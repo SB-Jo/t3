@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>07 / HOW IT WORKS — Weave 구현 파이프라인</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  /* ── 카드 공통 ── */
+  .card { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 18.59px;
+          box-shadow: 0 10px 28px rgba(107,78,255,.07); }
+  .loopbox { position: absolute; border: 1.5px dashed #B7A6FF; border-radius: 24.78px; background: rgba(241,236,255,.38); }
+  .abs { position: absolute; }
+
+  /* 단계 머리: 번호 배지 + 한글 이름 + 영문 기술 용어 */
+  .no { position: absolute; width: 24.78px; height: 24.78px; border-radius: 12.39px; background: var(--purple); }
+  .no-t { position: absolute; width: 24.78px; height: 24.78px; line-height: 24.87px; text-align: center; font: 700 13.25px/24.87px 'Inter', 'Noto Sans KR'; color: #fff; }
+  .head { position: absolute; display: flex; align-items: baseline; gap: 8.26px; height: 24.87px; }
+  .nm { font-size: 18.72px; line-height: 24.87px; font-weight: 700; color: var(--ink); }
+  .en { font: 600 13.25px/24.87px 'Inter', 'Noto Sans KR'; color: var(--purple-2); letter-spacing: .01em; }
+  .q  { position: absolute; font-family: 'Nanum Pen Script'; font-size: 22.66px; line-height: 26.94px; color: var(--purple); }
+  .desc { position: absolute; font-size: 14.04px; line-height: 20.73px; color: var(--body); }
+  .desc b { color: var(--ink); font-weight: 700; }
+
+  /* 칩 */
+  .chip { position: absolute; height: 23.84px; border-radius: 12.39px; background: #fff; border: 1px solid var(--purple-line); }
+  .chip-t { position: absolute; height: 23.84px; line-height: 23.84px; text-align: center; font-size: 12.72px; font-weight: 700; color: var(--purple); }
+  .chip.fill { background: var(--purple); border-color: var(--purple); }
+  .chip-t.fill { color: #fff; }
+  .chip.soft { background: var(--tile); border-color: var(--tile); }
+
+  /* 작은 흰 카드/알약 */
+  .mini { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 12.39px; }
+  .pill { position: absolute; background: var(--soft); border: 1px solid var(--soft-line); border-radius: 12.39px; }
+  .tile { position: absolute; width: 28.91px; height: 28.91px; border-radius: 8.26px; background: var(--tile); }
+  .ico { position: absolute; color: var(--purple); }
+  .app { position: absolute; }
+  /* 누르는 손: overview-comic 4컷(검색 화살표를 누르는 손)과 같은 아이콘·기울기 */
+  .tap { transform: rotate(-12deg); transform-origin: 35% 8%; filter: drop-shadow(0 2px 3px rgba(95,61,115,.22)); }
+  .t13b { position: absolute; font-size: 13.78px; line-height: 17.62px; font-weight: 700; color: var(--ink); }
+  .t12  { position: absolute; font-size: 12.72px; line-height: 16.58px; color: var(--muted); }
+  .t12b { position: absolute; font-size: 12.72px; line-height: 16.58px; font-weight: 700; color: var(--ink); }
+  .t12p { position: absolute; font-size: 12.72px; line-height: 16.58px; font-weight: 700; color: var(--purple); }
+  .t11  { position: absolute; font-size: 12.19px; line-height: 15.54px; color: var(--muted); }
+  .t11p { position: absolute; font-size: 12.19px; line-height: 15.54px; font-weight: 700; color: var(--purple); }
+  .photo { position: absolute; border-radius: 10.33px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tag { position: absolute; height: 19.69px; border-radius: 10.33px; background: var(--tile); border: 1px solid var(--tile); }
+  .tag-t { position: absolute; height: 19.69px; line-height: 19.69px; text-align: center; font-size: 11.66px; font-weight: 700; color: var(--purple); }
+  .tag.fill { background: var(--purple); border-color: var(--purple); }
+  .tag-t.fill { color: #fff; }
+  svg.links { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; }
+</style>
+</head>
+<body>
+<script src="icons.js"></script>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+
+  <div class="t-label" data-x>HOW IT WORKS</div>
+  <div class="t-title" data-x><span class="hl">Weave</span>는 어떻게 <span class="hl">기억을 엮을까요</span>?</div>
+  <div class="t-sub" data-x>찾은 기록이 다음 단서가 되어, 기억나지 않던 답까지 이어집니다.</div>
+
+  <!-- ───────── 연쇄 탐색 루프(점선 테두리) ───────── -->
+  <div class="loopbox" id="loopbox" data-s style="left:300.47px; top:181.44px; width:648.19px; height:339.91px;"></div>
+  <div class="chip soft" data-s style="left:318.99px; top:169px; width:234.58px; height:25.91px; border-radius:13.42px; background:#fff; border-color:#B7A6FF;"></div>
+  <svg class="ico" style="left:330.31px; top:174.18px; width:15.49px; height:15.49px;"><use href="#i-refresh"/></svg>
+  <div class="t12p" data-x style="left:349.86px; top:173.15px;">필요한 정보가 채워질 때까지 반복</div>
+
+  <!-- ───────── 01 Trigger ───────── -->
+  <div class="card" id="c-trigger" data-s style="left:70px; top:200.09px; width:207.83px; height:308.82px;"></div>
+  <div class="no" data-s style="left:84.4px; top:214.6px;"></div><div class="no-t" data-x style="left:84.4px; top:214.6px;">01</div>
+  <div class="head" style="left:117.33px; top:214.6px;"><span class="nm" data-x>순간 감지</span><span class="en" data-x>Trigger</span></div>
+  <div class="q" data-x style="left:84.4px; top:247.76px;">“지금, 도와줄 순간일까?”</div>
+
+  <div class="pill" data-s style="left:84.4px; top:287.14px; width:179.03px; height:41.45px;"></div>
+  <div class="tile" data-s style="left:90.58px; top:293.36px;"></div>
+  <svg class="ico" style="left:96.75px; top:299.58px; width:16.52px; height:16.52px;"><use href="#i-search"/></svg>
+  <div class="t13b" data-x style="left:127.62px; top:290.25px;">검색창에 입력</div>
+  <div class="t11" data-x style="left:127.62px; top:308.9px;">기록 통합 검색</div>
+
+  <div class="pill" data-s style="left:84.4px; top:339.99px; width:179.03px; height:41.45px;"></div>
+  <div class="tile" data-s style="left:90.58px; top:346.21px;"></div>
+  <img class="app" src="../assets/icons/weave-spool-filled.png" style="left:95.72px; top:351.39px; width:18.59px; height:18.59px;">
+  <div class="t13b" data-x style="left:127.62px; top:343.1px;">Weave 버튼</div>
+  <div class="t11" data-x style="left:127.62px; top:361.76px;">단서로 찾는 기억</div>
+
+  <div class="pill" data-s style="left:84.4px; top:392.85px; width:179.03px; height:41.45px;"></div>
+  <div class="tile" data-s style="left:90.58px; top:399.06px;"></div>
+  <svg class="ico" style="left:94.69px; top:403.21px; width:12.39px; height:12.39px;"><use href="#i-msg"/></svg>
+  <svg class="ico" style="left:102.92px; top:411.5px; width:12.39px; height:12.39px;"><use href="#i-pin"/></svg>
+  <div class="t13b" data-x style="left:127.62px; top:395.96px;">대화·맥락 파악</div>
+  <div class="t11" data-x style="left:127.62px; top:414.61px;">먼저 건네는 기억</div>
+
+  <div class="desc" data-x style="left:84.4px; top:452.95px;"><b>사용자가 직접</b> 부르거나,<br><b>맥락 파악</b> 후 조건을 감지합니다</div>
+
+  <!-- ───────── 02 Routing ───────── -->
+  <div class="card" id="c-routing" data-s style="left:314.87px; top:200.09px; width:228.41px; height:308.82px;"></div>
+  <div class="no" data-s style="left:329.28px; top:214.6px;"></div><div class="no-t" data-x style="left:329.28px; top:214.6px;">02</div>
+  <div class="head" style="left:362.2px; top:214.6px;"><span class="nm" data-x>단서 정리</span><span class="en" data-x>Routing</span></div>
+  <div class="q" data-x style="left:329.28px; top:247.76px;">“무엇을, 어디부터 찾을까?”</div>
+
+  <!-- 탐색 메모 (1차 방식) -->
+  <div class="mini" id="memo" data-s style="left:329.28px; top:287.14px; width:199.6px; height:151.3px; border-radius:12.39px;"></div>
+  <svg class="ico" style="left:339.57px; top:296.47px; width:15.49px; height:15.49px;"><use href="#i-note"/></svg>
+  <div class="t12p" data-x style="left:359.12px; top:295.43px;">탐색 메모</div>
+  <div class="abs" data-s style="left:339.57px; top:316.16px; width:179.03px; height:1.04px; background:#EEE9FA;"></div>
+
+  <div class="t11" data-x style="left:339.57px; top:329.63px;">찾을 것</div>
+  <div class="chip fill" data-s style="left:403.36px; top:325.49px; width:72.02px; height:21.76px;"></div>
+  <div class="chip-t fill" data-x style="left:403.36px; top:325.49px; width:72.02px; height:21.76px; line-height:21.76px; font-size:12.19px;">와인 이름</div>
+
+  <div class="t11" data-x style="left:339.57px; top:357.61px;">아는 단서</div>
+  <div class="chip" data-s style="left:403.36px; top:353.47px; width:39.1px; height:21.76px;"></div>
+  <div class="chip-t" data-x style="left:403.36px; top:353.47px; width:39.1px; height:21.76px; line-height:21.76px; font-size:12.19px;">지은</div>
+  <div class="chip" data-s style="left:446.57px; top:353.47px; width:51.44px; height:21.76px;"></div>
+  <div class="chip-t" data-x style="left:446.57px; top:353.47px; width:51.44px; height:21.76px; line-height:21.76px; font-size:12.19px;">집들이</div>
+
+  <div class="t11" data-x style="left:339.57px; top:385.59px;">먼저 볼 곳</div>
+  <div class="chip" id="memo-first" data-s style="left:403.36px; top:381.45px; width:74.08px; height:21.76px;"></div>
+  <img class="app" src="../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:408.5px; top:384.56px; width:15.49px; height:15.49px;">
+  <div class="chip-t" data-x style="left:424.96px; top:381.45px; width:47.33px; height:21.76px; line-height:21.76px; font-size:12.19px; text-align:left;">캘린더</div>
+
+  <div class="t11p" data-x style="left:339.57px; top:413.57px;">+ 새 단서</div>
+  <div class="chip" id="memo-new" data-s style="left:403.36px; top:409.43px; width:88.48px; height:21.76px; border-style:dashed; border-color:#8B6BFF; background:#F7F4FF;"></div>
+  <div class="chip-t" data-x style="left:403.36px; top:409.43px; width:88.48px; height:21.76px; line-height:21.76px; font-size:12.19px;">3/15 18:00</div>
+
+  <div class="desc" data-x style="left:329.28px; top:452.95px;">다음에 <b>무엇을 찾을지</b>,<br><b>언제 멈출지</b> 정합니다</div>
+
+  <!-- ───────── 03 Multi-hop Search ───────── -->
+  <div class="card" id="c-search" data-s style="left:584.44px; top:200.09px; width:349.82px; height:308.82px;"></div>
+  <div class="no" data-s style="left:598.84px; top:214.6px;"></div><div class="no-t" data-x style="left:598.84px; top:214.6px;">03</div>
+  <div class="head" style="left:631.77px; top:214.6px;"><span class="nm" data-x>연쇄 탐색</span><span class="en" data-x>Multi-hop Search</span></div>
+  <div class="q" data-x style="left:598.84px; top:247.76px;">“찾은 기록에, 다음 단서가 있을까?”</div>
+
+  <!-- hop 라벨 -->
+  <div class="t11p" data-x style="left:598.84px; top:285.07px;">① 날짜 찾기</div>
+  <div class="t11p" data-x style="left:714.08px; top:285.07px;">② 그 시간 사진</div>
+  <div class="t11p" data-x style="left:829.31px; top:285.07px;">③ 라벨 읽기</div>
+  <!-- hop 1: 캘린더 (중간 근거) -->
+  <div class="mini" id="hop1" data-s style="left:598.84px; top:305.79px; width:92.6px; height:74.62px; border-color:#B7A6FF;"></div>
+  <img class="app" src="../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:607.08px; top:314.09px; width:22.72px; height:22.72px;">
+  <div class="t12" data-x style="left:633.83px; top:317.19px; font-size:11.66px; color:var(--muted-2);">캘린더</div>
+  <div class="t13b" data-x style="left:607.08px; top:342.07px; font-size:13.25px;">지은 집들이</div>
+  <div class="t11p" data-x style="left:607.08px; top:359.68px;">3/15 18:00</div>
+  <!-- hop 2: 갤러리 사진 -->
+  <div class="photo" id="hop2" style="left:714.08px; top:305.79px; width:92.6px; height:74.62px;"><img src="../assets/crops/ux2-wine-photo.png" alt=""></div>
+  <div class="abs" style="left:720.25px; top:357.61px; width:59.68px; height:17.62px; border-radius:9.29px; background:rgba(255,255,255,.92);"></div>
+  <div class="t11" data-x style="left:720.25px; top:358.65px; width:59.68px; text-align:center; font-size:11.13px; line-height:15.54px; color:var(--ink-2); font-weight:700;">3/15 20:14</div>
+  <img class="app" src="../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:784.04px; top:309.94px; width:18.59px; height:18.59px;">
+  <!-- hop 3: 사진 속 글자 -->
+  <div class="mini" id="hop3" data-s style="left:829.31px; top:305.79px; width:90.54px; height:74.62px;"></div>
+  <div class="photo" style="left:834.46px; top:314.09px; width:80.25px; height:41.45px; border-radius:7.23px;"><img src="../assets/crops/ux2-label-text.png" alt="" style="object-fit:contain; background:#F4F1FA;"></div>
+  <svg class="ico" style="left:836.52px; top:359.68px; width:13.42px; height:13.42px;"><use href="#i-scan"/></svg>
+  <div class="t11" data-x style="left:852.98px; top:358.65px; font-size:11.66px; color:var(--muted);">사진 속 글자</div>
+  <!-- 각 단계의 담당: 추론이 필요한 곳과 정확한 조건을 구분 -->
+  <div class="tag fill" data-s style="left:598.84px; top:388.7px; width:92.6px;"></div><div class="tag-t fill" data-x style="left:598.84px; top:388.7px; width:92.6px;">추론 검색</div>
+  <div class="tag" data-s style="left:714.08px; top:388.7px; width:92.6px;"></div><div class="tag-t" data-x style="left:714.08px; top:388.7px; width:92.6px;">시간 필터</div>
+  <div class="tag" data-s style="left:829.31px; top:388.7px; width:90.54px;"></div><div class="tag-t" data-x style="left:829.31px; top:388.7px; width:90.54px;">OCR</div>
+
+  <!-- 같은 방식의 다른 예 -->
+  <div class="t11" data-x style="left:598.84px; top:418.75px; color:var(--muted-2);">같은 방식으로</div>
+  <div class="pill" data-s style="left:598.84px; top:438.44px; width:156.39px; height:24.87px;"></div>
+  <img class="app" src="../assets/icons/app-kakao.png" style="left:605.02px; top:442.59px; width:16.52px; height:16.52px; border-radius:4.13px;">
+  <svg class="app" style="left:624.57px; top:444.66px; width:10.33px; height:10.33px; color:#8B6BFF;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>
+  <img class="app" src="../assets/icons/app-map.png" style="left:636.91px; top:442.59px; width:16.52px; height:16.52px; border-radius:4.13px;">
+  <div class="t11" data-x style="left:657.49px; top:442.59px; color:var(--body); font-weight:600;">약속 → 지금 위치</div>
+  <div class="pill" data-s style="left:761.41px; top:438.44px; width:158.45px; height:24.87px;"></div>
+  <img class="app" src="../assets/icons/app-notes.png" style="left:767.58px; top:442.59px; width:16.52px; height:16.52px; border-radius:4.13px;">
+  <img class="app" src="../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:786.1px; top:442.59px; width:16.52px; height:16.52px;">
+  <img class="app" src="../assets/icons/app-kakao.png" style="left:804.62px; top:442.59px; width:16.52px; height:16.52px; border-radius:4.13px;">
+  <div class="t11" data-x style="left:825.2px; top:442.59px; color:var(--body); font-weight:600;">세 앱을 한 번에</div>
+
+  <div class="desc" data-x style="left:598.84px; top:473.68px;"><b>찾은 단서가 다음 검색의 조건</b>이 됩니다</div>
+
+  <!-- ───────── 04 Delivery ───────── -->
+  <div class="card" id="c-delivery" data-s style="left:975.42px; top:200.09px; width:234.58px; height:308.82px;"></div>
+  <div class="no" data-s style="left:989.82px; top:214.6px;"></div><div class="no-t" data-x style="left:989.82px; top:214.6px;">04</div>
+  <div class="head" style="left:1022.74px; top:214.6px;"><span class="nm" data-x>전달</span><span class="en" data-x>Delivery</span></div>
+  <div class="q" data-x style="left:989.82px; top:247.76px;">“골라서, 직접 완성해 볼까?”</div>
+
+  <div class="mini" data-s style="left:989.82px; top:287.14px; width:205.78px; height:109.85px; border-color:#D9CEFF; background:#FBFAFF;"></div>
+  <img class="app" src="../assets/icons/weave-spool-filled.png" style="left:1000.11px; top:296.47px; width:14.46px; height:14.46px;">
+  <div class="t11p" data-x style="left:1018.63px; top:295.43px;">자동 완성 추천</div>
+  <div class="abs" data-x style="left:1000.11px; top:316.16px; font-size:16.12px; line-height:21.76px; font-weight:700; color:var(--ink);">배비치 소비뇽 블랑</div>
+  <img class="app" src="../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:1000.11px; top:345.18px; width:14.46px; height:14.46px;">
+  <img class="app" src="../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:1017.6px; top:345.18px; width:14.46px; height:14.46px;">
+  <div class="t11" data-x style="left:1037.15px; top:344.14px;">출처 · 캘린더, 갤러리</div>
+  <div class="chip fill" data-s style="left:1000.11px; top:365.9px; width:185.2px; height:22.8px; border-radius:11.36px;"></div>
+  <svg class="ico" style="left:1059.78px; top:371.08px; width:12.39px; height:12.39px; color:#fff;"><use href="#i-check"/></svg>
+  <div class="chip-t fill" data-x style="left:1076.25px; top:365.9px; width:61.73px; height:22.8px; line-height:22.8px; font-size:12.19px; text-align:left;">입력하기</div>
+  <!-- 누르는 손 + 반짝임 선 3개 (덱 공통 터치 표시, 2쪽 만화 4컷과 같은 모양). 13차에 다시 넣음: 8차 모양을 11차 배율로 옮기고,
+       선이 보라 버튼 밖 흰 바탕에 오도록 손을 8차처럼 오른쪽으로 -->
+  <svg class="app" style="left:0; top:0; width:1280px; height:720px; overflow:visible;" viewBox="0 0 1280 720" aria-hidden="true"><defs><linearGradient id="tap-spark" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#A67CF2"/><stop offset="1" stop-color="#7B4BD8"/></linearGradient></defs><g fill="none" stroke-linecap="round"><path d="M1150.02 366.82L1146.40 363.44M1160.41 362.06L1160.19 355.94M1171.11 366.08L1174.47 362.44" stroke="#FFFFFF" stroke-width="3.3"/><path d="M1150.02 366.82L1146.40 363.44M1160.41 362.06L1160.19 355.94M1171.11 366.08L1174.47 362.44" stroke="url(#tap-spark)" stroke-width="1.75"/></g></svg>
+  <img class="app tap" src="../assets/icons/tap-hand.svg" alt="" style="left:1152.38px; top:377.30px; width:22.64px; height:29.02px;">
+
+  <div class="t11" data-x style="left:989.82px; top:411.5px; color:var(--muted-2);">sLLM이 상황에 맞는 모양으로</div>
+  <div class="pill" data-s style="left:989.82px; top:431.19px; width:63.79px; height:24.87px;"></div>
+  <div class="t11" data-x style="left:989.82px; top:435.34px; width:63.79px; text-align:center; color:var(--body); font-weight:600;">출처 카드</div>
+  <div class="pill" data-s style="left:1057.73px; top:431.19px; width:72.02px; height:24.87px;"></div>
+  <div class="t11" data-x style="left:1057.73px; top:435.34px; width:72.02px; text-align:center; color:var(--body); font-weight:600;">검색어·답장</div>
+  <div class="pill" data-s style="left:1133.86px; top:431.19px; width:61.73px; height:24.87px;"></div>
+  <div class="t11" data-x style="left:1133.86px; top:435.34px; width:61.73px; text-align:center; color:var(--body); font-weight:600;">추천 문장</div>
+
+  <div class="desc" data-x style="left:989.82px; top:473.68px;">출처와 함께 사용자에게 건넵니다</div>
+
+  <!-- 핵심 엔진 알약 (루프 하단 테두리) -->
+  <div class="chip" data-s style="left:310.76px; top:506.84px; width:627.62px; height:29.02px; border-radius:14.46px; border-color:#8B6BFF; box-shadow:0 6px 16px rgba(107,78,255,.14);"></div>
+  <svg class="ico" style="left:329.28px; top:513.06px; width:16.52px; height:16.52px;"><use href="#i-nodes"/></svg>
+  <div class="t12p" data-x style="left:351.91px; top:513.06px; font-size:13.25px;">핵심 엔진 · 온디바이스 Reasoning Embedding</div>
+  <div class="t12" data-x style="left:650.29px; top:513.06px; font-size:13.25px; color:var(--body);">지금 단서로부터 <b style="color:var(--ink)">‘이어지는’</b> 기록을 찾는 경량 모델</div>
+
+  <!-- ───────── 00 사전 준비 · Indexing ───────── -->
+  <div class="card" id="c-index" data-s style="left:70px; top:550.37px; width:1140px; height:103.63px; border-radius:18.59px; background:rgba(255,255,255,.86);"></div>
+  <div class="no" data-s style="left:86.46px; top:564.88px; background:#fff; border:1.5px solid var(--purple);"></div><div class="no-t" data-x style="left:86.46px; top:564.88px; color:var(--purple);">00</div>
+  <div class="head" style="left:119.39px; top:564.88px;"><span class="nm" data-x>사전 준비</span><span class="en" data-x>Indexing</span></div>
+  <div class="q" data-x style="left:86.46px; top:597px; font-size:21.63px; line-height:22.8px;">“어디에 뭐가 있는지,<br>미리 정리해 둘까?”</div>
+
+  <!-- 흐름: 허용한 기록 → 정리 → 기억 색인 → 갱신 -->
+  <div class="pill" id="ix1" data-s style="left:290.18px; top:562.8px; width:179.03px; height:78.76px; background:#fff;"></div>
+  <img class="app" src="../assets/icons/app-kakao.png" style="left:302.53px; top:575.24px; width:26.85px; height:26.85px; border-radius:7.23px;">
+  <img class="app" src="../assets/icons/app-notes.png" style="left:334.42px; top:575.24px; width:26.85px; height:26.85px; border-radius:7.23px;">
+  <img class="app" src="../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:366.32px; top:575.24px; width:26.85px; height:26.85px;">
+  <img class="app" src="../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:398.21px; top:575.24px; width:26.85px; height:26.85px;">
+  <img class="app" src="../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:430.11px; top:575.24px; width:26.85px; height:26.85px;">
+  <div class="t12" data-x style="left:302.53px; top:613.58px; color:var(--body); font-weight:600;">허용한 기록만 가져오기</div>
+
+  <div class="pill" id="ix2" data-s style="left:495.96px; top:562.8px; width:222.24px; height:78.76px; background:#fff;"></div>
+  <div class="tile" data-s style="left:508.3px; top:574.2px; width:26.85px; height:26.85px;"></div><svg class="ico" style="left:513.45px; top:579.38px; width:16.52px; height:16.52px;"><use href="#i-user"/></svg>
+  <div class="tile" data-s style="left:539.17px; top:574.2px; width:26.85px; height:26.85px;"></div><svg class="ico" style="left:544.31px; top:579.38px; width:16.52px; height:16.52px;"><use href="#i-clock"/></svg>
+  <div class="tile" data-s style="left:570.04px; top:574.2px; width:26.85px; height:26.85px;"></div><svg class="ico" style="left:575.18px; top:579.38px; width:16.52px; height:16.52px;"><use href="#i-pin"/></svg>
+  <div class="tile" data-s style="left:600.9px; top:574.2px; width:26.85px; height:26.85px;"></div><svg class="ico" style="left:606.05px; top:579.38px; width:16.52px; height:16.52px;"><use href="#i-scan"/></svg>
+  <div class="t12" data-x style="left:508.3px; top:613.58px; color:var(--body); font-weight:600;">사람·시간·장소와 사진 속 글자 정리</div>
+
+  <div class="pill" id="ix3" data-s style="left:744.95px; top:562.8px; width:222.24px; height:78.76px; background:#fff; border-color:#D9CEFF;"></div>
+  <div class="tile" data-s style="left:757.29px; top:578.35px; width:34.98px; height:47.67px; border-radius:9.29px;"></div>
+  <svg class="ico" style="left:763.47px; top:590.78px; width:22.72px; height:22.72px;"><use href="#i-db"/></svg>
+  <div class="t12p" data-x style="left:802.56px; top:573.17px;">기억 색인</div>
+  <div class="t12" data-x style="left:802.56px; top:593.89px; color:var(--body);"><b style="color:var(--ink)">키워드 색인</b> · 정확한 이름</div>
+  <div class="t12" data-x style="left:802.56px; top:613.58px; color:var(--body);"><b style="color:var(--ink)">벡터 색인</b> · 비슷한 의미</div>
+
+  <div class="pill" id="ix4" data-s style="left:993.94px; top:562.8px; width:201.66px; height:78.76px; background:#fff;"></div>
+  <svg class="ico" style="left:1006.28px; top:574.2px; width:15.49px; height:15.49px;"><use href="#i-refresh"/></svg>
+  <div class="t12" data-x style="left:1026.86px; top:573.17px; color:var(--body); font-weight:600;">바뀐 기록만 갱신</div>
+  <svg class="ico" style="left:1006.28px; top:595.97px; width:15.49px; height:15.49px;"><use href="#i-battery"/></svg>
+  <div class="t12" data-x style="left:1026.86px; top:594.93px; color:var(--body); font-weight:600;">충전·유휴 시간에</div>
+  <svg class="ico" style="left:1006.28px; top:617.73px; width:15.49px; height:15.49px;"><use href="#i-lock"/></svg>
+  <div class="t12" data-x style="left:1026.86px; top:616.69px; color:var(--body); font-weight:600;">기기 밖으로 보내지 않음</div>
+
+
+  <svg class="links" id="links"></svg>
+</div>
+
+<script>
+// 카드 사이 화살표·루프·홉 연결선을 DOM 위치 기준으로 그립니다.
+(function () {
+  const S = document.getElementById('slide').getBoundingClientRect();
+  const R = id => { const r = document.getElementById(id).getBoundingClientRect(); return { l: r.left - S.left, t: r.top - S.top, r: r.right - S.left, b: r.bottom - S.top, w: r.width, h: r.height }; };
+  const svg = document.getElementById('links');
+  const NS = 'http://www.w3.org/2000/svg';
+  svg.innerHTML = `<defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#6B4EFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ah2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#8B6BFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>`;
+  const path = (d, o = {}) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', o.c || '#6B4EFF'); p.setAttribute('stroke-width', o.w || 2); p.setAttribute('stroke-linecap', 'round');
+    if (o.dash) p.setAttribute('stroke-dasharray', o.dash); if (o.m !== false) p.setAttribute('marker-end', `url(#${o.mk || 'ah'})`); svg.appendChild(p); return p; };
+  const dot = (x, y, r = 3, c = '#6B4EFF') => { const e = document.createElementNS(NS, 'circle'); e.setAttribute('cx', x); e.setAttribute('cy', y); e.setAttribute('r', r); e.setAttribute('fill', c); svg.appendChild(e); };
+
+  // 단계 사이 굵은 화살표
+  const t = R('c-trigger'), ro = R('c-routing'), se = R('c-search'), de = R('c-delivery');
+  const h1 = R('hop1'), h2 = R('hop2'), h3 = R('hop3');
+  const midY = h1.t + h1.h / 2 + 8;
+  path(`M${t.r + 5} ${midY} L${ro.l - 6} ${midY}`, { w: 2.4 });
+  path(`M${se.r + 5} ${midY} L${de.l - 6} ${midY}`, { w: 2.4 });
+  dot(t.r + 5, midY, 3); dot(se.r + 5, midY, 3);
+
+  // 루프: 메모 '먼저 볼 곳' → hop1 위쪽,  hop1 아래쪽 → 메모 '새 단서' (1차 방식, 두 선이 교차하지 않도록)
+  const mf = R('memo-first'), mn = R('memo-new');
+  path(`M${mf.r + 3} ${mf.t + mf.h / 2} C ${mf.r + 40} ${mf.t + mf.h / 2}, ${h1.l - 40} ${h1.t + 20}, ${h1.l - 5} ${h1.t + 20}`, { w: 2 });
+  path(`M${h1.l - 3} ${h1.b - 12} C ${h1.l - 36} ${h1.b - 12}, ${mn.r + 42} ${mn.t + mn.h / 2}, ${mn.r + 6} ${mn.t + mn.h / 2}`, { w: 2, c: '#8B6BFF', dash: '4 4', mk: 'ah2' });
+  // hop 사이 연결
+  path(`M${h1.r + 3} ${h1.t + h1.h / 2} L${h2.l - 5} ${h2.t + h2.h / 2}`, { w: 2 });
+  path(`M${h2.r + 3} ${h2.t + h2.h / 2} L${h3.l - 5} ${h3.t + h3.h / 2}`, { w: 2 });
+
+  // 사전 준비 밴드: 허용한 기록 → 정리 → 기억 색인 → 갱신
+  [['ix1', 'ix2'], ['ix2', 'ix3'], ['ix3', 'ix4']].forEach(([a, b]) => { const A = R(a), B = R(b); const y = A.t + A.h / 2;
+    path(`M${A.r + 7} ${y} L${B.l - 8} ${y}`, { w: 2, c: '#8B6BFF', mk: 'ah2' }); });
+  window.pageReady = true;
+})();
+</script>
+</body>
+</html>

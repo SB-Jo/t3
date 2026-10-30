@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 69" width="336" height="552">
+  <defs>
+    <linearGradient id="spark-p08-input-tap" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#A67CF2"/><stop offset="1" stop-color="#7B4BD8"/></linearGradient>
+    <filter id="shadow-p08-input-tap" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.7" stdDeviation="1.2" flood-color="#5F3D73" flood-opacity="0.2"/></filter>
+  </defs>
+  <g fill="none" stroke-linecap="round">
+    <path d="M9.22 14.99L6.47 11.06M19.79 12.16L20.31 6.28M29.71 16.79L33.11 13.39" stroke="#FFFFFF" stroke-width="3.3"/>
+    <path d="M9.22 14.99L6.47 11.06M19.79 12.16L20.31 6.28M29.71 16.79L33.11 13.39" stroke="url(#spark-p08-input-tap)" stroke-width="1.75"/>
+  </g>
+  <g filter="url(#shadow-p08-input-tap)" transform="rotate(-12 17.56 29.62)">
+    <svg x="7.90" y="26.78" width="27.6" height="35.5" viewBox="0 0 80 102" preserveAspectRatio="none"><defs><radialGradient id="skin-p08-input-tap" cx=".45" cy=".35" r=".85"><stop stop-color="#FFF"/><stop offset=".7" stop-color="#FCF9FF"/><stop offset="1" stop-color="#E8DDF6"/></radialGradient></defs><path d="M27 56V13C27 3 41 3 41 13v29c0-9 13-9 13 0v3c2-9 14-6 14 2v3c5-6 12-2 12 5v20c0 13-10 18-11 25H32c0-9-7-17-13-24L7 62C0 54 10 45 17 51l10 8" transform="translate(-2 -1) scale(.98)" fill="url(#skin-p08-input-tap)" stroke="#9168C1" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M39 44v15m13-13v15m13-10v12" fill="none" stroke="#BEA4D9" stroke-width="2.3" stroke-linecap="round"/></svg>
+  </g>
+</svg>

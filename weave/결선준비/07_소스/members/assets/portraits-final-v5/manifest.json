@@ -1,0 +1,77 @@
+[
+  {
+    "id": "01-jaeung",
+    "source": "assets/male-shoulder-refinement/01-jaeung-refined.png",
+    "crop": {
+      "left": 2,
+      "top": 2,
+      "width": 963,
+      "height": 1547
+    },
+    "unchangedBodyProportions": true,
+    "renderedCirclePx": 184,
+    "renderedFullPortraitHeightPx": 201.52380952380955,
+    "sourceFileUnchanged": true,
+    "cleanup": "detached neighbouring strands only"
+  },
+  {
+    "id": "02-seoyun",
+    "source": "assets/portraits-v5/02-seoyun-tip-corrected.png",
+    "crop": {
+      "left": 0,
+      "top": 2,
+      "width": 423,
+      "height": 712
+    },
+    "unchangedBodyProportions": true,
+    "renderedCirclePx": 184,
+    "renderedFullPortraitHeightPx": 201.52380952380955,
+    "sourceFileUnchanged": true,
+    "cleanup": "detached neighbouring strands only"
+  },
+  {
+    "id": "03-jihyun",
+    "source": "assets/portraits-v5/03-jihyun-cutout.png",
+    "crop": {
+      "left": 0,
+      "top": 2,
+      "width": 411,
+      "height": 706
+    },
+    "unchangedBodyProportions": true,
+    "renderedCirclePx": 184,
+    "renderedFullPortraitHeightPx": 201.52380952380955,
+    "sourceFileUnchanged": true,
+    "cleanup": "detached neighbouring strands only"
+  },
+  {
+    "id": "04-ijun",
+    "source": "assets/portraits-v5/04-ijun-cutout.png",
+    "crop": {
+      "left": 0,
+      "top": 2,
+      "width": 440,
+      "height": 695
+    },
+    "unchangedBodyProportions": true,
+    "renderedCirclePx": 184,
+    "renderedFullPortraitHeightPx": 201.52380952380955,
+    "sourceFileUnchanged": true,
+    "cleanup": "detached neighbouring strands only"
+  },
+  {
+    "id": "05-seongbin",
+    "source": "assets/male-shoulder-refinement/05-seongbin-refined.png",
+    "crop": {
+      "left": 24,
+      "top": 1,
+      "width": 976,
+      "height": 1553
+    },
+    "unchangedBodyProportions": true,
+    "renderedCirclePx": 184,
+    "renderedFullPortraitHeightPx": 201.52380952380955,
+    "sourceFileUnchanged": true,
+    "cleanup": "detached neighbouring strands only"
+  }
+]

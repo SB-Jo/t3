@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>SOLUTION: WEAVE ASSIST — 핵심 UX 3가지 (5차)</title>
+<link rel="stylesheet" href="../p68/scenario.css">
+<style>
+  /* 번호: 보라 원 (그래픽 레이어), 숫자는 글자 상자 */
+  .no3 { position: absolute; width: 32px; height: 32px; border-radius: 50%; z-index: 4;
+    background: #6B4EFF; }
+  .no3-t { position: absolute; z-index: 20; width: 32px; height: 32px; text-align: center; font: 700 17px/32px 'Inter', 'Noto Sans KR'; color: #fff; }
+  .nm { position: absolute; z-index: 20; font-size: 23px; line-height: 32px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+  .one { position: absolute; z-index: 20; font-size: 16px; line-height: 22px; color: var(--body-2); }
+  .rule { position: absolute; background: #D2C4FA; }
+
+  /* (1) 휴대폰 안 UI */
+  .scr { position: absolute; z-index: 4; background: #EEF0F6; border-radius: 24px; overflow: hidden; }
+  .sheet { position: absolute; z-index: 5; background: #fff; border-radius: 18px; box-shadow: 0 -4px 16px rgba(80, 60, 140, .10); }
+  .sbar { position: absolute; z-index: 6; background: #F5F1FF; border: 1.5px solid #B69CFF; border-radius: 17px; }
+  .row { position: absolute; z-index: 6; background: #FBFAFF; border: 1px solid #EEE8FB; border-radius: 11px; }
+  .ui-s { position: absolute; z-index: 20; font-size: 9.5px; line-height: 12px; color: #6A6474; }
+  .ui-t { position: absolute; z-index: 20; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); }
+  .ui-m { position: absolute; z-index: 20; font-size: 10px; line-height: 13px; color: #8E88A0; }
+  .ui-q { position: absolute; z-index: 20; font-size: 13.5px; line-height: 18px; font-weight: 500; color: var(--ink); }
+  .ui-lbl { position: absolute; z-index: 20; font-size: 11.5px; line-height: 15px; font-weight: 700; color: var(--ink); }
+  .red-t { position: absolute; z-index: 20; font-size: 10.5px; line-height: 14px; font-weight: 700; color: var(--purple); text-align: center; }
+
+  /* (2)(3) 입력창·키보드·추천 카드 */
+  .inbar { position: absolute; z-index: 5; background: #fff; border: 1px solid #DCD6EA; border-radius: 17px; box-shadow: 0 4px 10px rgba(60, 50, 120, .06); }
+  .ctx { position: absolute; z-index: 5; background: #fff; border: 1px solid #DCD6EA; border-radius: 13px; }
+  .t13 { position: absolute; z-index: 20; font-size: 12.5px; line-height: 18px; color: var(--ink-2); }
+  .t12 { position: absolute; z-index: 20; font-size: 12px; line-height: 17px; color: #5B5866; }
+  .t12 b { color: var(--ink); font-weight: 700; }
+  .t115 { position: absolute; z-index: 20; font-size: 11.5px; line-height: 16px; color: #5B5866; }
+  .t115 b { color: var(--ink); font-weight: 700; }
+  .t11b { position: absolute; z-index: 20; font-size: 11px; line-height: 15px; font-weight: 700; color: #4E4A57; }
+  .lab { position: absolute; z-index: 20; font-size: 12.5px; line-height: 17px; font-weight: 700; color: var(--purple); }
+  .big { position: absolute; z-index: 20; font-size: 20px; line-height: 26px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+  .big2 { position: absolute; z-index: 20; font-size: 16px; line-height: 22px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+  .srcbox { position: absolute; z-index: 6; background: #F7F5FC; border-radius: 10px; }
+  .btn-t { position: absolute; z-index: 20; font-size: 13px; line-height: 20px; font-weight: 700; color: #fff; }
+  .photo { position: absolute; z-index: 6; border-radius: 8px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
+</head>
+<body>
+<script src="../../pages/icons.js"></script>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+
+  <div class="chip-prev" style="left:517.5px; width:245px;"></div>
+  <div class="t-label" data-x>SOLUTION: WEAVE ASSIST</div>
+  <div class="t-title" data-x><span class="hl5">Weave</span>의 <span class="hl5">핵심 UX 3가지</span>를 소개합니다!</div>
+  <div class="t-sub" data-x>여러 앱에 흩어진 기억을 엮어, 필요한 순간 건네는 온디바이스 AI</div>
+
+  <div class="rule" style="left:611px; top:180px; width:1px; height:520px;"></div>
+  <div class="rule" style="left:636px; top:449px; width:604px; height:1px;"></div>
+
+  <!-- ───────── 1. 기록 통합 검색 ───────── -->
+  <div class="no3" style="left:48px; top:174px;"></div><div class="no3-t" data-x style="left:48px; top:174px;">1</div>
+  <div class="nm" data-x style="left:92px; top:174px;">기록 통합 검색</div>
+  <div class="one" data-x style="left:48px; top:214px;">앱마다 흩어진 같은 일의 기록을, 하나로 엮어 보여줍니다.</div>
+
+  <!-- 흩어진 기록: 노트(내용 보임) + 메일·카카오톡 아이콘 -->
+  <div class="card" id="note" style="left:40px; top:262px; width:246px; height:140px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" style="left:54px; top:275px; width:20px; height:20px; border-radius:5px; z-index:6;">
+  <div class="t-app" data-x style="left:81px; top:276px;">삼성노트</div>
+  <div class="t-meta" data-x style="left:141px; top:277px;">어제 오후 2:10</div>
+  <div class="t-ttl" data-x style="left:54px; top:303px;">A사 시연 준비회의</div>
+  <div class="inset" style="left:54px; top:332px; width:218px; height:56px; z-index:6;"></div>
+  <div class="t12" data-x style="left:66px; top:339px;">시연 순서&nbsp; <b style="color:#6B4EFF">설치 → 연결 → 사용 예시</b></div>
+  <div class="t12" data-x style="left:66px; top:362px;">전체 시연&nbsp; <b style="color:#6B4EFF">5분</b></div>
+  <img class="app" id="ic-mail" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:128px; top:448px; width:48px; height:48px; transform:rotate(7deg); z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
+  <img class="app" id="ic-kakao" src="../../assets/icons/app-kakao.png" style="left:70px; top:560px; width:48px; height:48px; transform:rotate(-6deg); border-radius:12px; z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
+
+  <!-- 휴대폰: 통화 중 화면 + 아래에서 밀어 올린 Weave 검색 -->
+  <div class="phone" id="phone1" style="left:318px; top:252px; width:272px; height:456px; padding:0;"></div>
+  <div class="scr" style="left:327px; top:261px; width:254px; height:438px;"></div>
+  <div class="ui-s" data-x style="left:343px; top:268px; font-weight:700; color:#2B2640;">13:00</div>
+  <div class="ui-s" data-x id="calltime" style="left:442px; top:284px;">00:48</div>
+  <div class="sheet" id="sheet" style="left:334px; top:308px; width:240px; height:268px;"></div>
+  <div class="sbar" id="sbar1" style="left:343px; top:324px; width:222px; height:34px;"></div>
+  <img class="app" src="../assets/weave-spool-6B4EFF.png" style="left:352px; top:332px; width:18px; height:18px; z-index:7;">
+  <div class="ui-q" data-x id="q1" style="left:376px; top:332px;">어제 A사 시연 준비</div>
+  <div class="ui-lbl" data-x style="left:345px; top:368px;">연결된 기억</div>
+  <div class="row" id="r1" style="left:343px; top:388px; width:222px; height:52px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" style="left:352px; top:400px; width:26px; height:26px; border-radius:7px; z-index:7;">
+  <div class="ui-t" data-x style="left:386px; top:397px;">A사 시연 준비회의</div>
+  <div class="ui-m" data-x style="left:386px; top:415px;">삼성노트 · 어제 오후 2:10</div>
+  <div class="row" id="r2" style="left:343px; top:446px; width:222px; height:52px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:352px; top:458px; width:26px; height:26px; z-index:7;">
+  <div class="ui-t" data-x style="left:386px; top:455px;">A사 시연 자료 수정할 것</div>
+  <div class="ui-m" data-x style="left:386px; top:473px;">메일 · 어제 오후 6:20</div>
+  <div class="row" id="r3" style="left:343px; top:504px; width:222px; height:52px;"></div>
+  <img class="app" src="../../assets/icons/app-kakao.png" style="left:352px; top:516px; width:26px; height:26px; border-radius:7px; z-index:7;">
+  <div class="ui-t" data-x style="left:386px; top:513px;">A사 시연 집합 안내</div>
+  <div class="ui-m" data-x style="left:386px; top:531px;">나와의 채팅 · 어제 오후 8:55</div>
+  <img class="app" id="redbtn" src="assets/call-weave-button.png" style="left:434px; top:590px; width:40px; height:40px; z-index:6;">
+  <div class="red-t" data-x id="redlbl" style="left:394px; top:642px; width:120px;">위로 올려 기억 검색</div>
+  <div class="pen" data-x id="pen1" style="left:506px; top:570px;">쓱!</div>
+
+  <!-- ───────── 2. 단서로 찾는 기억 ───────── -->
+  <div class="no3" style="left:636px; top:174px;"></div><div class="no3-t" data-x style="left:636px; top:174px;">2</div>
+  <div class="nm" data-x style="left:680px; top:174px;">단서로 찾는 기억</div>
+  <div class="one" data-x style="left:636px; top:214px;">정확한 이름 대신, 기억나는 상황만으로 찾아줍니다.</div>
+
+  <div class="inbar" style="left:640px; top:252px; width:238px; height:34px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:652px; top:261px; width:16px; height:16px; z-index:7;"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#5F6368" stroke-width="2.2"/><path d="m15.5 15.5 5 5" stroke="#5F6368" stroke-width="2.2" stroke-linecap="round"/></svg>
+  <div class="t13" data-x id="q2" style="left:674px; top:260px;">지은이네 집들이 때 먹었던 와인</div>
+  <div class="abs" id="kb2" style="left:640px; top:294px; width:238px; height:132px;"></div>
+  <div class="pen" data-x id="pen2" style="left:0px; top:0px;">톡!</div>
+
+  <div class="card" id="card2" style="left:938px; top:252px; width:300px; height:182px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:955px; top:266px; width:14px; height:14px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="lab" data-x style="left:974px; top:264px;">자동 완성 추천</div>
+  <div class="big" data-x style="left:955px; top:284px;">배비치 소비뇽 블랑</div>
+  <div class="srcbox" style="left:953px; top:318px; width:270px; height:56px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:963px; top:325px; width:17px; height:17px; z-index:7;">
+  <div class="t115" data-x style="left:987px; top:326px;">캘린더 · <b>지은 집들이</b> 3월 15일 18:00</div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:963px; top:349px; width:17px; height:17px; z-index:7;">
+  <div class="t115" data-x style="left:987px; top:350px;">갤러리 · <b>와인 라벨 사진</b> 3월 15일 20:14</div>
+  <div class="pbtn" id="ok2" style="left:953px; top:386px; width:270px; height:34px; z-index:7;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:1054px; top:396px; width:14px; height:14px; z-index:8;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="btn-t" data-x style="left:1073px; top:393px;">입력하기</div>
+
+  <!-- ───────── 3. 먼저 건네는 기억 ───────── -->
+  <div class="no3" style="left:636px; top:464px;"></div><div class="no3-t" data-x style="left:636px; top:464px;">3</div>
+  <div class="nm" data-x style="left:680px; top:464px;">먼저 건네는 기억</div>
+  <div class="one" data-x style="left:636px; top:504px;">지금 도움이 될 기억을, 먼저 알려줍니다.</div>
+
+  <div class="ctx" style="left:640px; top:540px; width:156px; height:26px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:650px; top:545px; width:15px; height:15px; color:#2F7BF6; z-index:7;"><use href="#i-pin"/></svg>
+  <div class="t11b" data-x style="left:670px; top:545px;">현재 위치 · 미국 LA</div>
+  <div class="abs" id="kb3" style="left:640px; top:574px; width:238px; height:132px;"></div>
+  <div class="pen" data-x id="pen3" style="left:0px; top:0px;">반짝!</div>
+
+  <!-- (3) 추천 카드 (8차): (2)처럼 출처를 회색 상자에. 두 줄 제목·사진이 있어 카드를 8px 올리고 사진을 조금 줄임,
+       출처 줄 간격 22px, 긴 출처 문장이 상자 안에 들어가게 11px -->
+  <div class="card" id="card3" style="left:938px; top:528px; width:300px; height:184px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:955px; top:541px; width:14px; height:14px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="lab" data-x style="left:974px; top:539px;">자동 완성 추천</div>
+  <div class="big2" data-x style="left:955px; top:559px;">“LA 왔는데, 다저스 유니폼<br>사다 줄까?”</div>
+  <div class="photo" style="left:1162px; top:538px; width:66px; height:68px;"><img src="assets/jersey.png"></div>
+  <div class="srcbox" style="left:953px; top:610px; width:270px; height:52px;"></div>
+  <img class="app" src="../../assets/icons/app-kakao.png" style="left:963px; top:616px; width:17px; height:17px; border-radius:5px; z-index:7;">
+  <div class="t115" data-x style="left:987px; top:617px; font-size:11px;">다저스 유니폼 갖고 싶은데, 미국에서만 판대 ㅠㅠ</div>
+  <svg class="app" viewBox="0 0 24 24" style="left:963px; top:638px; width:17px; height:17px; z-index:7;"><rect width="24" height="24" rx="6" fill="#2F7BF6"/><path d="M17 10.2c0 3.7-5 8.3-5 8.3s-5-4.6-5-8.3a5 5 0 0 1 10 0z" fill="#fff"/><circle cx="12" cy="10.2" r="1.9" fill="#2F7BF6"/></svg>
+  <div class="t115" data-x style="left:987px; top:639px; font-size:11px;">현재 위치 · <b>미국 LA</b></div>
+  <div class="pbtn" id="ok3" style="left:953px; top:672px; width:270px; height:32px; z-index:7;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:1054px; top:681px; width:14px; height:14px; z-index:8;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="btn-t" data-x style="left:1073px; top:678px;">입력하기</div>
+</div>
+
+<script src="../p68/scenario.js"></script>
+<script>
+SC.run(async (sc) => {
+  const { R, el, thread, spark, hand, back, front } = sc;
+  const slide = document.getElementById('slide');
+  const img = (src, x, y, w, h, z = 27) => { const i = document.createElement('img'); i.src = src; i.className = 'app';
+    Object.assign(i.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px', zIndex: z }); slide.appendChild(i); return i; };
+
+  // ── (1) 휴대폰 속 상태줄·통화 표시·손잡이·보내기 버튼·내비게이션
+  [[528, 3.2], [533, 5], [538, 6.8]].forEach(([x, h]) => el(front, 'rect', { x, y: 275.5 - h, width: 3.2, height: h, rx: .9, fill: '#2B2640' }));
+  el(front, 'rect', { x: 547, y: 268, width: 15, height: 8, rx: 2.2, fill: 'none', stroke: '#2B2640', 'stroke-width': 1.1 });
+  el(front, 'rect', { x: 548.8, y: 269.8, width: 10.2, height: 4.4, rx: 1, fill: '#2B2640' });     // 배터리 약 80%
+  el(front, 'rect', { x: 562.6, y: 270.6, width: 1.6, height: 2.8, rx: .6, fill: '#2B2640' });
+  // 통화 시간: 수화기 아이콘 + 00:48을 한 묶음으로 가운데 정렬
+  const ct = document.getElementById('calltime'), ctw = ct.getBoundingClientRect().width;
+  const gx = 454 - (10 + 3 + ctw) / 2;
+  ct.style.left = (gx + 13) + 'px';
+  el(front, 'path', { d: 'M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z',
+    fill: '#6A6474', transform: `translate(${gx} 285) scale(${10 / 24})` });
+  el(front, 'rect', { x: 440, y: 313, width: 28, height: 3, rx: 1.5, fill: '#D4CEDF' });
+  el(front, 'circle', { cx: 454, cy: 271.5, r: 4.2, fill: '#1E1E26' });   // 카메라 구멍
+  const sb = R('sbar1');
+  el(front, 'circle', { cx: sb.r - 17, cy: sb.cy, r: 12, fill: '#6B4EFF' });
+  el(front, 'path', { d: `M${sb.r - 17} ${sb.cy + 6}V${sb.cy - 5.5}M${sb.r - 21.5} ${sb.cy - 1.5}l4.5-4.5 4.5 4.5`, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const q1 = R('q1');
+  const c1 = document.createElement('div'); c1.className = 'cursor'; Object.assign(c1.style, { left: (q1.r + 2) + 'px', top: (q1.t + 2) + 'px', height: '14px', zIndex: 21 }); slide.appendChild(c1);
+  ['r1', 'r2', 'r3'].forEach((id) => { const r = R(id); el(front, 'path', { d: `M${r.r - 17} ${r.cy - 5}l5 5-5 5`, fill: 'none', stroke: '#B3ADC4', 'stroke-width': 1.7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }); });
+  // 보내기 버튼을 누르는 손
+  spark(front, [sb.r - 17, sb.cy], 12 + 3, [213, 258, 303], [4.4, 5.4, 4.4]);
+  hand([sb.r - 14, sb.cy + 3], -12, .95);
+  // 내비게이션 줄
+  const ny = 680; const gn = el(front, 'g', { fill: 'none', stroke: '#7D8499', 'stroke-width': 1.6, 'stroke-linecap': 'round' });
+  el(gn, 'path', { d: `M397 ${ny - 5}v10M401 ${ny - 5}v10M405 ${ny - 5}v10` }); el(gn, 'rect', { x: 448, y: ny - 5, width: 11, height: 10, rx: 3 }); el(gn, 'path', { d: `M510 ${ny - 5}l-5 5 5 5` });
+
+  // 밀어 올리기: 빨간 버튼 아래(보라 막대)에서 위로 — 손끝은 버튼 아래, 화살표는 몸통과 머리가 붙은 하나의 모양
+  const rb = R('redbtn');
+  el(front, 'rect', { x: rb.cx - 16, y: rb.b + 5, width: 32, height: 3.5, rx: 1.75, fill: '#6B4EFF' });
+  const ax = rb.r + 35, ay0 = rb.b + 6, ay1 = rb.t - 8;
+  const tip = [ax, ay0 + 3];
+  spark(front, [tip[0], tip[1] + 4.2], 5.6, [192, 348], [4.8, 4.8]);
+  hand(tip, 0, .95);
+  el(front, 'path', { d: `M${ax - 3.2} ${ay0} L${ax - 3.2} ${ay1 + 11} L${ax - 9} ${ay1 + 11} L${ax} ${ay1} L${ax + 9} ${ay1 + 11} L${ax + 3.2} ${ay1 + 11} L${ax + 3.2} ${ay0} Z`,
+    fill: 'url(#up-front)', 'stroke-linejoin': 'round' });
+  const p1 = R('pen1'); document.getElementById('pen1').style.left = (ax + 8) + 'px'; document.getElementById('pen1').style.top = (ay1 - 4) + 'px';
+
+  // 흩어진 기록 → 휴대폰 속 결과 줄 (점선 실)
+  const phoneL = R('phone1').l;
+  thread(back, [R('note').r + 2, R('note').cy], [phoneL - 1, R('r1').cy], { dash: '4 4' });
+  thread(back, [R('ic-mail').r + 4, R('ic-mail').cy], [phoneL - 1, R('r2').cy], { dash: '4 4' });
+  thread(back, [R('ic-kakao').r + 4, R('ic-kakao').cy], [phoneL - 1, R('r3').cy], { dash: '4 4' });
+  // 13차: 노트 → 메일 → 카카오톡을 한 가닥으로(아이콘 뒤로 지나감) — 기록끼리도 엮여 있음
+  { const n = R('note'), m = R('ic-mail'), k = R('ic-kakao');
+    const S = [n.l + 96, n.b + 1], M = [m.cx, m.cy], K = [k.cx, k.cy];
+    const d = `M${S[0]} ${S[1]} C ${S[0]} ${S[1] + 30}, ${M[0] + 6} ${M[1] - 40}, ${M[0]} ${M[1]} C ${M[0] - 6} ${M[1] + 40}, ${K[0] + 8} ${K[1] - 40}, ${K[0]} ${K[1]}`;
+    el(back, 'path', { d, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 4.6, 'stroke-linecap': 'round', opacity: .9 });
+    el(back, 'path', { d, fill: 'none', stroke: '#8B6BFF', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-dasharray': '4 4' });
+    el(back, 'circle', { cx: S[0], cy: S[1], r: 3.4, fill: '#8B6BFF', stroke: '#fff', 'stroke-width': 1.5 }); }
+
+
+  // ── (2)(3) 키보드
+  const keyboard = (id, mode) => {
+    const k = R(id);
+    el(back, 'rect', { x: k.l, y: k.t, width: k.w, height: k.h, rx: 14, fill: '#E8EAF0' });
+    const ky = k.t + 21, sp = [k.l + 25, ky];
+    if (mode === 'glow') { el(front, 'circle', { cx: sp[0], cy: sp[1], r: 25, fill: 'url(#glow-front)' }); el(front, 'circle', { cx: sp[0], cy: sp[1], r: 14.5, fill: '#6B4EFF' }); }
+    else el(front, 'circle', { cx: sp[0], cy: sp[1], r: 14.5, fill: '#fff', stroke: '#D8CEFA', 'stroke-width': 1 });
+    img(mode === 'glow' ? '../assets/weave-spool-white.png' : '../assets/weave-spool-6B4EFF.png', sp[0] - 9, sp[1] - 9, 18, 18);
+    const g = el(back, 'g', { fill: 'none', stroke: '#7D8499', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    const ix = [k.l + 66, k.l + 98, k.l + 130, k.l + 162, k.l + 194];
+    el(g, 'circle', { cx: ix[0], cy: ky, r: 7 }); el(g, 'path', { d: `M${ix[0] - 3} ${ky + 2} q3 3 6 0 M${ix[0] - 2.5} ${ky - 2}h.1 M${ix[0] + 2.5} ${ky - 2}h.1` });
+    el(g, 'path', { d: `M${ix[1] - 7} ${ky - 5}h7 M${ix[1] - 3.5} ${ky - 7}v2 M${ix[1] - 6} ${ky}q3-1 5-5 M${ix[1] - 1} ${ky + 6}l3.5-8 3.5 8 M${ix[1]} ${ky + 3}h5` });
+    el(g, 'rect', { x: ix[2] - 6, y: ky - 7, width: 12, height: 14, rx: 2 }); el(g, 'path', { d: `M${ix[2] - 3} ${ky - 2}h6 M${ix[2] - 3} ${ky + 2}h6` });
+    el(g, 'circle', { cx: ix[3], cy: ky, r: 3 }); el(g, 'circle', { cx: ix[3], cy: ky, r: 7, 'stroke-dasharray': '3.2 2.3' });
+    [-5, 0, 5].forEach((dx) => el(g, 'circle', { cx: ix[4] + dx, cy: ky, r: 1.1, fill: '#7D8499', stroke: 'none' }, g));
+    const rows = [['ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅐ', 'ㅔ'], ['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅗ', 'ㅓ', 'ㅏ', 'ㅣ']];
+    const keys = [];
+    rows.forEach((row, ri) => { const pad = ri ? 13 : 6, gap = 4, kw = (k.w - 12 - gap * 9) / 10, y = k.t + 46 + ri * 38;
+      row.forEach((ch, i) => { const x = k.l + pad + i * (kw + gap);
+        el(back, 'rect', { x, y, width: kw, height: 31, rx: 5, fill: '#fff' });
+        const t = el(back, 'text', { x: x + kw / 2, y: y + 20.5, 'text-anchor': 'middle', 'font-size': 12.5, 'font-family': 'Noto Sans KR', fill: '#3A3F4E' }); t.textContent = ch;
+        keys.push([x + kw / 2, y + 15.5, ch]); }); });
+    return { sp, keys, k };
+  };
+  // (2) 단서를 입력하고(자판 위 손) → 실타래 버튼 톡
+  const k2 = keyboard('kb2', 'tap');
+  const q2 = R('q2');
+  const c2 = document.createElement('div'); c2.className = 'cursor'; Object.assign(c2.style, { left: (q2.r + 2) + 'px', top: (q2.t + 2) + 'px', height: '14px', zIndex: 21 }); slide.appendChild(c2);
+  // 두 손으로 타이핑: 왼손(ㄴ)·오른손(ㅏ) 손끝 위에 짧은 누름 표시
+  [['ㄴ', true], ['ㅏ', false]].forEach(([ch, left]) => {
+    const kk = k2.keys.find((x) => x[2] === ch);
+    const tip = [kk[0], kk[1] - 3];
+    el(front, 'path', { d: `M${tip[0] - 9} ${tip[1] - 10}l-2.6-3.4M${tip[0]} ${tip[1] - 13}v-4.2M${tip[0] + 9} ${tip[1] - 10}l2.6-3.4`,
+      stroke: '#8B6BFF', 'stroke-width': 1.5, 'stroke-linecap': 'round', fill: 'none' });
+    hand(tip, left ? 12 : -12, .88, left);
+  });
+  spark(front, k2.sp, 14.5 + 3, [213, 258, 303], [4.8, 5.9, 4.8]);
+  hand([k2.sp[0] + 3, k2.sp[1] + 3], -12);
+  // (3) 실타래 버튼이 먼저 반짝 → 누름
+  const k3 = keyboard('kb3', 'glow');
+  spark(front, k3.sp, 14.5 + 8, [213, 258, 303], [5.6, 7.0, 5.6]);
+  el(front, 'circle', { cx: k3.sp[0] + 11, cy: k3.sp[1] - 11, r: 7, fill: '#F04452', stroke: '#fff', 'stroke-width': 1.5 });
+  const one = el(front, 'text', { x: k3.sp[0] + 11, y: k3.sp[1] - 7.3, 'text-anchor': 'middle', 'font-size': 9.5, 'font-weight': 700, 'font-family': 'Inter', fill: '#fff' }); one.textContent = '1';
+  hand([k3.sp[0] + 4, k3.sp[1] + 4], -12);
+
+  // 키보드 → 추천 카드 화살표, 손글씨는 화살표 위 가운데
+  [['kb2', 'card2', 'pen2'], ['kb3', 'card3', 'pen3']].forEach(([a, b, p]) => {
+    const A = R(a), B = R(b); const y = A.t + A.h / 2 + 6;
+    el(back, 'path', { d: `M${A.r + 8} ${y} L${B.l - 8} ${y}`, stroke: '#8B6BFF', 'stroke-width': 2.2, 'stroke-linecap': 'round', fill: 'none', 'marker-end': 'url(#ah-back)' });
+    const pe = document.getElementById(p), pr = pe.getBoundingClientRect();
+    pe.style.left = ((A.r + B.l) / 2 - pr.width / 2) + 'px'; pe.style.top = (y - 30) + 'px';
+  });
+  // 입력하기 버튼을 누르는 손
+  ['ok2', 'ok3'].forEach((id) => { const o = R(id); spark(front, [o.r - 34, o.cy], 16 + 3, [213, 258, 303], [4.8, 5.9, 4.8]); hand([o.r - 30, o.cy + 3], -12); });
+});
+</script>
+</body>
+</html>

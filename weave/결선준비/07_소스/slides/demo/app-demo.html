@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face { font-family: 'Noto Sans KR'; font-weight: 700; src: url('../../assets/fonts/NotoSansKR-700.ttf'); }
+@font-face { font-family: 'Inter'; font-weight: 600; src: url('../../assets/fonts/Inter-600.ttf'); }
+@font-face { font-family: 'Inter'; font-weight: 700; src: url('../../assets/fonts/Inter-700.ttf'); }
+html, body { margin: 0; background: transparent; }
+#slide { position: relative; width: 1280px; height: 860px; overflow: hidden; font-family: 'Inter', 'Noto Sans KR', sans-serif; }
+/* 칩: header.py와 같은 규격 — #6B4EFF, 높이 26, y=28, Inter SemiBold 11pt(14.67px) 자간 +0.5pt, 폭은 header.chip_width()로(장표 칩과 같은 폭),
+   글자는 가운데. 줄 높이는 font 묶음 속성 안에 26px로 넣음(따로 쓰면 font 묶음이 줄 높이를 초기화해 글자가 위로 붙음 — 사용자 지적) */
+.chip { position: absolute; top: 28px; left: 583.0px; width: 114px; height: 26px; box-sizing: border-box; padding-left: 0.667px;
+         text-align: center; border-radius: 13px; background: #6B4EFF; color: #fff; font: 600 14.667px/26px 'Inter'; letter-spacing: 0.667px; white-space: nowrap; }
+.cap { position: absolute; height: 28px; line-height: 28px; text-align: center; font-size: 20px; font-weight: 700; color: #1C1A24; letter-spacing: -0.2px; }
+.shadow { position: absolute; background: transparent;
+           box-shadow: 0 16px 34px rgba(62, 40, 140, .16), 0 4px 10px rgba(62, 40, 140, .10); }
+</style></head><body><div id="slide"><div class="chip">APP DEMO</div><div class="cap" style="left:58.00px;top:798.00px;width:348.00px">UX1: 기록 통합 검색</div><div class="shadow" style="left:58.00px;top:84.00px;width:348.00px;height:694.00px;border-radius:40.49px"></div><div class="cap" style="left:466.00px;top:798.00px;width:348.00px">UX2: 단서로 찾는 기억</div><div class="shadow" style="left:466.00px;top:84.00px;width:348.00px;height:692.67px;border-radius:40.49px"></div><div class="cap" style="left:874.00px;top:798.00px;width:348.00px">UX3: 먼저 건네는 기억</div><div class="shadow" style="left:874.00px;top:84.00px;width:348.00px;height:693.33px;border-radius:40.49px"></div></div>
+<script>document.fonts.ready.then(() => { window.pageReady = true; });</script></body></html>

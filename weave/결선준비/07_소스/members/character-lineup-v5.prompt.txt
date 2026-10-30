@@ -1,0 +1,14 @@
+Use case: style-transfer / identity-preserve.
+Edit the FIVE-PERSON character sheet in reference 1. Produce the same five upper-body portraits, same order, same clothing, same dessert props and pose, on genuine transparent alpha, isolated by clear transparent gutters.
+
+Requested changes:
+A) Person 1 ONLY: use the softly swept/parted front-hair flow of reference 2 (the older illustrated version), with a little forehead showing. But COMPRESS THE HAIR AT BOTH SIDES: the temples and side hair should lie closer to the head, tidy and modest volume, not puffed out, not a mushroom outline. Keep the person's distinctive substantial dark glasses and individual face.
+B) ALL FIVE: make the rendering ONE STEP MORE CLEARLY 3D CARTOON, beyond the current near-photographic portrait treatment. Reference 3 shows the illustrated story's sculpted animated-character language; adapt that material/rendering feel, NOT its identities, hairstyles, clothes or background. Keep the different facial proportions and distinguishing features of reference 1. Slightly enlarged expressive eyes, simplified rounded nose/cheeks, satin-matte smooth skin, clean intentional sculpted hair locks, gently stylized hands. It should unmistakably read as polished high-end 3D animated characters / charming desk figurines, not airbrushed photographs. Friendly attractive adults, restrained smiles; no identical doll faces, no giant anime eyes, no baby-like chibi.
+
+Invariants:
+Exactly five people, two men at positions 1 and 5, three women at positions 2 3 4. Equal head scale.
+Same navy formal jackets and white shirts; men's ties remain.
+Person 2's whole ridged churro stays cocoa-brown dough with dark glossy chocolate coating and a little sugar, in a white sleeve. Never golden dough.
+1 wrapped pink rice-cake ball, 2 chocolate churro, 3 square pizza rice cake, 4 fig cream cake, 5 topped yogurt and spoon.
+All desserts clearly visible at chest height, hands intact, no extra objects.
+Transparent background and clean separation, no text, no badges, no circles, no labels, no photo texture, no opaque background. Preserve the warm appealing look while making the requested stylization and haircut improvements.

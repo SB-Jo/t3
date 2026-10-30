@@ -1,0 +1,62 @@
+/* 통합.pptx 후반부(08~13) 슬라이드에서 추출한 디자인 토큰
+   - 배경: 선형 FDFCFF→F8F5FF→F2EDFF(70°) + 우상단 복숭아빛 + 좌하단 라벤더 글로우
+   - 라벨 12pt/#6B4EFF, 제목 29pt/#1C1A24, 부제 14pt/#5B5866, 출처 12pt/#8E88A0
+   1pt = 1.333px (1280×720 캔버스)
+   글꼴: Noto Sans KR·Inter는 07_소스/assets/fonts에 함께 둠 */
+@font-face { font-family: 'Noto Sans KR'; font-weight: 400; src: url('../assets/fonts/NotoSansKR-400.ttf'); }
+@font-face { font-family: 'Noto Sans KR'; font-weight: 500; src: url('../assets/fonts/NotoSansKR-500.ttf'); }
+@font-face { font-family: 'Noto Sans KR'; font-weight: 600; src: url('../assets/fonts/NotoSansKR-600.ttf'); }
+@font-face { font-family: 'Noto Sans KR'; font-weight: 700; src: url('../assets/fonts/NotoSansKR-700.ttf'); }
+@font-face { font-family: 'Inter'; font-weight: 400; src: url('../assets/fonts/Inter-400.ttf'); }
+@font-face { font-family: 'Inter'; font-weight: 600; src: url('../assets/fonts/Inter-600.ttf'); }
+@font-face { font-family: 'Inter'; font-weight: 700; src: url('../assets/fonts/Inter-700.ttf'); }
+@font-face { font-family: 'Nanum Pen Script'; font-weight: 400; src: url('../assets/fonts/NanumPenScript-Regular.ttf'); }
+
+:root {
+  --purple: #6B4EFF;
+  --purple-2: #8B6BFF;
+  --purple-line: #CFC3FF;
+  --card-line: #E4DDF7;
+  --tile: #F1ECFF;
+  --tile-2: #EDE7FF;
+  --soft: #F7F4FF;
+  --soft-line: #E9E3FA;
+  --ink: #1C1A24;
+  --ink-2: #2B2640;
+  --body: #4E4A57;
+  --body-2: #5B5866;
+  --muted: #6A6474;
+  --muted-2: #8E88A0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #e9e6f2; }
+body { font-family: 'Noto Sans KR', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+.slide { position: relative; width: 1280px; height: 720px; overflow: hidden; background: #F8F5FF; }
+.slide .bg { position: absolute; pointer-events: none; }
+.slide .bg-base { inset: 0; background: linear-gradient(160deg, #FDFCFF 0%, #F8F5FF 50%, #F2EDFF 100%); }
+.slide .bg-peach { left: 640px; top: 0; width: 640px; height: 507px;
+  background: radial-gradient(ellipse farthest-corner at 85% 8%, rgba(255,226,130,.42) 0%, rgba(255,238,185,.18) 30%, rgba(255,250,235,0) 60%); }
+.slide .bg-lav { left: 0; top: 373px; width: 600px; height: 347px;
+  background: radial-gradient(ellipse farthest-corner at 12% 88%, rgba(186,166,255,.34) 0%, rgba(220,208,255,.16) 40%, rgba(248,245,255,0) 72%); }
+
+/* 후반부 공통 제목 블록 (중앙 정렬) */
+.t-label, .t-title, .t-sub { position: absolute; left: 0; width: 1280px; text-align: center; white-space: nowrap; }
+.t-label { top: 48px; height: 23.5px; line-height: 23.5px; font-size: 16px; font-weight: 700; color: var(--purple); letter-spacing: .02em; }
+.t-title { top: 78px; height: 49px; line-height: 49px; font-size: 38.6px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+.t-sub { top: 134px; height: 28.8px; line-height: 28.8px; font-size: 18.6px; font-weight: 400; color: var(--body-2); }
+.hl { color: var(--purple); }
+
+/* 출처 각주 (08~13 슬라이드 양식: 12pt, #8E88A0, 좌측 x=85) */
+.src { position: absolute; left: 85px; font-size: 16px; line-height: 20.8px; color: var(--muted-2); white-space: nowrap; }
+
+/* 텍스트 요소는 모두 명시적 줄바꿈만 사용 → PPTX 변환 시 줄바꿈이 달라지지 않도록 */
+[data-x] { white-space: nowrap; }
+
+/* 내보내기용: 텍스트/네이티브 도형 숨김 모드 */
+body.art-only [data-x], body.art-only [data-x] * { color: transparent !important; text-shadow: none !important; -webkit-text-fill-color: transparent !important; }
+body.art-only [data-s] { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
+body.art-only .slide { background: transparent !important; }
+body.art-only .slide .bg { display: none !important; }
+html:has(body.art-only), body.art-only { background: transparent !important; }

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941">
+  <defs>
+    <!-- Trace the existing photographed rims; do not tint either card's contents. -->
+    <path id="conversation-rim" d="M1203 324.4 L1463.7 341.9 C1476.4 342.6 1485.3 351.4 1484 364 L1457.7 701.6 C1456.7 714.6 1447.2 722.6 1434 721 L1166 687.3 C1152.2 685.6 1144.6 678.2 1145.9 663.8 L1178.3 348.1 C1179.8 333.5 1188.2 323.4 1203 324.4 Z"/>
+    <path id="location-rim" d="M1248.3 713.5 L1463.5 741 C1475.7 742.6 1483.4 750.9 1481.7 763.5 L1466.3 887.7 C1464.6 901.8 1456.1 909.4 1442.7 907.6 L1225.7 880 C1212.2 878.2 1204.9 869.8 1206.8 856.3 L1223.4 735.1 C1225.4 720.4 1234.5 711.8 1248.3 713.5 Z"/>
+    <linearGradient id="conversation-lavender" gradientUnits="userSpaceOnUse" x1="1160" y1="528" x2="1490" y2="480">
+      <stop offset="0" stop-color="#AF7DE7" stop-opacity=".72"/>
+      <stop offset=".5" stop-color="#C29AF0" stop-opacity=".62"/>
+      <stop offset="1" stop-color="#B68AE9" stop-opacity=".65"/>
+    </linearGradient>
+    <linearGradient id="location-lavender" gradientUnits="userSpaceOnUse" x1="1210" y1="782" x2="1480" y2="852">
+      <stop offset="0" stop-color="#B587E9" stop-opacity=".70"/>
+      <stop offset=".55" stop-color="#C7A2F0" stop-opacity=".61"/>
+      <stop offset="1" stop-color="#B68AE9" stop-opacity=".66"/>
+    </linearGradient>
+    <filter id="rim-soft" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="1.5"/></filter>
+  </defs>
+  <g fill="none" stroke-linejoin="round">
+    <g stroke="url(#conversation-lavender)">
+      <use href="#conversation-rim" stroke-width="3.5" opacity=".4" filter="url(#rim-soft)"/>
+      <use href="#conversation-rim" stroke-width="1.35"/>
+    </g>
+    <g stroke="url(#location-lavender)">
+      <use href="#location-rim" stroke-width="3.5" opacity=".4" filter="url(#rim-soft)"/>
+      <use href="#location-rim" stroke-width="1.35"/>
+    </g>
+  </g>
+</svg>
