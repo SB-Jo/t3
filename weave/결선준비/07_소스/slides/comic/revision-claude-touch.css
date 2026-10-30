@@ -1,0 +1,5 @@
+/* claude 0927: 누르는 손 + 반짝임(터치 효과). 8쪽 커서의 방사선을 참고하되 보라색으로, 선은 3개 이하로. 원형 링은 쓰지 않음(v4에서 삭제 요청). */
+.touch-spark{position:absolute;width:80px;height:80px;z-index:6;pointer-events:none;overflow:visible;filter:drop-shadow(0 0 1.6px #FFFFFF) drop-shadow(0 0 1px #FFFFFF)}
+.touch-spark path{fill:none;stroke-width:3.1;stroke-linecap:round}
+.p4 .touch-spark{left:481.5px;top:139.5px}
+.p3 .touch-spark{left:450.8px;top:475px}

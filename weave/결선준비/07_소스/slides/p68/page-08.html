@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>USER SCENARIO 3 — 아 맞다! 이거 필요하지?</title>
+<link rel="stylesheet" href="scenario.css">
+<style>
+  .photo { position: absolute; z-index: 6; border-radius: 8px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .kb { position: absolute; z-index: 12; background: #E8EAF0; border-radius: 16px; border: 1.5px solid #CBB8FF;
+        box-shadow: 0 16px 34px rgba(90, 60, 200, .20), 0 0 0 4px rgba(236, 228, 255, .7); }
+  .chat-pop { position: absolute; z-index: 12; background: #BACEE0; border-radius: 16px; border: 1.5px solid #CBB8FF;
+        box-shadow: 0 16px 34px rgba(90, 60, 200, .18), 0 0 0 4px rgba(236, 228, 255, .7); }
+  .chat-res { position: absolute; z-index: 5; background: #BACEE0; border-radius: 16px; border: 1px solid #C9D6E6;
+        box-shadow: 0 12px 26px rgba(60, 50, 120, .12); }
+  .t-mom { position: absolute; z-index: 20; font-size: 11px; line-height: 14px; color: #3F4A5A; }
+  .t-big { position: absolute; z-index: 20; font-size: 16px; line-height: 23px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+  .avatar { position: absolute; z-index: 13; border-radius: 50%; }
+</style>
+</head>
+<body>
+<script src="../../pages/icons.js"></script>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+  <img class="scene" src="scenes/scene-p8-cafe.png" alt="">
+
+  <div class="chip-prev" style="left:555px; width:170px;"></div>
+  <div class="t-label" data-x>USER SCENARIO 3</div>
+  <div class="t-title" data-x>아 맞다! 이거 <span class="hl5">필요</span>하지?</div>
+  <div class="t-sub" data-x>이전에 나눈 약속과 현재 위치를 연결해, 필요한 말을 떠올립니다.</div>
+
+  <!-- ① 엄마와 대화 중 (대전역, 2주 전 약속은 잊은 채) -->
+  <img class="char big" id="charA" src="characters/p8-A-yellow.png" style="left:-18px; top:296px; width:424px; height:424px;">
+  <div class="chat-pop" id="ctx" style="left:30px; top:170px; width:352px; height:128px;"></div>
+  <img class="avatar" id="av1" src="assets/mom-avatar.png" style="left:44px; top:182px; width:26px; height:26px;">
+  <div class="t-mom" data-x id="mom1" style="left:78px; top:181px;">엄마</div>
+  <div class="wbubble" id="wb1" style="left:78px; top:197px; width:196px; height:44px; z-index:13;"></div>
+  <div class="t-chat" data-x id="wt1" style="left:90px; top:200px;">출장 다녀오느라 고생했어!<br>지금 어디쯤이야?</div>
+  <div class="ybubble" id="yb1" style="left:136px; top:252px; width:232px; height:32px; z-index:13;"></div>
+  <div class="t-chat" data-x id="yt1" style="left:148px; top:258px;">응, 역 근처에서 기차 기다리고 있어</div>
+
+  <!-- ② 실타래 버튼이 먼저 반짝 -->
+  <div class="kb" id="kbar" style="left:414px; top:498px; width:300px; height:56px;"></div>
+  <div class="pen" data-x style="left:360px; top:512px;">반짝!</div>
+
+  <!-- ③ 2주 전 약속 + 지금 위치 -->
+  <div class="card" id="s1" style="left:772px; top:170px; width:262px; height:190px;"></div>
+  <img class="app" src="../../assets/icons/app-kakao.png" style="left:786px; top:183px; width:20px; height:20px; border-radius:5px; z-index:6;">
+  <div class="t-app" data-x style="left:812px; top:184px;">가족 단체방</div>
+  <div class="t-meta" data-x style="left:890px; top:185px;">2주 전</div>
+  <div class="chatbg" id="cb3" style="left:786px; top:212px; width:234px; height:134px; z-index:6;"></div>
+  <div class="t-mom" data-x style="left:796px; top:218px;">엄마</div>
+  <div class="photo" id="ph3" style="left:796px; top:234px; width:86px; height:56px;"><img src="assets/fig-cake.png"></div>
+  <div class="wbubble" id="wb3" style="left:888px; top:246px; width:124px; height:40px; z-index:7;"></div>
+  <div class="t-chat" data-x id="wt3" style="left:896px; top:248px; font-size:11.5px; line-height:17px;">이거 TV에서 봤어!<br>맛있겠다.</div>
+  <div class="ybubble" id="yb3" style="left:830px; top:298px; width:182px; height:40px; z-index:7;"></div>
+  <div class="t-chat" data-x id="yt3" style="left:840px; top:300px; font-size:11.5px; line-height:17px;">성심당 무화과시루네.<br><b>다음에 대전 가면 사다줄게!</b></div>
+
+  <div class="card s2g" id="s2" style="left:1054px; top:170px; width:208px; height:106px;"></div>
+  <svg class="app s2g" viewBox="0 0 24 24" style="left:1068px; top:183px; width:20px; height:20px; z-index:6;"><rect width="24" height="24" rx="6" fill="#2F7BF6"/><path d="M17 10.2c0 3.7-5 8.3-5 8.3s-5-4.6-5-8.3a5 5 0 0 1 10 0z" fill="#fff"/><circle cx="12" cy="10.2" r="1.9" fill="#2F7BF6"/></svg>
+  <div class="t-app s2g" data-x style="left:1094px; top:184px;">현재 위치</div>
+  <div class="t-meta s2g" data-x style="left:1160px; top:185px;">GPS</div>
+  <div class="t-ttl s2g" data-x style="left:1068px; top:214px;"><b>대전역</b></div>
+  <div class="t-body s2g" data-x style="left:1068px; top:240px;">성심당 대전역점 인근</div>
+
+  <!-- Weave 추천 -->
+  <div class="card pop" id="sug" style="left:900px; top:384px; width:330px; height:136px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:918px; top:400px; width:14px; height:14px; z-index:13;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="t-app" data-x style="left:937px; top:398px; color:#6B4EFF;">자동 완성 추천</div>
+  <div class="t-big" data-x style="left:918px; top:419px;">“엄마, 전에 먹고 싶다던 무화과시루 사갈까?”</div>
+  <div class="t-meta" data-x style="left:918px; top:447px;">가족 단체방 대화 · 현재 위치 (대전역)</div>
+  <div class="pbtn" id="okbtn" style="left:918px; top:474px; width:294px; height:34px; z-index:13;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:1032px; top:484px; width:14px; height:14px; z-index:14;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="t-btn" data-x style="left:1051px; top:481px;">입력하기</div>
+
+  <!-- ④ 필요한 말 한 번에 -->
+  <div class="chat-res" id="res" style="left:772px; top:560px; width:300px; height:140px;"></div>
+  <div class="ybubble" id="yb4" style="left:852px; top:572px; width:208px; height:40px; z-index:7;"></div>
+  <div class="t-chat" data-x id="yt4" style="left:862px; top:574px; font-size:12px; line-height:18px;">엄마, 전에 먹고 싶다던<br>무화과시루 사갈까?</div>
+  <img class="avatar" id="av4" src="assets/mom-avatar.png" style="left:784px; top:624px; width:24px; height:24px;">
+  <div class="t-mom" data-x id="mom4" style="left:814px; top:622px;">엄마</div>
+  <div class="wbubble" id="wb4" style="left:814px; top:628px; width:208px; height:60px; z-index:7;"></div>
+  <div class="t-chat" data-x id="wt4" style="left:824px; top:631px; font-size:12px; line-height:18px;">어머! 그때 말했던 걸 기억하고<br>있었어? ㅠㅠ 감동이야 우리 딸!</div>
+  <div class="pen" data-x id="pen8" style="left:1000px; top:566px; font-size:22px; line-height:25px; text-align:center;">휴,<br>Weave 덕분에<br>기억했네!</div>
+  <img class="char" id="charB" src="characters/p8-B-yellow.png" style="left:1080px; top:528px; width:192px; height:192px;">
+</div>
+
+<script src="scenario.js"></script>
+<script>
+SC.run(async (sc) => {
+  const { R, el, bubble, thread, spark, hand, fit, moveTo, step, phone, back, front } = sc;
+  // 휴대폰: 카톡 데모 — 엄마와 대화 중, 키보드의 실타래 버튼이 먼저 반짝이는 순간 (563×1195)
+  const ph = phone('phone', 450, 186, 232, 'assets/screen-카톡키보드.png', 563, 1195);
+  const setBox = (id, o) => Object.assign(document.getElementById(id).style, Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v + 'px'])));
+  // ① 엄마와 대화: 말풍선은 글자에 맞추고, 바깥 상자는 내용에 맞춤 (보낸 말풍선은 오른쪽 정렬)
+  let X1 = 30;
+  { const wbw0 = R('wt1').w + 22, ybw0 = R('yt1').w + 22;
+    const W0 = Math.max(48 + wbw0 + 16, 70 + ybw0 + 12);
+    X1 = Math.round((450 - W0) / 2 + 4);
+    const X = X1, Y = 170;
+    moveTo('av1', X + 14, null); moveTo('mom1', X + 48, null);
+    const wb = fit('wt1', 'wb1', { px: 11, py: 5, left: X + 48, top: Y + 27 });
+    const ybw = R('yt1').w + 22;
+    const W = Math.max(wb.r - X + 16, 70 + ybw + 12);
+    const yb = fit('yt1', 'yb1', { px: 11, py: 6, anchor: 'right', right: X + W - 12, top: wb.b + 10 });
+    setBox('ctx', { left: X, top: Y, width: W, height: yb.b + 12 - Y }); }
+  // ③ 가족 단체방: '이거 TV에서 봤어!' 말풍선 왼쪽, 무화과 사진 오른쪽, 내 답장은 오른쪽 정렬
+  { const CB = { l: 786, t: 212 };
+    const wb = fit('wt3', 'wb3', { px: 9, py: 5, left: 796, top: 236 });
+    moveTo('ph3', wb.r + 8, 234);
+    const ph = R('ph3');
+    const ybw = R('yt3').w + 20;
+    const cbw = Math.max(ph.r + 10 - CB.l, 40 + ybw + 10);
+    const yb = fit('yt3', 'yb3', { px: 10, py: 5, anchor: 'right', right: CB.l + cbw - 10, top: Math.max(wb.b, ph.b) + 8 });
+    setBox('cb3', { left: CB.l, top: CB.t, width: cbw, height: yb.b + 10 - CB.t });
+    setBox('s1', { left: 772, top: 170, width: cbw + 28, height: yb.b + 10 + 14 - 170 });
+    const dx = (772 + cbw + 28 + 20) - 1054;
+    document.querySelectorAll('.s2g').forEach((e) => { e.style.left = (parseFloat(e.style.left) + dx) + 'px'; }); }
+  // 현재 위치 카드: 오른쪽 여백을 줄임 (8차, 79px → 글자 끝 + 30px)
+  { const s2 = document.getElementById('s2'), l = R(s2).l;
+    const r = Math.max(...[...document.querySelectorAll('.s2g[data-x]')].map((e) => R(e).r));
+    s2.style.width = Math.round(r + 30 - l) + 'px'; }
+  // ④ 보낸 답장 + 엄마 답장: 프로필 옆에 '엄마', 말풍선은 글자에 맞춤
+  { const X = 772, Y = 560;
+    const ybw = R('yt4').w + 22, wbw = R('wt4').w + 22;
+    const W = Math.max(12 + 30 + wbw + 12, 60 + ybw + 12);
+    const yb = fit('yt4', 'yb4', { px: 11, py: 5, anchor: 'right', right: X + W - 12, top: Y + 12 });
+    moveTo('av4', X + 12, yb.b + 10); moveTo('mom4', X + 42, yb.b + 9);
+    const wb = fit('wt4', 'wb4', { px: 11, py: 5, left: X + 42, top: yb.b + 26 });
+    setBox('res', { left: X, top: Y, width: W, height: wb.b + 12 - Y }); }
+
+  // ① 대화 조각 ↔ 휴대폰 속 원래 대화 (가는 점선)
+  const cx = R('ctx');
+  const chat0 = ph.at(90, 330);
+  el(back, 'path', { d: `M${cx.r + 2} ${cx.cy} C ${cx.r + 40} ${cx.cy}, ${chat0[0] - 30} ${chat0[1]}, ${chat0[0]} ${chat0[1]}`, stroke: '#B69CFF', 'stroke-width': 1.3, 'stroke-dasharray': '3 3', fill: 'none' });
+
+  // ② 확대한 키보드 도구 줄: 실타래 버튼이 보라로 반짝 + 알림 1 + 누르는 손
+  const kb = R('kbar'); const ky = kb.cy;
+  const sp = [kb.l + 30, ky];
+  el(front, 'circle', { cx: sp[0], cy: sp[1], r: 30, fill: 'url(#glow-front)' });
+  el(front, 'circle', { cx: sp[0], cy: sp[1], r: 17, fill: '#6B4EFF' });
+  const spool = document.createElement('img'); spool.src = '../assets/weave-spool-white.png'; spool.className = 'app';
+  Object.assign(spool.style, { left: (sp[0] - 11) + 'px', top: (sp[1] - 11) + 'px', width: '22px', height: '22px', zIndex: 27 }); document.getElementById('slide').appendChild(spool);
+  el(front, 'circle', { cx: sp[0] + 13, cy: sp[1] - 13, r: 8, fill: '#F04452', stroke: '#fff', 'stroke-width': 1.6 });
+  const one = el(front, 'text', { x: sp[0] + 13, y: sp[1] - 9.2, 'text-anchor': 'middle', 'font-size': 10.5, 'font-weight': 700, 'font-family': 'Inter', fill: '#fff' }); one.textContent = '1';
+  const g = el(front, 'g', { fill: 'none', stroke: '#6E7488', 'stroke-width': 1.7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const ix = [kb.l + 80, kb.l + 122, kb.l + 164, kb.l + 206, kb.l + 248];
+  el(g, 'circle', { cx: ix[0], cy: ky, r: 8.5 }); el(g, 'path', { d: `M${ix[0] - 3.5} ${ky + 2.5} q3.5 3.5 7 0 M${ix[0] - 3} ${ky - 2.5}h.1 M${ix[0] + 3} ${ky - 2.5}h.1` });
+  el(g, 'path', { d: `M${ix[1] - 8} ${ky - 6}h8 M${ix[1] - 4} ${ky - 8}v2 M${ix[1] - 7} ${ky}q3.5-1 6-6 M${ix[1] - 1} ${ky + 7}l4-9 4 9 M${ix[1]} ${ky + 4}h6` });
+  el(g, 'rect', { x: ix[2] - 7, y: ky - 8.5, width: 14, height: 17, rx: 2.5 }); el(g, 'path', { d: `M${ix[2] - 3.5} ${ky - 2}h7 M${ix[2] - 3.5} ${ky + 2.5}h7` });
+  el(g, 'circle', { cx: ix[3], cy: ky, r: 3.2 }); el(g, 'circle', { cx: ix[3], cy: ky, r: 8, 'stroke-dasharray': '3.4 2.4' });
+  [-6, 0, 6].forEach((dx) => el(g, 'circle', { cx: ix[4] + dx, cy: ky, r: 1.3, fill: '#6E7488', stroke: 'none' }));
+  spark(front, sp, 17 + 7, [213, 258, 303], [5.8, 7.2, 5.8]);
+  hand([sp[0] + 5, sp[1] + 5], -12, 1.15);
+
+  // ③ 휴대폰 → 두 기록, 두 기록 → 추천
+  const phoneR = R('phone').r, key0 = ph.at(37, 808);
+  const s1 = R('s1'), s2 = R('s2'), sg = R('sug');
+  thread(back, [phoneR + 1, key0[1]], [s1.l - 2, s1.cy + 40], { dash: '5 4' });
+  thread(back, [s1.r - 60, s1.b + 2], [sg.l + 60, sg.t - 2], { dash: '5 4', k: .2 });
+  thread(back, [s2.cx, s2.b + 2], [sg.r - 70, sg.t - 2], { dash: '5 4', k: .2 });
+  // 입력하기 누름 → 보낸 답장
+  const ok = R('okbtn');
+  spark(front, [ok.r - 30, ok.cy], 17 + 3, [213, 258, 303], [4.8, 5.9, 4.8]);
+  hand([ok.r - 26, ok.cy + 3], -12);
+  const rs = R('res');
+  thread(back, [ok.l + 40, ok.b + 2], [rs.cx, rs.t - 2], { arrow: true, dots: false, k: .3 });
+
+  // 손글씨: ④ 대화 상자 오른쪽 끝과 지현 머리카락 사이 가운데 (머리카락 왼쪽 끝은 그림 투명도로 잰 값, 글자 높이에서 약 1125px)
+  { const t = R('pen8'); moveTo('pen8', Math.round((R('res').r + 1125) / 2 - t.w / 2), null); }
+  step(1, '엄마와 대화 중', X1 - 12, 157);
+  step(2, '실타래 버튼이 먼저 반짝', 362, 484);
+  step(3, '2주 전 약속 + 지금 위치', 762, 157);
+  step(4, '필요한 말을 한 번에', 762, 546);
+});
+</script>
+</body>
+</html>

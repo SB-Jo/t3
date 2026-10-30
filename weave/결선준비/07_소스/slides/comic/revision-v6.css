@@ -1,0 +1,17 @@
+/* v6 continuity: woman stays on the left, man on the right, as in panels 1–5. */
+/* Preserve each speaker's existing size, color, type, and vertical position. */
+.p6a{left:290px}
+.p6b{left:23px}
+
+/* Half-step emphasis only for the requested phrase; preserve the line box. */
+.p2a .food-response{font-size:23px;line-height:1}
+
+/* v6.1: reduce each thought-cloud inset by 2px, retaining its center/content. */
+.thought-pod{left:352px;top:39px;width:205px;height:162px;padding:14px 13px 13px}
+.thought-dot.one{left:129px;top:170px}
+.thought-dot.two{left:103px;top:196px}
+
+/* v6.2: color only the two source words; tighten the gallery's bottom by 3px. */
+.thought-pod .thought-keyword{color:#693BC5} /* v6.3: slightly higher saturation, similar hue/lightness. */
+/* Retain the previous rotation origin so the card's contents do not move. */
+.p5 .source-gallery{height:198px;padding-bottom:13px;transform-origin:94px 100.5px}

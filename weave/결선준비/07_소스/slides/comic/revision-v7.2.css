@@ -1,0 +1,13 @@
+/* Panel 2 only: lower the left dialogue text by exactly 2px. */
+.p2a p{top:calc(50% - 1px)}
+
+/* Add 4px of room on each side without moving the text, app cards or dots. */
+.thought-pod{
+  left:348px;
+  top:35px;
+  width:213px;
+  height:170px;
+  padding:18px 17px 17px;
+}
+.thought-dot.one{left:133px;top:174px}
+.thought-dot.two{left:107px;top:200px}

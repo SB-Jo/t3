@@ -1,0 +1,77 @@
+/* v3: one balloon system, color at the rim and a near-white reading area. */
+.bubble{height:auto;filter:drop-shadow(0 4px 5px #49364920)}
+.bubble p{font-size:23px;line-height:1.4;padding:17px 20px;letter-spacing:-.65px}
+.bubble>svg{overflow:visible}
+.p1a{left:28px;top:75px;width:190px}.p1a p{font-size:23px;padding:15px 20px;line-height:1.36}
+.p1b{left:280px;top:115px;width:280px}.p1b p{font-size:22.5px;padding:17px 20px}
+.p1c{left:28px;top:201px;width:307px}.p1c p{font-size:23px;padding:17px 20px}
+.p2a{left:23px;top:95px;width:305px}.p2a p{font-size:22px;line-height:1.48;padding:19px 13px}
+.p3a{left:84px;top:71px;width:348px}.p3a p{font-size:27px;padding:18px 24px}
+.p6a{left:23px;top:76px;width:275px}.p6a p{font-size:24px;padding:19px 15px}
+.p6b{left:315px;top:88px;width:250px}.p6b p{font-size:24px;padding:20px 12px}
+
+/* Speech left, thought upper right: leave the woman's face uncovered. */
+.thought-pod{left:341px;top:37px;width:222px;height:178px;padding:18px 17px 16px;border-radius:40px;border-color:#D1B5E8;background:radial-gradient(ellipse at 50% 45%,#FFF 29%,#FFFDFF 46%,#F5EBFD 73%,#EBD9F8 100%);box-shadow:0 4px 9px #49364920}
+.thought-pod>p{font-size:20px;margin-bottom:10px;line-height:1.4}
+.thought-dot{border-color:#CDB4E5;background:radial-gradient(ellipse at 45% 40%,#FFF 20%,#EEDFFA 100%)}
+.thought-dot.one{left:39px;top:182px;width:24px;height:21px}
+.thought-dot.two{left:72px;top:209px;width:16px;height:14px}
+.confusion{right:30px;top:232px;width:45px;height:38px}
+
+/* A real home-screen structure beneath the independent floating search. */
+.mini-home{position:relative;height:269px;overflow:hidden;background:linear-gradient(150deg,#E9DAFB 0%,#CACEEA 37%,#A9C5D9 65%,#DBE9EE 100%)}
+.wallpaper-shape{position:absolute;border:1px solid #FFFFFF74;box-shadow:inset 5px 4px 19px #FFFFFFAA,6px 7px 23px #696B9730}
+.wallpaper-a{width:198px;height:123px;left:-70px;top:95px;transform:rotate(-35deg);border-radius:70% 45% 55% 42%;background:linear-gradient(170deg,#ECE0FB 10%,#B4B5DD 60%,#A1B6D0)}
+.wallpaper-b{width:154px;height:194px;right:-81px;top:95px;transform:rotate(35deg);border-radius:50% 65% 50% 65%;background:linear-gradient(100deg,#DBE8EA,#93BACD 70%,#739DB9)}
+.mini-home .clock{position:relative;font-size:25px;padding-top:12px;color:#535575}
+.home-apps{position:absolute;bottom:25px;left:13px;right:13px;margin:0;gap:12px;padding:7px 3px;border:1px solid #FFFFFF80;border-radius:16px;background:#FFFFFF55;backdrop-filter:blur(6px)}
+.home-apps img{width:25px;height:25px;opacity:1;filter:drop-shadow(0 2px 2px #53547525)}
+.mini-device .swipe-origin{background:#646B85}
+.swipe-hand{left:472px;top:505px;width:48px;height:61px}
+.drag-trail{stroke-width:6}
+.drag-trail .drag-under{stroke-width:10}
+
+/* Narrow phone, complete one-line query, and a deliberate press on submit. */
+.p4 .search-device{left:342px;top:223px;width:215px;height:378px;border-radius:27px;border-width:3px}
+.p4 .phone-search-body{height:171px}
+.p4 .keyrow{gap:2px}.p4 .keyrow.middle{padding:0 6px}.p4 .keyrow i{font-size:11px}
+.p4 .keyrow.last .utility{font-size:8px}.p4 .keyrow.last .lang-key{font-size:7px}
+.p4 .query-popout{left:43px;right:17px;top:86px}
+.query-popout .query-text{font-size:21px;letter-spacing:-.75px}
+.tap-hand{position:absolute;left:503px;top:180px;width:49px;height:63px;z-index:7;transform:rotate(-12deg);transform-origin:35% 8%;filter:drop-shadow(0 3px 4px #5F3D7325)}
+.tap-feedback{position:absolute;left:506px;top:159px;width:37px;height:37px;border:2px solid #A775D3;border-radius:50%;box-shadow:0 0 0 4px #CEB1EA45;z-index:6;pointer-events:none}
+
+/* Source cards grow 5–10%, with explicit balanced internal spacing. */
+.p5 .float-card{padding:16px;border-radius:19px}
+.p5 .source-calendar{left:70px;top:67px;width:274px;height:139px}
+.p5 .float-card header{font-size:19px;gap:9px;line-height:1.25}
+.p5 .float-card header img{width:31px;height:31px}
+.p5 .calendar-event{margin-top:11px;padding-left:11px;border-left-width:4px}
+.p5 .source-calendar strong{font-size:24px;line-height:1.25;margin:0 0 7px;gap:9px}
+.p5 .source-calendar small{font-size:20px;line-height:1.2;letter-spacing:-.4px}
+.p5 .source-gallery{left:378px;top:208px;width:188px;height:201px}
+.p5 .source-gallery .source-photo{height:98px;display:block;margin:9px 0 8px}
+.p5 .source-gallery small{font-size:14.4px;line-height:20px;letter-spacing:-.35px;white-space:nowrap}
+.p5 .source-chat{left:318px;top:477px;width:248px;height:133px;padding:14px}
+.p5 .source-chat header{font-size:18px}.p5 .source-chat header img{width:29px;height:29px}
+.chat-record{display:flex;gap:7px;align-items:flex-start;margin-top:11px}
+.chat-avatar{width:31px;height:31px;flex:none;border-radius:50%;border:1px solid #E1D8E9;object-fit:cover}
+.chat-message{position:relative;flex:1;min-width:0;background:#F1E9F8;border:1px solid #EBE0F3;border-radius:3px 10px 10px 10px}
+.chat-message:before{content:'';position:absolute;left:-5px;top:0;width:7px;height:8px;background:#F1E9F8;clip-path:polygon(100% 0,0 0,100% 100%)}
+.p5 .source-chat .chat-message p{padding:7px 7px;margin:0;font-size:15.5px;line-height:1.45;letter-spacing:-.55px;background:none;border:0}
+.p5 .source-chat .place-link{margin:9px 0 0 39px;font-size:12px;line-height:16px}
+
+/* Three representative results, in the same source order as the floating cards. */
+.screen5{padding:0 12px}
+.screen5 .tiny-search{gap:5px}.screen5 .tiny-search b{font-size:24px}.screen5 .tiny-search>span:last-child{font-size:16px}
+.screen5 .tiny-query{font-size:15.5px;padding:8px 6px;line-height:1.3}
+.screen5 h3{font-size:21px;line-height:1.25;margin:12px 0 8px}
+.tiny-result-list{display:flex;flex-direction:column;gap:8px}
+.tiny-result{border:1px solid #DFD3EF;background:#FEFCFF;border-radius:9px;padding:7px 9px;height:82px}
+.tiny-result header{display:flex;gap:6px;align-items:center;font-size:17px;line-height:21px;margin:0 0 4px}
+.tiny-result header img{height:19px;width:19px}
+.tiny-result strong{display:block;font-weight:600;font-size:18px;line-height:1.3;white-space:nowrap;letter-spacing:-.5px}
+.tiny-result small{display:block;font-size:14px;line-height:1.4;color:#8B789C;margin-top:3px;white-space:nowrap}
+.tiny-gallery-row{display:flex;gap:7px;align-items:center}.tiny-gallery-row>img{height:42px;width:46px;border-radius:5px;object-fit:cover}
+.tiny-gallery-row strong{font-size:16px}.tiny-gallery-row small{font-size:12px;margin-top:3px}
+.screen5 .tiny-original{margin-top:10px;padding:7px;font-size:19px;line-height:1.2}

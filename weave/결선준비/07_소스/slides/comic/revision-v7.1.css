@@ -1,0 +1,24 @@
+/* Retain the v7 size/placement; move only dialogue glyphs 3px upward. */
+.bubble p{top:calc(50% - 3px)}
+.p6a p,.p6b p{top:calc(50% - 4px)}
+
+/* A rounded thought balloon with its original text, app cards and two dots.
+ * Transparent border preserves the existing padding/content coordinates.
+ */
+.thought-pod{
+  isolation:isolate;
+  border-color:transparent;
+  background:none;
+  box-shadow:none;
+}
+.thought-pod>.thought-shape{
+  position:absolute;
+  left:-1.3px;
+  top:-1.3px;
+  width:calc(100% + 2.6px);
+  height:calc(100% + 2.6px);
+  z-index:-1;
+  overflow:visible;
+  pointer-events:none;
+  filter:drop-shadow(0 4px 5px #49364920);
+}

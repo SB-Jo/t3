@@ -1,0 +1,2 @@
+characters/p6-A.png
+out/page-06.png

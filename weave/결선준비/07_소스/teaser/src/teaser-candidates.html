@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Weave Assist 티저 — 제목 타이포그래피 후보</title>
+<!--
+  원본 0921/assets/teaser-typography.html의 레이어를 그대로 쓰고, 제목·부제·제목 뒤 음영만 후보별로 바꿉니다.
+  ?v=v0 은 원본과 같은 설정(검증용), 나머지는 후보입니다. 원본 파일은 읽기만 합니다.
+-->
+<style>
+  @font-face{font-family:'Samsung Sharp Sans';src:url('../assets/fonts/SamsungSharpSans-Bold.woff2') format('woff2');font-weight:700;font-display:block}
+  @font-face{font-family:'Samsung Sharp Sans';src:url('../assets/fonts/SamsungSharpSans-Regular.woff2') format('woff2');font-weight:400;font-display:block}
+  @font-face{font-family:'SamsungOne Korean';src:url('../assets/fonts/SamsungOneKorean-400.woff2') format('woff2');font-weight:400;font-display:block}
+  @font-face{font-family:'SamsungOne Korean';src:url('../assets/fonts/SamsungOneKorean-500.woff') format('woff');font-weight:500;font-display:block}
+  @font-face{font-family:'Noto Sans KR';src:url('../../assets/fonts/NotoSansKR-500.ttf') format('truetype');font-weight:500;font-display:block}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:1672px;height:941px;overflow:hidden;background:transparent}
+  body{font-family:'Samsung Sharp Sans','Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased}
+  .photo,.ui-light{position:absolute;inset:0;width:1672px;height:941px}
+
+  /* ── 원본과 같은 레이어 (변경하지 않음) ── */
+  .galaxy-logo{position:absolute;right:27px;bottom:24px;width:149px;height:38px;filter:drop-shadow(0 1px 2.2px rgba(0,0,0,.32))}
+  .card-correction{position:absolute;left:1258px;top:424px;margin:0;color:#18191B;font-family:'SamsungOne Korean',sans-serif;font-size:17px;font-weight:400;line-height:20px;letter-spacing:-.3px;white-space:nowrap;transform-origin:0 0;transform:matrix(1,.078,-.045,1,0,0)}
+  .incoming-copy{position:absolute;left:715px;top:185px;margin:0;color:#111416;font-family:'Noto Sans KR',sans-serif;font-size:18px;font-weight:500;line-height:24px;letter-spacing:-.5px;white-space:nowrap;transform-origin:0 0;transform:matrix(1,.081,-.12,1,0,0)}
+  .cta-repair{position:absolute;left:853px;top:434px;width:106px;height:43px;border:1.05px solid #9A82F8;border-radius:21.5px;background:linear-gradient(115deg,#E9E5FC,#E1DEFC);display:flex;align-items:center;justify-content:center;gap:5.5px;color:#4933ED;font-family:'Noto Sans KR',sans-serif;font-size:16.5px;font-weight:500;line-height:1;letter-spacing:-.4px;transform-origin:0 0;transform:matrix(1,.1,-.12,1,0,0)}
+  .cta-repair svg{display:block;flex:none;width:8px;height:12px}
+
+  /* ── 제목 뒤 음영: 원본(타원 덩어리) ── */
+  .headline-shade{position:absolute;left:1032px;top:80px;width:640px;height:222px;background:radial-gradient(ellipse 418px 132px at 50% 45%,rgba(3,2,9,.44) 0%,rgba(3,2,9,.35) 35%,rgba(3,2,9,.19) 64%,transparent 100%);mask-image:linear-gradient(to right,transparent,#000 16px,#000 calc(100% - 24px),transparent),linear-gradient(to bottom,transparent,#000 30px,#000 calc(100% - 28px),transparent);mask-composite:intersect}
+  /* 후보용 음영: 오른쪽 위 모서리에서 번지는 비네트. 폰 가장자리(x≈1035)에서 시작해 60px에 걸쳐 들어오고,
+     떠 있는 카드 윗부분(y≈330)에 닿기 전에 사라집니다. 원본의 타원 덩어리처럼 경계가 보이지 않게 화면 밖까지 이어지는 모양 */
+  .corner-scrim{position:absolute;left:1000px;top:0;width:672px;height:340px;display:none;
+    background:radial-gradient(150% 120% at 62% 0%,rgba(10,8,22,.58) 0%,rgba(10,8,22,.48) 34%,rgba(10,8,22,.25) 64%,rgba(10,8,22,0) 92%);
+    mask-image:linear-gradient(to bottom,#000 0,#000 62%,transparent 100%),linear-gradient(to right,transparent 0,#000 60px);mask-composite:intersect}
+
+  /* ── 제목 (원본 설정 = v0) ── */
+  .headline{position:absolute;left:1071px;top:115px;white-space:nowrap}
+  .brand{width:max-content;margin:0;font-family:'Samsung Sharp Sans',sans-serif;font-size:92px;font-weight:700;line-height:1.04;letter-spacing:-3.8px;word-spacing:1px;color:#FBF9FF}
+  .weave-word{display:inline-block;background:linear-gradient(to bottom,#FFFFFF 0%,rgba(255,255,255,.9) 12%,rgba(255,255,255,.38) 25%,rgba(255,255,255,0) 43%),linear-gradient(24deg,#986BCB 13%,#B58CE7 35%,#DABCF6 58%,#FFFFFF 83%);background-clip:text;-webkit-background-clip:text;color:transparent}
+  .assist-word{color:#FBF9FF}
+  .tagline{position:absolute;left:23px;top:92.83px;margin:0;font-family:'Noto Sans KR',sans-serif;font-size:30px;font-weight:500;line-height:1.3;letter-spacing:-1.0px;color:#F8F6FC}
+
+  /* ── 후보 공통 (vA–vD): 삼성 KV 규칙 — 단색 워드마크 · 기본에 가까운 자간 · SamsungOne Korean 부제 · 제목과 부제 정렬 ──
+     제목 88px·자간 −0.02em: 폭이 원본(92px·−0.041em)과 거의 같아 폰과의 간격·오른쪽 여백을 그대로 유지합니다.
+     top 118.5px: 원본과 기준선(y≈194)을 맞춘 값. 부제 잉크 위쪽은 원본처럼 기준선 아래 약 22px. */
+  body.cand .headline-shade{display:none}
+  body.cand .corner-scrim{display:block}
+  body.cand .headline{left:1071px;top:118.5px}
+  body.cand .brand{font-size:88px;letter-spacing:-.02em;word-spacing:0;color:#FFFFFF;text-shadow:0 1px 14px rgba(8,6,20,.26)}
+  body.cand .weave-word{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:inherit}
+  body.cand .assist-word{color:inherit}
+  body.cand .tagline{left:var(--tag-x,0px);top:var(--tag-y,91px);font-family:'SamsungOne Korean','Noto Sans KR',sans-serif;font-size:28px;font-weight:500;line-height:1.3;letter-spacing:-.01em;color:#FFFFFF;text-shadow:0 1px 10px rgba(8,6,20,.30)}
+
+  /* A · 정석: 전부 흰색 단색, 제목·부제 왼쪽 정렬 (Galaxy Unpacked 초대장 방식) */
+
+  /* B · Weave만 밝은 연보라 단색 — 보라 정체성은 남기고 그라데이션·어두운 시작색은 없앰
+         (#D5C6FF는 글자 픽셀 11%가 3:1 미만이라 더 밝은 #DDD2FF로) */
+  body.vB .weave-word{color:#DDD2FF}
+
+  /* C · 굵기 위계: Weave Bold / Assist Regular (S26 KV의 'Galaxy S26 Series' Bold · 'Galaxy AI' Regular 대비를 한 줄에) */
+  body.vC .assist-word{font-weight:400}
+
+  /* D · 가운데 정렬 락업 (S26 Ultra 무대·사전판매 KV 방식): 제목 중심 = 원본 제목 중심 x≈1350 */
+  body.vD .headline{left:1350px;transform:translateX(-50%);text-align:center}
+  body.vD .brand{margin:0 auto}
+  body.vD .tagline{position:static;margin-top:var(--tag-mt,0px)}
+
+  /* E · 최소 변경: 원본 크기·자간·위치·음영과 부제(서체·크기·위치)를 그대로 두고, Weave 그라데이션만 밝은 연보라→흰색 가로 방향으로,
+         상단 하이라이트 제거. 부제는 3차 요청으로 원본 위치(제목 기준 left 23px · top 92.83px)로 되돌림 */
+  body.vE{--e-start:#D2C3FF;--e-mid:#E4DBFF}
+  body.vE .weave-word{background:linear-gradient(90deg,var(--e-start) 0%,var(--e-mid) 45%,#FFFFFF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  /* E 시작색 단계 (2차 요청: 왼쪽 보라를 원본과 현재 E 사이 채도로). 숫자 = 현재 E 시작색 #D2C3FF에서 원본 시작색 #986BCB 쪽으로
+     OKLab 보간한 비율. 중간 정지점은 시작색에서 흰색 쪽으로 sRGB 40% (현재 E와 같은 규칙) */
+  body.vE35{--e-start:#BDA4ED;--e-mid:#D7C8F4}
+  body.vE50{--e-start:#B597E5;--e-mid:#D3C1EF}
+  body.vE65{--e-start:#AC8ADD;--e-mid:#CDB9EB}
+  /* 채도 우선: 채도(OKLCH C .135)는 E50(.115)보다 높이고 밝기(L .76)는 E50(.732)보다 덜 낮춤 → 보라는 더 선명, W는 더 밝게 */
+  body.vEs{--e-start:#BE9CFA;--e-mid:#D8C4FC}
+  /* EsB · 채도 우선(Es) + 선제 알림 버튼 (2026-09-28 요청): 자판 줄 실타래 버튼의 원을 같은 색조의 짙은 보라(#9359CC),
+     아이콘은 모양·크기 그대로 흰색(0.25px만 두껍게). 원본 SVG를 복사한 src/teaser-ui-light-btn.svg를 씀(아래 스크립트) */
+  body.vEsB{--e-start:#BE9CFA;--e-mid:#D8C4FC}
+</style>
+</head>
+<body>
+  <img class="photo" src="../assets/teaser-retouched-base.png" alt="">
+  <img class="ui-light" src="../assets/teaser-ui-light.svg" alt="">
+  <img class="ui-light floating-card-rims" src="../assets/teaser-floating-card-rims.svg" alt="">
+  <p class="incoming-copy">출장 다녀오느라 고생했어!<br>집 오는 중이야?</p>
+  <div class="cta-repair" aria-label="입력하기"><span>입력하기</span><svg viewBox="0 0 9 12" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1.3 7 6 2 10.7" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <p class="card-correction">예쁘고 맛있겠다.</p>
+  <div class="headline-shade" aria-hidden="true"></div>
+  <div class="corner-scrim" aria-hidden="true"></div>
+  <div class="headline">
+    <h1 class="brand"><span class="weave-word">Weave</span> <span class="assist-word">Assist</span></h1>
+    <p class="tagline">흩어진 기억을 엮어, 지금을 완성하다</p>
+  </div>
+  <img class="galaxy-logo" src="../assets/icons/galaxy-ai-wordmark.svg" alt="Galaxy AI">
+<script>
+  const v = new URLSearchParams(location.search).get('v') || 'v0';
+  if (v !== 'v0') document.body.classList.add(v);
+  if (v.startsWith('vE')) document.body.classList.add('vE');           // vE35·vE50·vE65는 E 규칙 + 시작색만 다름
+  else if (v !== 'v0') document.body.classList.add('cand');
+  window.variant = v;
+  if (v === 'vEsB') document.querySelector('img.ui-light:not(.floating-card-rims)').src = 'teaser-ui-light-btn.svg';
+</script>
+</body>
+</html>

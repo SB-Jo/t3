@@ -1,0 +1,37 @@
+{
+  "title": "Members",
+  "section": "17 / END",
+  "subtitle": null,
+  "size": { "width": 1280, "height": 720 },
+  "fonts": { "english": "Inter", "korean": "Noto Sans KR" },
+  "design": {
+    "reference": "../통합.pptx, 후반부 중앙 제목 / 밝은 라벤더·따뜻한 우상단 그라데이션",
+    "background": ["#FDFCFF", "#F8F5FF", "#F2EDFF"],
+    "accent": "#6B4EFF",
+    "ink": "#1C1A24",
+    "body": "#5B5866",
+    "portraitStyle": "사용자가 선택한 v5의 부드러운 3D 캐릭터. 재웅·성빈 두 명만 어깨를 조금 넓혀 밸런스를 맞추고, 184px 원형 안에 자연스럽게 하단 크롭",
+    "portraitVersion": "v5 + 초코 츄러스 끝부분 코팅 + 재웅·성빈 어깨 보완",
+    "portraitDiameter": 184,
+    "portraitScaleRelativeToFirstDraft": 0.663,
+    "thankYouWeight": 700,
+    "thankYouFontSize": 24,
+    "supportTextFontSize": 22,
+    "supportTextWeight": 400,
+    "thankYouColor": "#5B5866",
+    "portraitRowTop": 200,
+    "bottomTextMargin": 66,
+    "emoji": "😊 — Microsoft Fluent Emoji 컬러 이미지"
+  },
+  "members": [
+    { "id": "01-jaeung", "name": "이재웅", "division": "Samsung Research", "team": "AI System Team", "dessert": "포장된 한정선 찹쌀떡 하나", "features": "둥근 검정 안경, 짙은 머리, 이마가 약간 보이게 앞머리 정돈" },
+    { "id": "02-seoyun", "name": "양서윤", "division": "Samsung Research", "team": "채용 T/F", "dessert": "파리바게뜨 초코쫀득츄러스 — 코코아 반죽 + 초콜릿 코팅", "features": "내린 긴 머리, 자연스러운 가르마와 부드러운 웨이브" },
+    { "id": "03-jihyun", "name": "이지현", "division": "Samsung Research", "team": "채용 T/F", "dessert": "피자설기", "features": "단정하게 뒤로 묶은 머리, 가는 앞머리와 작은 귀걸이" },
+    { "id": "04-ijun", "name": "장이준", "division": "Samsung Research", "team": "AI Core Team", "dessert": "무화과 케이크", "features": "어깨 길이 레이어드 머리, 양옆으로 흐르는 앞머리" },
+    { "id": "05-seongbin", "name": "조성빈", "division": "하만협력", "team": "오디오개발Lab", "dessert": "토핑을 올린 요아정", "features": "안경 없음, 짧은 가르마 머리, 편안한 미소" }
+  ],
+  "closing": [
+    "읽어주셔서 감사합니다! 😊",
+    "'좋아요'와 '응원 댓글'은 신입사원들에게 큰 힘이 됩니다."
+  ]
+}

@@ -1,0 +1,19 @@
+/* Only the seven spoken-dialogue balloons change. Thought/UI cards stay as-is.
+ * Oval bodies remove the rectangular corner mass, without shrinking the type.
+ * Keep the original horizontal positions, widths and conversation order.
+ */
+.bubble p{
+  position:absolute;
+  top:50%;
+  left:0;
+  width:100%;
+  padding:0 12px;
+  line-height:1.3;
+  transform:translateY(-50%);
+}
+.p1a{height:104px}
+.p1b,.p1c{height:112px}
+.p2a{height:116px}
+.p3a{height:124px}
+.p6a,.p6b{height:114px}
+.p6a p,.p6b p{top:calc(50% - 1px)}

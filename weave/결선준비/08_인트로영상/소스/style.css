@@ -1,0 +1,421 @@
+/* Weave 결선 인트로 영상 v7 · 1920×1080 · 모든 움직임은 main.js의 GSAP 타임라인(시간 t로 탐색)만 씀 */
+@font-face { font-family: 'SamsungOneKorean'; font-weight: 400; src: url('assets/fonts/SamsungOneKorean-400.woff2'); }
+@font-face { font-family: 'SamsungOneKorean'; font-weight: 500; src: url('assets/fonts/SamsungOneKorean-500.woff'); }
+@font-face { font-family: 'SamsungOneKorean'; font-weight: 700; src: url('assets/fonts/SamsungOneKorean-700.woff'); }
+@font-face { font-family: 'SamsungOne'; font-weight: 400; src: url('assets/fonts/SamsungOneLatin-400.woff2'); }
+@font-face { font-family: 'SamsungOne'; font-weight: 500; src: url('assets/fonts/SamsungOneLatin-500.woff2'); }
+@font-face { font-family: 'SamsungOne'; font-weight: 700; src: url('assets/fonts/SamsungOneLatin-700.woff2'); }
+@font-face { font-family: 'Samsung Sharp Sans'; font-weight: 700; src: url('assets/fonts/SamsungSharpSans-Bold.woff2'); }
+
+:root {
+  --purple: #6B4EFF; --violet: #7B4BD8; --lilac: #A67CF2;
+  --ink: #1E1B2E; --ink2: #3A3650; --gray: #5B5866; --gray2: #8E88A0;
+  --lav: #F3EFFF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #FBFAFF; }
+body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+.kr { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+/* ── 배경: 보라빛 그라데이션만 ─────────────────────── */
+#bg { position: absolute; inset: 0; background: linear-gradient(170deg, #FDFCFF 0%, #F6F3FF 55%, #EEE9FF 100%); }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+.g1 { width: 1400px; height: 1100px; left: -420px; top: -520px; background: radial-gradient(closest-side, rgba(166,124,242,.30), rgba(166,124,242,0)); }
+.g2 { width: 1400px; height: 1150px; right: -480px; bottom: -600px; background: radial-gradient(closest-side, rgba(123,92,255,.20), rgba(123,92,255,0)); }
+.g3 { width: 1100px; height: 900px; left: 410px; top: 140px; background: radial-gradient(closest-side, rgba(150,120,255,.12), rgba(150,120,255,0)); }
+#vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 46%, rgba(255,255,255,0) 58%, rgba(92,72,160,.07) 100%); pointer-events: none; }
+
+/* ── 1. 질문 · 어디서 찾지? ─────────────────────── */
+#hook { position: absolute; left: 0; right: 0; top: 410px; text-align: center; }
+#hook .line { display: block; font-size: 92px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.18; white-space: nowrap; }
+#hook .line .w { display: inline-block; }
+#hook .l2 { color: var(--purple); }
+#where { position: absolute; left: 0; right: 0; top: 884px; text-align: center; font-size: 64px; font-weight: 700; letter-spacing: -0.035em; color: var(--ink); white-space: nowrap; }
+#where .c { display: inline-block; }
+#where b { font-weight: 700; color: var(--purple); }
+#space { position: absolute; inset: 0; perspective: 1300px; perspective-origin: 50% 42%; }
+#cam { position: absolute; left: 960px; top: 450px; width: 0; height: 0; transform-style: preserve-3d; }
+.frag { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 18px; padding: 20px 30px 20px 20px; background: rgba(255,255,255,.97);
+  border-radius: 24px; box-shadow: 0 18px 40px rgba(64,40,140,.13), 0 2px 6px rgba(64,40,140,.06); white-space: nowrap; transform-style: preserve-3d; }
+.frag img.ic { width: 54px; height: 54px; border-radius: 14px; flex: none; }
+.frag .t { font-size: 25px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+.frag .m { font-size: 18px; color: var(--gray2); margin-top: 3px; letter-spacing: -0.01em; }
+.frag .ph { width: 84px; height: 56px; border-radius: 11px; object-fit: cover; flex: none; }
+.frag .ring { position: absolute; inset: -5px; border-radius: 28px; border: 3px solid #8B68F5; box-shadow: 0 0 24px rgba(139,104,245,.55); opacity: 0; }
+
+/* ── 2. 엮기 ─────────────────────────────────── */
+#pill { position: absolute; left: 470px; top: 210px; width: 980px; height: 104px; border-radius: 52px; background: #fff; display: flex; align-items: center; gap: 22px; padding: 0 18px 0 30px;
+  box-shadow: 0 24px 60px rgba(84,56,190,.18), 0 0 0 2px #E2D8FF inset; }
+#pill .spool { width: 52px; height: 52px; }
+#pill .q { flex: 1; font-size: 36px; font-weight: 500; letter-spacing: -0.025em; color: var(--ink); white-space: nowrap; }
+#pill .send { width: 72px; height: 72px; border-radius: 50%; background: var(--purple); display: grid; place-items: center; box-shadow: 0 8px 18px rgba(107,78,255,.35); }
+#pill .send svg { width: 34px; height: 34px; }
+.card { position: absolute; background: #fff; border-radius: 30px; padding: 28px 30px 30px; box-shadow: 0 30px 70px rgba(64,40,140,.16), 0 3px 10px rgba(64,40,140,.06); }
+.card .hd { display: flex; align-items: center; gap: 18px; }
+.card .hd img { width: 64px; height: 64px; border-radius: 17px; }
+.card .tt { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; }
+.card .mm { font-size: 20px; color: var(--gray2); margin-top: 4px; letter-spacing: -0.01em; }
+.card .snip { margin-top: 20px; padding: 14px 20px; border-radius: 16px; background: #F6F5FA; font-size: 22px; color: var(--ink2); font-weight: 500; letter-spacing: -0.015em; }
+#cA { left: 110px; top: 460px; width: 440px; }
+#cB { left: 700px; top: 400px; width: 460px; }
+#cB .photo { position: relative; margin-top: 22px; width: 400px; height: 235px; border-radius: 18px; overflow: hidden; }
+#cB .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#scan { position: absolute; left: 0; right: 0; top: 0; height: 70px; background: linear-gradient(180deg, rgba(166,124,242,0), rgba(166,124,242,.55) 85%, rgba(255,255,255,.95)); mix-blend-mode: screen; }
+#ocrbox { position: absolute; left: 134px; top: 126px; width: 146px; height: 74px; border: 3px solid #fff; border-radius: 10px; box-shadow: 0 0 0 3px rgba(123,75,216,.85), 0 0 22px rgba(166,124,242,.8); }
+#ocr { margin-top: 18px; font-family: 'SamsungOne', sans-serif; font-size: 22px; font-weight: 600; letter-spacing: 0.06em; color: var(--violet); padding: 12px 18px; background: var(--lav); border-radius: 14px; display: inline-block; min-width: 10px; min-height: 54px; }
+#cC { left: 1310px; top: 520px; width: 500px; background: linear-gradient(180deg, #FFFFFF, #F8F5FF); box-shadow: 0 34px 80px rgba(84,56,190,.24), 0 0 0 2px #DCCFFF inset; }
+.sug-l { font-size: 21px; font-weight: 600; color: var(--purple); display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
+.sug-l svg { width: 22px; height: 22px; }
+#cC .ans { font-size: 54px; font-weight: 700; letter-spacing: -0.04em; margin-top: 12px; color: var(--ink); }
+#cC .src { font-size: 20px; color: var(--gray2); margin-top: 10px; }
+#cC .btn { margin-top: 24px; height: 70px; border-radius: 20px; background: var(--purple); color: #fff; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: -0.02em; }
+#threads { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.thr-halo { fill: none; stroke: #fff; stroke-width: 13; stroke-linecap: round; opacity: .95; }
+.thr { fill: none; stroke: url(#tg); stroke-width: 6; stroke-linecap: round; }
+.pen { position: absolute; font-size: 30px; font-weight: 700; color: var(--purple); background: #F1ECFF; border: 1.5px solid #DCCFFF; border-radius: 16px; padding: 6px 16px; white-space: nowrap; letter-spacing: -0.02em; }
+#h2 { position: absolute; left: 0; right: 0; top: 852px; text-align: center; font-weight: 700; }
+.knot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 5px var(--violet), 0 0 18px rgba(123,75,216,.6); }
+
+/* ── 3. 휴대폰 UX ─────────────────────────────── */
+#ux { position: absolute; inset: 0; }
+.head h3 em { font-style: normal; color: var(--purple); }
+
+#phone { position: absolute; left: 734px; top: 70px; width: 452px; height: 940px; }
+#phone .frame { position: absolute; inset: 0; border-radius: 70px; padding: 4px; background: linear-gradient(150deg, #E9E6F2 0%, #A9A4B9 38%, #D9D5E4 62%, #8F8AA0 100%);
+  box-shadow: 0 60px 110px rgba(52,30,130,.26), 0 18px 34px rgba(52,30,130,.14); }
+#phone .bezel { width: 100%; height: 100%; border-radius: 66px; background: #0C0C10; padding: 12px; }
+#phone .screen { position: relative; width: 100%; height: 100%; border-radius: 54px; overflow: hidden; background: #fff; }
+.punch { position: absolute; top: 15px; left: 50%; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%; background: #0A0A0E; box-shadow: 0 0 0 2px #1d1d24; z-index: 60; }
+.sb { position: absolute; left: 0; right: 0; top: 0; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0; font-family: 'SamsungOne'; font-size: 15px; font-weight: 600; z-index: 55; }
+.sb .ics { display: flex; gap: 6px; align-items: center; }
+.sb svg { height: 14px; }
+.nav { position: absolute; left: 0; right: 0; bottom: 0; height: 46px; display: flex; justify-content: space-around; align-items: center; z-index: 55; color: #4b4b55; }
+.nav svg { width: 22px; height: 22px; }
+.scr { position: absolute; inset: 0; overflow: hidden; }
+.scrim { position: absolute; inset: 0; background: rgba(28,18,64,.28); }
+
+/* Weave 시트 요소 (휴대폰 안 크기) */
+.ws { position: absolute; left: 10px; right: 10px; background: #fff; border-radius: 26px; box-shadow: 0 -6px 30px rgba(52,30,130,.14), 0 0 0 1px #EEEAF7; padding: 16px 16px 14px; }
+.ws .grab { width: 40px; height: 4px; border-radius: 2px; background: #DAD6E4; margin: -6px auto 10px; }
+.ws .row { display: flex; align-items: center; gap: 8px; }
+.ws .row img { width: 20px; height: 20px; }
+.ws .ttl { font-size: 15.5px; font-weight: 700; letter-spacing: -0.02em; }
+.ws .x { margin-left: auto; color: #8a8698; font-size: 18px; line-height: 1; }
+.mc { margin-top: 10px; border: 1px solid #ECE8F4; border-radius: 16px; padding: 11px 12px 12px; display: grid; grid-template-columns: 32px 1fr; column-gap: 10px; }
+.mc img { width: 32px; height: 32px; border-radius: 9px; }
+.mc .a { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
+.mc .b { font-size: 10.5px; color: #8E88A0; margin-top: 2px; }
+.mc .c { grid-column: 2; margin-top: 7px; padding: 6px 9px; background: #F5F4F9; border-radius: 9px; font-size: 11.5px; color: #3A3650; line-height: 1.4; letter-spacing: -0.01em; }
+.sg { margin-top: 10px; background: #F4F0FF; border: 1px solid #E3D9FF; border-radius: 16px; padding: 11px 13px; }
+.sg .l { font-size: 11px; font-weight: 600; color: var(--purple); display: flex; gap: 4px; align-items: center; }
+.sg .l svg { width: 12px; height: 12px; }
+.sg .v { font-size: 17px; font-weight: 700; letter-spacing: -0.03em; margin-top: 4px; line-height: 1.35; }
+.sg .s { font-size: 10.5px; color: #8E88A0; margin-top: 4px; }
+.pbtn { margin-top: 10px; height: 44px; border-radius: 14px; background: var(--purple); color: #fff; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.wpill { display: flex; align-items: center; gap: 8px; height: 46px; border-radius: 23px; border: 1.5px solid #C9B8FF; background: #F7F4FF; padding: 0 6px 0 12px; }
+.wpill img { width: 24px; height: 24px; }
+.wpill .q { flex: 1; font-size: 14px; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; }
+.wpill .go { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--purple); display: grid; place-items: center; }
+.wpill .go svg { width: 18px; height: 18px; }
+
+/* 키보드 (A·C 공통) */
+.kb { position: absolute; left: 0; right: 0; bottom: 46px; height: 284px; background: #EEEFF3; padding: 8px 6px 0; }
+.kb .tb { display: flex; align-items: center; gap: 18px; height: 36px; padding: 0 12px; color: #6a6676; font-size: 13px; }
+.kb .tb svg { width: 20px; height: 20px; }
+.kb .tb .wv { width: 32px; height: 32px; border-radius: 50%; background: #E6DEFF; display: grid; place-items: center; }
+.kb .tb .wv img { width: 21px; height: 21px; }
+.krow { display: flex; gap: 5px; justify-content: center; margin-top: 7px; }
+.k { flex: none; width: 34px; height: 44px; border-radius: 8px; background: #fff; display: grid; place-items: center; font-size: 15px; color: #2a2733; box-shadow: 0 1px 0 rgba(0,0,0,.12); }
+.k.g { background: #DCDDE3; }
+.k.w2 { width: 50px; } .k.sp { width: 150px; font-size: 12px; color: #6a6676; }
+.k.snd { background: var(--purple); }
+
+/* A. 검색 */
+#scrA { background: #fff; }
+.sbar { position: absolute; left: 16px; right: 16px; top: 62px; height: 52px; border-radius: 26px; background: #F1F2F6; display: flex; align-items: center; gap: 10px; padding: 0 16px; }
+.sbar svg { width: 20px; height: 20px; flex: none; }
+.sbar .tx { flex: 1; font-size: 15.5px; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; display: flex; align-items: center; }
+.caret { display: inline-block; width: 2px; height: 20px; background: var(--purple); margin-left: 2px; border-radius: 1px; }
+.tabs { position: absolute; left: 24px; top: 128px; display: flex; gap: 20px; font-size: 13.5px; font-weight: 600; color: #8E88A0; }
+.tabs .on { color: var(--ink); border-bottom: 2.5px solid var(--purple); padding-bottom: 5px; }
+.res { position: absolute; left: 16px; right: 16px; display: flex; gap: 14px; padding: 14px; border-radius: 18px; border: 1px solid #EEEBF5; background: #fff; }
+.res .bt { width: 62px; height: 82px; border-radius: 12px; background: #F6F4EE; display: grid; place-items: center; flex: none; }
+.res .n { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; }
+.res .p { font-size: 13px; color: #8E88A0; margin-top: 4px; }
+.res .pr { font-size: 16px; font-weight: 700; margin-top: 6px; }
+.res .pr i { font-style: normal; color: #E5484D; margin-right: 6px; }
+
+/* B. 통화 */
+#scrB { background: linear-gradient(180deg, #F7F6FB, #EEECF6); }
+.ctop { position: absolute; left: 0; right: 0; top: 54px; text-align: center; font-family: 'SamsungOne'; font-size: 15px; font-weight: 600; color: #3A3650; display: flex; gap: 6px; justify-content: center; align-items: center; }
+.ctop svg { width: 15px; height: 15px; }
+.cname { position: absolute; left: 0; right: 0; top: 112px; text-align: center; font-size: 38px; font-weight: 700; letter-spacing: -0.03em; }
+.cnum { position: absolute; left: 0; right: 0; top: 168px; text-align: center; font-size: 15px; color: #6E6A7C; }
+.cgrid { position: absolute; left: 34px; right: 34px; top: 418px; display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 26px; }
+.cb { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12.5px; color: #4A4658; }
+.cb i { width: 66px; height: 66px; border-radius: 50%; background: #fff; box-shadow: 0 4px 12px rgba(52,30,130,.08); display: grid; place-items: center; }
+.cb svg { width: 26px; height: 26px; }
+.endc { position: absolute; left: 50%; top: 644px; width: 80px; height: 80px; margin-left: -40px; border-radius: 50%; background: #EF3B3B; display: grid; place-items: center; box-shadow: 0 10px 24px rgba(239,59,59,.35); }
+.endc svg { width: 36px; height: 36px; }
+.handle { position: absolute; left: 50%; top: 786px; width: 64px; height: 6px; margin-left: -32px; border-radius: 3px; background: var(--purple); }
+.hlab { position: absolute; left: 0; right: 0; top: 800px; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--purple); }
+#wB { top: 92px; min-height: 572px; }
+#wB .mc { padding: 13px 14px 14px; grid-template-columns: 38px 1fr; }
+#wB .mc img { width: 38px; height: 38px; border-radius: 10px; }
+#wB .mc .a { font-size: 16px; } #wB .mc .b { font-size: 12px; } #wB .mc .c { font-size: 13px; padding: 8px 10px; }
+
+/* C. 카톡 */
+#scrC { background: #BACEE0; }
+.khd { position: absolute; left: 0; right: 0; top: 44px; height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 20px; font-size: 19px; font-weight: 700; color: #1d2430; }
+.khd .sp { flex: 1; }
+.khd svg { width: 22px; height: 22px; }
+#chat { position: absolute; left: 0; right: 0; top: 104px; bottom: 380px; overflow: hidden; }
+#chatIn { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 14px 10px; }
+.dpill { margin: 6px auto 10px; width: max-content; padding: 5px 14px; border-radius: 14px; background: rgba(40,60,90,.18); color: #fff; font-size: 12px; font-weight: 600; }
+.msg { display: flex; gap: 8px; margin-top: 10px; align-items: flex-end; }
+.msg .av { width: 40px; height: 40px; border-radius: 15px; align-self: flex-start; }
+.msg .nm { font-size: 12.5px; color: #3c4655; margin-bottom: 4px; }
+.bub { max-width: 250px; padding: 10px 13px; border-radius: 16px; font-size: 14.5px; line-height: 1.42; letter-spacing: -0.02em; background: #fff; color: #1d2430; }
+.msg .tm { font-size: 10.5px; color: #4f5b6b; white-space: nowrap; }
+.msg.me { justify-content: flex-end; }
+.msg.me .bub { background: #FEE500; }
+.kin { position: absolute; left: 10px; right: 10px; bottom: 334px; height: 46px; border-radius: 23px; background: #fff; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 16px; font-size: 14px; color: #9a96a6; }
+.kin .tx { flex: 1; color: #1d2430; font-weight: 500; white-space: nowrap; overflow: hidden; letter-spacing: -0.02em; }
+.kin .snd { width: 32px; height: 32px; border-radius: 50%; background: #FEE500; display: grid; place-items: center; }
+.kin .snd svg { width: 16px; height: 16px; }
+#wC { bottom: 46px; border-radius: 26px 26px 0 0; padding-bottom: 16px; }
+
+/* ── 4. 엔드 카드 ─────────────────────────────── */
+#end { position: absolute; inset: 0; }
+#logo { position: absolute; left: 0; right: 0; top: 352px; display: flex; justify-content: center; align-items: center; gap: 34px; }
+#logo .mark { width: 150px; height: 150px; border-radius: 40px; background: linear-gradient(145deg, #8D6BFF, #6B4EFF 55%, #5A3FE0); display: grid; place-items: center; box-shadow: 0 30px 60px rgba(107,78,255,.35); }
+#logo .mark img { width: 100px; height: 100px; }
+#logo .word { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 132px; letter-spacing: -0.02em; line-height: 1; }
+#logo .word .wv { background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #4E36CF 0%, #6248F2 40%, #7A55FF 72%, #8F66FF 100%);
+  background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 10px 24px rgba(107,78,255,.20)); }
+#tag { position: absolute; left: 0; right: 0; top: 586px; text-align: center; font-size: 58px; font-weight: 700; letter-spacing: -0.035em; color: var(--ink); }
+#tag .en { font-family: 'Samsung Sharp Sans', 'SamsungOne'; color: var(--purple); }
+#sub { position: absolute; left: 0; right: 0; top: 684px; text-align: center; font-size: 33px; color: var(--gray); letter-spacing: -0.02em; }
+#fin { position: absolute; inset: 0; background: #FDFCFF; }
+
+/* ── 손 · 반짝임 ───────────────────────────────── */
+#hand { position: absolute; left: 0; top: 0; width: 100px; height: 128px; transform-origin: 39px 5px; z-index: 90; }
+#hand svg { width: 100px; height: 128px; filter: drop-shadow(0 10px 14px rgba(60,30,120,.22)); }
+#spark { position: absolute; left: 0; top: 0; width: 120px; height: 120px; margin: -60px 0 0 -60px; z-index: 89; }
+#dbg { position: absolute; inset: 0; z-index: 200; pointer-events: none; }
+#dbg i { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #ff2d55; box-shadow: 0 0 0 3px #fff; }
+
+/* ── 연결 표시 (v2.1) ─────────────────────────── */
+#uxThreads { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.fchip { position: absolute; display: flex; align-items: center; gap: 12px; padding: 12px 20px 12px 12px; background: #fff; border-radius: 20px; white-space: nowrap;
+  box-shadow: 0 18px 40px rgba(64,40,140,.16), 0 0 0 1.5px #E6DEFF inset; }
+.fchip img { width: 44px; height: 44px; border-radius: 12px; display: block; }
+.fchip .t { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+.fchip .m { font-size: 15px; color: var(--gray2); margin-top: 2px; }
+.gps { position: relative; width: 44px; height: 44px; flex: none; }
+.gps img { position: relative; z-index: 2; }
+.gps .pulse { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 2.5px solid rgba(46,125,255,.85); z-index: 1; }
+.tchip { position: absolute; right: 16px; top: 70px; padding: 3px 10px; border-radius: 10px; background: #F1ECFF; border: 1px solid #D9CCFF; color: var(--purple); font-size: 11.5px; font-weight: 700; letter-spacing: -0.01em; }
+.ilink { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ilink .dh { fill: none; stroke: #fff; stroke-width: 6.5; stroke-dasharray: 5 4; stroke-linecap: round; stroke-linejoin: round; }
+.ilink .dl { fill: none; stroke: #7B4BD8; stroke-width: 3; stroke-dasharray: 5 4; stroke-linecap: round; stroke-linejoin: round; }
+.ilink .kn { fill: #fff; stroke: #7B4BD8; stroke-width: 2.4; }
+
+/* ── v3: 구글 검색 화면 ───────────────────────── */
+.chrome { position: absolute; left: 0; right: 0; top: 44px; height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 16px; color: #3c4043; }
+.chrome > svg { width: 22px; height: 22px; flex: none; }
+.chrome .url { flex: 1; height: 38px; border-radius: 19px; background: #EEF0F4; display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 14.5px; color: #3c4043; }
+.chrome .url svg { width: 17px; height: 17px; flex: none; } .chrome .url span { flex: 1; } .chrome .url .rl { width: 16px; height: 16px; }
+.chrome .tabn { width: 22px; height: 22px; border: 2px solid #3c4043; border-radius: 6px; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; font-family: 'SamsungOne'; }
+.gtop { position: absolute; left: 0; right: 0; top: 100px; height: 40px; display: flex; align-items: center; gap: 18px; padding: 0 18px; font-size: 14px; font-weight: 500; color: #5f6368; }
+.gtop .on { color: #1a73e8; border-bottom: 2.5px solid #1a73e8; padding: 8px 2px 6px; }
+.gtop .sp { flex: 1; } .gtop svg { width: 21px; height: 21px; color: #5f6368; }
+.gtop .av { width: 30px; height: 30px; border-radius: 50%; background: #3c4043; color: #fff; font-style: normal; font-size: 14px; font-weight: 700; display: grid; place-items: center; font-family: 'SamsungOne'; }
+.glogo { position: absolute; left: 50%; top: 214px; width: 160px; margin-left: -80px; }
+.gbox { position: absolute; left: 18px; right: 18px; top: 296px; height: 54px; border-radius: 27px; background: #fff; box-shadow: 0 1px 6px rgba(32,33,36,.28); display: flex; align-items: center; gap: 10px; padding: 0 14px 0 16px; }
+.gbox .mg { width: 20px; height: 20px; color: #5f6368; flex: none; }
+.gbox .tx { flex: 1; font-size: 15.5px; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; display: flex; align-items: center; color: #202124; }
+.gbox .gi { width: 22px; height: 22px; flex: none; }
+#gres { position: absolute; left: 0; right: 0; top: 168px; padding: 0 16px; }
+.gchips { display: flex; gap: 8px; margin-bottom: 12px; }
+.gchips span { padding: 7px 14px; border-radius: 16px; border: 1px solid #DADCE0; font-size: 13px; font-weight: 500; color: #3c4043; }
+.gchips .on { background: #E8F0FE; border-color: #E8F0FE; color: #1967D2; }
+#gres .res { position: relative; left: 0; right: 0; margin-bottom: 10px; }
+.res .n { font-size: 14.5px; }
+
+/* ── v3: 큼직한 플로팅 ─────────────────────────── */
+.bigf { position: absolute; width: 640px; display: grid; grid-template-columns: 64px 1fr; column-gap: 20px; padding: 24px 28px 26px 24px; background: #fff; border-radius: 28px;
+  box-shadow: 0 26px 60px rgba(64,40,140,.16), 0 0 0 1.5px #E6DEFF inset; }
+.bigf > img, .bigf > .gpsI { width: 64px; height: 64px; border-radius: 17px; }
+.bigf .t { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.25; color: var(--ink); }
+.bigf .m { font-size: 19px; color: var(--gray2); margin-top: 5px; letter-spacing: -0.01em; }
+.bigf .sn { margin-top: 14px; padding: 12px 16px; background: #F6F5FA; border-radius: 14px; font-size: 23px; font-weight: 500; color: var(--ink2); letter-spacing: -0.02em; line-height: 1.4; }
+.gpsI { position: relative; display: grid; place-items: center; background: #EAF2FF; }
+.gpsI svg { width: 40px; height: 40px; position: relative; z-index: 2; }
+.gpsI .pulse { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; border: 3px solid rgba(46,125,255,.8); z-index: 1; }
+.recf { position: absolute; width: 450px; padding: 26px 28px 28px; background: linear-gradient(180deg, #FFFFFF, #F7F3FF); border-radius: 30px; box-shadow: 0 30px 70px rgba(84,56,190,.22), 0 0 0 2px #D9CBFF inset; }
+.recf .l { font-size: 20px; font-weight: 700; color: var(--purple); display: flex; gap: 8px; align-items: center; }
+.recf .l svg { width: 22px; height: 22px; color: var(--purple); }
+.recf .v { font-size: 33px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.35; margin-top: 12px; color: var(--ink); }
+.recf .s { font-size: 18px; color: var(--gray2); margin-top: 12px; }
+.flink { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.flink .dh { fill: none; stroke: #fff; stroke-width: 10; stroke-dasharray: 9 7; stroke-linecap: round; stroke-linejoin: round; }
+.flink .dl { fill: none; stroke: #7B4BD8; stroke-width: 4.5; stroke-dasharray: 9 7; stroke-linecap: round; stroke-linejoin: round; }
+.flink .kn { fill: #fff; stroke: #7B4BD8; stroke-width: 4; }
+.tagchip { position: absolute; padding: 8px 18px; border-radius: 18px; background: var(--purple); color: #fff; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; box-shadow: 0 10px 24px rgba(107,78,255,.3); }
+
+.bigf, .recf, .head h3, #hook, #where, .card, .bub, .mc, .sg { word-break: keep-all; }
+
+/* ── v4: 챕터 카드 · 헤드라인 · 선 통일 ───────────── */
+.chap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
+.chap .no { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 140px; line-height: 1; letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #4E36CF, #7A55FF 70%, #8F66FF); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chap .tt { margin-top: 24px; font-size: 84px; font-weight: 700; letter-spacing: -0.04em; color: var(--ink); }
+.chap .csub { margin-top: 20px; font-size: 38px; font-weight: 500; letter-spacing: -0.03em; color: var(--gray); }
+.head { position: absolute; width: auto; }
+#hdB { left: 150px; top: 92px; }
+#hdC { left: 0; right: 0; top: 40px; text-align: center; }
+.head .hchip { display: inline-block; padding: 8px 18px; border-radius: 18px; background: #F1ECFF; border: 1.5px solid #DCCFFF; color: var(--purple); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.head h3 { margin-top: 12px; font-size: 48px; line-height: 1.3; font-weight: 700; letter-spacing: -0.035em; white-space: nowrap; }
+.knot { display: none; }
+
+/* ── v5 ─────────────────────────────────────────── */
+/* 01: 사슬 레이어(카메라), 위쪽 제목 */
+#w1 { position: absolute; inset: 0; transform-origin: 0 0; }
+#topScrim { position: absolute; left: 0; right: 0; top: 0; height: 260px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(252,251,255,.97) 0%, rgba(252,251,255,.93) 52%, rgba(252,251,255,0) 100%); }
+#h1 { left: 0; right: 0; top: 40px; text-align: center; }
+#h1 h3 { font-size: 54px; }
+#flyChip { position: absolute; left: 0; top: 0; padding: 8px 26px 10px; border-radius: 30px; background: #fff; color: var(--purple); font-size: 44px; font-weight: 700;
+  letter-spacing: -0.04em; white-space: nowrap; box-shadow: 0 18px 40px rgba(84,56,190,.22), 0 0 0 2px #CDBBFF inset; transform-origin: 0 50%; z-index: 80; }
+#sqA .sel { background: rgba(26,115,232,.22); border-radius: 3px; }
+#gbox .sweep { position: absolute; left: 50px; right: 92px; bottom: 9px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, #A67CF2, #6B4EFF); transform-origin: 0 50%; transform: scaleX(0); }
+.gload { position: absolute; left: 0; top: 96px; width: 100%; height: 3px; background: linear-gradient(90deg, #1a73e8, #5aa2ff); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; z-index: 6; }
+.k.snd.srch { background: #2F6BFF; }
+
+/* 02: 통화 상황 말풍선 · 생각 · 답 표시 · 위로 올리기 */
+#callQ { position: absolute; left: 150px; top: 404px; width: 760px; padding: 26px 34px 30px; background: #fff; border-radius: 30px;
+  box-shadow: 0 26px 60px rgba(64,40,140,.16), 0 0 0 1.5px #E6DEFF inset; }
+#callQ::after { content: ''; position: absolute; right: -16px; top: 92px; border: 18px solid transparent; border-left-color: #fff; border-right: 0; filter: drop-shadow(3px 0 0 #E6DEFF); }
+#callQ .who { display: flex; align-items: center; gap: 12px; font-size: 24px; color: var(--ink); }
+#callQ .who .av { width: 44px; height: 44px; border-radius: 50%; background: #E9F7EE; color: #1E9E55; display: grid; place-items: center; }
+#callQ .who .av svg { width: 22px; height: 22px; }
+#callQ .who .st { font-size: 19px; font-weight: 600; color: #1E9E55; background: #E9F7EE; border-radius: 12px; padding: 3px 10px; }
+#callQ .eq { display: flex; align-items: center; gap: 4px; height: 26px; margin-left: 4px; }
+#callQ .eq i { display: block; width: 4px; height: 26px; border-radius: 2px; background: #6FCF97; transform-origin: 50% 50%; }
+#callQ .q { margin-top: 18px; font-size: 38px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.38; color: var(--ink); }
+#callT { position: absolute; left: 156px; top: 676px; font-size: 36px; font-weight: 700; letter-spacing: -0.03em; color: #8E88A0; }
+#callT b { color: var(--purple); }
+mark { background: linear-gradient(transparent 56%, rgba(166,124,242,.42) 56%) no-repeat 0 0 / 0% 100%; color: inherit; border-radius: 3px; padding: 0 2px; }
+.chev { position: absolute; left: 50%; top: 736px; width: 30px; margin-left: -15px; display: grid; gap: 2px; justify-items: center; }
+.chev svg { width: 28px; height: 16px; fill: none; stroke: var(--purple); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+#htrail { position: absolute; left: 25px; top: 10px; width: 28px; height: 0; border-radius: 14px; transform-origin: 50% 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(123,75,216,.75), rgba(166,124,242,.35) 55%, rgba(166,124,242,0)); }
+#htouch { position: absolute; left: 15px; top: -16px; width: 48px; height: 48px; border-radius: 50%; border: 3px solid rgba(123,75,216,.75); background: rgba(166,124,242,.18); opacity: 0; z-index: -1; }
+#wB.drag { box-shadow: 0 -10px 40px rgba(107,78,255,.35), 0 0 0 1.5px #CDBBFF; }
+
+/* 03: 휴대폰 왼쪽, 문장·플로팅 오른쪽 */
+#hdC { left: 990px; right: auto; top: 92px; text-align: left; }
+#fg { left: 990px; top: 352px; width: 680px; }
+#fk { left: 990px; top: 548px; width: 680px; }
+.bigf .mini { margin-top: 14px; padding: 14px 16px; background: #BACEE0; border-radius: 16px; display: grid; gap: 10px; }
+.bigf .mini .mm { max-width: 92%; padding: 10px 14px; border-radius: 14px; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.38; color: #1d2430; }
+.bigf .mini .mm.l { background: #fff; justify-self: start; }
+.bigf .mini .mm.l b { display: block; font-size: 16px; font-weight: 600; color: #4f5b6b; margin-bottom: 2px; }
+.bigf .mini .mm.r { background: #FEE500; justify-self: end; }
+.msg .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.msg .rd { font-size: 12.5px; font-weight: 700; color: #E8B800; line-height: 1; }
+.kb .tb { position: relative; overflow: hidden; }
+.kb .tb .shim { position: absolute; top: 0; bottom: 0; width: 160px; left: 0; background: linear-gradient(90deg, rgba(166,124,242,0), rgba(166,124,242,.55), rgba(166,124,242,0)); opacity: 0; pointer-events: none; }
+
+/* 끝 화면: Galaxy AI는 오른쪽 아래 모서리 */
+#gai { position: absolute; right: 72px; bottom: 58px; display: flex; align-items: center; gap: 6px; }
+#gai .gw { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 34px; letter-spacing: -0.01em; color: #1E1B2E; }
+#gai .gs { width: 50px; height: 50px; margin: -14px 0 0 -2px; }
+
+/* ── v6 ─────────────────────────────────────────── */
+/* 공통: 같은 단서를 표시하는 형광펜(너비 0 → 100%) */
+.hl, .card .mm .dt, mark.rm, #callQ .qk, #callA u, #gpsDj, #kkDj {
+  background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; }
+#kkDj { background-image: linear-gradient(transparent 52%, rgba(107,78,255,.30) 52%); }
+.card .mm .dt { color: var(--ink2); font-weight: 700; padding: 0 2px; }
+mark.rm { color: inherit; padding: 0 1px; }
+.tok { position: absolute; left: 0; top: 0; padding: 5px 14px 7px; border-radius: 16px; background: var(--purple); color: #fff; font-size: 22px; font-weight: 700;
+  letter-spacing: -0.02em; white-space: nowrap; box-shadow: 0 10px 22px rgba(107,78,255,.35); z-index: 5; }
+
+/* 02: 휴대폰 왼쪽 위의 통화 말풍선 · 생각 · 답변 */
+#hdB h3 { font-size: 46px; }
+#fl1, #fl2, #fl3 { width: 600px; }
+#fl1 .sn, #fl2 .sn, #fl3 .sn { font-size: 21px; }
+#callQ { left: auto; right: 650px; top: 96px; width: auto; padding: 18px 26px 22px 24px; border-radius: 26px; z-index: 20; }
+#callQ::after { top: 70px; }
+#callQ .who { font-size: 21px; gap: 10px; }
+#callQ .who .av { width: 36px; height: 36px; }
+#callQ .who .av svg { width: 19px; height: 19px; }
+#callQ .who .st { font-size: 17px; }
+#callQ .eq { height: 22px; } #callQ .eq i { height: 22px; }
+#callQ .q { margin-top: 12px; font-size: 33px; line-height: 1.42; white-space: nowrap; }
+#callQ .qk { font-weight: 700; padding: 0 2px; }
+#callT { left: auto; right: 676px; top: 318px; font-size: 32px; z-index: 20; }
+#callA { position: absolute; right: 650px; top: 312px; padding: 16px 26px 22px 24px; border-radius: 26px; background: #F6F2FF; z-index: 20;
+  box-shadow: 0 26px 60px rgba(64,40,140,.16), 0 0 0 1.5px #D9CBFF inset; }
+#callA::after { content: ''; position: absolute; right: -16px; top: 60px; border: 18px solid transparent; border-left-color: #F6F2FF; border-right: 0; filter: drop-shadow(2px 0 0 #D9CBFF); }
+#callA .who { display: flex; align-items: center; gap: 8px; }
+#callA .who .me { font-size: 19px; font-weight: 700; color: #fff; background: var(--purple); border-radius: 12px; padding: 2px 12px 3px; }
+#callA .q { margin-top: 10px; font-size: 33px; font-weight: 500; line-height: 1.42; letter-spacing: -0.03em; white-space: nowrap; color: var(--ink); }
+#callA u { text-decoration: none; font-weight: 700; color: var(--purple); padding: 0 2px; }
+
+/* 03: 문장·플로팅을 오른쪽으로, 위치 카드는 작게, 가족 단체방에 엄마가 보낸 사진 */
+#hdC { left: 1080px; }
+#fg { left: 1080px; top: 318px; width: auto; padding-right: 36px; }
+#fg .t, #fk .t { white-space: nowrap; }
+#fg .t .m2, #fk .t .m2 { font-size: 19px; font-weight: 500; color: var(--gray2); margin-left: 8px; letter-spacing: -0.01em; }
+#fg .loc { margin-top: 6px; font-size: 42px; font-weight: 700; letter-spacing: -0.03em; color: var(--purple); line-height: 1.2; }
+#fg .loc #gpsDj { padding: 0 2px; }
+#fg .m { margin-top: 2px; font-size: 21px; color: var(--ink2); }
+#fk { left: 1080px; top: 512px; width: 640px; }
+.bigf .mini { padding: 14px 16px 16px; gap: 12px; }
+.bigf .mini .mrow { display: flex; gap: 10px; align-items: flex-start; }
+.bigf .mini .mav { width: 40px; height: 40px; border-radius: 14px; flex: none; }
+.bigf .mini .mnm { display: block; font-size: 16px; font-weight: 600; color: #3c4655; margin-bottom: 4px; }
+.bigf .mini .mpair { display: flex; gap: 10px; align-items: flex-end; }
+.bigf .mini .mph { width: 168px; height: 108px; border-radius: 14px; object-fit: cover; flex: none; box-shadow: 0 2px 6px rgba(29,36,48,.12); }
+.bigf .mini .mm { max-width: none; }
+.bigf .mini .mm.r b { font-weight: 700; }
+#kkDj { padding: 0 2px; }
+
+/* 03: Weave 버튼이 '반짝' — 빛·물결·별·배지(키보드 안, 버튼 위아래 두 겹) */
+.kb { isolation: isolate; }                         /* 버튼 효과가 위에 뜨는 시트를 뚫고 나오지 않게 */
+.kb .tb { position: relative; overflow: visible; }
+.kb .tb .clip { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.kb .tb .wv { position: relative; z-index: 2; }
+.kb .tb .wv img.lit { position: absolute; left: 50%; top: 50%; width: 21px; height: 21px; margin: -10.5px 0 0 -10.5px; opacity: 0; }
+.wvfx { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; }
+.wvfx.under { z-index: 1; } .wvfx.over { z-index: 3; }
+.wvfx .glow { position: absolute; left: -75px; top: -75px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(closest-side, rgba(139,104,245,.7), rgba(139,104,245,.25) 55%, rgba(139,104,245,0)); opacity: 0; }
+.wvfx .rg { position: absolute; left: -20px; top: -20px; width: 40px; height: 40px; border-radius: 50%; border: 3.5px solid rgba(107,78,255,.9); opacity: 0; }
+.wvfx .badge { position: absolute; left: 7px; top: -27px; width: 20px; height: 20px; border-radius: 10px; background: #F23B3B; color: #fff; font: 700 12px/20px 'SamsungOne', sans-serif; text-align: center; box-shadow: 0 0 0 2px #fff; opacity: 0; }
+.wvfx .st { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; opacity: 0; color: #8B68F5; }
+.wvfx .st svg { width: 100%; height: 100%; display: block; }
+
+/* ── v7 ─────────────────────────────────────────── */
+/* 장면 뱃지를 빼고 문장을 조금 크게 */
+#h1 h3 { font-size: 60px; margin-top: 0; }
+#h1 { top: 52px; }
+#hdB h3 { font-size: 52px; margin-top: 0; }
+#hdB { top: 92px; }
+#hdC h3 { font-size: 54px; margin-top: 0; }
+#hdC { top: 96px; }
+/* 02: '노트였나… 메일이었나…'는 내 생각이라 왼쪽 문장 아래로(확대되는 휴대폰과 겹치지 않게) */
+#callT { left: 152px; right: auto; top: 330px; font-size: 36px; z-index: 5; }
+/* 03 가족 단체방: 카카오톡처럼 이름 → 사진 → 말풍선 */
+.bigf .mini .mcol { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.bigf .mini .mnm { margin-bottom: 0; }
+.bigf .mini .mph { width: 200px; height: 128px; }
+.bigf .mini .mm.r { margin-top: 2px; }
+
+/* ── v8 ─────────────────────────────────────────── */
+/* 03: 가족 단체방의 '성심당 무화과시루', Weave 추천 문장의 '먹고 싶다던 무화과시루'도 같은 형광펜 */
+#kkSs { background: linear-gradient(transparent 52%, rgba(107,78,255,.30) 52%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
+#sgK { background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 1px; }

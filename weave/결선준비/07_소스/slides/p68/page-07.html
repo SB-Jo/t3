@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>USER SCENARIO 2 — 그거 이름이 뭐였지?</title>
+<link rel="stylesheet" href="scenario.css">
+<style>
+  .label-name { position: absolute; z-index: 20; font: 700 16px/20px 'Inter', 'Noto Sans KR'; letter-spacing: .06em; color: #2B2640; text-align: center; }
+  .label-sub  { position: absolute; z-index: 20; font: 600 9.5px/13px 'Inter', 'Noto Sans KR'; letter-spacing: .12em; color: #6A6474; text-align: center; }
+  .hop-t { position: absolute; z-index: 20; font-size: 11px; line-height: 15px; font-weight: 700; color: #8B6BFF; text-align: center; }
+  .photo { position: absolute; z-index: 6; border-radius: 8px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gbar { position: absolute; z-index: 12; background: #fff; border: 1.5px solid #CBB8FF; border-radius: 26px;
+          box-shadow: 0 16px 34px rgba(90, 60, 200, .20), 0 0 0 4px rgba(236, 228, 255, .7); }
+  .gbar.done { border-color: #DADCE0; box-shadow: 0 10px 24px rgba(60, 50, 120, .12); }
+  .kb { position: absolute; z-index: 12; background: #E8EAF0; border-radius: 16px; border: 1.5px solid #CBB8FF;
+        box-shadow: 0 16px 34px rgba(90, 60, 200, .20), 0 0 0 4px rgba(236, 228, 255, .7); }
+  .t-q2 { position: absolute; z-index: 20; font-size: 16px; line-height: 22px; font-weight: 500; color: #202124; letter-spacing: -.01em; }
+  .t-big { position: absolute; z-index: 20; font-size: 20px; line-height: 26px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+  .evt { position: absolute; z-index: 6; background: #F3EEFF; border-radius: 8px; border-left: 3.5px solid #8B6BFF; }
+  .res { position: absolute; z-index: 12; border-radius: 12px; box-shadow: 0 12px 26px rgba(60, 50, 120, .16), 0 0 0 1px #E4DDF7; }
+</style>
+</head>
+<body>
+<script src="../../pages/icons.js"></script>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+  <img class="scene" src="scenes/scene-p7-wineshop.png" alt="">
+
+  <div class="chip-prev" style="left:555px; width:170px;"></div>
+  <div class="t-label" data-x>USER SCENARIO 2</div>
+  <div class="t-title" data-x><span class="hl5">그거</span> 이름이 뭐였지?</div>
+  <div class="t-sub" data-x>기억하는 상황 한마디가 정확한 이름으로 이어집니다.</div>
+
+  <!-- ① 이름이 가물가물 -->
+  <img class="char big" id="charA" src="characters/p7-A.png" style="left:-14px; top:296px; width:424px; height:424px;">
+  <div class="t-say" data-x id="say1" style="left:66px; top:187px;">지은이네 집들이 때 마신 와인 좋았는데,<br>그거 <b>이름이 뭐였지?</b></div>
+
+  <!-- ② 검색창에 단서 + 키보드 실타래 버튼 -->
+  <div class="gbar" id="qbar" style="left:376px; top:341px; width:356px; height:52px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:394px; top:357px; width:20px; height:20px; z-index:13;"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#5F6368" stroke-width="2.2"/><path d="m15.5 15.5 5 5" stroke="#5F6368" stroke-width="2.2" stroke-linecap="round"/></svg>
+  <div class="t-q2" data-x id="qtext" style="left:424px; top:356px;">지은이네 집들이 때 먹었던 와인</div>
+  <div class="kb" id="kbar" style="left:394px; top:498px; width:300px; height:56px;"></div>
+  <div class="pen" data-x style="left:356px; top:516px;">톡!</div>
+
+  <!-- ③ 단서에서 단서로: 일정 → 그 시간 사진 → 라벨 글자 -->
+  <div class="card" id="h1" style="left:772px; top:170px; width:146px; height:150px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:786px; top:183px; width:20px; height:20px; z-index:6;">
+  <div class="t-app" data-x style="left:812px; top:184px;">삼성 캘린더</div>
+  <div class="evt" style="left:782px; top:212px; width:126px; height:94px;"></div>
+  <div class="t-ttl" data-x style="left:794px; top:221px;">지은 집들이</div>
+  <div class="t-body" data-x style="left:794px; top:247px;">지난주 일요일</div>
+  <div class="t-ttl" data-x style="left:794px; top:271px;"><b>3월 15일 18:00</b></div>
+
+  <div class="card" id="h2" style="left:944px; top:170px; width:146px; height:150px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:958px; top:183px; width:20px; height:20px; z-index:6;">
+  <div class="t-app" data-x style="left:984px; top:184px;">갤러리</div>
+  <div class="photo" style="left:958px; top:212px; width:118px; height:70px;"><img src="../../assets/crops/ux2-wine-photo.png"></div>
+  <div class="t-meta" data-x style="left:958px; top:290px;"><b style="color:#6B4EFF">3월 15일 20:14</b></div>
+
+  <div class="card" id="h3" style="left:1116px; top:170px; width:146px; height:150px;"></div>
+  <svg class="app" style="left:1130px; top:183px; width:20px; height:20px; color:#6B4EFF; z-index:6;"><use href="#i-scan"/></svg>
+  <div class="t-app" data-x style="left:1156px; top:184px;">사진 속 글자</div>
+  <div class="inset" style="left:1130px; top:214px; width:118px; height:66px; z-index:6;"></div>
+  <div class="label-name" data-x style="left:1130px; top:228px; width:118px;">BABICH</div>
+  <div class="label-sub" data-x style="left:1130px; top:251px; width:118px;">SAUVIGNON BLANC</div>
+
+  <div class="hop-t" data-x style="left:910px; top:326px; width:44px;">그 시간 사진</div>
+  <div class="hop-t" data-x style="left:1080px; top:326px; width:44px;">라벨 읽기</div>
+
+  <!-- Weave 추천 -->
+  <div class="card pop" id="sug" style="left:790px; top:368px; width:290px; height:136px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:808px; top:384px; width:14px; height:14px; z-index:13;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="t-app" data-x style="left:827px; top:382px; color:#6B4EFF;">자동 완성 추천</div>
+  <div class="t-big" data-x style="left:808px; top:404px;">배비치 소비뇽 블랑</div>
+  <div class="t-meta" data-x style="left:808px; top:433px;">지은 집들이 · 일정과 갤러리</div>
+  <div class="pbtn" id="okbtn" style="left:808px; top:458px; width:254px; height:34px; z-index:13;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:902px; top:468px; width:14px; height:14px; z-index:14;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="t-btn" data-x style="left:921px; top:465px;">입력하기</div>
+
+  <!-- ④ 정확한 이름으로 검색 -->
+  <div class="gbar done" id="done" style="left:790px; top:540px; width:250px; height:44px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:808px; top:552px; width:20px; height:20px; z-index:13;"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#5F6368" stroke-width="2.2"/><path d="m15.5 15.5 5 5" stroke="#5F6368" stroke-width="2.2" stroke-linecap="round"/></svg>
+  <div class="t-q2" data-x style="left:838px; top:551px; font-weight:700;">배비치 소비뇽 블랑</div>
+  <img class="app res" id="res" src="assets/result-card.png" style="left:790px; top:592px; width:250px; height:114.6px;">
+  <img class="char" id="charB" src="characters/p7-B.png" style="left:1080px; top:528px; width:192px; height:192px;">
+  <div class="pen" data-x id="pen5" style="left:1096px; top:488px; font-size:27px; line-height:30px;">맞아, 이거였어!</div>
+</div>
+
+<script src="scenario.js"></script>
+<script>
+SC.run(async (sc) => {
+  const { R, el, bubble, thread, spark, hand, fit, moveTo, step, phone, back, front } = sc;
+  // 휴대폰: 검색 데모 — Google 검색창에 단서 입력, 키보드가 올라온 화면 (564×1194)
+  // ②③과 휴대폰은 8차에 20px 왼쪽으로 (① 왼쪽 정렬과 무게중심 맞춤, 오른쪽 이어지는 선은 자동으로 길어짐)
+  const ph = phone('phone', 430, 186, 232, 'assets/screen-검색입력.png', 564, 1194);
+
+  // ① 생각 말풍선 (머리 쪽으로 방울)
+  // 휴대폰 왼쪽 공간의 가운데(오른쪽 여백이 조금 적게). 글자는 왼쪽에 붙임: 왼쪽 여백 22px, 오른쪽 34px
+  const t1 = R('say1'), bw1 = t1.w + 22 + 34, bx1 = Math.round((R('phone').l - bw1) / 2 + 6);
+  { const by = 172, bh = t1.h + 30; moveTo('say1', bx1 + 22, by + 15);
+    bubble(back, { x: bx1, y: by, w: bw1, h: bh, thought: true, tail: { edge: 'bottom', at: 196 - bx1, to: [196, 306] } }); }
+
+  // ② 확대 검색창 = 휴대폰 검색창에서 튀어나온 것. 커서
+  const q = R('qtext');
+  const cur = document.createElement('div'); cur.className = 'cursor'; Object.assign(cur.style, { left: (q.r + 2) + 'px', top: (q.t + 2) + 'px', height: '18px' }); document.getElementById('slide').appendChild(cur);
+  // ② 확대한 키보드 도구 줄: 실타래 버튼(누름) + 이모티콘·번역·클립보드·설정·더보기
+  const kb = R('kbar'); const ky = kb.cy;
+  const sp = [kb.l + 30, ky];
+  el(front, 'circle', { cx: sp[0], cy: sp[1], r: 17, fill: '#E4D9FF', stroke: '#B69CFF', 'stroke-width': 1.2 });
+  const spool = document.createElement('img'); spool.src = '../assets/weave-spool-6B4EFF.png'; spool.className = 'app';
+  Object.assign(spool.style, { left: (sp[0] - 11) + 'px', top: (sp[1] - 11) + 'px', width: '22px', height: '22px', zIndex: 27 }); document.getElementById('slide').appendChild(spool);
+  const g = el(front, 'g', { fill: 'none', stroke: '#6E7488', 'stroke-width': 1.7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const ix = [kb.l + 80, kb.l + 122, kb.l + 164, kb.l + 206, kb.l + 248];
+  el(g, 'circle', { cx: ix[0], cy: ky, r: 8.5 }); el(g, 'path', { d: `M${ix[0] - 3.5} ${ky + 2.5} q3.5 3.5 7 0 M${ix[0] - 3} ${ky - 2.5}h.1 M${ix[0] + 3} ${ky - 2.5}h.1` });
+  el(g, 'path', { d: `M${ix[1] - 8} ${ky - 6}h8 M${ix[1] - 4} ${ky - 8}v2 M${ix[1] - 7} ${ky}q3.5-1 6-6 M${ix[1] - 1} ${ky + 7}l4-9 4 9 M${ix[1]} ${ky + 4}h6` });
+  el(g, 'rect', { x: ix[2] - 7, y: ky - 8.5, width: 14, height: 17, rx: 2.5 }); el(g, 'path', { d: `M${ix[2] - 3.5} ${ky - 2}h7 M${ix[2] - 3.5} ${ky + 2.5}h7` });
+  el(g, 'circle', { cx: ix[3], cy: ky, r: 3.2 }); el(g, 'circle', { cx: ix[3], cy: ky, r: 8, 'stroke-dasharray': '3.4 2.4' });
+  [-6, 0, 6].forEach((dx) => el(g, 'circle', { cx: ix[4] + dx, cy: ky, r: 1.3, fill: '#6E7488', stroke: 'none' }));
+  spark(front, sp, 17 + 3, [213, 258, 303], [5.2, 6.5, 5.2]);
+  hand([sp[0] + 4, sp[1] + 4], -12, 1.15);
+  // 확대 요소 ↔ 휴대폰 속 원래 자리 (가는 점선)
+  const bar0 = ph.at(282, 425.5), key0 = ph.at(36, 808);
+
+  // ③ 휴대폰 → 첫 단서, 단서 → 단서 → 추천
+  const phoneR = R('phone').r;
+  thread(back, [phoneR + 1, key0[1]], [R('h1').l - 2, R('h1').cy + 30], { dash: '5 4' });
+  const h1 = R('h1'), h2 = R('h2'), h3 = R('h3');
+  thread(back, [h1.r + 1, h1.cy], [h2.l - 1, h2.cy], { arrow: true, dots: false });
+  thread(back, [h2.r + 1, h2.cy], [h3.l - 1, h3.cy], { arrow: true, dots: false });
+  const s = R('sug');
+  thread(back, [h3.cx, h3.b + 2], [s.r - 30, s.t - 2], { dash: '5 4', k: .2 });
+  thread(back, [h1.cx, h1.b + 2], [s.l + 30, s.t - 2], { dash: '5 4', k: .2 });
+  // 입력하기 누름 → 완성된 검색창
+  const ok = R('okbtn');
+  spark(front, [ok.r - 30, ok.cy], 17 + 3, [213, 258, 303], [4.8, 5.9, 4.8]);
+  hand([ok.r - 26, ok.cy + 3], -12);
+  const d = R('done');
+  thread(back, [ok.r - 60, ok.b + 2], [d.r - 44, d.t - 2], { arrow: true, dots: false, k: .3 });
+  // ④ 말풍선
+  const b = R('charB');
+  { const t = R('pen5'); moveTo('pen5', 1172 - t.w / 2, 492); }
+
+  step(1, '이름이 가물가물', bx1 - 10, 159);
+  step(2, '단서 입력', 366, 327);
+  step(3, '실타래 버튼 클릭', 342, 484);
+  step(4, '단서에서 단서로', 762, 157);
+  step(5, '정확한 이름으로 검색', 780, 526);
+});
+</script>
+</body>
+</html>

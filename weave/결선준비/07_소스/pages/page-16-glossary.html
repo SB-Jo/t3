@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>16 / Appendix · Q&amp;A — (Reasoning) Embedding Model이란?</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  .panel { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 18px; box-shadow: 0 8px 24px rgba(107,78,255,.06); }
+  .div { position: absolute; height: 1px; background: #EEE9FA; }
+  .qn { position: absolute; font: 700 20px/24px 'Inter','Noto Sans KR'; color: #B7A6FF; letter-spacing: -.01em; }
+  .qq { position: absolute; font-size: 15px; line-height: 20.5px; font-weight: 700; color: var(--ink); }
+  /* A.와 보충: 라벨과 본문을 따로 두어 줄 시작을 정확히 맞춤 */
+  .al { position: absolute; font-size: 14px; line-height: 21px; font-weight: 700; color: var(--purple); }
+  .aa { position: absolute; font-size: 14px; line-height: 21px; color: var(--ink-2); }
+  .aa b { font-weight: 700; color: var(--ink); }
+  .sl { position: absolute; font-size: 12.5px; line-height: 18.5px; font-weight: 700; color: var(--body-2); }
+  .ss { position: absolute; font-size: 12.5px; line-height: 18.5px; color: var(--muted); }
+  .ss b { font-weight: 700; color: var(--body); }
+  .sup { font-size: .72em; vertical-align: .45em; line-height: 0; }
+  .box { position: absolute; background: var(--soft); border: 1px solid var(--soft-line); border-radius: 12px; }
+  .t11 { position: absolute; font-size: 11.5px; line-height: 15px; color: var(--muted); }
+  .t11p { position: absolute; font-size: 11.5px; line-height: 15px; font-weight: 700; color: var(--purple); }
+  .t12b { position: absolute; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); }
+  .chipw { position: absolute; height: 22px; border-radius: 11px; background: #fff; border: 1px solid var(--card-line); }
+  .chipp { position: absolute; height: 22px; border-radius: 11px; background: var(--tile); border: 1px solid #D9CEFF; }
+  .app { position: absolute; }
+  .photo { position: absolute; border-radius: 6px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tb { position: absolute; font-size: 11.5px; line-height: 22px; white-space: nowrap; }
+  .tb.h { font-weight: 700; color: var(--ink); text-align: center; }
+  .tb.k { color: var(--muted); }
+  .tb.c { text-align: center; color: var(--body); }
+  .tb.cp { text-align: center; color: var(--purple); font-weight: 700; }
+  .rule { position: absolute; height: 1px; background: #E4DDF7; }
+  svg.links { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; }
+</style>
+</head>
+<body>
+<script src="icons.js"></script>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+
+  <div class="t-label" data-x>16 / Appendix · Q&amp;A</div>
+  <div class="t-title" data-x>(Reasoning) Embedding Model이란?</div>
+
+  <div class="panel" data-s style="left:86px; top:146px; width:1108px; height:484px;"></div>
+
+  <!-- ───────── Q1 (행 146~267) ───────── -->
+  <div class="qn" data-x style="left:112px; top:164px;">Q1</div>
+  <div class="qq" data-x style="left:112px; top:192px;">임베딩은 검색에<br>어떻게 쓰이나요?</div>
+  <div class="al" data-x style="left:300px; top:164px;">A.</div>
+  <div class="aa" data-x style="left:322px; top:164px;">글과 사진의 <b>의미를 벡터</b>로 바꾸는 모델입니다. 기록은 미리 벡터로 저장해 두고,<br>검색할 땐 <b>질문도 벡터로 바꿔</b> 가장 가까운 기록을 찾습니다.</div>
+  <div class="sl" data-x style="left:322px; top:212px;">보충</div>
+  <div class="ss" data-x style="left:358px; top:212px;">정확한 이름은 <b>키워드 색인</b>으로, 표현이 다른 내용은 <b>벡터 색인</b>으로 함께 찾습니다(하이브리드 검색).<br>벡터는 뜻이 가까운 기록을 모으는 데 쓰고, 최종 확인은 원문으로 합니다.</div>
+  <!-- 그림: 의미 공간 -->
+  <div class="box" data-s style="left:940px; top:158px; width:230px; height:97px;"></div>
+  <div class="t11" data-x style="left:950px; top:163px; font-size:11px;">의미 공간 (예시)</div>
+  <svg class="app" style="left:940px; top:158px; width:230px; height:97px;" viewBox="0 0 230 97">
+    <path d="M100 60 L72 36 M100 60 L134 50" stroke="#8B6BFF" stroke-width="1.3" stroke-dasharray="3 2.5" fill="none"/>
+    <circle cx="100" cy="60" r="6.5" fill="#fff" stroke="#6B4EFF" stroke-width="2.6"/>
+    <circle cx="72" cy="36" r="4.8" fill="#6B4EFF"/>
+    <circle cx="134" cy="50" r="4.8" fill="#6B4EFF"/>
+    <circle cx="216" cy="86" r="4.2" fill="#C9C1DC"/>
+    <circle cx="16" cy="86" r="4.2" fill="#C9C1DC"/>
+  </svg>
+  <div class="t12b" data-x style="left:1000px; top:228px; width:80px; text-align:center; color:var(--purple); font-size:11.5px;">질문(Query)</div>
+  <div class="t11" data-x style="left:1020px; top:187px; color:var(--ink); font-weight:600;">지은 집들이 일정</div>
+  <div class="t11" data-x style="left:1082px; top:201px; color:var(--ink); font-weight:600;">와인 라벨 사진</div>
+  <div class="t11" data-x style="left:964px; top:237px; color:#A39CB5;">회의록</div>
+  <div class="t11" data-x style="left:1100px; top:237px; color:#A39CB5;">택배 문자</div>
+  <div class="div" data-s style="left:112px; top:267px; width:1056px;"></div>
+
+  <!-- ───────── Q2 (행 267~388) ───────── -->
+  <div class="qn" data-x style="left:112px; top:285px;">Q2</div>
+  <div class="qq" data-x style="left:112px; top:313px;">왜 LLM이 아니라<br>임베딩 모델로 찾나요?</div>
+  <div class="al" data-x style="left:300px; top:285px;">A.</div>
+  <div class="aa" data-x style="left:322px; top:285px;">LLM은 글을 <b>토큰마다 한 번씩</b> 계산하며 만들어 연산량이 많고, 수많은 기록을 매번 읽기 어렵습니다.<br>임베딩은 <b>질문당 한 번</b> 계산해 후보를 고르고, LLM은 최종 문장만 다듬습니다.</div>
+  <div class="sl" data-x style="left:322px; top:333px;">보충</div>
+  <div class="ss" data-x style="left:358px; top:333px;">휴대폰은 <b>메모리와 전력이 제한적</b>이라, 문장 생성은 꼭 필요할 때만 씁니다.<br>기록 벡터는 충전·유휴 시간에 미리 만들어 두어, 사용 중에는 질문만 계산합니다.</div>
+  <!-- 그림: LLM과 임베딩 비교 -->
+  <div class="box" data-s style="left:940px; top:279px; width:230px; height:97px;"></div>
+  <div class="tb h" data-x style="left:984px; top:282px; width:88px;">LLM</div>
+  <div class="tb h" data-x style="left:1072px; top:282px; width:92px; color:var(--purple);">임베딩</div>
+  <div class="rule" data-s style="left:948px; top:304px; width:214px;"></div>
+  <div class="tb k" data-x style="left:950px; top:306px;">결과</div>
+  <div class="tb c" data-x style="left:984px; top:306px; width:88px;">글 생성</div>
+  <div class="tb cp" data-x style="left:1072px; top:306px; width:92px;">의미 벡터</div>
+  <div class="tb k" data-x style="left:950px; top:328px;">계산</div>
+  <div class="tb c" data-x style="left:984px; top:328px; width:88px;">토큰마다 반복</div>
+  <div class="tb cp" data-x style="left:1072px; top:328px; width:92px;">입력당 한 번</div>
+  <div class="tb k" data-x style="left:950px; top:350px;">기록</div>
+  <div class="tb c" data-x style="left:984px; top:350px; width:88px;">요청마다 읽기</div>
+  <div class="tb cp" data-x style="left:1072px; top:350px; width:92px;">미리 저장</div>
+  <div class="div" data-s style="left:112px; top:388px; width:1056px;"></div>
+
+  <!-- ───────── Q3 (행 388~509) ───────── -->
+  <div class="qn" data-x style="left:112px; top:406px;">Q3</div>
+  <div class="qq" data-x style="left:112px; top:434px;">Reasoning Embedding이<br>왜 Weave에 필요한가요?</div>
+  <div class="al" data-x style="left:300px; top:406px;">A.</div>
+  <div class="aa" data-x style="left:322px; top:406px;">일반 임베딩은 <b>비슷한 말</b>을 찾고, Reasoning Embedding은 <b>답에 필요한 기록</b>을 찾도록 학습합니다.<br>Weave의 요청은 일반 검색보다 불완전하므로, <b>답까지 이어 줄 중간 근거</b>를 찾는 것이 중요합니다.</div>
+  <div class="sl" data-x style="left:322px; top:454px;">보충</div>
+  <div class="ss" data-x style="left:358px; top:454px;">일반 검색에 강한 모델도 추론이 필요한 검색에서는 점수가 크게 떨어집니다<span class="sup">1</span>.<br>그래서 최근에는 <b>추론형 검색용 임베딩을 따로 학습시키는 연구</b>가 이어지고 있습니다<span class="sup">2</span>.</div>
+  <!-- 그림: 같은 모델, 두 벤치마크 (0~100 → 170px, 1.7px/점) -->
+  <div class="box" data-s style="left:940px; top:400px; width:230px; height:97px;"></div>
+  <div class="t11" data-x style="left:950px; top:406px; font-size:11px;">같은 임베딩 모델의 검색 점수<span class="sup">1</span></div>
+  <div class="t11" data-x style="left:950px; top:425px; color:var(--ink);">일반 검색 · BEIR</div>
+  <div class="t11" data-x style="left:950px; top:461px; color:var(--ink);">추론이 필요한 검색 · BRIGHT</div>
+  <svg class="app" style="left:950px; top:443px; width:210px; height:50px;" viewBox="0 0 210 50">
+    <line x1="0.5" y1="0" x2="0.5" y2="50" stroke="#DDD6EC" stroke-width="1"/>
+    <path d="M1 0 h96.3 a4 4 0 0 1 4 4 v4 a4 4 0 0 1 -4 4 h-96.3 z" fill="#A8A1B9"/>
+    <path d="M1 36 h27.1 a4 4 0 0 1 4 4 v4 a4 4 0 0 1 -4 4 h-27.1 z" fill="#6B4EFF"/>
+  </svg>
+  <div class="t12b" data-x style="left:1058px; top:441px;">59.0</div>
+  <div class="t12b" data-x style="left:989px; top:477px;">18.3</div>
+  <div class="t11" data-x style="left:1110px; top:478px; color:var(--muted-2); font-size:11px;">nDCG@10</div>
+  <div class="div" data-s style="left:112px; top:509px; width:1056px;"></div>
+
+  <!-- ───────── Q4 (행 509~630) ───────── -->
+  <div class="qn" data-x style="left:112px; top:527px;">Q4</div>
+  <div class="qq" data-x style="left:112px; top:555px;">임베딩으로 어떻게<br>‘연쇄 탐색’을 하나요?</div>
+  <div class="al" data-x style="left:300px; top:527px;">A.</div>
+  <div class="aa" data-x style="left:322px; top:527px;">찾은 기록의 단서를 탐색 메모에 더하고, 탐색 메모의 <b>찾을 것 · 확인한 단서 · 아직 필요한 정보</b>로<br>다음 근거를 찾습니다. <b>새 단서가 없으면 멈춥니다.</b></div>
+  <div class="sl" data-x style="left:322px; top:575px;">보충</div>
+  <div class="ss" data-x style="left:358px; top:575px;">질문과 앞서 찾은 기록을 함께 벡터로 바꿔 다음 기록을 찾는 방식<span class="sup">3</span>을 적용하고,<br>학습 데이터도 ‘질문 + 확인한 단서 → 다음 근거’와 헷갈리기 쉬운 오답으로 구성합니다<span class="sup">2</span>.</div>
+  <!-- 그림: 두 번의 검색 -->
+  <div class="box" data-s style="left:940px; top:521px; width:230px; height:97px;"></div>
+  <div class="t11p" data-x style="left:948px; top:533px;">1회차</div>
+  <div class="chipw" id="r1q" data-s style="left:980px; top:529px; width:38px;"></div>
+  <div class="t11" data-x style="left:980px; top:533px; width:38px; text-align:center; color:var(--ink); font-weight:600;">질문</div>
+  <div class="chipp" id="r1a" data-s style="left:1050px; top:529px; width:112px;"></div>
+  <img class="app" src="../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:1055px; top:533px; width:14px; height:14px;">
+  <div class="t11" data-x style="left:1072px; top:533px; font-size:10.5px; color:var(--ink); font-weight:700;">지은 집들이 · 3/15</div>
+  <div class="t11p" data-x style="left:948px; top:573px;">2회차</div>
+  <div class="chipw" id="r2q" data-s style="left:980px; top:569px; width:60px; border-color:#B7A6FF;"></div>
+  <div class="t11" data-x style="left:980px; top:573px; width:60px; text-align:center; color:var(--ink); font-weight:600; font-size:10.5px;">질문+3/15</div>
+  <div class="chipp" id="r2a" data-s style="left:1072px; top:565px; width:90px; height:30px; border-radius:10px;"></div>
+  <div class="photo" style="left:1076px; top:569px; width:30px; height:22px;"><img src="../assets/crops/ux2-wine-photo.png" alt=""></div>
+  <div class="t11" data-x style="left:1110px; top:573px; color:var(--ink); font-weight:700;">BABICH</div>
+  <div class="t11" data-x style="left:948px; top:601px; font-size:10.5px; color:var(--muted-2);">추론 검색 → 시간 필터 + OCR</div>
+
+  <div class="src" data-x style="top:642px; font-size:14px; line-height:19px;">* 출처: ¹ Su et al., "BRIGHT: A Realistic and Challenging Benchmark for Reasoning-Intensive Retrieval", ICLR 2025<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;² Shao et al., "ReasonIR: Training Retrievers for Reasoning Tasks", COLM 2025<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;³ Xiong et al., "Answering Complex Open-Domain Questions with Multi-Hop Dense Retrieval", ICLR 2021</div>
+
+  <svg class="links" id="links"></svg>
+</div>
+<script>
+(function () {
+  const S = document.getElementById('slide').getBoundingClientRect();
+  const R = id => { const r = document.getElementById(id).getBoundingClientRect(); return { l: r.left - S.left, t: r.top - S.top, r: r.right - S.left, b: r.bottom - S.top, w: r.width, h: r.height }; };
+  const svg = document.getElementById('links'); const NS = 'http://www.w3.org/2000/svg';
+  svg.innerHTML = `<defs><marker id="ah" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#6B4EFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  <marker id="ah2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#8B6BFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  <marker id="ahs" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#6B4EFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+  const path = (d, o = {}) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', o.c || '#6B4EFF'); p.setAttribute('stroke-width', o.w || 1.8); p.setAttribute('stroke-linecap', 'round'); if (o.dash) p.setAttribute('stroke-dasharray', o.dash); p.setAttribute('marker-end', `url(#${o.mk || 'ah'})`); svg.appendChild(p); };
+  const q1 = R('r1q'), a1 = R('r1a'), q2 = R('r2q'), a2 = R('r2a');
+  path(`M${q1.r + 4} ${q1.t + q1.h / 2} L${a1.l - 5} ${a1.t + a1.h / 2}`, { mk: 'ahs' });
+  path(`M${q2.r + 4} ${q2.t + q2.h / 2} L${a2.l - 5} ${a2.t + a2.h / 2}`, { mk: 'ahs' });
+  // 캘린더 칩 아래에서 내려와, 2회차 질문 칩의 오른쪽 위로 비스듬히 들어가도록 (끝 방향이 곡선과 자연스럽게 이어짐)
+  path(`M${a1.l + 20} ${a1.b + 1} C ${a1.l + 20} ${a1.b + 9}, ${q2.r + 2} ${q2.t - 9}, ${q2.r - 8} ${q2.t - 2}`, { c: '#8B6BFF', dash: '3 3', mk: 'ah2' });
+  window.pageReady = true;
+})();
+</script>
+</body>
+</html>

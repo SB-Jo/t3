@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>USER SCENARIO 1 — 어디에 뭘 적어놨더라?</title>
+<link rel="stylesheet" href="scenario.css">
+<style>
+/* 13차: 오른쪽 카드 역할 칩·공통 업무 칩(배경은 그림 층, 글자는 텍스트 상자), 답변 속 사실 밑줄 */
+.role-bg { position: absolute; z-index: 21; box-sizing: border-box; background: #F4F0FF; border: 1px solid #DDD2F7; border-radius: 10.5px; }
+.role-t  { position: absolute; z-index: 22; font-family: 'Inter', 'Noto Sans KR'; font-size: 10.8px; line-height: 17px; font-weight: 600; letter-spacing: -.015em; color: #6952BB; white-space: nowrap; }
+.role-t.ev { font-size: 11.5px; line-height: 19px; }
+.fact-link { text-decoration: underline; text-decoration-color: #C9B9FF; text-decoration-thickness: 1.4px; text-underline-offset: 3px; }
+</style>
+</head>
+<body>
+<script src="../../pages/icons.js"></script>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+  <img class="scene" src="scenes/scene-p6-home.png" alt="">
+
+  <div class="chip-prev" style="left:556.5px; width:167px;"></div>
+  <div class="t-label" data-x>USER SCENARIO 1</div>
+  <div class="t-title" data-x><span class="hl5">어디</span>에 뭘 적어놨더라?</div>
+  <div class="t-sub" data-x>회의에서 정한 순서부터 뒤늦게 받은 안내까지, 같은 업무에 관한 기록을 연결합니다.</div>
+
+  <!-- ① 통화 중 요청 -->
+  <img class="char big" id="charA" src="characters/p6-A.png" style="left:-6px; top:296px; width:424px; height:424px;">
+  <div class="t-who" data-x id="who1" style="left:96px; top:185px;">재웅 선배</div>
+  <div class="t-meta" data-x id="meta1" style="left:164px; top:186px;">통화 중 · 00:48</div>
+  <div class="t-say" data-x id="say1" style="left:64px; top:214px;">프로님, 어제 정한 <b>A사 시연 순서</b>랑<br><b>오늘 집합 시간</b> 좀 알려줄래요?</div>
+  <div class="pen" data-x style="left:296px; top:330px; font-size:22px;">노트였나… 메일이었나…</div>
+
+  <!-- ② 위로 올려 검색 -->
+  <div class="card pop" id="query" style="left:428px; top:247px; width:338px; height:58px; border-radius:20px;"></div>
+  <img class="app" src="../assets/weave-spool-6B4EFF.png" style="left:445px; top:264px; width:24px; height:24px; z-index:13;">
+  <div class="t-query" data-x id="qtext" style="left:477px; top:263px;">어제 A사 시연 준비</div>
+  <div class="pen" data-x id="pen6" style="left:664px; top:596px;">쓱!</div>
+
+  <!-- ③ 흩어진 기록 연결 -->
+  <div class="role-bg" id="ev-bg"></div><div class="role-t ev" data-x id="ev-t">A사 시연 준비</div>
+  <div class="role-bg" id="rl1-bg"></div><div class="role-t" data-x id="rl1-t">회의에서 정한 순서</div>
+  <div class="role-bg" id="rl2-bg"></div><div class="role-t" data-x id="rl2-t">이후 정리한 수정사항</div>
+  <div class="role-bg" id="rl3-bg"></div><div class="role-t" data-x id="rl3-t">뒤늦게 받은 집합 안내</div>
+  <div class="card" id="c1" style="left:840px; top:170px; width:306px; height:146px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" style="left:856px; top:183px; width:22px; height:22px; border-radius:6px; z-index:6;">
+  <div class="t-app" data-x style="left:886px; top:185px;">삼성노트</div>
+  <div class="t-meta" data-x style="left:946px; top:186px;">어제 오후 2:10</div>
+  <div class="t-ttl" data-x style="left:856px; top:213px;">A사 시연 준비회의</div>
+  <div class="inset" style="left:856px; top:243px; width:274px; height:62px; z-index:6;"></div>
+  <div class="t-body" data-x style="left:870px; top:252px;">시연 순서&nbsp;&nbsp;<b>설치 → 연결 → 사용 예시</b></div>
+  <div class="t-body" data-x style="left:870px; top:276px;">전체 시연&nbsp;&nbsp;<b>5분</b></div>
+
+  <div class="card" id="c2" style="left:840px; top:328px; width:306px; height:108px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:856px; top:341px; width:22px; height:22px; z-index:6;">
+  <div class="t-app" data-x style="left:886px; top:343px;">메일</div>
+  <div class="t-meta" data-x style="left:919px; top:344px;">나에게 보냄 · 어제 오후 6:20</div>
+  <div class="t-ttl" data-x style="left:856px; top:370px;">A사 시연 자료 — 내일 수정할 것</div>
+  <div class="t-body" data-x style="left:856px; top:399px;">7쪽 연결 화면 교체 · 9쪽 설명 축약</div>
+
+  <div class="card" id="c3" style="left:840px; top:448px; width:306px; height:110px;"></div>
+  <img class="app" src="../../assets/icons/app-kakao.png" style="left:856px; top:460px; width:22px; height:22px; border-radius:6px; z-index:6;">
+  <div class="t-app" data-x style="left:886px; top:462px;">나와의 채팅</div>
+  <div class="t-meta" data-x style="left:966px; top:463px;">어제 오후 8:55</div>
+  <div class="chatbg" id="cbg3" style="left:856px; top:489px; width:274px; height:56px; z-index:6;"></div>
+  <div class="ybubble" id="yb3" style="left:902px; top:493px; width:264px; height:48px; z-index:7;"></div>
+  <div class="t-chat" data-x id="yt3" style="left:914px; top:498px;">A사 시연, 내일 <b>8:40 1층 로비</b>.<br>충전 어댑터 챙기기.</div>
+
+  <!-- ④ 바로 답변 -->
+  <img class="char" id="charB" src="characters/p6-B.png" style="left:1104px; top:554px; width:170px; height:170px;">
+  <div class="t-say" data-x id="say4" style="left:858px; top:610px;"><b class="fact-link">설치 → 연결 → 사용 예시</b> 순서로<br><b class="fact-link">5분</b>이고, 집합은 <b class="fact-link">8시 40분</b>이에요!</div>
+</div>
+
+<script src="scenario.js"></script>
+<script>
+SC.run(async (sc) => {
+  const { R, el, bubble, thread, spark, hand, fit, moveTo, step, phone, back, front } = sc;
+  // 휴대폰: 통화 데모 화면(포인터 없는 중앙값 캡처, 563×1196)
+  // 캡처 속 메일 아이콘을 삼성 이메일 아이콘으로 바꾼 사본(9차)
+  const ph = phone('phone', 470, 186, 232, 'assets/screen-통화-galaxy.png', 563, 1196);
+
+  // ① 선배 목소리 말풍선 (이어폰 쪽으로 꼬리)
+  // 글자는 ③ 카드들처럼 왼쪽에 붙임(왼쪽 여백 20px), 말풍선은 7차처럼 넉넉히(글자 폭 + 80px) → 남는 공간은 오른쪽
+  const PAD = 20, EXTRA = 80;
+  const sayW = R('say1').w, headW = 22 + 8 + R('who1').w + 8 + R('meta1').w;
+  const bw = Math.max(sayW, headW) + EXTRA, bx = 44;
+  moveTo('say1', bx + PAD, null);
+  moveTo('who1', bx + PAD + 30, null);
+  moveTo('meta1', R('who1').r + 8, null);
+  bubble(back, { x: bx, y: 170, w: bw, h: 104, tail: { edge: 'bottom', at: 58, to: [100, 356], w: 26 } });
+  // 통화 앱 아이콘: 갤럭시 전화 아이콘 (9차, 이전 초록 원 + 흰 수화기)
+  { const ic = document.createElement('img'); ic.src = '../../assets/icons/galaxy/samsung-phone.png'; ic.className = 'app';
+    Object.assign(ic.style, { left: (bx + PAD) + 'px', top: '183px', width: '22px', height: '22px', zIndex: 6 });
+    document.getElementById('slide').appendChild(ic); }
+  // 이어폰에서 나오는 소리 결
+  const ear = [150, 459];
+  [[12, .95], [20, .7], [28, .45]].forEach(([r, o]) => { const a0 = 195 * Math.PI / 180, a1 = 255 * Math.PI / 180;
+    el(front, 'path', { d: `M${ear[0] + r * Math.cos(a0)} ${ear[1] + r * Math.sin(a0)} A${r} ${r} 0 0 1 ${ear[0] + r * Math.cos(a1)} ${ear[1] + r * Math.sin(a1)}`, fill: 'none', stroke: '#8B6BFF', 'stroke-width': 2.2, 'stroke-linecap': 'round', opacity: o }); });
+  // 생각 방울 (머리 → 손글씨)
+  [[289, 360, 3.4], [280, 373, 2.4]].forEach(([cx, cy, r]) => el(back, 'circle', { cx, cy, r, fill: '#fff', stroke: '#CFC3FF', 'stroke-width': 1.3 }));
+
+  // ② 검색창 커서 + 보내기 버튼, 빨간 버튼을 밀어 올리는 손
+  const q = R('qtext');
+  const cur = document.createElement('div'); cur.className = 'cursor'; Object.assign(cur.style, { left: (q.r + 2) + 'px', top: (q.t + 4) + 'px', height: '19px' }); document.getElementById('slide').appendChild(cur);
+  el(front, 'circle', { cx: 745, cy: 276, r: 15, fill: '#6B4EFF' });
+  el(front, 'path', { d: 'M745 284V269M739 274.5l6-6 6 6', fill: 'none', stroke: '#fff', 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  // ② 보내기 버튼 누름 (덱 공통 터치 표시: 손 + 반짝임 선 3개, 8차)
+  spark(front, [745, 276], 15 + 3, [213, 258, 303], [4.8, 5.9, 4.8]);
+  hand([748, 279], -12);
+  const btn = ph.at(281, 1011.5);                       // 캡처 속 빨간 '위로 올려 기억 검색' 버튼
+  // 밀어 올리기 표시: 5쪽과 같은 모양 — 몸통과 머리가 붙은 화살표, 손은 화살표 아래 (통화 종료 버튼은 누르지 않음)
+  const ax = btn[0] + 49, ay0 = btn[1] + 38, ay1 = btn[1] - 14;
+  el(front, 'path', { d: `M${ax - 3.4} ${ay0} L${ax - 3.4} ${ay1 + 12} L${ax - 9.5} ${ay1 + 12} L${ax} ${ay1} L${ax + 9.5} ${ay1 + 12} L${ax + 3.4} ${ay1 + 12} L${ax + 3.4} ${ay0} Z`, fill: 'url(#up-front)' });
+  const tip = [ax, ay0 + 3];
+  spark(front, [tip[0], tip[1] + 4.2], 5.6, [192, 348], [4.8, 4.8]);
+  hand(tip, 0);
+  moveTo('pen6', ax + 9, ay1 - 6);
+
+  { const cb = R('cbg3'); const yb = fit('yt3', 'yb3', { px: 12, py: 5, anchor: 'right', right: cb.r - 10 }); moveTo('yb3', null, cb.t + (cb.h - yb.h) / 2); moveTo('yt3', null, cb.t + (cb.h - yb.h) / 2 + 5); }
+  // ③ 결과 줄 → 원래 기록 카드로 이어지는 실
+  const rows = [416.5, 600.5, 784.5].map((y) => ph.at(514, y));
+  const phoneR = R('phone').r;
+  ['c1', 'c2', 'c3'].forEach((id, i) => { const c = R(id); thread(back, [phoneR + 1, rows[i][1]], [c.l - 2, c.cy], { dash: '5 4' }); });
+
+
+  // 13차: 공통 업무(A사 시연 준비) 칩에서 세 기록 카드로 — 6쪽 실과 같은 점선(흰 테두리 + 보라 5·4 점선 + 끝점)
+  const cards = ['c1', 'c2', 'c3'].map(R);
+  [['c1', 'rl1'], ['c2', 'rl2'], ['c3', 'rl3']].forEach(([cid, id]) => { const c = R(cid); fit(id + '-t', id + '-bg', { px: 9, py: 2, anchor: 'right', right: c.r - 12, top: c.b - 10.5 }); });
+  const an = fit('ev-t', 'ev-bg', { px: 11, py: 3, anchor: 'right', right: cards[0].r, top: cards[0].t - 12.5 });
+  const sx = cards[0].r + 24, rr = 12, y0 = an.cy, y3 = cards[2].cy;
+  const spine = `M${an.r + 2} ${y0} H${sx - rr} Q${sx} ${y0} ${sx} ${y0 + rr} V${y3 - rr} Q${sx} ${y3} ${sx - rr} ${y3} H${cards[2].r + 2}`;
+  const branches = cards.slice(0, 2).map((c) => `M${sx} ${c.cy - rr} Q${sx} ${c.cy} ${sx - rr} ${c.cy} H${c.r + 2}`);
+  [spine, ...branches].forEach((d) => el(back, 'path', { d, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 4.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: .9 }));
+  [spine, ...branches].forEach((d) => el(back, 'path', { d, fill: 'none', stroke: '#8B6BFF', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-dasharray': '5 4' }));
+  [[an.r + 2, y0], ...cards.map((c) => [c.r + 2, c.cy])].forEach(([x, y]) => el(back, 'circle', { cx: x, cy: y, r: 3.4, fill: '#8B6BFF', stroke: '#fff', 'stroke-width': 1.5 }));
+
+  // ④ 답변 말풍선 (웃는 성빈 쪽으로 꼬리)
+  const b = R('charB');
+  const s4 = R('say4');
+  bubble(back, { x: 840, y: 594, w: s4.r + 20 - 840, h: 74, tail: { edge: 'right', at: 44, to: [b.l + 44, 646], w: 20 } });
+
+  step(1, '통화 중 요청', bx - 12, 157);
+  step(2, '위로 올려 검색', 416, 233);
+  step(3, '업무 관련 기록을 엮어 확인', 830, 157);
+  step(4, '필요한 내용을 확인하고 바로 답변', 830, 581);
+});
+</script>
+</body>
+</html>
