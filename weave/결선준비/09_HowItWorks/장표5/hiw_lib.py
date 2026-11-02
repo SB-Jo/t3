@@ -18,6 +18,11 @@ NS = {
     'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
 }
 FONTDIR = Path(__file__).resolve().parents[2] / '06_에셋' / '글꼴'
+# 덱 글꼴을 SamsungOneKorean으로 바꾸면(11_중간본/samsung_fonts.remap_prs) 글자 폭도 그 글꼴로 잼.
+# SamsungOneKorean 한 벌에 한글과 영문·숫자가 함께 있어 모든 글자를 같은 파일로 잼. 굵기: 보통 400, Medium 500, SemiBold·Bold 700.
+SAMSUNG = True
+SAMSUNG_FILE = {400: 'SamsungOneKorean-400.woff2', 500: 'SamsungOneKorean-500.woff', 700: 'SamsungOneKorean-700.woff'}
+SAMSUNG_W = {400: 400, 500: 500, 600: 700, 700: 700}
 
 # 굵기 → (영문 글꼴, 한글 글꼴, b 속성). 덱에서 쓰는 이름 그대로.
 FACES = {
@@ -49,6 +54,8 @@ def el(tag, parent=None, **attrs):
 # ------------------------------------------------------------------ 글자 폭
 @lru_cache(None)
 def _font(fam, w):
+    if SAMSUNG and fam != 'pen':
+        return ImageFont.truetype(str(FONTDIR / SAMSUNG_FILE[SAMSUNG_W[w]]), size=200)
     f = {'inter': f'Inter-{w}.ttf', 'noto': f'NotoSansKR-{w}.ttf', 'pen': 'NanumPenScript-Regular.ttf'}[fam]
     return ImageFont.truetype(str(FONTDIR / f), size=200)
 

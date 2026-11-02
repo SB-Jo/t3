@@ -136,3 +136,29 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 #spark path { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
 #dbg { position: absolute; inset: 0; z-index: 200; pointer-events: none; }
 #dbg i { position: absolute; border: 2px solid #ff2d55; }
+
+/* ── v2 (2026-11-02): 타자 → 입력하기 → 검색 결과까지 ─────────────── */
+.gbox .tx { position: relative; }
+#q .sel { background: rgba(26,115,232,.22); border-radius: 3px; }
+#gsweep { position: absolute; left: 47px; bottom: 9px; width: 120px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, #A67CF2, #6B4EFF);
+  transform-origin: 0 50%; transform: scaleX(0); opacity: 0; }
+.glogo, .gtop, .gbox { will-change: opacity, transform; }
+.gload { position: absolute; left: 0; top: 96px; width: 100%; height: 3px; background: linear-gradient(90deg, #1a73e8, #5aa2ff); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; z-index: 6; }
+#gres { position: absolute; left: 0; right: 0; top: 168px; padding: 0 16px; opacity: 0; }
+#gres > * { opacity: 0; }
+.gchips { display: flex; gap: 8px; margin-bottom: 12px; }
+.gchips span { padding: 7px 14px; border-radius: 16px; border: 1px solid #DADCE0; font-size: 13px; font-weight: 500; color: #3c4043; }
+.gchips .on { background: #E8F0FE; border-color: #E8F0FE; color: #1967D2; }
+.res { position: relative; display: flex; gap: 14px; padding: 14px; margin-bottom: 10px; border-radius: 18px; border: 1px solid #EEEBF5; background: #fff; }
+.res .bt { width: 62px; height: 82px; border-radius: 12px; background: #F3F2F7; display: grid; place-items: center; flex: none; }
+.res .n { font-size: 14.5px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; color: var(--ink); }
+.res .p { font-size: 13px; color: #8E88A0; margin-top: 4px; }
+.res .pr { font-size: 16px; font-weight: 700; margin-top: 6px; color: var(--ink); font-family: 'SamsungOne', 'SamsungOneKorean', sans-serif; }
+.res .pr i { font-style: normal; color: #E5484D; margin-right: 6px; }
+.res .hl { padding: 0 1px; }
+#sug .b { transform-origin: 50% 50%; }
+.k.snd { transition: none; }
+.rel { margin-top: 4px; }
+.rel .rh { font-size: 15px; font-weight: 700; color: var(--ink); margin: 2px 2px 9px; }
+.rel .rc { display: flex; flex-wrap: wrap; gap: 8px; }
+.rel .rc span { display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 18px; background: #F1F3F4; font-size: 13px; color: #3c4043; white-space: nowrap; }

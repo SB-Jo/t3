@@ -1,7 +1,8 @@
 // 표지 루프 렌더(08_인트로영상/tools/render.cjs를 옮겨 고침): 소스/index.html의 render(t)를 프레임마다 탐색해 찍고 ffmpeg로 묶는다.
 // 사용:
 //   node tools/render.cjs --stills 0,2.3,6.5             → out/stills/t00.00.png …
-//   node tools/render.cjs --fps 30 --jobs 8 [--blur] [--out 표지_루프.mp4]
+//   node tools/render.cjs --fps 30 --jobs 8 [--blur] [--out 표지_루프.mp4] [--scale 2] [--crf 16]
+//     --scale 2 : CSS 1920×1080 화면을 두 배 화소(3840×2160)로 찍음(v2 기본값)
 //     프레임 시각은 0, 1/fps, … , 길이 - 1/fps (길이 시각 = 0 시각이라 넣지 않음 → 이어 붙여도 끊김 없음)
 //     --jobs N : 브라우저 N개가 프레임을 나눠 찍음(out/_frames/*.jpg, 끝나면 지움)
 //     --blur   : 두 배 빠르기로 찍어 이웃 프레임을 섞음(움직임 흐림, 셔터 180°)
@@ -17,9 +18,10 @@ const FR = path.join(OUT, '_frames');
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i < 0 ? d : (process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : true); };
 const run = (cmd, args) => new Promise((res, rej) => { const p = spawn(cmd, args, { stdio: 'inherit' }); p.on('close', c => c === 0 ? res() : rej(new Error(`${cmd} ${c}`))); });
 
+const SCALE = Number(arg('--scale', 2));
 async function openPage(debug = false) {
   const browser = await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox', '--force-color-profile=srgb', '--font-render-hinting=none', '--disable-lcd-text'] });
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: SCALE });
   page.on('pageerror', e => console.error('PAGE ERROR', e.message));
   page.on('console', m => { if (m.type() === 'error') console.error('CONSOLE', m.text()); });
   await page.goto(pathToFileURL(path.join(ROOT, '소스', 'index.html')).href + (debug ? '?debug=1' : ''));
@@ -36,7 +38,7 @@ async function openPage(debug = false) {
     const from = Number(arg('--from', 0)), i0 = Number(arg('--i0')), i1 = Number(arg('--i1'));
     for (let i = i0; i < i1; i++) {
       await page.evaluate(t => window.__seek(t), from + i / rate);
-      await page.screenshot({ path: path.join(FR, `f${String(i).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 96 });
+      await page.screenshot({ path: path.join(FR, `f${String(i).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 95 });
     }
     await browser.close();
     return;
@@ -70,7 +72,7 @@ async function openPage(debug = false) {
     for (let k = 0; k < jobs; k++) {
       const i0 = k * per, i1 = Math.min(n, i0 + per);
       if (i0 >= i1) break;
-      ws.push(run(process.execPath, [__filename, '--worker', '--fps', String(fps), ...(sub > 1 ? ['--blur'] : []), '--from', String(from), '--i0', String(i0), '--i1', String(i1)]));
+      ws.push(run(process.execPath, [__filename, '--worker', '--scale', String(SCALE), '--fps', String(fps), ...(sub > 1 ? ['--blur'] : []), '--from', String(from), '--i0', String(i0), '--i1', String(i1)]));
     }
     const tick = setInterval(() => process.stdout.write(`\rframes ${fs.readdirSync(FR).length}/${n}  ${((Date.now() - t0) / 1000).toFixed(0)}s`), 2000);
     await Promise.all(ws); clearInterval(tick);
@@ -83,7 +85,7 @@ async function openPage(debug = false) {
     const vf = [];
     if (sub > 1) vf.push('tmix=frames=2:weights=1 1', `fps=${fps}`);
     vf.push('scale=in_range=full:out_range=tv', 'format=yuv420p');
-    ff.push('-vf', vf.join(','), '-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-profile:v', 'high', '-tune', 'animation',
+    ff.push('-vf', vf.join(','), '-c:v', 'libx264', '-preset', 'slow', '-crf', String(arg('--crf', 16)), '-profile:v', 'high', '-level:v', SCALE > 1 ? '5.1' : '4.2', '-g', '60', '-tune', 'animation',
       '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709', '-color_range', 'tv', '-movflags', '+faststart');
     if (audio) ff.push('-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '256k', '-t', String(to - from));
     ff.push(out);
