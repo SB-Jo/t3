@@ -8,6 +8,7 @@
 import argparse
 import copy
 import importlib
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -20,6 +21,8 @@ from hiw_lib import q
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+sys.path.insert(0, str(ROOT / '11_중간본'))
+import samsung_fonts  # noqa: E402  덱과 같은 글꼴(SamsungOneKorean)로 저장
 DECK = ROOT / '02_PPT' / 'Weave_결선.pptx'
 OUT = HERE / 'out'
 ALL = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'c3']
@@ -107,6 +110,7 @@ def render(sc, dst):
         prs.part.drop_rel(s.get(q('r:id')))
         lst.remove(s)
     _, warns = add_steps(prs, sc, layout, note_tpl)
+    samsung_fonts.remap_prs(prs)
     prs.save(str(dst))
     return len(sc.steps), warns
 

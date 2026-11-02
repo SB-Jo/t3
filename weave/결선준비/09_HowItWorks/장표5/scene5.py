@@ -164,12 +164,13 @@ def fit_pt(text, maxw, pt=9.5, weight='b', lo=7.5):
 
 # ------------------------------------------------------------------ 위 띠(01~04)
 STAGES = [('01', '순간 감지'), ('02', '질문 다시 쓰기'), ('03', '연쇄 탐색'), ('04', '전달')]
+STAGES0 = [('00', '사전 준비')] + STAGES        # 00판: 기록을 미리 벡터 + 메타데이터로 저장하는 단계까지
 
 
-def bar_layout():
-    widths = [24 + 8 + tw(ko, 10.5, 'b') + 22 for _, ko in STAGES]
-    gap = 30
-    total = sum(widths) + gap * (len(STAGES) - 1)
+def bar_layout(stages=STAGES):
+    widths = [24 + 8 + tw(ko, 10.5, 'b') + 22 for _, ko in stages]
+    gap = 30 if len(stages) <= 4 else 28
+    total = sum(widths) + gap * (len(stages) - 1)
     x = 720 - total / 2
     out = []
     for w in widths:
@@ -185,16 +186,18 @@ def topbar_prims(h):
     out = [R('top/chip', 40, y0 + 6, cw, 28, prst='roundRect', fill=PURPLE, line=None),
            T('top/chip_t', 40, y0 + 6, cw, 28, 'HOW IT WORKS', size=10.5, color='FFFFFF', weight='sb', align='c', anchor='ctr',
              spc=0.5)]
-    lay = bar_layout()
+    stages = h.get('stages', STAGES)
+    ids = [s_ for s_, _ in stages]
+    lay = bar_layout(stages)
     x0, x1 = lay[0][0], lay[-1][0] + lay[-1][1]
     out.append(R('top/bar', x0 - 12, y0, x1 - x0 + 24, hh, prst='roundRect', fill='FFFFFF', alpha=94, line=LINE,
                  shadow=S.L.SHADOW_SOFT))
     cur, done = h.get('cur'), h.get('done', set())
     if cur:
-        i = [s for s, _ in STAGES].index(cur)
+        i = ids.index(cur)
         x, w = lay[i]
         out.append(R('top/hl', x - 4, y0 + 4, w + 8, hh - 8, prst='roundRect', fill=LAV, line=RING, line_w=1.6, glow=(8, RING, 30)))
-    for i, ((no, ko), (x, w)) in enumerate(zip(STAGES, lay)):
+    for i, ((no, ko), (x, w)) in enumerate(zip(stages, lay)):
         state = 'cur' if no == cur else ('done' if (no in done or h.get('all')) else 'todo')
         bf, bt, lc, lw = {'cur': (PURPLE, 'FFFFFF', INK, 'b'), 'done': ('DCD3FF', PURPLE, PURPLE, 'b'),
                           'todo': ('F1EEF8', 'C3BDD2', 'BDB7CC', 'sb')}[state]
@@ -203,10 +206,11 @@ def topbar_prims(h):
         out.append(T('top/bn%s' % no, x + 8, cy - 11, 22, 22, '✓' if state == 'done' else no, size=8, color=bt, weight='b',
                      align='c', anchor='ctr'))
         out.append(T('top/l%s' % no, x + 36, y0, w - 34, hh, ko, size=10.5, color=lc, weight=lw, anchor='ctr'))
-        if i < len(STAGES) - 1:
-            out.append(T('top/a%d' % i, x + w + 4, y0, 22, hh, '→', size=10, color='C9C0E8', align='c', anchor='ctr'))
+        if i < len(stages) - 1:
+            gx_ = (lay[i + 1][0] - x - w)
+            out.append(T('top/a%d' % i, x + w + gx_ / 2 - 11, y0, 22, hh, '→', size=10, color='C9C0E8', align='c', anchor='ctr'))
     if h.get('loop'):
-        (x2, w2), (x3, w3) = lay[1], lay[2]
+        (x2, w2), (x3, w3) = lay[ids.index('02')], lay[ids.index('03')]
         a, b = (x3 + w3 / 2, y0 + hh - 1), (x2 + w2 / 2, y0 + hh - 1)
         on = h.get('loop_on')
         col = PURPLE if on else '9A90C8'
@@ -856,8 +860,10 @@ def scatter(items, rect, avoid, seed):
 
 
 # ------------------------------------------------------------------ 일반 검색 판(실패): 키워드 검색 / 임베딩 검색 / 둘을 합친 일반 검색
-def search_panel(name, y, title, pill, query, words, bars, label=None, under=False):
-    """제목 + 회색 알약 + 검색어(같은 단어엔 형광펜, 임베딩이면 점선 밑줄) + 숫자 막대. 돌려줌: (원시 목록, 실이 나가는 점, 높이)."""
+def search_panel(name, y, title, pill, query, words, bars, label=None, under=False, x=None, w=None):
+    """제목 + 회색 알약 + 검색어(같은 단어엔 형광펜, 임베딩이면 점선 밑줄) + 숫자 막대. 돌려줌: (원시 목록, 실이 나가는 점, 높이).
+    x, w를 주면 그 자리·폭으로(키워드·임베딩을 나란히 놓는 실패 장)."""
+    EX, EW = (globals()['EX'] if x is None else x), (globals()['EW'] if w is None else w)
     inner = EW - 32
     ql = wrap(query, 10.5, inner - 24, 'm')[:2]
     qh = 14 + 20 * len(ql)
@@ -896,6 +902,31 @@ def search_panel(name, y, title, pill, query, words, bars, label=None, under=Fal
     else:
         port = (EX + EW - 2, qy + qh / 2)
     return out, port, h
+
+
+def rank_prims(name, x, y, n, fill='8E88A0'):
+    return [R(name + '/c', x, y, 26, 26, prst='ellipse', fill=fill, line='FFFFFF', line_w=1.6),
+            T(name + '/t', x, y, 26, 26, str(n), size=10, color='FFFFFF', weight='b', align='c', anchor='ctr')]
+
+
+VEC_COLS = ['F1ECFF', 'DCD3FF', 'B9A6FF', '8B6BFF', '5A3FE0']       # 벡터 칸 색(옅은 → 진한 보라, 노랑 없음)
+
+
+def vec_prims(name, x, y, n, cw, ch, seed, gap=2):
+    """벡터를 색 칸 줄로(Jay Alammar의 단어 임베딩 그림처럼). 칸 색은 글자에서 나온 값(같은 기록이면 늘 같음)."""
+    import hashlib
+    hv = hashlib.md5(seed.encode('utf-8')).digest()
+    return [R('%s/c%d' % (name, i), x + i * (cw + gap), y, cw, ch, prst='roundRect', radius=2.5,
+              fill=VEC_COLS[hv[i % len(hv)] % len(VEC_COLS)], line=None) for i in range(n)]
+
+
+def short_date(meta):
+    """'2026. 3. 15 (일) 20:14' → '3/15 (일) 20:14', '2026. 3. 14' → '3/14'."""
+    import re
+    m = re.match(r'\d{4}\. (\d{1,2})\. (\d{1,2})(?: \((.)\))?(?: (\d{1,2}:\d{2}))?', meta or '')
+    if not m:
+        return meta
+    return '%s/%s' % (m.group(1), m.group(2)) + (' (%s)' % m.group(3) if m.group(3) else '') + (' ' + m.group(4) if m.group(4) else '')
 
 
 def underline_prims(name, rect, color=PURPLE2):
@@ -949,6 +980,162 @@ def build(spec):
     def thread_to(p0, box):
         return route_elbow(p0, box)
 
+    def pair_items():
+        """키워드 검색(왼쪽)과 임베딩 검색(오른쪽)을 한 장에 나란히. 왼쪽은 같은 단어에 형광펜,
+        오른쪽은 임베딩 공간에서 질문 점 둘레(점선 원)의 가장 가까운 기록. 답에 필요한 기록은 원 밖 먼 곳."""
+        PR = dict(F.get('pair', {}))
+        HW, GX_ = PR.get('hw', 480), PR.get('gap', 84)
+        LX0 = PR.get('x', 640)
+        RX0 = LX0 + HW + GX_
+        TOP = PR.get('top', 150)
+        kwp, _, kwh = search_panel('kw', TOP, '키워드 검색', 'BM25', F['query'], F['words'], False, x=LX0, w=HW)
+        ebp, _, ebh = search_panel('emb', TOP, '임베딩 검색', PR.get('emb_pill', '가장 가까운 뜻'), F['query'], [], False, under=True,
+                                   x=RX0, w=HW)
+        sc.put('kw', kwp)
+        sc.put('emb', ebp)
+        under, over, al = [], ['kw', 'emb'], {}
+        anim = {'kw': dict(kind='rise', delay=0, dur=420), 'emb': dict(kind='rise', delay=150, dur=420)}
+        # 왼쪽: 같은 단어가 든 기록(형광펜). 판 아래 나란히, 순위 동그라미, 이유 태그는 카드 아래
+        K = F['kw']
+        ws = [REC[k]['w'] for k in K['ranks']]
+        n = len(ws)
+        gapc = PR.get('kw_gap', 34)
+        x = LX0 + (HW - sum(ws) - gapc * (n - 1)) / 2
+        ry = TOP + kwh + PR.get('kw_dy', 64)
+        kbot = ry
+        for i, k in enumerate(K['ranks']):
+            pr, h, pos = card_at(k, x, ry, style='gray')
+            w_ = REC[k]['w']
+            sc.put('kw.res.' + k, pr)
+            sx_ = LX0 + HW / 2 + (i - (n - 1) / 2) * 96
+            th = 'kw.th%d' % (i + 1)
+            sc.put(th, [C(th + '/l', vcurve((sx_, TOP + kwh + 1), (x + w_ / 2, ry - 2)), w=1.8, color='B9B3C8')])
+            rk = 'kw.rank%d' % (i + 1)
+            sc.put(rk, rank_prims('krank%d' % (i + 1), x - 13, ry - 12, i + 1))
+            over += ['kw.res.' + k, rk]
+            under.append(th)
+            anim[th] = dict(kind='wipe_in', dir='down', delay=380 + 140 * i, dur=380)
+            box = (x, ry, w_, h)
+            if K.get('marks', {}).get(k):
+                marks_at(pos, K['marks'][k], 'kw.mk.' + k, alpha=30)
+                over.append('kw.mk.' + k)
+                anim['kw.mk.' + k] = dict(kind='wipe_in', dir='left', delay=700 + 120 * i, dur=360)
+            if K.get('tags', {}).get(k):
+                sc.put('kw.tag.' + k, tag_box(box, K['tags'][k], where='br', name='ktag.' + k, pt=11))
+                over.append('kw.tag.' + k)
+                anim['kw.tag.' + k] = dict(kind='zoom_in', delay=1050 + 150 * i, dur=280)
+            kbot = max(kbot, ry + h)
+            x += w_ + gapc
+        if PR.get('kw_note'):
+            sc.put('kw.note', [T('kw.note/t', LX0, kbot + 52, HW, 24, PR['kw_note'], size=11, color=SUB, weight='sb', align='c',
+                                 anchor='ctr')])
+            over.append('kw.note')
+            anim['kw.note'] = dict(kind='fade_in', delay=1400, dur=400)
+        # 오른쪽: 임베딩 공간. 질문도 점 하나로 바뀌고, 그 둘레(점선 원)에 가장 가까운 기록이 결과
+        E_ = F['emb']
+        my0 = TOP + ebh + PR.get('map_dy', 28)
+        mh = PR.get('map_h', 246)
+        sx, sy = RX0 + PR.get('star_x', 150), my0 + PR.get('star_y', 128)
+        rr = PR.get('ring_r', 100)
+        sc.put('emap', [R('emap/bg', RX0, my0, HW, mh, prst='roundRect', radius=18, fill='FFFFFF', alpha=72, line=LINE, line_w=1.0)])
+        sc.put('emap.ring', [R('emap/ring', sx - rr, sy - rr, 2 * rr, 2 * rr, prst='ellipse', fill=LAV, alpha=60, line=PURPLE2,
+                                line_w=1.5, dash='dash')])
+        qx0 = RX0 + 44
+        sc.put('emap.link', [C('emap/link', [(qx0, TOP + ebh + 1), (qx0, sy - 8), (sx - 70, sy), (sx - 18, sy)], w=1.6, color=PURPLE2,
+                               dash='sysDash', tail='triangle')])
+        sc.put('emap.q', [R('emap/q', sx - 14, sy - 14, 28, 28, prst='star5', fill=PURPLE, line='FFFFFF', line_w=1.2, glow=(8, RING, 40)),
+                          T('emap/q_t', sx - 70, sy + 8, 48, 18, '질문', size=9.5, color=PURPLE, weight='b', align='r', anchor='ctr')])
+        under += ['emap', 'emap.ring', 'emap.link']
+        over.append('emap.q')
+        anim.update({'emap': dict(kind='fade_in', delay=300, dur=400), 'emap.link': dict(kind='wipe_in', dir='down', delay=560, dur=420),
+                     'emap.q': dict(kind='zoom_in', delay=900, dur=300), 'emap.ring': dict(kind='zoom_in', delay=1150, dur=420)})
+        offs = PR.get('near', [(42, -48), (64, 42)])
+        TW_, TH_ = PR.get('thumb', (70, 52))
+        taken = []
+        for i, k in enumerate(E_['ranks']):
+            dx, dy = offs[i]
+            cx_, cy_ = sx + dx, sy + dy
+            x0, y0 = cx_ - TW_ / 2, cy_ - TH_ / 2
+            img = REC[k]['img']
+            sc.put('emb.res.' + k, [R(k + '/bg', x0 - 4, y0 - 4, TW_ + 8, TH_ + 8, prst='roundRect', radius=10, fill='FFFFFF',
+                                      line=GRAY_LINE, line_w=1.4, shadow=S.L.SHADOW_SOFT),
+                                    P(k + '/img', img, x0, y0, TW_, TH_, radius=7, crop=S._fit_crop(img, TW_, TH_))])
+            ln_ = (dx * dx + dy * dy) ** 0.5
+            ux, uy = dx / ln_, dy / ln_
+            ta = (sx + ux * 15, sy + uy * 15)
+            tb = (cx_ - ux * min(TW_ / 2 / max(abs(ux), 1e-3), TH_ / 2 / max(abs(uy), 1e-3)) - ux * 5,
+                  cy_ - uy * min(TW_ / 2 / max(abs(ux), 1e-3), TH_ / 2 / max(abs(uy), 1e-3)) - uy * 5)
+            ln = 'emb.ln%d' % (i + 1)
+            sc.put(ln, [C(ln + '/l', [ta, (ta[0] + (tb[0] - ta[0]) / 3, ta[1] + (tb[1] - ta[1]) / 3),
+                                      (ta[0] + 2 * (tb[0] - ta[0]) / 3, ta[1] + 2 * (tb[1] - ta[1]) / 3), tb], w=2.0, color=PURPLE2)])
+            rk = 'emb.rank%d' % (i + 1)
+            sc.put(rk, rank_prims('erank%d' % (i + 1), x0 - 4 - 34, cy_ - 13, i + 1))
+            lab = E_['tags'][k]
+            tgw = tw(lab, 10.5, 'sb') + 22
+            ty_ = (y0 - 4 - 8 - 26) if dy < 0 else (y0 + TH_ + 4 + 8)
+            tg = 'emb.tag.' + k
+            sc.put(tg, chip_prims('etag.' + k, cx_ - tgw / 2, ty_, lab, style='grayfill', pt=10.5, h=26, padx=11, weight='sb')[0])
+            under.append(ln)
+            over += ['emb.res.' + k, rk, tg]
+            anim[ln] = dict(kind='wipe_in', dir='right' if dx > 0 else 'left', delay=1350 + 150 * i, dur=300)
+            anim[rk] = dict(kind='zoom_in', delay=1500 + 150 * i, dur=260)
+            anim[tg] = dict(kind='zoom_in', delay=1700 + 150 * i, dur=280)
+            taken += [(x0 - 40, y0 - 8, TW_ + 48, TH_ + 16), (cx_ - tgw / 2 - 6, ty_ - 4, tgw + 12, 34)]
+        # 결과 밖의 답: 질문 점에서 먼 곳(점선 테두리 + 먼저 알아야 할 단서 태그)
+        M = F['miss']
+        mk_ = M['key']
+        fw = S.frag_w(REC[mk_]['title'], chip_text(REC[mk_]))
+        fx = RX0 + HW - fw - PR.get('miss_dx', 18)
+        fy = sy - S.FRAG_H / 2 + PR.get('miss_dy', 0)
+        sc.put('missf.' + mk_, frag_at(mk_, mk_, fx, fy))
+        al['missf.' + mk_] = 60
+        mt = M['tag']
+        mtw = tw(mt, 10, 'sb') + 24
+        sc.put('emap.far', [C('emap/far', [(sx + 16, sy), (sx + 70, sy), (fx - 50, fy + S.FRAG_H / 2), (fx - 12, fy + S.FRAG_H / 2)],
+                              w=1.5, color=GRAY_LINE, dash='sysDash')])
+        sc.put('miss', [R('miss/r', fx - 8, fy - 8, fw + 16, S.FRAG_H + 16, prst='roundRect', radius=18, fill=None, line=GRAY_LINE,
+                          line_w=1.6, dash='dash'),
+                        R('miss/tag', fx + fw / 2 - mtw / 2, fy + S.FRAG_H + 16, mtw, 28, prst='roundRect', fill='EFECF4', line=None),
+                        T('miss/tag_t', fx + fw / 2 - mtw / 2, fy + S.FRAG_H + 16, mtw, 28, mt, size=10, color=SUB, weight='sb',
+                          align='c', anchor='ctr')])
+        mlab = PR.get('map_label', '가까울수록 비슷한 뜻')
+        lw_ = tw(mlab, 9, 'sb') + 4
+        sc.put('emap.lab', [T('emap/lab', RX0 + HW - 16 - lw_, my0 + mh - 28, lw_, 18, mlab, size=9, color=MUTE, weight='sb', align='r',
+                              anchor='ctr')])
+        under.append('emap.far')
+        over += ['missf.' + mk_, 'miss', 'emap.lab']
+        anim.update({'emap.far': dict(kind='wipe_in', dir='right', delay=2050, dur=450), 'miss': dict(kind='fade_in', delay=2250, dur=450),
+                     'emap.lab': dict(kind='fade_in', delay=1250, dur=400)})
+        taken += [(fx - 12, fy - 12, fw + 24, S.FRAG_H + 60), (RX0 + HW - 20 - lw_, my0 + mh - 32, lw_ + 8, 26), (sx - 74, sy - 18, 92, 50)]
+        # 흐린 점(다른 기록들): 원 밖에만, 다른 것과 겹치지 않게(씨앗 고정)
+        import random
+        rnd = random.Random(spec.get('seed', 11) + 7)
+        dots = []
+        for _ in range(600):
+            if len(dots) >= PR.get('n_dots', 16):
+                break
+            px_, py_ = rnd.uniform(RX0 + 18, RX0 + HW - 18), rnd.uniform(my0 + 16, my0 + mh - 16)
+            if ((px_ - sx) ** 2 + (py_ - sy) ** 2) ** 0.5 < rr + 14:
+                continue
+            if px_ < qx0 + 26 and py_ < sy + 8:
+                continue
+            if abs(py_ - sy) < 10 and sx < px_ < fx:
+                continue
+            if any(_overlap((px_ - 6, py_ - 6, 12, 12), t_, 4, 4) for t_ in taken) or any(abs(px_ - a) < 28 and abs(py_ - b) < 24
+                                                                                             for a, b in dots):
+                continue
+            dots.append((px_, py_))
+        sc.put('emap.dots', [R('emap/d%d' % j, a - 4.5, b - 4.5, 9, 9, prst='ellipse', fill='D6D0E4', line=None)
+                             for j, (a, b) in enumerate(dots)])
+        under.append('emap.dots')
+        anim['emap.dots'] = dict(kind='fade_in', delay=500, dur=500)
+        tot_h = max(my0 + mh, kbot + 90) - TOP
+        sc.put('pair.div', [R('pair/div', LX0 + HW + GX_ / 2 - 0.6, TOP + 8, 1.2, tot_h - 16, fill=LINE2, line=None)])
+        under.insert(0, 'pair.div')
+        box = union([sc.box[k_] for k_ in under + over])
+        recs = list(K['ranks']) + list(E_['ranks']) + [mk_]
+        return dict(under=under, over=over, alpha=al, anim=anim, box=box, recs=recs, zmax=PR.get('zmax', 1.3))
+
     # -------------------------------------------------------------- 1 더미: 이야기 기록도 작은 조각으로, 아무 데나 흩어짐(옅게) → 몇 개만 켜짐
     cap_c = dict(t=CP['cloud'])
     _, _, ccw, cch = cap_measure(cap_c, 'top')
@@ -999,77 +1186,81 @@ def build(spec):
     # -------------------------------------------------------------- 2 실패: 일반 검색 판 + 결과 목록(1·2·3, 판 옆에 세로로) + 결과 밖의 답
     mode = F.get('mode', 'brief')
     LX = EX + EW + 70
-    if mode == 'brief':
-        plan = [('fail', 'gen', '일반 검색', '키워드 + 임베딩', F['words'], True, F['hits'], '같은 단어 + 비슷한 뜻', False)]
+    passes, PAIR, mk_ = [], None, None
+    if mode == 'pair':
+        PAIR = pair_items()
     else:
-        plan = [('fail_kw', 'kw', '키워드 검색', 'BM25', F['words'], False, F['kw'], None, False),
-                ('fail_emb', 'emb', '임베딩 검색', '비슷한 뜻', [], True, F['emb'], '뜻을 숫자로 바꿔 비교', True)]
-    passes = []
-    for skey, pk, title, pill, words, bars, hit, blabel, under in plan:
-        ranks = hit['ranks']
-        hs = [card_at(k, 0, 0, img_h=LIST_IMG_H)[1] for k in ranks]
-        gap = 50
-        tot = sum(hs) + gap * (len(hs) - 1)
-        mid = F.get('mid_y', 392)
-        prims, port, ph = search_panel(pk, 0, title, pill, F['query'], words, bars, label=blabel, under=under)
-        py = mid - ph / 2
-        prims, port, ph = search_panel(pk, py, title, pill, F['query'], words, bars, label=blabel, under=under)
-        sc.put(pk, prims)
-        y = mid - tot / 2 + 8
-        rs, ths, rks, tgs, mks = [], [], [], [], []
-        maxw = 0
-        for i, (k, h) in enumerate(zip(ranks, hs)):
-            pr, h, pos = card_at(k, LX, y, style='gray', img_h=LIST_IMG_H)
-            rk = '%s.res.%s' % (pk, k)
-            sc.put(rk, pr)
-            rs.append(rk)
-            box = (LX, y, REC[k]['w'], h)
-            maxw = max(maxw, REC[k]['w'])
-            bn = '%s.rank%d' % (pk, i + 1)
-            sc.put(bn, [R('rank%d/c' % (i + 1), LX - 13, y - 12, 26, 26, prst='ellipse', fill='8E88A0', line='FFFFFF', line_w=1.6),
-                        T('rank%d/t' % (i + 1), LX - 13, y - 12, 26, 26, str(i + 1), size=10, color='FFFFFF', weight='b', align='c',
-                          anchor='ctr')])
-            rks.append(bn)
-            th = '%s.th%d' % (pk, i + 1)
-            sc.put(th, [C(th + '/l', scurve(port, (LX - 2, y + min(h / 2, 34)), 0.5), w=1.8, color='B9B3C8')])
-            ths.append(th)
-            if hit.get('tags', {}).get(k):
-                tg = '%s.tag.%s' % (pk, k)
-                sc.put(tg, tag_box(box, hit['tags'][k], name='tag.' + k, pt=11))
-                tgs.append(tg)
-            if hit.get('marks', {}).get(k):
-                mk = '%s.mk.%s' % (pk, k)
-                marks_at(pos, hit['marks'][k], mk, alpha=30)
-                mks.append(mk)
-            for j, (where, sub) in enumerate(hit.get('sims', {}).get(k, [])):
-                sm = '%s.sim%d.%s' % (pk, j, k)
-                if where == 'img':
-                    ix, iy, iw, ih = pos['img']
-                    lab = '≈ ' + sub
-                    cw_ = tw(lab, 9.5, 'b') + 22
-                    sc.put(sm, [R(sm + '/bg', ix + 8, iy + ih - 32, cw_, 24, prst='roundRect', fill='FFFFFF', line=PURPLE2, line_w=1.3,
-                                  dash='dash'),
-                                T(sm + '/t', ix + 8, iy + ih - 32, cw_, 24, lab, size=9.5, color=PURPLE, weight='b', align='c', anchor='ctr')])
-                else:
-                    sc.put(sm, underline_prims(sm + '/l', band(pos[where], sub, kind='full')))
-                mks.append(sm)
-            y += h + gap
-        passes.append(dict(skey=skey, pk=pk, ranks=list(ranks), rs=rs, ths=ths, rks=rks, tgs=tgs, mks=mks, maxw=maxw, mid=mid))
-    # 결과 밖의 답: 더미 조각 그대로(답이 미리 읽히지 않게) 목록 오른쪽에 옅게 + 점선 테두리 + 태그(먼저 알아야 할 단서)
-    M = F['miss']
-    mk_ = M['key']
-    lastp = passes[-1]
-    mw_ = S.frag_w(REC[mk_]['title'], chip_text(REC[mk_]))
-    mx_ = LX + lastp['maxw'] + 74
-    my_ = lastp['mid'] - S.FRAG_H / 2
-    sc.put('missf.' + mk_, frag_at(mk_, mk_, mx_, my_))
-    mt = M['tag']
-    mtw = tw(mt, 11, 'sb') + 26
-    tx_ = mx_ + mw_ / 2 - mtw / 2
-    sc.put('miss', [R('miss/r', mx_ - 10, my_ - 10, mw_ + 20, S.FRAG_H + 20, prst='roundRect', radius=18, fill=None, line=GRAY_LINE,
-                      line_w=1.8, dash='dash'),
-                    R('miss/tag', tx_, my_ + S.FRAG_H + 22, mtw, 30, prst='roundRect', fill='EFECF4', line=None),
-                    T('miss/tag_t', tx_, my_ + S.FRAG_H + 22, mtw, 30, mt, size=11, color=SUB, weight='sb', align='c', anchor='ctr')])
+        if mode == 'brief':
+            plan = [('fail', 'gen', '일반 검색', '키워드 + 임베딩', F['words'], True, F['hits'], '같은 단어 + 비슷한 뜻', False)]
+        else:
+            plan = [('fail_kw', 'kw', '키워드 검색', 'BM25', F['words'], False, F['kw'], None, False),
+                    ('fail_emb', 'emb', '임베딩 검색', '비슷한 뜻', [], True, F['emb'], '뜻을 숫자로 바꿔 비교', True)]
+        passes = []
+        for skey, pk, title, pill, words, bars, hit, blabel, under in plan:
+            ranks = hit['ranks']
+            hs = [card_at(k, 0, 0, img_h=LIST_IMG_H)[1] for k in ranks]
+            gap = 50
+            tot = sum(hs) + gap * (len(hs) - 1)
+            mid = F.get('mid_y', 392)
+            prims, port, ph = search_panel(pk, 0, title, pill, F['query'], words, bars, label=blabel, under=under)
+            py = mid - ph / 2
+            prims, port, ph = search_panel(pk, py, title, pill, F['query'], words, bars, label=blabel, under=under)
+            sc.put(pk, prims)
+            y = mid - tot / 2 + 8
+            rs, ths, rks, tgs, mks = [], [], [], [], []
+            maxw = 0
+            for i, (k, h) in enumerate(zip(ranks, hs)):
+                pr, h, pos = card_at(k, LX, y, style='gray', img_h=LIST_IMG_H)
+                rk = '%s.res.%s' % (pk, k)
+                sc.put(rk, pr)
+                rs.append(rk)
+                box = (LX, y, REC[k]['w'], h)
+                maxw = max(maxw, REC[k]['w'])
+                bn = '%s.rank%d' % (pk, i + 1)
+                sc.put(bn, [R('rank%d/c' % (i + 1), LX - 13, y - 12, 26, 26, prst='ellipse', fill='8E88A0', line='FFFFFF', line_w=1.6),
+                            T('rank%d/t' % (i + 1), LX - 13, y - 12, 26, 26, str(i + 1), size=10, color='FFFFFF', weight='b', align='c',
+                              anchor='ctr')])
+                rks.append(bn)
+                th = '%s.th%d' % (pk, i + 1)
+                sc.put(th, [C(th + '/l', scurve(port, (LX - 2, y + min(h / 2, 34)), 0.5), w=1.8, color='B9B3C8')])
+                ths.append(th)
+                if hit.get('tags', {}).get(k):
+                    tg = '%s.tag.%s' % (pk, k)
+                    sc.put(tg, tag_box(box, hit['tags'][k], name='tag.' + k, pt=11))
+                    tgs.append(tg)
+                if hit.get('marks', {}).get(k):
+                    mk = '%s.mk.%s' % (pk, k)
+                    marks_at(pos, hit['marks'][k], mk, alpha=30)
+                    mks.append(mk)
+                for j, (where, sub) in enumerate(hit.get('sims', {}).get(k, [])):
+                    sm = '%s.sim%d.%s' % (pk, j, k)
+                    if where == 'img':
+                        ix, iy, iw, ih = pos['img']
+                        lab = '≈ ' + sub
+                        cw_ = tw(lab, 9.5, 'b') + 22
+                        sc.put(sm, [R(sm + '/bg', ix + 8, iy + ih - 32, cw_, 24, prst='roundRect', fill='FFFFFF', line=PURPLE2, line_w=1.3,
+                                      dash='dash'),
+                                    T(sm + '/t', ix + 8, iy + ih - 32, cw_, 24, lab, size=9.5, color=PURPLE, weight='b', align='c', anchor='ctr')])
+                    else:
+                        sc.put(sm, underline_prims(sm + '/l', band(pos[where], sub, kind='full')))
+                    mks.append(sm)
+                y += h + gap
+            passes.append(dict(skey=skey, pk=pk, ranks=list(ranks), rs=rs, ths=ths, rks=rks, tgs=tgs, mks=mks, maxw=maxw, mid=mid))
+        # 결과 밖의 답: 더미 조각 그대로(답이 미리 읽히지 않게) 목록 오른쪽에 옅게 + 점선 테두리 + 태그(먼저 알아야 할 단서)
+        M = F['miss']
+        mk_ = M['key']
+        lastp = passes[-1]
+        mw_ = S.frag_w(REC[mk_]['title'], chip_text(REC[mk_]))
+        mx_ = LX + lastp['maxw'] + 74
+        my_ = lastp['mid'] - S.FRAG_H / 2
+        sc.put('missf.' + mk_, frag_at(mk_, mk_, mx_, my_))
+        mt = M['tag']
+        mtw = tw(mt, 11, 'sb') + 26
+        tx_ = mx_ + mw_ / 2 - mtw / 2
+        sc.put('miss', [R('miss/r', mx_ - 10, my_ - 10, mw_ + 20, S.FRAG_H + 20, prst='roundRect', radius=18, fill=None, line=GRAY_LINE,
+                          line_w=1.8, dash='dash'),
+                        R('miss/tag', tx_, my_ + S.FRAG_H + 22, mtw, 30, prst='roundRect', fill='EFECF4', line=None),
+                        T('miss/tag_t', tx_, my_ + S.FRAG_H + 22, mtw, 30, mt, size=11, color=SUB, weight='sb', align='c', anchor='ctr')])
 
     # -------------------------------------------------------------- 홉마다: Reasoning Embedding 판(다시 쓴 질문 통째로) + 필터
     re_keys = {}
@@ -1173,6 +1364,146 @@ def build(spec):
             sc.put('tok%d@q' % n, chip_prims('tok%d' % n, sc.X0, sc.row_y(n + 1) - 1, lab, style='fill', pt=10, h=23, padx=9)[0])
         H.append(h)
 
+    # -------------------------------------------------------------- Weave 하이브리드 한눈에: 질문 → 중간 단서(가운데 기록) → 답 기록 → 답
+    HY = spec.get('hybrid')
+    HYB = None
+    if HY:
+        mid = HY.get('mid', hops[0]['target'])
+        ansk = HY.get('ans', hops[-1]['target'])
+        cm = REC[mid]
+        mx0, my0_, mw0, mh0 = cm['x'], cm['y'], cm['w'], cm['h']
+        cyc = my0_ + mh0 / 2
+        qt = HY.get('q', spec['ask'])
+        qw = tw(qt, 10.5, 'm') + 52
+        qx = mx0 - HY.get('gap1', 104) - qw
+        sc.put('hy.q', [R('hq/bg', qx, cyc - 22, qw, 44, prst='roundRect', fill='FFFFFF', line=LINE2, line_w=1.2, shadow=S.L.SHADOW_SOFT),
+                        R('hq/lens', qx + 17, cyc - 8, 12, 12, prst='ellipse', fill=None, line='9AA0A6', line_w=1.6),
+                        R('hq/lens2', qx + 26, cyc + 3, 6, 2, fill='9AA0A6', line=None),
+                        T('hq/t', qx + 38, cyc - 22, qw - 44, 44, qt, size=10.5, color=INK, weight='m', anchor='ctr')])
+        ca = REC[ansk]
+        aimg_h = HY.get('img_h', 84)
+        ah = card_at(ansk, 0, 0, img_h=aimg_h)[1]
+        ax0 = mx0 + mw0 + HY.get('gap2', 128)
+        ay0 = cyc - ah / 2
+        apr, ah, apos = card_at(ansk, ax0, ay0, style='weave', img_h=aimg_h)
+        sc.put('hy.ans', apr)
+        sc.put('hth1', S.thread_prims('hth1', scurve((qx + qw + 2, cyc), (mx0 - 2, cyc), 0.5)))
+        sc.put('hth2', S.thread_prims('hth2', scurve((mx0 + mw0 + 2, cyc), (ax0 - 2, cyc), 0.5)))
+        tok = hops[0]['token']
+        tkw = chip_prims('x', 0, 0, tok, pt=10, padx=9)[1]
+        tmx = (mx0 + mw0 + ax0) / 2
+        sc.put('htok', chip_prims('htok', tmx - tkw / 2, cyc - 13, tok, style='fill', pt=10, h=26, padx=9)[0])
+        ans = spec['answer']
+        aw = chip_prims('x', 0, 0, ans, pt=10.5, padx=13)[1]
+        acx = ax0 + ca['w'] / 2
+        sc.put('hth3', S.thread_prims('hth3', vcurve((acx, ay0 + ah + 2), (acx, ay0 + ah + 24))))
+        sc.put('hans', chip_prims('hans', acx - aw / 2, ay0 + ah + 26, ans, style='fill', pt=10.5, h=30, padx=13)[0])
+        marks_at(sc.pos[mid], HY.get('marks_mid', []), 'hy.mk1', owner_=mid)
+        marks_at(apos, HY.get('marks_ans', []), 'hy.mk2', alpha=30)
+
+        def hlab(name, cx, y, text, style='outline'):
+            w = tw(text, 9.5, 'b') + 24
+            sc.put(name, chip_prims(name, cx - w / 2, y, text, style=style, pt=9.5, h=24, padx=12)[0])
+        l1, l2, l3 = HY['labels']
+        hlab('hy.l1', (qx + qw + mx0) / 2, cyc - 46, l1)
+        hlab('hy.l2', tmx, cyc - 48, l2)
+        mp_ = apos['meta']
+        hlab('hy.l3', mp_[0] + tw(mp_[2], mp_[3]) / 2, ay0 - 32, l3)
+        mlw = tw(HY.get('mid_label', '중간 단서'), 9.5, 'b') + 24
+        hlab('hy.mid', mx0 + 6 + mlw / 2, my0_ - 32, HY.get('mid_label', '중간 단서'), style='soft')
+        hu = ['hth1', 'hth2', 'hth3']
+        ho = ['hy.q', mid, 'hy.mk1', 'hy.mid', 'htok', 'hy.ans', 'hy.mk2', 'hans', 'hy.l1', 'hy.l2', 'hy.l3']
+        ha = {'hth1': dict(kind='wipe_in', dir='left', delay=350, dur=450), 'hy.l1': dict(kind='zoom_in', delay=750, dur=280),
+              'hy.mk1': dict(kind='wipe_in', dir='left', delay=850, dur=420), 'hy.mid': dict(kind='zoom_in', delay=1100, dur=280),
+              'hth2': dict(kind='wipe_in', dir='left', delay=1400, dur=450), 'htok': dict(kind='zoom_in', delay=1650, dur=300),
+              'hy.l2': dict(kind='zoom_in', delay=1850, dur=280), 'hy.mk2': dict(kind='wipe_in', dir='left', delay=2150, dur=420),
+              'hy.l3': dict(kind='zoom_in', delay=2300, dur=280), 'hth3': dict(kind='wipe_in', dir='down', delay=2600, dur=300),
+              'hans': dict(kind='zoom_in', delay=2800, dur=320)}
+        HYB = dict(under=hu, over=ho, anim=ha, mid=mid, box=union([sc.box[k_] for k_ in hu + ho]), zmax=HY.get('zmax', 1.25))
+
+    # -------------------------------------------------------------- 00 사전 준비(00판): 기록 하나 → 벡터 + 메타데이터, 모든 기록 → 기기 안 저장소
+    IX = spec.get('index')
+    IXD = None
+    if IX:
+        ik = IX.get('key', hops[0]['target'])
+        ck = REC[ik]
+        x0_, y0_ = cpos['cl.' + ik]
+        cpr, ch_, _ = card_at(ik, x0_, y0_)
+        sc.put('ix.card', cpr)
+        EWD, EH = IX.get('entry_w', 436), 172
+        ex0 = x0_ + ck['w'] + 78
+        ey0 = y0_ + ch_ / 2 - EH / 2
+        ent = [R('ixe/bg', ex0, ey0, EWD, EH, prst='roundRect', radius=16, fill='FFFFFF', line=RING, line_w=1.6, shadow=S.L.SHADOW_CARD,
+                 glow=(8, RING, 22)),
+               P('ixe/ic', S.ICON['spool'], ex0 + 16, ey0 + 13, 18, 18),
+               T('ixe/h', ex0 + 40, ey0 + 11, 260, 22, IX.get('entry_title', '기기 안에 저장한 모습'), size=10, color=PURPLE2, weight='b',
+                 anchor='ctr')]
+        LX_, VX_ = ex0 + 18, ex0 + 104
+        rows_ = [('글자', ey0 + 46, 20), ('벡터', ey0 + 78, 22), ('메타데이터', ey0 + 128, 26)]
+        for j, (lab_, yy_, hh_) in enumerate(rows_):
+            ent.append(T('ixe/l%d' % j, LX_, yy_, 84, hh_, lab_, size=9.5, color=PURPLE if j else MUTE, weight='b', anchor='ctr'))
+        ent.append(T('ixe/v0', VX_, ey0 + 46, EWD - (VX_ - ex0) - 14, 20, IX.get('text', ''), size=9.5, color=MUTE, anchor='ctr'))
+        sc.put('ix.entry', ent)
+        sc.put('ix.vec', vec_prims('ixv', VX_, ey0 + 78, IX.get('n_vec', 16), 14, 22, ''.join(ck.get('lines', ())) + ck['title']) +
+               [T('ixv/n', VX_, ey0 + 103, 260, 16, IX.get('nums', '[0.12, −0.53, 0.88, …]'), size=8.5, color=MUTE, anchor='ctr')])
+        mx_, meta_ = VX_, []
+        for j, (ic, lab_) in enumerate(IX['meta']):
+            pr, cw_ = chip_prims('ixm%d' % j, mx_, ey0 + 128, lab_, style='outline', pt=9, h=26, padx=10, icon=ic)
+            meta_ += pr
+            mx_ += cw_ + 8
+        sc.put('ix.meta', meta_)
+        if mx_ - 8 > ex0 + EWD - 12:
+            print('   ! 00 메타데이터 칩이 판을 넘침 (%.0f > %.0f)' % (mx_ - 8, ex0 + EWD - 12))
+        sc.put('ixth', S.thread_prims('ixth', scurve((x0_ + ck['w'] + 2, y0_ + ch_ / 2), (ex0 - 2, ey0 + EH / 2), 0.5)))
+        close = ['ixth', 'ix.card', 'ix.entry', 'ix.vec', 'ix.meta']
+        a1_ = {'ixth': dict(kind='wipe_in', dir='left', delay=300, dur=450), 'ix.entry': dict(kind='rise', delay=600, dur=450),
+               'ix.vec': dict(kind='wipe_in', dir='left', delay=1050, dur=700), 'ix.meta': dict(kind='wipe_in', dir='left', delay=1700, dur=600)}
+        # 저장소: 이야기 기록은 한 줄씩(아이콘 + 이름 + 작은 벡터 + 날짜), 나머지 조각은 아래 묶음으로 날아 들어감
+        rows = IX.get('rows', keys)
+        SW, RH, RG = IX.get('store_w', 470), 36, 7
+        n_f = len(fill_keys)
+        SH = 58 + len(rows) * (RH + RG) + 14 + 30 + 2.5 * n_f + 34
+        scx, scy = IX.get('store_c', (CLOUD_BOX[0] + CLOUD_BOX[2] / 2, CLOUD_BOX[1] + CLOUD_BOX[3] / 2))
+        sx0, sy0 = scx - SW / 2, scy - SH / 2
+        st_ = [R('ixs/bg', sx0, sy0, SW, SH, prst='roundRect', radius=18, fill='FFFFFF', line=LINE2, line_w=1.4, shadow=S.L.SHADOW_CARD),
+               P('ixs/ic', S.ICON['spool'], sx0 + 18, sy0 + 17, 20, 20),
+               T('ixs/h', sx0 + 46, sy0 + 15, 220, 24, IX.get('store_title', '기기 안 저장소'), size=12, color=PURPLE, weight='b', anchor='ctr'),
+               T('ixs/h2', sx0 + SW - 18 - 200, sy0 + 15, 200, 24, '벡터 + 메타데이터', size=9, color=MUTE, weight='sb', align='r', anchor='ctr')]
+        sc.put('ix.store', st_)
+        store = ['ix.store']
+        a2_ = {}
+        for j, k in enumerate(rows):
+            c = REC[k]
+            ry_ = sy0 + 54 + j * (RH + RG)
+            ic = c.get('icon') or KIND_ICON.get(c['kind'], 'talk')
+            dt = short_date(c.get('meta', ''))
+            dw = chip_prims('x', 0, 0, dt, pt=9, padx=9)[1]
+            pr = [R(k + '/bg', sx0 + 14, ry_, SW - 28, RH, prst='roundRect', radius=10, fill='FFFFFF', line=LINE, line_w=0.9),
+                  P(k + '/ic', S.ICON[ic], sx0 + 26, ry_ + 8, 20, 20),
+                  T(k + '/title', sx0 + 54, ry_, 130, RH, c['title'], size=10, color=INK, weight='b', anchor='ctr')]
+            pr += vec_prims('ixr%d' % j, sx0 + 190, ry_ + 10, 10, 9, 16, ''.join(c.get('lines', ())) + c['title'] + c.get('meta', ''))
+            pr += chip_prims('ixr%d/d' % j, sx0 + SW - 26 - dw, ry_ + 6, dt, style='soft', pt=9, h=24, padx=9)[0]
+            sc.put('ixs.' + k, pr)
+            store.append('ixs.' + k)
+        by_ = sy0 + 54 + len(rows) * (RH + RG) + 10
+        stack = []
+        for j, fk in enumerate(fill_keys):
+            sc.put('ixs.' + fk, [R(fk + '/bg', sx0 + 14 + 6 * (j % 2), by_ + 2.5 * j, SW - 28 - 12, 30, prst='roundRect', radius=10,
+                                   fill='FFFFFF', line=LINE, line_w=0.8)])
+            stack.append('ixs.' + fk)
+        fy_ = by_ + 2.5 * max(0, n_f - 1)
+        fxo = sx0 + 14 + 6 * ((n_f - 1) % 2)
+        sk = [R('ixs/sk_ic', fxo + 12, fy_ + 7, 16, 16, prst='roundRect', radius=4, fill='E9E5F2', line=None),
+              R('ixs/sk_t', fxo + 40, fy_ + 11, 70, 8, prst='roundRect', radius=4, fill='ECE8F4', line=None),
+              R('ixs/sk_d', fxo + SW - 40 - 12 - 54, fy_ + 7, 54, 16, prst='roundRect', fill='F1ECFF', line=None)]
+        sk += [(p_[0], p_[1], p_[2], p_[3], p_[4], p_[5], dict(p_[6], alpha=45)) for p_ in vec_prims('ixs/sk_v', sx0 + 190, fy_ + 8, 10, 9, 14, 'more')]
+        sc.put('ix.more', sk + [T('ixs/more', sx0, by_ + 2.5 * n_f + 34, SW, 22, IX.get('more', '그 밖의 기록도 모두 같은 모양으로'),
+                                  size=9.5, color=MUTE, weight='sb', align='c', anchor='ctr')])
+        store += stack + ['ix.more']
+        a2_ = {'ix.more': dict(kind='fade_in', delay=1500, dur=400)}
+        IXD = dict(key=ik, close=close, anim1=a1_, box1=union([sc.box[k_] for k_ in close]), store=store, anim2=a2_,
+                   box2=sc.box['ix.store'])
+
     # -------------------------------------------------------------- 단계 진행
     cur, styles = [], {}
 
@@ -1251,8 +1582,26 @@ def build(spec):
          anim=dict({k: dict(kind='zoom_in', delay=120 + 38 * j, dur=360) for j, k in enumerate(order)},
                    **{x: dict(kind='zoom_in', delay=t_end + 420 * j, dur=380) for j, x in enumerate(lits)}))
     hide(*lits)
+    if IXD:
+        # 00 사전 준비(00판): 더미 속 지은 카톡 하나를 가까이 → 벡터 + 메타데이터. 이어서 모든 조각이 기기 안 저장소로 날아 들어감
+        hide('cl.' + IXD['key'])
+        show(*IXD['close'])
+        shot('idx1', [], 'top', set(IXD['close']), {}, IX.get('z1', 1.6), frame_box=IXD['box1'], cap=CP['idx1'], notes=NT['idx1'],
+             morph=1700, anim=IXD['anim1'])
+        hide(*IXD['close'], *all_cloud, *['cl.' + k for k in keys])
+        show(*IXD['store'])
+        shot('idx2', [], IX.get('side2', 'left'), set(IXD['store']), {}, IX.get('z2', 1.3), frame_box=IXD['box2'], cap=CP['idx2'], notes=NT['idx2'],
+             morph=1900, anim=IXD['anim2'])
+        hide(*IXD['store'])
     # 3 실패: 결과는 판 옆에 1·2·3 목록으로 뽑혀 나오고(더미에서 날아옴), 답이 있는 기록은 결과 밖에 옅게 남음
     prev = []
+    if PAIR:      # 키워드(왼쪽)와 임베딩(오른쪽)을 한 장에: 둘 다 안 됨
+        hide(*all_cloud, *['cl.' + k for k in keys])
+        show_under(*PAIR['under'])
+        show(*PAIR['over'])
+        shot('fail_pair', [], 'top', set(PAIR['under'] + PAIR['over']), {}, PAIR['zmax'], frame_box=PAIR['box'], alpha=PAIR['alpha'],
+             morph=1700, anim=PAIR['anim'])
+        prev = PAIR['under'] + PAIR['over']
     for j, P_ in enumerate(passes):
         hide(*prev)
         last_pass = j == len(passes) - 1
@@ -1273,6 +1622,16 @@ def build(spec):
                        **{t_: dict(kind='zoom_in', delay=1000 + 160 * i, dur=280) for i, t_ in enumerate(P_['tgs'])},
                        **({'miss': dict(kind='fade_in', delay=1100 + 160 * n_r, dur=500)} if last_pass else {})))
         prev = [P_['pk']] + P_['rs'] + P_['ths'] + P_['rks'] + P_['tgs'] + P_['mks'] + extra
+    if HYB:       # Weave 하이브리드 한눈에: 단서를 잡아 중간 단계를 채움(키워드 + 멀티홉 + 추론)
+        hide(*prev)
+        prev = []
+        styles[HYB['mid']] = 'weave'
+        show_under(*HYB['under'])
+        show(*HYB['over'])
+        shot('hybrid', [], 'top', set(HYB['under'] + HYB['over']), {}, HYB['zmax'], frame_box=HYB['box'],
+             cap=dict(t=CP['hybrid'], pill=CP.get('hybrid_pill')), notes=NT['hybrid'], morph=1700, anim=HYB['anim'])
+        hide(*HYB['under'], *HYB['over'])
+        styles.pop(HYB['mid'], None)
     hide(*prev, *all_cloud)
     # 4 01 순간 감지
     show(*ui_base)
@@ -1484,6 +1843,17 @@ def build(spec):
          dict(all=True), 1.45, cap=sum_cap,
          anim=dict({x: dict(kind='wipe_in', dir='left', delay=900 + 500 * j, dur=500) for j, x in enumerate(sth)},
                    **{'qans.ok': dict(kind='zoom_in', delay=1900, dur=300)}), morph=1800)
+    if IXD:       # 00판: 위 띠는 00~04. 00 다음 장부터는 00에 ✓
+        after = False
+        for st in sc.steps:
+            h_ = dict(st.hud or {})
+            h_['stages'] = STAGES0
+            if st.key in ('idx1', 'idx2'):
+                h_['cur'] = '00'
+                after = True
+            elif after:
+                h_['done'] = set(h_.get('done', ())) | {'00'}
+            st.hud = h_
     skip = set(spec.get('skip', ()))         # 덱용 판: 화면 경험(예: 결과 화면)은 앞 장표가 보여 주므로 뺄 수 있음
     sc.steps = [st for st in sc.steps if st.key not in skip]
     return sc

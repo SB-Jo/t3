@@ -11,3 +11,6 @@ SamsungSharpSans*.otf
 
 # PowerPoint가 파일을 열 때 만드는 잠금 파일
 ~$*
+
+# 파이썬 캐시
+__pycache__/

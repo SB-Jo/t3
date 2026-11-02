@@ -6,7 +6,7 @@ from pathlib import Path
 import scene5
 
 HERE = Path(__file__).resolve().parent
-ALL = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'c3']
+ALL = ['a1', 'a1_deck00', 'a2', 'b1', 'b2', 'c1', 'c2', 'c3']   # a1_deck00: 덱용 00판(사전 준비 두 장)
 
 
 def plain(cap):
