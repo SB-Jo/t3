@@ -17,3 +17,11 @@ The first three URLs are declared in https://www.samsung.com/sec/static/_css/com
 - `SamsungOneKorean-700.woff`: https://design.samsung.com/kr/contents/samsungone_part2/font/SamsungOneKorean-700.woff — 한글 11,172자 전부 포함(fontTools로 확인)
 - `SamsungOneLatin-400.woff2`, `-500.woff2`, `-700.woff2`: https://design.samsung.com/global/font/SamsungOneLatin-{400,500,700}.woff2
 - 위와 같은 주의가 그대로 적용됩니다: 사내 발표용으로만 쓰고, 외부 재배포 전에는 삼성 브랜드 사용 권한을 확인하세요.
+
+## 2026-11-02 저장소에서 뺌 (공개 저장소)
+
+GitHub 저장소(gnueaj/t3)는 공개로 유지하므로 삼성 글꼴 파일은 올리지 않습니다(`결선준비/.gitignore`). 앞서 두 커밋(10/30, 11/02)에 들어갔던 글꼴은 기록을 다시 써서 뺐습니다.
+
+- 로컬에는 그대로 있습니다: `06_에셋/글꼴`, `07_소스/teaser/assets/fonts`, `08_인트로영상/소스/assets/fonts`, `10_표지영상/소스/assets/fonts`.
+- 다른 컴퓨터에서 영상을 다시 렌더하려면 위 주소에서 받아 같은 이름으로 넣습니다.
+- PowerPoint용 TTF(SamsungOneKorean 400·500·700, SamsungOne 400, Samsung Sharp Sans)는 웹 글꼴을 변환해 `~/.cache/weave-tools/fonts`에 두고, Windows 사용자 글꼴로 설치했습니다. 이것도 저장소 밖입니다.

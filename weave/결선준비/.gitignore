@@ -1,0 +1,13 @@
+# 삼성 글꼴(SamsungOne, Samsung Sharp Sans)은 "허가 없는 사용·배포 금지"라서 공개 저장소에 올리지 않고 로컬에만 둔다.
+# 받는 곳: 06_에셋/글꼴/SOURCES.md. 영상을 다시 렌더하려면 같은 이름으로 각 소스의 assets/fonts에 넣는다.
+SamsungOne*.woff
+SamsungOne*.woff2
+SamsungOne*.ttf
+SamsungOne*.otf
+SamsungSharpSans*.woff
+SamsungSharpSans*.woff2
+SamsungSharpSans*.ttf
+SamsungSharpSans*.otf
+
+# PowerPoint가 파일을 열 때 만드는 잠금 파일
+~$*
