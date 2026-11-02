@@ -1,0 +1,399 @@
+# Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions (2212.10509v2)
+
+### b001 [p]
+Prompting-based large language models (LLMs) are surprisingly powerful at generating natural language reasoning steps or Chains-of-Thoughts (CoT) for multi-step question answering (QA). They struggle, however, when the necessary knowledge is either unavailable to the LLM or not up-to-date within its parameters. While using the question to retrieve relevant text from an external knowledge source helps LLMs, we observe that this one-step retrieve-and-read approach is insufficient for multi-step QA. Here, <i>what to retrieve</i> depends on <i>what has already been derived</i>, which in turn may depend on <i>what was previously retrieved</i>. To address this, we propose IRCoT, a new approach for multi-step QA that interleaves retrieval with steps (sentences) in a CoT, guiding the retrieval with CoT and in turn using retrieved results to improve CoT. Using IRCoT with GPT3 substantially improves retrieval (up to 21 points) as well as downstream QA (up to 15 points) on four datasets: HotpotQA, 2WikiMultihopQA, MuSiQue, and IIRC. We observe similar substantial gains in out-of-distribution (OOD) settings as well as with much smaller models such as Flan-T5-large without additional training. IRCoT reduces model hallucination, resulting in factually more accurate CoT reasoning.<sup class="fnm">1</sup>.
+
+### b134 [fn]
+Code, data, and prompts are available at <a href="https://github.com/stonybrooknlp/ircot">https://github.com/stonybrooknlp/ircot</a>
+
+### b002 [h2]
+1 Introduction
+
+### b003 [fig caption]
+Figure 1: IRCoT interleaves chain-of-thought (CoT) generation and knowledge retrieval steps in order to guide the retrieval by CoT and vice-versa. This interleaving allows retrieving more relevant information for later reasoning steps, compared to standard retrieval using solely the question as the query.
+
+### b004 [p]
+Large language models are capable of answering complex questions by generating step-by-step natural language reasoning steps—so called chains of thoughts (CoT)—when prompted appropriately <span class="cite">Wei et al. (2022)</span>. This approach has been successful when all information needed to answer the question is either provided as context (e.g., algebra questions) or assumed to be present in the model’s parameters (e.g., commonsense reasoning). However, for many open-domain questions, all required knowledge is not always available or up-to-date in models’ parameters and it’s beneficial to retrieve knowledge from external sources <span class="cite">Lazaridou et al. (2022) ; Kasai et al. (2022)</span>.
+
+### b005 [p]
+<i>How can we augment chain-of-thought prompting for open-domain, knowledge-intensive tasks that require complex, multi-step reasoning?</i>
+
+### b006 [p]
+While a <i>one-shot</i> retrieval from a knowledge source based solely on the question can successfully augment LMs with relevant knowledge for many factoid-based tasks <span class="cite">Lewis et al. (2020) ; Guu et al. (2020) ; Borgeaud et al. (2022) ; Izacard et al. (2022)</span>, this strategy has clear limitations for more complex multi-step reasoning questions. For such questions, one often must retrieve partial knowledge, perform partial reasoning, retrieve additional information based on the outcome of the partial reasoning done so far, and iterate. As an example, consider the question illustrated in Fig. 1, <i>“In what country was Lost Gravity manufactured?”</i>. The Wikipedia document retrieved using the question (in particular, the roller coaster Lost Gravity) as the query does not mention where Lost Gravity was manufactured. Instead, one must first infer that it was manufactured by a company called Mack Rides, and then perform further retrieval, guided by the inferred company name, to obtain evidence pointing to the manufacturing country.
+
+### b007 [p]
+Thus, the retrieval and reasoning steps must inform each other. Without retrieval, a model is likely to generate an incorrect reasoning step due to hallucination. Additionally, without generating the first reasoning step, the text supporting the second step can’t be identified easily given the lack of lexical or even semantic overlap with the question. In other words, we need retrieved facts in order to generate factually correct reasoning steps and the reasoning steps to retrieve relevant facts.
+
+### b008 [p]
+Based on this intuition, we propose an <i>interleaving approach</i> to this problem, where the idea is to use retrieval to guide the chain-of-thought (CoT) reasoning steps and use CoT reasoning to guide the retrieval. Fig. 1 shows an overview of our retrieval method, which we call IRCoT.<sup class="fnm">2</sup> We begin by retrieving a base set of paragraphs using the question as a query. Subsequently, we alternate between the following two steps: (i) <i>extend CoT</i>: use the question, the paragraphs collected thus far, and the CoT sentences generated thus far to generate the next CoT sentence; (ii) <i>expand retrieved information</i>: use the last CoT sentence as a query to retrieve additional paragraphs to add to the collected set. We repeat these steps till the CoT reports an answer or we reach the maximum allowed number of reasoning steps. Upon termination, all collected paragraphs are returned as the retrieval outcome. Finally, we use these as the context for answering the question via direct QA prompting <span class="cite">Brown et al. (2020)</span> or CoT prompting <span class="cite">Wei et al. (2022)</span>.
+
+### b009 [fn]
+Interleaved Retrieval guided by Chain-of-Thought.
+
+### b010 [p]
+We evaluate the efficacy of our system on 4 multi-step reasoning datasets under an open-domain setting: HotpotQA <span class="cite">Yang et al. (2018)</span>, 2WikiMultihopQA <span class="cite">Ho et al. (2020)</span>, MuSiQue <span class="cite">Trivedi et al. (2022)</span>, and IIRC <span class="cite">Ferguson et al. (2020)</span>. Our experiments using OpenAI GPT3 (<code>code-davinci-002</code>) <span class="cite">Brown et al. (2020) ; Ouyang et al. (2022) ; Chen et al. (2021)</span> demonstrate that retrieval using IRCoT is substantially more effective than the baseline, one-step, question-based retrieval by 11-21 recall points under a fixed-budget optimal recall setup.<sup class="fnm">3</sup> When IRCoT is used in conjunction with a prompting-based reader, it also leads to substantial improvement (up to 15 F1 points) in downstream few-shot QA performance and reduces factual errors in generated CoT by up to 50%. Our approach also works on much smaller Flan-T5 models (11B, 3B, and 0.7B) showing similar trends. In particular, we find QA using Flan-T5-XL (3B) with IRCoT even outperforms the 58X larger GPT3 with a one-step question-based retrieval. Furthermore, these improvements also hold up in an out-of-distribution (OOD) setting where the demonstrations from one dataset are used when testing on another dataset. Lastly, we note that our QA scores exceed those reported by recent works on few-shot prompting for open-domain QA (ODQA) <span class="cite">Khot et al. (2023) ; Press et al. (2022) ; Yao et al. (2022)</span>, although a fair apples-to-apples comparison with them isn’t possible (cf. Appendix C).
+
+### b011 [fn]
+We explain later (in the Metric section and Footnote 7) the appropriateness of this metric in our setting as opposed to more mainstream information recall metrics.
+
+### b012 [p]
+In summary, our main <b>contribution</b> is a novel retrieval method, IRCoT, that leverages LMs’ chain-of-thought generation capabilities to guide retrieval and uses retrieval in turn to improve CoT reasoning. We demonstrate that IRCoT:
+
+### b013 [li]
+improves both retrieval and few-shot QA performance on several multi-step open-domain QA datasets, in both IID and OOD settings;
+
+### b014 [li]
+reduces factual errors in generated CoTs; and
+
+### b015 [li]
+improves performance with both large-scale (175B models) as well as smaller-scale models (Flan-T5-*, \(\leq\)11B) without any training.
+
+### b016 [h2]
+2 Related Work
+
+### b017 [h4]
+Prompting for Open-Domain QA.
+
+### b018 [p]
+LLMs can learn various tasks by simply using a few examples as prompts <span class="cite">Brown et al. (2020)</span>. They’ve also been shown to answer complex questions by producing step-by-step reasoning (chain-of-thoughts, or CoT) when prompted with a few or zero demonstrations <span class="cite">Wei et al. (2022) ; Kojima et al. (2022)</span>. Prompting has been applied to open-domain QA <span class="cite">Lazaridou et al. (2022) ; Sun et al. (2022) ; Yu et al. (2023)</span> but its value in improving retrieval and QA for multi-step open-domain questions remains relatively underexplored.
+
+### b019 [p]
+Recently three approaches have been proposed for multi-step open-domain QA. SelfAsk <span class="cite">Press et al. (2022)</span> prompts LLMs to decompose a question into subquestions and answers subquestions by a call to Google Search API. DecomP <span class="cite">Khot et al. (2023)</span> is a general framework that decomposes a task and delegates sub-tasks to appropriate sub-models. They also decompose questions but delegate retrieval to a BM25-based retriever. Both of these approaches are not developed for CoT reasoning, do not focus on the retrieval problem, and require a single-hop QA model to answer the decomposed questions. Recently proposed ReAct <span class="cite">Yao et al. (2022)</span> system frames the problem as generating a sequence of reasoning and action steps. These steps are much more complex, rely on much larger models (PaLM-540B), and require fine-tuning to outperform CoT for multi-step ODQA. Furthermore, none of these works have been shown to be effective for smaller models without any training. While a direct comparison with these approaches is not straightforward (difference in knowledge corpus, LLMs, examples), we find that our ODQA performance is much higher than all their reported numbers where available (§5).
+
+### b020 [h4]
+Supervised Multi-Step Open-Domain QA.
+
+### b021 [p]
+Prior work has explored iterative retrieval for open-domain QA in a fully supervised setting. <span class="cite">Das et al. (2019)</span> proposes an iterative retrieval model that retrieves using a neural query representation and then updates it based on a reading comprehension model’s output. <span class="cite">Feldman and El-Yaniv (2019)</span> apply similar neural query reformulation idea for multihop open-domain QA. <span class="cite">Xiong et al. (2021)</span> extends the widely-used Dense Passage Retrieval (DPR) <span class="cite">Karpukhin et al. (2020)</span> to multihop setting, which has since been improved by <span class="cite">Khattab et al. (2021)</span>. <span class="cite">Asai et al. (2020)</span> leverages the graph structure induced by the entity links present in Wikipedia paragraphs to perform iterative multi-step retrieval. GoldEn (Gold Entity) retriever <span class="cite">Qi et al. (2019)</span> iteratively generates text queries based on paragraphs retrieved from an off-the-shelf retriever but requires training data for this next query generator. <span class="cite">Nakano et al. (2021)</span> used GPT3 to answer long-form questions by interacting with the browser but relied on human annotations of these interactions. All of these methods rely on supervised training on a large-scale dataset and can not be easily extended to a few-shot setting.
+
+### b022 [h2]
+3 Chain-of-Thought-Guided Retrieval and Open-Domain QA
+
+### b023 [fig caption]
+Figure 2: IRCoT interleaves chain-of-thought (CoT) generation and retrieval steps to guide the retrieval by CoT and vice-versa. We start by retrieving \(K\) documents using the question as they query and repeat two steps alternatingly until termination. (i) <code>reason</code>-step generates next CoT sentence based on the question, so far retrieved paragraphs, and CoT sentences. (ii) <code>retrieve</code>-step retrieves \(K\) more paragraphs based on the last CoT sentence. The process terminates when the generated CoT has “answer is” or the number of steps exceeds a threshold. The collection of all paragraphs is returned as the retrieval result on the termination.
+
+### b024 [p]
+Our goal is to answer a knowledge-intensive multi-step reasoning question \(Q\) in a few-shot setting by using a knowledge source containing a large number of documents. To do this we follow a <code>retrieve-and-read</code> paradigm <span class="cite">Zhu et al. (2021)</span>, where the retriever first retrieves documents from the knowledge source and the QA model reads the retrieved documents and the question to generate the final answer. Our contribution is mainly in the <code>retrieve</code> step (§3.1), and we use standard prompting strategies for the <code>read</code> step (§3.2).
+
+### b025 [p]
+As noted earlier, for multi-step reasoning, retrieval can help guide the next reasoning step, which in turn can inform what to retrieve next. This motivates our interleaving strategy, discussed next.
+
+### b026 [h3]
+3.1 Interleaving Retrieval with Chain-of-Thought Reasoning
+
+### b027 [p]
+Our proposed retriever method, IRCoT, can be instantiated from the following three ingredients: (i) a base retriever that can take a query and return a given number of paragraphs from a corpus or knowledge source; (ii) a language model with zero/few-shot Chain-of-Thought (CoT) generation capabilities; and (iii) a small number of annotated questions with reasoning steps explaining how to arrive at the answer in natural language (chain of thoughts) and a set of paragraphs from the knowledge source that collectively support the reasoning chain and the answer.
+
+### b028 [p]
+The overview of IRCoT is given in Fig. 2. We first gather a base set of paragraphs by retrieving \(K\) paragraphs using the question \(Q\) as the query. Then, we interleave two steps (<code>reason</code> and <code>retrieve</code>) iteratively until the termination criterion is met.
+
+### b029 [p]
+The <b>retrieval-guided reasoning step (“Reason”)</b> generates the next CoT sentence using the question, the paragraphs collected thus far, and the CoT sentences generated thus far. The prompt template for the task looks as follows:
+
+### b030 [alg] (캡션 없음, 번역 안 함)
+### b031 [p]
+For in-context demonstrations, we use the complete CoT in the above format. For a test instance, we show the model only the CoT sentences generated thus far and let it complete the rest. Even though the model may output multiple sentences, for each <code>reason-step</code>, we only take the first generated sentence and discard the rest.
+
+### b032 [p]
+For the paragraphs in the in-context demonstrations, we use ground-truth supporting paragraphs and \(M\) randomly sampled paragraphs shuffled and concatenated together in the above format. For a test instance, we show all the paragraphs collected thus far across all the previous <code>retrieve-step</code>s.
+
+### b033 [p]
+If the generated CoT sentence has the ‘‘answer is:’’ string or the maximum number of steps<sup class="fnm">4</sup> has been reached, we terminate the process and return all collected paragraphs as the retrieval result.
+
+### b034 [fn]
+set to 8 in our experiments.
+
+### b035 [p]
+The <b>CoT-guided retrieval step (“Retrieve”)</b> uses the last generated CoT sentence as a query to retrieve more paragraphs and adds them to the collected paragraphs. We cap the total number of collected paragraphs<sup class="fnm">5</sup> so as to fit in at least a few demonstrations in the model’s context limit.
+
+### b036 [fn]
+set to 15 in our experiments.
+
+### b037 [h3]
+3.2 Question Answering Reader
+
+### b038 [p]
+The QA reader answers the question using retrieved paragraphs taken from the retriever. We consider two versions of the QA reader implemented via two prompting strategies: <code>CoT Prompting</code> as proposed by <span class="cite">Wei et al. (2022)</span>, Direct Prompting as proposed by <span class="cite">Brown et al. (2020)</span>. For CoT prompting, we use the same template as shown in §3.2, but at test time we ask the model to generate the full CoT from scratch. The final sentence of CoT is expected to be of the form “answer is: …”, so that the answer can be extracted programmatically. If it’s not in that form, the full generation is returned as the answer. For Direct Prompting, we use the same template as CoT Prompting but the answer field (“A: ”) contains only the final answer instead of CoT. See App. G for details.
+
+### b039 [h2]
+4 Experimental Setup
+
+### b040 [p]
+We evaluate our method on 4 multi-step QA datasets in the open-domain setting: <b>HotpotQA</b> <span class="cite">Yang et al. (2018)</span>, <b>2WikiMultihopQA</b> <span class="cite">Ho et al. (2020)</span>, answerable subset of <b>MuSiQue</b> <span class="cite">Trivedi et al. (2022)</span>, and answerable subset of <b>IIRC</b> <span class="cite">Ferguson et al. (2020)</span>. For HotpotQA, we use the Wikipedia corpus that comes with it for the open-domain setting. For each of the other three datasets, which originally come in a reading comprehension or mixed setting, we used the associated contexts to construct a corpus for our open-domain setting (see App. A for details). For each dataset, we use 100 randomly sampled questions from the original development set for tuning hyperparameters, and 500 other randomly sampled questions as our test set.
+
+### b041 [h3]
+4.1 Models
+
+### b042 [h4]
+Retriever.
+
+### b043 [p]
+We use BM25 <span class="cite">Robertson et al. (2009)</span> implemented in Elasticsearch<sup class="fnm">6</sup> as our base retriever. We compare two retriever systems:
+
+### b044 [fn]
+<a href="https://www.elastic.co/">https://www.elastic.co/</a>
+
+### b045 [p]
+(i) <b>One-step Retriever (OneR)</b> uses the question as a query to retrieve \(K\) paragraphs. We select \(K\in\{5,7,9,11,13,15\}\) that’s best on the dev set.
+
+### b046 [p]
+(ii) <b>IRCoT</b><b> Retriever</b> is our method described in §3. We use BM25 as its underlying retriever and experiment with OpenAI GPT3 (<code>code-davinci-002</code>) <span class="cite">Brown et al. (2020) ; Ouyang et al. (2022) ; Chen et al. (2021)</span> and Flan-T5 <span class="cite">Chung et al. (2022)</span> of different sizes as its CoT generator.
+
+### b047 [p]
+For demonstrating in-context examples to these LMs, we wrote CoTs for 20 questions for all the datasets (see App. §G). We then create 3 demonstration (“training”) sets by sampling 15 questions each for each dataset. For each experiment, we search for the best hyperparameters for the dev set using the first demonstration set and evaluate each demonstration set on the test set using the selected hyperparameters. We report the mean and standard deviation of these 3 results for each experiment.
+
+### b048 [p]
+At test time, we pack as many demonstrations as possible within the model’s context length limit. The context limit for GPT3 (<code>code-davinci-002</code>) is 8K word pieces. Flan-T5-* doesn’t have any hard limit as it uses relative position embeddings. But we limit Flan-T5’s context to 6K word pieces, which is the maximum we could fit in the memory of our 80G A100 GPUs.
+
+### b049 [p]
+IRCoT Retriever has one key hyperparameter: \(K\in\{2,4,6,8\}\), the number of paragraphs to retrieve at each step. Additionally, when creating “training” demonstrations for IRCoT’s Reasoner module, we use gold paragraphs and a smaller number \(M\in\{1,2,3\}\) of distractor paragraphs (§3.1).
+
+### b050 [p]
+<b>Retrieval Metric:</b> We allow a maximum of 15 paragraphs for all retriever systems and measure the recall of the gold paragraphs among the retrieved set of paragraphs. We search for the hyperparameter \(K\) (and \(M\) for IRCoT) that maximizes the recall on the dev set and use it on the test set. The reported metric can thus be viewed as the <i>fixed-budget optimal recall</i> for each system considered.<sup class="fnm">7</sup>
+
+### b051 [fn]
+Note that our retrieved documents are not ranked, making standard information retrieval metrics such as MAP and DCG inapplicable. Further, we can only limit the number of retrieved paragraphs <i>per step</i> to \(K\). Since the total number of reasoning steps varies for questions, and in some cases, we don’t even obtain all \(K\) paragraphs in a given step, the total number of retrieved paragraphs also varies (even though capped at 15). This makes Recall@k, Precision@k, etc., also not applicable as metrics for any given k.
+
+### b052 [h4]
+QA Reader.
+
+### b053 [p]
+To implement the reader, we use the same LMs as used in the <code>reason-step</code> of IRCoT Retriever. We found that QA readers implemented with Flan-T5-* perform better with the Direct Prompting strategy and GPT3 performs better with CoT Prompting strategy (see App.  E). Hence we use Direct prompting strategy for QA with Flan-T5-* and CoT with GPT3 for the experiments.<sup class="fnm">8</sup>
+
+### b054 [fn]
+IRCoT, by construction, produces a CoT as a part of its retrieval process. Thus, instead of having a separate post-hoc reader, one can also just extract the answer from the CoT generated during retrieval. However, we found this to be a suboptimal choice, so we always use a separate reader (see App. F).
+
+### b055 [p]
+The QA reader has one hyperparameter \(M\): the number of distractor paragraphs in the in-context demonstrations. We search for \(M\) in \(\{1,2,3\}\). When used in conjunction with IRCoT retriever \(M\) is tied for the CoT generator and the reader.
+
+### b056 [h4]
+Open-Domain QA (ODQA) Models.
+
+### b057 [p]
+Putting retrievers and readers together, we experiment with ODQA models constructed from the various language models denoted as <b>OneR QA</b> and <b>IRCoT</b><b> QA</b>. For IRCoT QA, the choice of LM for the CoT generator and the reader is kept the same. We also experiment with retriever-less QA readers <b>NoR QA</b> to assess how well LMs can answer the question from their parametric knowledge alone. To select the best hyperparameters for the ODQA model, we search for the hyperparameters \(K\) and \(M\) that maximize the answer F1 on the development set.
+
+### b058 [p]
+IIRC is structured slightly differently from the other datasets, in that its questions are grounded in a main passage and other supporting paragraphs come from the Wikipedia pages of entities mentioned in this passage. We slightly modify the retrievers and readers to account for this (see App. B).
+
+### b059 [fig caption]
+Figure 3: Retrieval recall for one-step retriever (OneR) and IRCoT instantiated from <code>Flan-T5-XXL</code> (left) and <code>GPT3</code> (right) models. IRCoT outperforms OneR for both models and all datasets.
+
+### b060 [fig caption]
+Figure 4: Answer F1 for ODQA model made using (i) no retriever (NoR QA) (ii) one-step retriever (OneR QA) and (iii) IRCoT QA instantiated from <code>Flan-T5-XXL</code> (left) and <code>GPT3</code> (right) models. IRCoT QA outperforms OneR QA and NoR QA for both models on all datasets, except for GPT3 on IIRC.
+
+### b061 [h2]
+5 Results
+
+### b062 [fig caption]
+Figure 5: Retrieval recall for OneR and IRCoT using Flan-T5-XXL (Left) and GPT3 (Right) in out-of-distribution (OOD) setting. HQ (HotpotQA), 2W (2WikiMultihopQA), MQ (MuSiQue). The result X\(\rightarrow\)Y indicates prompt demonstrations are from dataset X and evaluation is on dataset Y. IRCoT outperforms OneR in such an OOD setting.
+
+### b063 [fig caption]
+Figure 6: Answer F1 for NoR QA, OneR QA and IRCoT QA using Flan-T5-XXL (Left) and GPT3 (Right) in out-of-distribution (OOD) setting. HQ (HotpotQA), 2W (2WikiMultihopQA), MQ (MuSiQue). The result X\(\rightarrow\)Y indicates prompt demonstrations are from dataset X and evaluation is on dataset Y. IRCoT QA outperforms OneR QA and NoR QA in such OOD setting.
+
+### b064 [h4]
+IRCoT retrieval is better than one-step.
+
+### b065 [p]
+Fig. 3 compares OneR with IRCoT retrievers made from <code>Flan-T5-XXL</code> and <code>GPT3</code> LMs. For both models, IRCoT significantly outperforms one-step retrieval across all datasets. For <code>Flan-T5-XXL</code>, IRCoT improves our recall metric relative to one-step retrieval, on HotpotQA by 7.9, on 2WikiMultihopQA by 14.3, on MuSiQue by 3.5, and on IIRC by 10.2 points. For <code>GPT3</code>, this improvement is by 11.3, 22.6, 12.5, and 21.2 points, respectively.
+
+### b066 [h4]
+IRCoT QA outperforms NoR and OneR QA.
+
+### b067 [p]
+Fig. 4 compares ODQA performance using NoR, OneR and IRCoT retriever made from <code>Flan-T5-XXL</code> and <code>GPT3</code> LMs. For <code>Flan-T5-XXL</code>, IRCoT QA outperforms OneR QA on HotpotQA by 9.4, on 2WikiMultihopQA by 15.3, on MuSiQue by 5.0 and IIRC by 2.5 F1 points. For <code>GPT3</code>, the corresponding numbers (except for IIRC) are 7.1, 13.2, and 7.1 F1 points. For <code>GPT3</code>, IRCoT doesn’t improve the QA score on IIRC, despite significantly improved retrieval (21 points as shown in Fig. 3). This is likely because IIRC relevant knowledge may already be present in GPT3, as also evidenced by its NoR QA score being similar. For other datasets and model combinations, NoR QA is much worse than IRCoT QA, indicating the limits of the models’ parametric knowledge.
+
+### b068 [fig caption]
+Figure 7: Number of questions, out of 40, where CoT generated by GPT3 using different methods has at least 1 factual error. Factual errors: IRCoT \(&lt;\) OneR \(&lt;\) NoR.
+
+### b069 [fig caption]
+Figure 8: Retrieval recall for OneR (bottom) and IRCoT (top) for LMs of increasing sizes: Flan-T5 {base (0.2B), large (0.7B), XL (3B), XXL (11B)} and GPT3 (175B) on HotpotQA, 2WikiMultihopQA, MuSiQue. IRCoT outperforms OneR for all model sizes, including the 0.3B model, and the difference roughly grows with model size. Note: OneR doesn’t use LM in its retrieval and so has a fixed score.
+
+### b070 [fig caption]
+Figure 9: Answer F1 for ODQA models made using OneR (bottom) and IRCoT (top) for LMs of increasing sizes: Flan-T5 {base (0.2B), large (0.7B), XL (3B), XXL (11B)} and GPT3 (175B) on HotpotQA, 2WikiMultihopQA and MuSiQue. IRCoT QA outperforms OneR QA for all model sizes except for the smallest, 0.3B. IRCoT with 3B model even outperforms OneR with 58X larger GPT3 model showing the value of improved retrieval.
+
+### b071 [h4]
+IRCoT is effective in OOD setting.
+
+### b072 [p]
+Since CoT may not always be easy to write for new datasets, we evaluate NoR, OneR, and IRCoT on generalization to new datasets, i.e. OOD setting. To do so, we use prompt demonstrations from one dataset to evaluate on another dataset.<sup class="fnm">9</sup> For all pairs of the datasets<sup class="fnm">10</sup> and for both <code>Flan-T5-XXL</code> and <code>GPT3</code>, we find the same trend as in the IID setting: IRCoT retrieval outperforms OneR (Fig. 5), and IRCoT QA outperforms both OneR QA and NoR QA (Fig. 6).
+
+### b073 [fn]
+We use the evaluation dataset’s corpus for retrieval.
+
+### b074 [fn]
+We skip IIRC in this exploration as the task is structured a bit differently and requires special handling (see App. B).
+
+### b075 [h4]
+IRCoT generates CoT with fewer factual errors.
+
+### b076 [p]
+To assess whether our approach also improves the factuality of generated CoTs, we manually annotated CoTs generated by NoR QA, OneR QA, and IRCoT QA using GPT3 for 40 randomly sampled questions from each of the four datasets. We considered CoT to have a factual error if at least one of the facts<sup class="fnm">11</sup> is not true.<sup class="fnm">12</sup> As Fig. 7 shows, NoR makes the most factual errors, OneR makes fewer, and IRCoT the least. In particular, IRCoT reduces the factual errors over OneR by 50% on HotpotQA and 40% on 2WikiMultihopQA.
+
+### b077 [fn]
+all sentences before the final “answer is:” sentence.
+
+### b078 [fn]
+Note that factual error doesn’t necessarily mean the predicted answer is incorrect and vice-versa. This is because the model can generate a wrong answer despite all correct facts, and vice-versa. We also account for the possibility of answer annotation errors in the original datasets.
+
+### b079 [p]
+Table 2 illustrates how the CoT predictions for different methods vary qualitatively. Since NoR relies completely on parametric knowledge, it often makes a factual error in the first sentence, which derails the full CoT. OneR can retrieve relevant information closest to the question and is less likely to make such errors early on, but it still makes errors later in the CoT. IRCoT, on the other hand, is often able to prevent such errors in each step.
+
+### b080 [h4]
+IRCoT is also effective for smaller models.
+
+### b081 [p]
+To see how effective IRCoT is at different LM sizes, we show the scaling plots in Fig. 8.<sup class="fnm">13</sup> We compare the recall for OneR and IRCoT using <code>Flan-T5</code> {base (0.2B), large (0.7B), XL (3B), XXL (11B)}, and GPT3 <code>code-davinci-002</code> (175B). IRCoT with even the smallest model (0.2B) is better than OneR, and the performance roughly improves with the model size. This shows the CoT generation capabilities of even small models can be leveraged for improving retrieval. Furthermore, we show the effect of model size on the QA score in Fig. 9. For all sizes except the smallest (0.2B), we see IRCoT QA is better than OneR QA. Moreover, IRCoT with a 3B model even outperforms OneR and NoR with a 58X larger 175B GPT3 model in all datasets.
+
+### b082 [fn]
+We skip IIRC here as the smaller models are not good at identifying Wikipedia titles from a paragraph and a question which is necessary for IIRC (see App. B).
+
+### b083 [h4]
+IRCoT is SOTA for few-shot multistep ODQA.<sup class="fnm">14</sup>
+
+### b084 [fn]
+App. §C reports updated SOTA numbers, including contemporaneous and newer works.
+
+### b085 [p]
+We compare IRCoT QA with five recent approaches to using LLMs for ODQA: Internet-Augmented QA <span class="cite">Lazaridou et al. (2022)</span>, RECITE <span class="cite">Sun et al. (2022)</span> ReAct <span class="cite">Yao et al. (2022)</span>, SelfAsk <span class="cite">Press et al. (2022)</span>, and DecomP <span class="cite">Khot et al. (2022)</span>. Although these are not head-to-head comparisons as different methods use different APIs, knowledge sources, and even LLMs (see App. C for details), it is still informative to explore, in a leaderboard-style fashion, how IRCoT performs relative to the best numbers published for these recent systems.
+
+### b086 [tab caption]
+Table 1: Comparison with other LLM-based ODQA systems on EM and F1 scores. ‘\(-\)’: score is unavailable. HpQA<sup>Br</sup>: Bridge questions subset of HotpotQA. MQ<sup>2H</sup>: MuSiQue 2-hop questions. IRCoT QA with GPT3 (ours) outperforms other systems by a large margin. Note: Comparisons aren’t head-to-head as discussed in the text. App. §C reports updated SOTA numbers, including contemporaneous and newer works.
+
+### b087 [p]
+As shown in Table 1, IRCoT QA significantly outperforms all of these recent systems by a large margin, setting a new state of the art in terms of what’s achievable via retrieval-augmented LLMs (without supervised training).
+
+### b088 [tab caption]
+Table 2: Example CoTs generated by GPT3 with different methods. Since NoR relies on parametric knowledge, it often makes a factual error in the first sentence derailing the full CoT. OneR can retrieve relevant information closest to the question and is less likely to make such errors early on, but it still makes errors later in the CoT. As IRCoT performs retrieval after each step, it is often able to prevent such errors in each step. More examples are in App. D.
+
+### b089 [h2]
+6 Conclusions
+
+### b090 [p]
+Chain-of-thought prompting has significantly improved LLMs’ ability to perform multi-step reasoning. We leveraged this ability to improve retrieval, and in turn, improve QA performance for complex knowledge-intensive open-domain tasks in a few-shot setting. We argued that one-step question-based retrieval is insufficient for such tasks, and introduced IRCoT, which uses interleaved CoT reasoning and retrieval steps that guide each other step-by-step. On four datasets, IRCoT significantly improves both retrieval and QA performance when compared to one-step retrieval, for both large and relatively smaller-scale LMs. Additionally, CoTs generated by IRCoT contain fewer factual errors.
+
+### b091 [h2]
+Limitations
+
+### b092 [p]
+IRCoT relies on the base LM to have a zero or few-shot CoT-generation ability. While this is commonly available in large LMs (over 100B), it’s not as common for small LMs (under 20B), which to some extent limits IRCoT adoptability. Given the recent surge of interest <span class="cite">Tay et al. (2023) ; Magister et al. (2022) ; Ho et al. (2022)</span>, however, smaller LMs will likely increasingly acquire such ability, making IRCoT compatible with many more LMs.
+
+### b093 [p]
+IRCoT also relies on the base LM to support long inputs as multiple retrieved paragraphs need to fit in the LM’s input, in addition to at least a few demonstrations of QA or CoT with paragraphs. This was supported by the models we used as <code>code-davinci-002</code> (GPT3) allows 8K tokens and Flan-T5-* uses relative position embeddings making it as extensible as the GPU memory constraints allow. Future work can explore strategies to rerank and select the retrieved paragraphs instead of passing all of them to the LM to alleviate the need for the LM to support long input.
+
+### b094 [p]
+The performance gain of IRCoT retriever and QA (over OneR and ZeroR baselines) come with an additional computational cost. This is because IRCoT makes a separate call to an (L)LM for each sentence of CoT. Future work can focus on, for instance, dynamically deciding when to retrieve more information and when to perform additional reasoning with the current information.
+
+### b095 [p]
+Lastly, a portion of our experiments was carried out using a commercial LLM API from OpenAI (<code>code-davinci-002</code>). This model was deprecated by OpenAI after our submission making the reproduction of these experiments challenging despite our best efforts, just like any other work using such APIs. The trends discussed in the paper (IRCoT \(&gt;\) OneR \(&gt;\) NoR), we believe, would still hold. Additionally, all our experiments using Flan-T5-*, which exhibit similar trends as that of GPT3, will remain reproducible, thanks to its publicly available model weights.
+
+### b096 [h2]
+Ethical Considerations
+
+### b097 [p]
+Language models are known to hallucinate incorrect and potentially biased information. This is especially problematic when the questions asked to it are of a sensitive nature. While retrieval-augmented approaches such as ours are expected to alleviate this issue to some extent by grounding generation in external text, this by no means solves the problem of generating biased or offensive statements. Appropriate care should thus be taken if deploying such systems in user-facing applications.
+
+### b098 [p]
+All the datasets and models used in this work are publicly available with permissible licenses. HotpotQA has CC BY-SA 4.0 license<sup class="fnm">15</sup>, 2WikiMultihopQA has Apache-2.0 license<sup class="fnm">16</sup>, MuSiQUe and IIRC have CC BY 4.0 license<sup class="fnm">17</sup>, and Flan-T5-* models have Apache-2.0 license.
+
+### b099 [fn]
+<a href="https://creativecommons.org/licenses/by-sa/4.0/">https://creativecommons.org/licenses/by-sa/4.0/</a>
+
+### b100 [fn]
+<a href="https://www.apache.org/licenses/LICENSE-2.0">https://www.apache.org/licenses/LICENSE-2.0</a>
+
+### b101 [fn]
+<a href="https://creativecommons.org/licenses/by/4.0">https://creativecommons.org/licenses/by/4.0</a>
+
+### b102 [h2]
+Acknowledgments
+
+### b103 [p]
+We thank the reviewers for their valuable feedback and suggestions. We also thank OpenAI for providing access to the <code>code-davinci-002</code> API. This material is based on research supported in part by the Air Force Research Laboratory (AFRL), DARPA, for the KAIROS program under agreement number FA8750-19-2-1003, in part by the National Science Foundation under the award IIS #2007290, and in part by an award from the Stony Brook Trustees Faculty Awards Program.
+
+### b104 [h2 appendix]
+Appendix A Constructing Retrieval Corpora
+
+### b105 [p appendix]
+HotpotQA already comes with the associated Wikipedia corpus for the open-domain setting, so we use it directly. 2WikiMultihopQA and MuSiQue, however, are originally reading comprehension datasets. Questions in 2WikiMultihopQA and MuSiQue are associated with 10 and 20 paragraphs respectively, 2-4 of which are supporting and others are non-supporting. To turn these datasets into an open-domain setting, we make two corpora, one for each dataset, by combining all supporting and non-supporting paragraphs for all its questions in the train, development, and test sets. IIRC is originally a mix between reading comprehension and an open-domain setting. Each question is grounded in one main paragraph, which contains links to multiple Wikipedia pages with several paragraphs each. We create a corpus out of all the paragraphs from all the Wikipedia pages present in the dataset.<sup class="fnm">18</sup> We do assume the availability of the main passage which doesn’t need to be retrieved and is always present. We don’t assume the availability of Wikipedia links in the main passage, however, to keep the retrieval problem challenging.<sup class="fnm">19</sup>
+
+### b106 [fn appendix]
+Following are the corpus sizes for the datasets: HotpotQA (5,233,329), 2WikiMultihopQA (430,225), MuSiQue (139,416), and IIRC (1,882,415)
+
+### b107 [fn appendix]
+IIRC corpus has a positional bias, i.e., the majority of supporting paragraphs are always within the first few positions of the Wikipedia page. To keep the retrieval problem challenging enough we shuffle the paragraphs before indexing the corpus, i.e., we don’t use positional information in any way.
+
+### b108 [h2 appendix]
+Appendix B Special Handling of Models for IIRC
+
+### b109 [p appendix]
+IIRC is slightly different from the other datasets, in that the question is grounded in the main passage and other supporting paragraphs come from the Wikipedia pages of entities mentioned in this passage. We modify the retrievers and readers to account for this difference: (i) We always keep the main passage as part of the input to the model regardless of the retrieval strategy used. (ii) For all the retrieval methods, we first prompt the model to generate a list of Wikipedia page titles using the main passage and the question. We map these generated titles to the nearest Wikipedia page titles in the corpus (found using BM25), and then the rest of the paragraph retrieval queries are scoped within only those Wikipedia pages.
+
+### b110 [p appendix]
+To prompt the model to generate Wikipedia page titles using the main passage and the question for IIRC, we use the following template.
+
+### b111 [alg] (캡션 없음, 번역 안 함)
+### b112 [p appendix]
+For “training”, i.e., for demonstrations, N (\(\leq 3\)) is the number of supporting Wikipedia page titles for the question. At test time, since the number of supporting page titles is unknown, we use a fixed value of 3. We found this trick of prompting the model to generate more titles at the test time improves its recall over letting the model decide by itself how many titles to generate.
+
+### b113 [tab appendix caption]
+Table 3: Extended comparison with published LLM-based ODQA systems (as of May 25, 2023) on EM and F1 scores (with new numbers marked with *). ‘\(-\)’: score is unavailable. HpQA<sup>Br</sup>: Bridge questions subset of HotpotQA. MQ<sup>2H</sup>: MuSiQue 2-hop questions. IRCoT remains SOTA for MuSiQue and is close to SOTA for HotpotQA and 2WikiMultihopQA. Note the comparisons here are not head-to-head as discussed in the text.
+
+### b114 [tab appendix caption]
+Table 4: Answer F1 for different ODQA models made from NoR, One and IRCoT retrievals, and Direct and CoT prompting readers. For <code>Flan-T5-XXL</code>, Direct prompting is a better choice for the reader, and for <code>GPT3</code>, CoT prompting is a better choice for the reader. Hence, we make different reader choices for Flan-T5 and GPT3 for the experiments in the main paper. Note that IRCoT QA \(&gt;\) OneR QA \(&gt;\) ZeroR QA holds up regardless of this choice.
+
+### b115 [tab appendix caption]
+Table 5: Additional CoTs generated by GPT3 with different methods. ZeroR is most prone to factual errors. OneR often fixes some of the factual information which is closest to the question but doesn’t always fix it all the way. Since IRCoT retrieves after each step, it can also fix the errors at each step. More examples are in Table 2.
+
+### b116 [h2 appendix]
+Appendix C Comparison with Previous Systems for ODQA with LLMs
+
+### b117 [p appendix]
+We showed a leaderboard-style comparison with previous approaches to using large language models for open-domain QA in § 5. We noted though that the comparison is not head-to-head given various differences. We briefly describe each method and the differences in API, LLM, retrieval corpus, and other choices here.
+
+### b118 [p appendix]
+Internet-Augmented QA <span class="cite">Lazaridou et al. (2022)</span> does (one-step) Google Search retrieval, performs additional LLM-based filtering on it, and then prompts an LLM to answer the question using the resulting context. It uses the Gopher 280B language model. RECITE <span class="cite">Sun et al. (2022)</span> bypasses the retrieval and instead prompts an LLM to first generate (recite) one or several relevant passages from its own memory, and generate the answer conditioned on this generation. They experiment with many LLMs, the highest performing of which is <code>code-davinci-002</code> which we report here. ReAct <span class="cite">Yao et al. (2022)</span> prompts LLMs to produce reasoning and action traces where actions are calls to a Wikipedia API to return the summary for a given Wikipedia page title. It uses the PALM 540B model. SelfAsk <span class="cite">Press et al. (2022)</span> prompts LLMs to decompose a question into subquestions and answers these subquestions by issuing separate calls to the Google Search API. It uses the GPT3 (<code>text-davinci-002</code>) model. Finally, DecomP <span class="cite">Khot et al. (2023)</span> is a general framework that decomposes a task and delegates sub-tasks to appropriate sub-models. Similar to our system, it uses BM25 Search and the GPT3 (<code>code-davinci-002</code>) model. And lastly, DSP <span class="cite">Khattab et al. (2023)</span> provides a way to programmatically define interactions between LLM and retrieval for ODQA (e.g., via question decomposition), bootstrap demonstrations for such a program, and use them to make the answer prediction. It uses GPT3.5 LLM with ColBERT-based retrieval. Since most of these methods use different knowledge sources or APIs and are built using different LLMs and retrieval models, it’s difficult to make a fair scientific comparison across these systems. Additionally, the evaluations in the respective papers are on different random subsets (from the same distribution) of test instances.
+
+### b119 [p appendix]
+Despite these differences, it is still informative to explore, in a leaderboard-style fashion, how IRCoT performs relative to the best numbers published for these recent systems. Table 3 shows results from different systems, including contemporaneous and newer numbers. The two new systems in this table (relative to Table 1) are DecomP (newer version) and DSP. While IRCoT remains SOTA on MuSiQue, DSP outperforms it on HotpotQA by 2.0 points and the newer version of Decomp outperforms IRCoT on 2WikiMultihopQA by 2.8 points. We speculate DecomP performs well on 2WikiMultihopQA because it has only a few easy-to-predict decomposition patterns, which DecomP’s question decomposition can leverage. The lack of such patterns in HotpotQA and MuSiQue causes it to underperform compared to IRCoT. Lastly, it will be useful to assess whether DSP, which is hardcoded for 2-hop questions like that of HotpotQA, will work well for a dataset with a varied number of hops like that of MuSiQue. We leave this further investigation to future work.
+
+### b120 [h2 appendix]
+Appendix D Additional CoT Generation Examples
+
+### b121 [p appendix]
+Table 5 provides illustrations, in addition to the ones provided in Table 2, for how the CoT generations for NoR QA, OneR QA, and IRCoT QA methods vary. This gives an insight into how IRCoT improves QA performance. Since NoR relies completely on parametric knowledge, it often makes a factual error in the first sentence, which derails the full reasoning chain. Some of this factual information can be fixed by OneR, especially information closest to the question (i.e., can be retrieved using the question). This is insufficient for fixing all the mistakes. Since IRCoT involves retrieval after each step, it can fix errors at each step.
+
+### b122 [h2 appendix]
+Appendix E Direct vs CoT Prompting Readers
+
+### b123 [p appendix]
+Table 4 compares reader choice (Direct vs CoT Prompting) for Flan-T5-XXL and GPT3. We find that Flan-T5-XXL works better with Direct Prompting as a reader and GPT3 works better with CoT Prompting as a reader. Therefore, for the experiments in the main paper, we go with this choice. Note though that the trends discussed in § 5 (IRCoT QA \(&gt;\) OneR QA \(&gt;\) ZeroR QA) hold regardless of the choice of the reader.
+
+### b124 [h2 appendix]
+Appendix F Separate Reader in IRCoT QA
+
+### b125 [tab appendix caption]
+Table 6: Answer F1 of IRCoT QA with and without a separate reader for <code>Flan-T5-XXL</code> (top two rows) and <code>GPT3</code> (bottom two rows). When the reader is not used, the answer is extracted from the CoT generated by IRCoT while doing the retrieval. Ablating the reader usually hurts the performance.
+
+### b126 [p appendix]
+IRCoT, by construction, produces a CoT as a part of its retrieval process. So, instead of having a separate post-hoc reader, one can also just extract the answer from the CoT generated during retrieval. As Table 6 shows the effect of such an ablation. For <code>Flan-T5-XXL</code> having a separate reader is significantly better. For GPT3, this is not always true, but at least a model with a separate reader is always better or close to the one without. So overall we go with the choice of using the reader for the experiments in this paper.
+
+### b127 [h2 appendix]
+Appendix G Prompts
+
+### b128 [p appendix]
+Our manually written chain-of-thought annotations for HotpotQA, 2WikiMultihopQA, MuSiQue, and IIRC are given in Listing 1, 2, 3 and 4 respectively. Our prompts for GPT3 CoT Prompting are the same as these, except they have Wikipipedia paragraphs on the top of the questions as shown in § 3.1<sup class="fnm">20</sup>. Our prompts for GPT3 Direct Prompting are the same as that of CoT prompting, except have the answer after "A:" directly. Our prompts for Flan-T5-* are slightly different from that of GPT3. For CoT Prompting, we prefix the question line: "Q: Answer the following question by reasoning step-by-step. &lt;actual-question&gt;". For Direct Prompting, we prefix the question line: "Q: Answer the following question. &lt;actual-question&gt;". We did this to follow Flan-T5-*’s training format and found it to help its CoT generation.
+
+### b129 [fn appendix]
+We are not showing the paragraphs in the paper for brevity but they can be obtained from the released code.
+
+### b130 [alg appendix caption]
+Listing 1: Chain-of-Thought annotations for HotpotQA.
+
+### b131 [alg appendix caption]
+Listing 2: Chain-of-Thought annotations for 2WikiMultihopQA.
+
+### b132 [alg appendix caption]
+Listing 3: Chain-of-Thought annotations for MuSiQue.
+
+### b133 [alg appendix caption]
+Listing 4: Chain-of-Thought annotations for IIRC.

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="ltx_picture" height="143.1" id="A1.F19.pic1" overflow="visible" version="1.1" viewBox="0 0 653.15 143.1" width="653.15"><style id="wv-ltx-fo"><![CDATA[
+foreignObject{overflow:visible}
+.ltx_foreignobject_container{display:flex;align-items:flex-end;width:100%;height:100%}
+.ltx_foreignobject_container:has(>.ltx_foreignobject_content>.ltx_minipage){align-items:flex-start}
+.ltx_foreignobject_content{display:block;color:#000;font-family:'Times New Roman',Times,'Liberation Serif','Nimbus Roman',Tinos,'DejaVu Serif',serif;font-size:calc(1em * var(--wv-fit, 1));line-height:1.2;text-align:left;overflow-wrap:break-word}
+.ltx_foreignobject_content *{line-height:1.2}
+[style*='--ltx-fg-color:']{color:var(--ltx-fg-color)}
+[style*='--ltx-bg-color:']{background-color:var(--ltx-bg-color)}
+.ltx_p,.ltx_para,.ltx_block,.ltx_logical-block{display:block;margin:0}
+span.ltx_p:not(:last-child){margin-bottom:.3em}
+.ltx_inline-logical-block,.ltx_inline-logical-block .ltx_para{display:inline}
+.ltx_inline-block,.ltx_inline-block .ltx_para{display:inline-block}
+.ltx_parbox{display:inline-block}
+.ltx_minipage{display:inline-block;max-width:100%}
+.ltx_align_bottom{vertical-align:bottom}
+.ltx_font_bold{font-weight:700}
+.ltx_font_medium{font-weight:400}
+.ltx_font_italic,.ltx_emph{font-style:italic}
+.ltx_font_smallcaps{font-variant:small-caps}
+.ltx_align_center{text-align:center}
+.ltx_align_top{vertical-align:top}
+.ltx_font_typewriter{font-family:'Noto Sans Mono','DejaVu Sans Mono',Menlo,Consolas,monospace}
+.ltx_text.ltx_font_typewriter{font-size:.875em}
+.ltx_verbatim{text-align:left}
+span.ltx_p:empty,span.ltx_p:has(>.ltx_text.ltx_font_typewriter.ltx_inline-block:first-child){margin-bottom:0}
+span.ltx_p:has(>.ltx_text.ltx_font_typewriter.ltx_inline-block:first-child):not(:has(.ltx_parbox)){white-space:pre}
+.ltx_font_typewriter .ltx_parbox .ltx_para,.ltx_font_typewriter .ltx_parbox .ltx_p{text-align:left;margin-bottom:0;font-family:inherit}
+.ltx_font_typewriter .ltx_parbox .ltx_p{white-space:pre-wrap}
+.ltx_font_typewriter .ltx_parbox .ltx_para,span.ltx_p:has(.ltx_parbox),.ltx_parbox,.ltx_parbox .ltx_para{white-space:normal}
+.ltx_text:has(>.ltx_parbox){white-space:normal;align-items:baseline;display:flex}
+.ltx_itemize,.ltx_enumerate,.ltx_description{display:block;margin:.2em 0 0 .2em}
+.ltx_item{display:block;padding-left:1.2em;text-indent:-1.2em}
+.ltx_item+.ltx_item{margin-top:.2em}
+.ltx_item .ltx_para,.ltx_item .ltx_p{display:inline;text-indent:0}
+.ltx_tag_item{display:inline-block;min-width:1.2em;text-indent:0}
+.ltx_rule{vertical-align:middle;background-color:#000}
+.ltx_minipage>.ltx_rule{display:block!important;margin:.2em 0}
+@supports (font-size-adjust:ch-width 0.5){.ltx_foreignobject_content{font-size-adjust:ch-width .5}.ltx_text.ltx_font_typewriter{font-size-adjust:ch-width .525;font-size:1em}}
+]]></style><g fill="#000000" stroke="#000000" stroke-width="0.4pt" style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="translate(0,143.1) matrix(1 0 0 -1 0 0)"><g fill="#40409F" fill-opacity="1.0" style="--ltx-fill-color:#40409F;"><path d="M 0 5.91 L 0 137.2 C 0 140.46 2.64 143.1 5.91 143.1 L 647.24 143.1 C 650.51 143.1 653.15 140.46 653.15 137.2 L 653.15 5.91 C 653.15 2.64 650.51 0 647.24 0 L 5.91 0 C 2.64 0 0 2.64 0 5.91 Z" style="stroke:none"></path></g><g fill="#F2F2F9" fill-opacity="1.0" style="--ltx-fill-color:#F2F2F9;"><path d="M 1.97 5.91 L 1.97 118.99 L 651.18 118.99 L 651.18 5.91 C 651.18 3.73 649.42 1.97 647.24 1.97 L 5.91 1.97 C 3.73 1.97 1.97 3.73 1.97 5.91 Z" style="stroke:none"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 127.59)"><foreignObject height="12.3" overflow="visible" style="--ltx-fo-width:44.07em;--ltx-fo-height:0.69em;--ltx-fo-depth:0.19em;font-size:10pt;" transform="matrix(1 0 0 -1 0 9.61)" width="609.8"><span class="ltx_foreignobject_container" xmlns="http://www.w3.org/1999/xhtml"><span class="ltx_foreignobject_content">
+<span class="ltx_inline-block ltx_minipage ltx_align_bottom" id="A1.F19.pic1.1" style="width:44.07em;">
+<span class="ltx_p" id="A1.F19.pic1.1.1"><span class="ltx_text" id="A1.F19.pic1.1.1.1" style="--ltx-fg-color:#FFFFFF;">Prompt for query decomposition</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 16.55)"><foreignObject height="93.4" overflow="visible" style="--ltx-fo-width:46.64em;--ltx-fo-height:6.55em;--ltx-fo-depth:0.2em;font-size:10pt;" transform="matrix(1 0 0 -1 0 90.63)" width="645.37"><span class="ltx_foreignobject_container" xmlns="http://www.w3.org/1999/xhtml"><span class="ltx_foreignobject_content">
+<span class="ltx_inline-block ltx_minipage ltx_align_bottom" id="A1.F19.pic1.2" style="width:46.64em;">
+<span class="ltx_p" id="A1.F19.pic1.2.1"><span class="ltx_text ltx_verbatim ltx_font_typewriter ltx_inline-block" id="A1.F19.pic1.2.1.1" style="font-size:90%;width:440.7pt;--ltx-fg-color:#000000;"><span class="ltx_text ltx_inline-block" id="A1.F19.pic1.2.1.1.1" style="width:0.0pt;"> </span><span class="ltx_text ltx_inline-block" id="A1.F19.pic1.2.1.1.2" style="width:0.0pt;"> </span><span class="ltx_inline-logical-block ltx_parbox ltx_align_top" id="A1.F19.pic1.2.1.1.3" style="width:440.7pt;">
+<span class="ltx_para ltx_noindent" id="A1.F19.pic1.p1">
+<span class="ltx_p" id="A1.F19.pic1.p1.1">You are a helpful assistant that generates multiple sub-questions related to an input question.</span>
+</span></span></span></span>
+<span class="ltx_p" id="A1.F19.pic1.2.2" style="width:440.7pt;"><span class="ltx_text ltx_verbatim ltx_font_typewriter ltx_inline-block" id="A1.F19.pic1.2.2.1" style="font-size:90%;width:440.7pt;--ltx-fg-color:#000000;"><span class="ltx_inline-logical-block ltx_parbox ltx_pruned_first ltx_align_top" id="A1.F19.pic1.2.2.1.1" style="width:440.7pt;"></span></span></span>
+<span class="ltx_p" id="A1.F19.pic1.2.3" style="width:440.7pt;"><span class="ltx_text ltx_verbatim ltx_font_typewriter ltx_inline-block" id="A1.F19.pic1.2.3.1" style="font-size:90%;width:440.7pt;--ltx-fg-color:#000000;"><span class="ltx_text ltx_inline-block" id="A1.F19.pic1.2.3.1.1" style="width:0.0pt;"> </span><span class="ltx_text ltx_inline-block" id="A1.F19.pic1.2.3.1.2" style="width:0.0pt;"> </span><span class="ltx_inline-logical-block ltx_parbox ltx_align_top" id="A1.F19.pic1.2.3.1.3" style="width:440.7pt;">
+<span class="ltx_para ltx_noindent" id="A1.F19.pic1.p3">
+<span class="ltx_p" id="A1.F19.pic1.p3.1">The goal is to break down the input into a set of sub-problems / sub-questions that can be answers in isolation.</span>
+</span></span></span></span>
+<span class="ltx_p" id="A1.F19.pic1.2.4" style="width:440.7pt;"><span class="ltx_text ltx_verbatim ltx_font_typewriter ltx_inline-block" id="A1.F19.pic1.2.4.1" style="font-size:90%;width:440.7pt;--ltx-fg-color:#000000;"><span class="ltx_inline-logical-block ltx_parbox ltx_pruned_first ltx_align_top" id="A1.F19.pic1.2.4.1.1" style="width:440.7pt;"></span></span></span>
+<span class="ltx_p" id="A1.F19.pic1.2.5" style="width:440.7pt;"><span class="ltx_text ltx_verbatim ltx_font_typewriter ltx_inline-block" id="A1.F19.pic1.2.5.1" style="font-size:90%;width:440.7pt;--ltx-fg-color:#000000;"><span class="ltx_inline-logical-block ltx_parbox ltx_align_top" id="A1.F19.pic1.2.5.1.1" style="width:440.7pt;">
+<span class="ltx_para ltx_noindent" id="A1.F19.pic1.p5">
+<span class="ltx_p" id="A1.F19.pic1.p5.1">Generate multiple search queries related to: {question}</span>
+</span></span></span></span>
+<span class="ltx_p" id="A1.F19.pic1.2.6" style="width:440.7pt;"><span class="ltx_text ltx_verbatim ltx_font_typewriter ltx_inline-block" id="A1.F19.pic1.2.6.1" style="font-size:90%;width:440.7pt;--ltx-fg-color:#000000;"><span class="ltx_inline-logical-block ltx_parbox ltx_align_top" id="A1.F19.pic1.2.6.1.1" style="width:440.7pt;">
+<span class="ltx_para ltx_noindent" id="A1.F19.pic1.p6">
+<span class="ltx_p" id="A1.F19.pic1.p6.1">Output (3 queries):</span>
+</span></span></span></span>
+</span></span></span></foreignObject></g></g></svg>

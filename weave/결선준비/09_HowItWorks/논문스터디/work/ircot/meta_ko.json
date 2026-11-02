@@ -1,0 +1,179 @@
+{
+ "key": "ircot",
+ "title_ko": "지식 집약적 다단계 질문을 위한 검색과 사고의 사슬(CoT) 추론의 교차 수행",
+ "short": "IRCoT",
+ "venue": "ACL 2023 (Long Papers)",
+ "venue_source": "https://aclanthology.org/2023.acl-long.557/",
+ "year": 2023,
+ "authors_short": "Harsh Trivedi et al. (Stony Brook University, Allen Institute for AI)",
+ "links": {
+  "arxiv": "https://arxiv.org/abs/2212.10509",
+  "pdf": "https://arxiv.org/pdf/2212.10509v2",
+  "html": "https://arxiv.org/html/2212.10509v2",
+  "acl": "https://aclanthology.org/2023.acl-long.557/",
+  "code": "https://github.com/stonybrooknlp/ircot"
+ },
+ "group": "multihop",
+ "one_line": "LLM이 사고의 사슬(CoT)을 한 문장 쓸 때마다 그 문장을 질의로 다시 검색하고, 새로 모은 문단을 보고 다음 문장을 쓰게 하는 '검색 ↔ 추론 교차' 루프로 다단계 질문의 근거 문단을 모은다(학습 없이 퓨샷 프롬프팅만 사용).",
+ "problem": "다단계 질문은 질문만으로 한 번 검색(one-step retrieve-and-read)해서는 뒤 단계의 근거를 찾기 어렵다. 무엇을 검색할지가 지금까지 무엇을 알아냈는지에 달려 있고, 두 번째 근거 문서는 질문과 어휘·의미가 거의 겹치지 않을 수 있기 때문이다(예: 'Lost Gravity는 어느 나라에서 제조되었나?' → 질문으로 찾은 문서에는 제조국이 없고, 먼저 제조사 Mack Rides를 알아낸 뒤 그 이름으로 다시 검색해야 독일이 나온다). 반대로 검색 없이 CoT만 쓰면 파라미터 지식에 기대다가 환각으로 첫 문장부터 틀리기 쉽다. 이 논문은 지도 학습 없이 퓨샷 프롬프팅만으로 검색과 CoT 추론이 단계마다 서로를 이끌게 하는 방법을 제안한다.",
+ "pipeline": [
+  "1단계(초기 검색): 질문 Q 자체를 질의로 BM25(Elasticsearch)에서 문단 K개를 검색해 '모은 문단' 집합을 시작한다(K∈{2,4,6,8}, 개발 세트로 선택).",
+  "2단계(Reason, LLM 1회): 퓨샷 예시 + 지금까지 모은 문단 전체 + 질문 + 지금까지 쓴 CoT 문장을 프롬프트로 넣어 CoT를 이어 쓰게 하고, 생성된 첫 문장 하나만 취한다(나머지는 버림).",
+  "3단계(종료 판정): 그 문장에 'answer is:'가 있거나 최대 추론 단계 수(8, 각주 4)에 도달하면 멈추고, 모은 문단 전체를 검색 결과로 반환한다. 멈춤 조건은 이 두 가지뿐이다.",
+  "4단계(Retrieve, BM25 1회): 방금 쓴 CoT 문장 하나를 질의로 K개를 더 검색해 모은 집합에 더한다(모은 문단 총수 상한 15, 각주 5). → 2단계로 돌아간다.",
+  "5단계(Reader, LLM 1회): 모은 문단을 맥락으로 별도 QA 리더를 호출해 최종 답을 낸다(GPT3는 CoT 프롬프팅, Flan-T5는 직접 프롬프팅). 검색 중 만든 CoT에서 답을 바로 뽑지 않고 항상 별도 리더를 쓴다(각주 8, 부록 F).",
+  "(IIRC만) 시작 전에 주 지문과 질문으로 LLM이 위키백과 페이지 제목 목록을 생성하고, BM25로 코퍼스의 가장 가까운 제목에 대응시킨 뒤 이후 검색을 그 페이지들 안으로 한정한다(부록 B)."
+ ],
+ "key_idea": "'무엇을 검색할지'는 '지금까지 무엇을 알아냈는지'에 달려 있으므로, 질문 대신 LLM이 방금 쓴 CoT 한 문장을 다음 검색 질의로 쓴다. 검색된 문단은 다시 다음 CoT 문장의 근거가 되어 환각을 줄인다(검색과 추론이 단계마다 서로를 이끎). 검색기(BM25)와 LLM 모두 학습하지 않고, 데이터셋마다 손으로 쓴 CoT 20개 중 15개씩 뽑은 예시만 프롬프트로 쓴다.",
+ "llm_calls": "질문 하나당(3.1절·그림 2·각주 4·5·8 기준, 횟수는 제 정리): ① 초기 BM25 검색 1회(질문이 질의). ② 추론 단계마다 LLM 생성 1회(다음 CoT 문장 1개만 사용) → 종료되지 않았으면 그 문장을 질의로 BM25 검색 1회. 종료는 'answer is:' 출력 또는 최대 추론 단계 수 8 도달이며, 그림 2처럼 종료한 단계 뒤에는 검색하지 않는다. ③ 검색이 끝나면 별도 QA 리더 LLM 호출 1회. → 추론 단계가 n번(n≤8)이면 LLM 호출 n+1회, BM25 검색 n회(제 계산). IIRC에서는 위키백과 제목 생성 LLM 호출 1회가 앞에 더 붙는다(부록 B). 매 LLM 호출의 입력은 퓨샷 예시 + 지금까지 모은 문단(최대 15개) + 질문 + 지금까지의 CoT이고, 테스트 때 컨텍스트 한도(GPT3 code-davinci-002 8K, Flan-T5 6K 워드피스)까지 예시를 최대한 채운다(4.1절) — 즉 단계마다 긴 프롬프트 전체를 다시 넣는다. 논문은 질문당 평균 단계 수·호출 수·지연 시간을 보고하지 않으며, 저자는 'IRCoT makes a separate call to an (L)LM for each sentence of CoT'를 추가 계산 비용으로 밝힌다(Limitations).",
+ "index_cost": "색인은 BM25(Elasticsearch) 역색인 하나뿐이다. 색인할 때 LLM 호출·임베딩 계산·학습이 없다. 코퍼스(부록 A): HotpotQA는 데이터셋에 딸린 위키백과 코퍼스를 그대로 쓰고, 2WikiMultihopQA·MuSiQue는 train/dev/test 모든 질문에 딸린 근거·비근거 문단을 합쳐 만들며, IIRC는 데이터셋에 나오는 모든 위키백과 페이지의 문단으로 만든다(위치 편향을 없애려고 색인 전에 문단 순서를 섞음, 각주 19). 코퍼스 크기(각주 18, 단위 표기 없음): HotpotQA 5,233,329 / 2WikiMultihopQA 430,225 / MuSiQue 139,416 / IIRC 1,882,415. 사전 준비의 사람 비용은 프롬프트 쪽에 있다: 데이터셋마다 CoT 20개를 손으로 쓰고 15개씩 뽑아 예시 세트 3개를 만든다(4.1절, 부록 G).",
+ "results": [
+  {
+   "claim": "문제 제기(서론): 첫 추론 단계를 먼저 거치지 않으면, 두 번째 단계를 뒷받침하는 글은 질문과 어휘는 물론 의미도 겹치지 않아 찾기 어렵다. 그래서 검색과 추론이 단계마다 서로를 이끌어야 한다는 것이 이 논문의 출발점이다(결과가 아니라 저자의 문제 설정).",
+   "quote": "Additionally, without generating the first reasoning step, the text supporting the second step can’t be identified easily given the lack of lexical or even semantic overlap with the question.",
+   "where": "§1 Introduction"
+  },
+  {
+   "claim": "GPT3와 함께 쓰면 4개 데이터셋에서 검색은 최대 21포인트, 후속 QA는 최대 15포인트 향상된다고 초록에서 요약한다. 단 5절 수치로는 GPT3 재현율 향상 최대가 22.6(2WikiMultihopQA)이고 GPT3 QA F1 향상 최대는 13.2이며, 15.3은 Flan-T5-XXL 수치다(원문 내 표현 차이, 제 확인).",
+   "quote": "Using IRCoT with GPT3 substantially improves retrieval (up to 21 points) as well as downstream QA (up to 15 points) on four datasets: HotpotQA, 2WikiMultihopQA, MuSiQue, and IIRC.",
+   "where": "Abstract"
+  },
+  {
+   "claim": "검색 재현율(15개 고정 예산 최적 재현율), OneR 대비 향상: Flan-T5-XXL +7.9/+14.3/+3.5/+10.2, GPT3 +11.3/+22.6/+12.5/+21.2 (HotpotQA/2WikiMultihopQA/MuSiQue/IIRC).",
+   "quote": "For Flan-T5-XXL, IRCoT improves our recall metric relative to one-step retrieval, on HotpotQA by 7.9, on 2WikiMultihopQA by 14.3, on MuSiQue by 3.5, and on IIRC by 10.2 points. For GPT3, this improvement is by 11.3, 22.6, 12.5, and 21.2 points, respectively.",
+   "where": "§5, Fig. 3"
+  },
+  {
+   "claim": "QA 답 F1, OneR QA 대비 향상: Flan-T5-XXL +9.4/+15.3/+5.0/+2.5, GPT3 +7.1/+13.2/+7.1(IIRC 제외).",
+   "quote": "For Flan-T5-XXL, IRCoT QA outperforms OneR QA on HotpotQA by 9.4, on 2WikiMultihopQA by 15.3, on MuSiQue by 5.0 and IIRC by 2.5 F1 points. For GPT3, the corresponding numbers (except for IIRC) are 7.1, 13.2, and 7.1 F1 points.",
+   "where": "§5, Fig. 4"
+  },
+  {
+   "claim": "반례: GPT3 + IIRC에서는 검색이 21포인트 좋아져도 QA 점수가 오르지 않는다(저자는 GPT3가 이미 관련 지식을 가진 탓으로 추정).",
+   "quote": "For GPT3, IRCoT doesn’t improve the QA score on IIRC, despite significantly improved retrieval (21 points as shown in Fig. 3).",
+   "where": "§5"
+  },
+  {
+   "claim": "GPT3가 쓴 CoT의 사실 오류(데이터셋당 무작위 40문항 수작업 주석)가 OneR 대비 HotpotQA에서 50%, 2WikiMultihopQA에서 40% 줄었다.",
+   "quote": "In particular, IRCoT reduces the factual errors over OneR by 50% on HotpotQA and 40% on 2WikiMultihopQA.",
+   "where": "§5, Fig. 7"
+  },
+  {
+   "claim": "가장 작은 Flan-T5(0.2B)를 CoT 생성기로 써도 IRCoT 검색 재현율이 OneR보다 높고, 모델이 클수록 대체로 좋아진다(IIRC 제외).",
+   "quote": "IRCoT with even the smallest model (0.2B) is better than OneR, and the performance roughly improves with the model size.",
+   "where": "§5, Fig. 8"
+  },
+  {
+   "claim": "QA에서는 0.2B를 제외한 모든 크기에서 IRCoT QA가 OneR QA보다 낫고, 3B(Flan-T5-XL) IRCoT가 58배 큰 175B GPT3의 OneR·NoR보다 높다(IIRC 제외한 3개 데이터셋).",
+   "quote": "Moreover, IRCoT with a 3B model even outperforms OneR and NoR with a 58X larger 175B GPT3 model in all datasets.",
+   "where": "§5, Fig. 9"
+  },
+  {
+   "claim": "OOD(한 데이터셋의 예시로 다른 데이터셋을 평가)에서도 같은 경향: 검색은 IRCoT > OneR, QA는 IRCoT QA > OneR QA·NoR QA(IIRC 제외, 인용문의 각주 10 표시는 생략).",
+   "quote": "For all pairs of the datasets and for both Flan-T5-XXL and GPT3, we find the same trend as in the IID setting: IRCoT retrieval outperforms OneR (Fig. 5), and IRCoT QA outperforms both OneR QA and NoR QA (Fig. 6).",
+   "where": "§5, Fig. 5–6"
+  },
+  {
+   "claim": "기존 LLM 기반 ODQA 시스템(InterAug, RECITE, ReAct, SelfAsk, DecomP)보다 높다고 주장하지만, API·지식원·LLM이 달라 직접 맞대결 비교는 아니라고 저자가 명시한다.",
+   "quote": "As shown in Table 1, IRCoT QA significantly outperforms all of these recent systems by a large margin, setting a new state of the art in terms of what’s achievable via retrieval-augmented LLMs (without supervised training).",
+   "where": "§5, Table 1"
+  },
+  {
+   "claim": "부록 C의 갱신 비교(2023-05-25 기준)에서는 MuSiQue만 SOTA를 유지하고, HotpotQA는 DSP가 2.0, 2WikiMultihopQA는 새 DecomP가 2.8포인트 앞선다.",
+   "quote": "While IRCoT remains SOTA on MuSiQue, DSP outperforms it on HotpotQA by 2.0 points and the newer version of Decomp outperforms IRCoT on 2WikiMultihopQA by 2.8 points.",
+   "where": "Appendix C, Table 3"
+  }
+ ],
+ "limits": [
+  "(저자 언급) 기반 LM에 제로/퓨샷 CoT 생성 능력이 있어야 한다. 대형 LM(100B 이상)에는 흔하지만 소형 LM(20B 미만)에는 덜 흔해 채택 가능성이 제한된다.",
+  "(저자 언급) 긴 입력이 필요하다. 검색된 문단 여러 개와 (문단이 포함된) 예시 몇 개가 함께 LM 입력에 들어가야 한다(GPT3 8K 토큰, Flan-T5는 GPU 메모리 한도). 문단을 재순위화·선택해 입력을 줄이는 것은 향후 과제로 남겼다.",
+  "(저자 언급) 추가 계산 비용: CoT 문장마다 (L)LM을 따로 호출한다. 언제 더 검색하고 언제 현재 정보로 더 추론할지를 동적으로 정하는 것은 향후 과제로 남겼다.",
+  "(저자 언급) GPT3 실험에 쓴 code-davinci-002가 제출 후 지원 중단되어 재현이 어렵다(Flan-T5 실험은 가중치가 공개되어 재현 가능).",
+  "(저자 언급) 다른 LLM 기반 ODQA 시스템과의 비교(표 1)는 API·지식원·LLM이 달라 직접 맞대결 비교가 아니다. 부록 C 갱신표에서는 HotpotQA·2WikiMultihopQA에서 DSP·새 DecomP에 뒤진다.",
+  "(저자 언급) 검색 결과에 순위가 없고 질문마다 검색 문단 수가 달라(상한 15) MAP·DCG·Recall@k를 쓸 수 없어서, 개발 세트에서 K(와 M)를 골라 잰 '고정 예산 최적 재현율'을 보고한다(각주 7).",
+  "(제 관찰) 평가 규모: 데이터셋마다 테스트 500문항(개발 100문항으로 튜닝), 예시 세트 3개의 평균·표준편차. 사실 오류 분석은 데이터셋당 40문항 수작업 주석. 모델 크기 실험(그림 8·9)과 OOD 실험(그림 5·6)은 IIRC를 뺐다.",
+  "(제 관찰) 기본 검색기는 BM25 하나뿐이다(밀집 검색기와 결합한 실험은 없음). 검색이 좋아져도 QA가 오르지 않는 경우가 있다(GPT3 + IIRC, 저자 언급)."
+ ],
+ "weave": {
+  "borrow": [
+   "문제 정의 인용: 초록의 'what to retrieve depends on what has already been derived'(무엇을 검색할지는 이미 무엇을 알아냈는지에 달려 있다)는 Weave 멀티홉(찾은 단서가 탐색 메모에 더해져 다음 검색 조건이 됨)의 동기를 설명하는 대표 문장으로 쓸 만하다.",
+   "'첫 추론 단계 없이는 두 번째 근거가 질문과 어휘·의미가 겹치지 않아 찾기 어렵다'(서론)는 와인 시나리오와 같은 구조다: '지은이네 집들이 때 마신 화이트 와인'이라는 요청만으로는 라벨 사진이 잡히지 않고, 중간 근거인 지은의 카톡 초대(3/12 '이번 주 토요일 6시, 이사 기념으로 우리 집에서 저녁 먹자!', '집들이'라는 단어 없음)를 먼저 찾아야 3/15(토) 18시 이후 그날 저녁 사진 두 장(시간 필터) → 라벨 OCR 'BABICH SAUVIGNON BLANC' + '소비뇽 블랑 = 화이트' 추론 → '배비치 소비뇽 블랑'으로 이어진다.",
+   "루프 골격(요청으로 첫 검색 → 새로 얻은 단서로 다음 검색 → 찾은 것을 누적 → 답이 나오거나 상한에 닿으면 멈춤 → 모은 근거로 답)은 How it Works 장표에서 '탐색 메모 → 다음 기록 → 메모 갱신 → 멈춤' 흐름의 대표 선행 연구로 소개하기 좋다. 단계당 K개·누적 상한 15개·최대 8단계 같은 예산 설정도 Weave의 홉 수·후보 수 상한을 정할 때 참고할 만하다.",
+   "저자가 밝힌 비용 한계('IRCoT makes a separate call to an (L)LM for each sentence of CoT')와 향후 과제('dynamically deciding when to retrieve more information and when to perform additional reasoning')는, 매 홉 긴 추론 문장을 생성하지 않고 경량 임베딩으로 다음 기록을 찾으려는 Weave 설계의 동기로 인용할 수 있다(단, 비용 차이는 우리가 측정해야 주장할 수 있다).",
+   "평가 틀: NoR(검색 없음) / OneR(요청으로 한 번 검색) / 교차 검색의 3단 비교와 '같은 문단 예산에서의 재현율'은 Weave 데모·실험에서 '한 번 검색 vs 멀티홉'을 보여 줄 때 빌려 쓸 수 있다."
+  ],
+  "contrast": [
+   "다음 질의를 만드는 주체가 다르다: IRCoT는 매 단계 LLM(실험은 GPT3 175B code-davinci-002, Flan-T5 0.2B–11B)이 CoT 문장을 생성하고 그 문장이 그대로 BM25 질의가 된다. Weave는 매 홉 긴 추론 문장을 생성하지 않고 온디바이스 경량 Reasoning Embedding이 탐색 메모에서 이어지는 다음 기록을 찾는다. 루프 모양이 비슷할 뿐 같은 방법이 아니다.",
+   "IRCoT 수치(재현율 최대 21포인트(5절에서는 22.6), QA 최대 15 F1, 사실 오류 최대 50% 감소)는 위키백과 기반 공개 벤치마크에서 BM25 + 대형/중형 LM으로 얻은 값이다. 개인 기록·온디바이스·임베딩 루프인 Weave의 성능 근거로 쓰면 안 된다.",
+   "'작은 모델에서도 효과적'이라는 결과는 작은 '생성' 모델(Flan-T5)이 CoT를 쓰는 루프의 결과이며(그마저 0.2B에서는 QA가 OneR보다 낫지 않음, 그림 9), 생성 없이 임베딩만 쓰는 루프가 같은 이득을 낸다는 근거가 아니다. Flan-T5 실험도 80G A100 GPU에서 6K 컨텍스트로 돌렸다(4.1절) — 온디바이스 실행을 보인 논문이 아니다.",
+   "IRCoT에는 날짜·시간 필터, 사진 OCR, 사람·시간·장소 같은 구조화 색인이 없다(텍스트 문단 + BM25만 사용). Weave의 필터·OCR·구조화 색인은 이 논문이 검증한 부분이 아니다.",
+   "멈춤 규칙도 다르다: IRCoT는 LLM이 'answer is:'를 쓰거나 8단계에 닿으면 멈춘다. Weave의 '필요한 정보가 채워지거나 새 단서가 없으면 멈춤'은 별도 설계라서 이 논문 결과로 정당화되지 않는다.",
+   "'IRCoT보다 N배 빠르다/가볍다' 같은 비교는 논문이 질문당 호출 수·지연 시간을 보고하지 않으므로, 우리가 직접 측정한 값으로만 말해야 한다."
+  ]
+ },
+ "pipeline_figure": "b023",
+ "glossary": [
+  {
+   "term": "IRCoT (Interleaved Retrieval guided by Chain-of-Thought)",
+   "ko": "사고의 사슬이 이끄는 교차 검색",
+   "desc": "CoT 한 문장 생성과 검색 한 번을 번갈아 반복해 검색과 추론이 서로를 이끌게 하는 방법."
+  },
+  {
+   "term": "Chain-of-Thought (CoT)",
+   "ko": "사고의 사슬",
+   "desc": "답에 이르는 중간 추론을 자연어 문장으로 단계별로 쓰게 하는 프롬프팅."
+  },
+  {
+   "term": "Reason step / Retrieve step",
+   "ko": "추론 단계 / 검색 단계",
+   "desc": "Reason은 질문·모은 문단·지금까지의 CoT로 다음 CoT 문장 하나를 생성하고, Retrieve는 그 문장을 질의로 K개를 더 검색해 모은 집합에 더한다."
+  },
+  {
+   "term": "One-step Retriever (OneR)",
+   "ko": "1단계 검색기",
+   "desc": "질문을 질의로 BM25에서 K개(5~15 중 선택)를 한 번만 검색하는 기준선."
+  },
+  {
+   "term": "NoR QA (ZeroR)",
+   "ko": "검색 없는 QA",
+   "desc": "검색 없이 모델의 파라미터 지식만으로 답하는 기준선(한계·부록에서는 ZeroR로도 표기)."
+  },
+  {
+   "term": "Fixed-budget optimal recall",
+   "ko": "고정 예산 최적 재현율",
+   "desc": "모든 검색기에 최대 15개 문단을 허용하고, 개발 세트에서 재현율이 최대가 되도록 K(와 M)를 고른 뒤 잰 정답 문단 재현율."
+  },
+  {
+   "term": "Distractor paragraphs (M)",
+   "ko": "방해 문단",
+   "desc": "프롬프트 예시에 정답 문단과 섞어 넣는 무작위 문단(개수 M∈{1,2,3})."
+  },
+  {
+   "term": "QA reader (Direct / CoT prompting)",
+   "ko": "QA 리더(직접 / CoT 프롬프팅)",
+   "desc": "검색이 끝난 뒤 모은 문단으로 최종 답을 내는 별도 LLM 호출. 직접 프롬프팅은 답만 쓰고, CoT 프롬프팅은 추론을 쓴 뒤 'answer is:'로 답한다."
+  },
+  {
+   "term": "Open-domain QA (ODQA)",
+   "ko": "오픈 도메인 질의응답",
+   "desc": "정답 문단이 주어지지 않고 큰 코퍼스에서 직접 검색해 답하는 설정."
+  },
+  {
+   "term": "Out-of-distribution (OOD) setting",
+   "ko": "분포 외 설정",
+   "desc": "한 데이터셋의 예시로 프롬프트를 만들고 다른 데이터셋에서 평가하는 설정."
+  },
+  {
+   "term": "Factual error (in CoT)",
+   "ko": "사실 오류",
+   "desc": "마지막 'answer is:' 문장 앞의 문장들 중 하나라도 사실이 아니면 오류로 센 수작업 평가."
+  },
+  {
+   "term": "BM25",
+   "ko": "BM25",
+   "desc": "단어 일치에 기반한 고전적 어휘(희소) 검색 점수 함수. 이 논문의 기본 검색기(Elasticsearch로 구현)."
+  }
+ ],
+ "skipped": "부록 C 본문(b117–b119: 기존 LLM ODQA 시스템 설명·리더보드 비교)과 표 3 캡션(b113), 부록 D 본문(b121: 추가 CoT 사례)과 표 5 캡션(b115)은 비교·사례 나열이라 번역하지 않았다(부록 C의 핵심 단서 문장은 results·limits에 원문 인용). 프롬프트 템플릿과 CoT 주석 원문(b030·b111, Listing 1–4의 줄)은 번역 대상이 아니라 원문 그대로 둔다. 부록 A·B·E·F·G의 제목·문단·각주, 표 4·6 캡션, Listing 1–4 캡션, 부록 C·D 제목은 번역했다.",
+ "extract_issues": "① 초록 각주 1('Code, data, and prompts are available at https://github.com/stonybrooknlp/ircot')이 빠져 있었다. 추출기가 초록 문단의 각주를 버린다(extract_arxiv.py run()에서 초록용 Inline의 footnotes를 쓰지 않음). src.json의 abstract에 b001 바로 뒤로 fn 블록 b134(mark '1')를 추가하고 src.txt에도 넣었다. ② b030·b111(프롬프트 템플릿)의 lines는 '글 상자' 대체 경로(get_text)로 뽑혀 '<Page Title>', '<Question>' 같은 자리표시자가 이스케이프되지 않은 채 들어 있었다(다른 경로의 lines는 HTML로 이스케이프됨). HTML로 렌더하면 사라지므로 &lt;…&gt;로 이스케이프했다(내용 불변). 추출기는 고치지 않았다. ③ 추출 문제는 아니지만 원문 표기 참고: 3.2절 리더 문단의 '§3.2'는 템플릿이 있는 3.1절을 가리키는 것으로 보이고, 그림 8·9 캡션은 가장 작은 모델을 0.3B로, 본문은 0.2B로 쓰며, 표 4 캡션의 'One'은 OneR이다. 번역은 모두 원문 표기를 따랐다."
+}

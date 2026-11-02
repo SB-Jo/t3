@@ -1,0 +1,207 @@
+{
+ "key": "reasonir",
+ "title_ko": "ReasonIR: 추론 과제를 위한 검색기 학습",
+ "short": "ReasonIR",
+ "venue": "COLM 2025",
+ "venue_source": "https://colmweb.org/2025/AcceptedPapers.html",
+ "year": 2025,
+ "authors_short": "Rulin Shao, Rui Qiao et al. (FAIR at Meta, University of Washington)",
+ "links": {
+  "arxiv": "https://arxiv.org/abs/2504.20595",
+  "pdf": "https://arxiv.org/pdf/2504.20595v1",
+  "html": "https://arxiv.org/html/2504.20595v1",
+  "project": "",
+  "code": "https://github.com/facebookresearch/ReasonIR",
+  "model": "https://huggingface.co/reasonir/ReasonIR-8B"
+ },
+ "group": "reasoning_embedding",
+ "one_line": "LLM으로 '문서마다 추론이 필요한 어려운 질의 + 그럴듯하지만 답에는 도움이 안 되는 하드 네거티브'를 합성해 8B 임베딩 검색기(ReasonIR-8B)를 대조 학습시킨 논문. 추론형 검색 벤치마크 BRIGHT에서 바이인코더 최고 성능을 냈다.",
+ "problem": "기존 검색기는 NQ·MS MARCO처럼 평균 20–21토큰의 짧은 사실형 질의와, 그 질의에 곧바로 답하는 문서로 학습된다. 그러나 추론 과제(BRIGHT 질의 평균 194토큰)에서는 질의와 정답 문서가 어휘·의미상 거의 겹치지 않고, 정답 자체보다 배경 지식·풀이 패턴·비슷한 예제처럼 '추론에 도움이 되는' 문서를 찾아야 한다. 기존 하드 네거티브 마이닝(BM25 상위의 비관련 문서)은 이 설정에서 검색기 자체가 약하고 거짓 네거티브 위험이 커서 통하지 않는다. 또 기존 밀집 검색기는 LLM이 길게 재작성한 질의(Reason-query)를 넣으면 성능이 정체하거나 떨어진다.",
+ "pipeline": [
+  "1단계(공개 데이터 1,383,877개): MS MARCO·NQ·HotpotQA 등 공개 검색 데이터 11종(부록 D)으로 자기회귀 LLM을 임베딩 모델로 적응시키는 기본 데이터를 깐다(짧은 사실형 질의).",
+  "2단계(VL, 가변 길이 데이터 244,970개): Llama3.1-70B-Instruct가 '긴 질의로 검색하는 과제' 지시문을 호출당 약 20개 브레인스토밍(그림 7) → 지시문마다 길이(300 미만·300·500·1000·1500·2000단어 중 샘플)를 정해 긴 질의와 포지티브 문서를 함께 생성(그림 8) → 지시문+질의를 새 질의로 삼아 별도 턴에서 하드 네거티브 생성(그림 6, 부록 A.3).",
+  "3단계(HQ 시드 문서 선택): BRIGHT 저자들(Su et al., 2024)이 수집한 문서(생물학·경제학·수학·코딩 등, 다수가 포럼의 추론형 질문에 달린 사람 답변에 인용된 문서)를 초기 풀로 쓰고, FineWeb-Edu 분류기의 교육 가치 점수가 2 미만인 문서를 제거한다(4.3절).",
+  "4단계(HQ, 어려운 질의 100,521개): 시드 문서를 주고 '사람 같은 브레인스토밍 지침'에 따라 배경 지식·흔한 풀이 패턴·현실적 시나리오를 먼저 추론한 뒤, 문서 없이도 이해되는(self-contained) 어려운 질의를 만들게 한다. 문서의 특정 용어를 언급하는 질문은 금지하고, 시드 문서가 곧 포지티브가 된다(그림 4·5).",
+  "5단계(하드 네거티브 생성, VL·HQ 공통): 앞서 만든 질의와 포지티브를 조건으로 별도 턴에서 LLM이 '표면적인 어휘 겹침은 있지만 질문 해결에는 도움이 안 되고 포지티브보다 덜 관련된, 300단어 이상' 문서를 새로 쓴다(그림 6). 코퍼스에서 캐내지(mining) 않고 생성하며, 질의와 동시에 생성하면 짧고 쉬운 네거티브가 나와서 턴을 나눴다(4.4절).",
+  "6단계(학습): Llama3.1-8B의 인과적 어텐션 마스크를 양방향으로 바꾸고 마지막 층 은닉 상태를 평균 풀링해 임베딩한다. 하드 네거티브 + 배치 내/장치 간 네거티브로 대조 학습(온도 τ=0.02), 배치 2048 × 1000스텝, 학습률 2e-5, GradCache 사용(부록 E.1, 표 12 캡션).",
+  "7단계(검색): 문서를 미리 임베딩해 색인하고, 질의 1개를 인코딩해 코사인 유사도로 찾는다. 선택적으로 (a) LLM 질의 재작성(Reason-query), (b) BM25 점수와 0.5 비율 보간(하이브리드), (c) QwenRerank(Qwen2.5-32B-Instruct가 상위 100개에 0–5점을 매기고 검색기 점수와 0.5:0.5로 보간해 동점을 깸)를 붙인다."
+ ],
+ "key_idea": "추론형 질의에서는 기존 검색기가 약해서 하드 네거티브를 '캐낼' 수 없으므로, LLM이 질의와 포지티브를 먼저 만든 뒤 별도 턴에서 '키워드는 겹치지만 답에는 도움이 안 되는' 하드 네거티브를 '생성'한다. 질의 쪽은 실제 문서에서 출발해 배경 지식·풀이 패턴·현실 시나리오를 먼저 추론하게 만든 자기 완결적 어려운 질의(HQ)와, 300 미만–2000단어의 긴 질의(VL)를 섞어 검색기가 길고 추론이 필요한 질의를 다루게 한다. 절제 실험에서는 HQ 단독보다 VL과 섞었을 때 효과가 컸다(표 3).",
+ "llm_calls": "기본 검색은 생성 없이 질의 1개를 ReasonIR-8B(8B 바이인코더)로 1회 인코딩하고, 미리 색인한 문서 임베딩과 코사인 유사도를 비교한다. 이 설정의 BRIGHT 점수가 24.4다. 선택 1(질의 재작성): LLM이 CoT로 정보가 풍부한 Reason-query를 1회 생성하고, 그 긴 질의를 다시 1회 인코딩한다. BRIGHT 대표 수치 29.9는 GPT-4 재작성, Llama3.1-8B-Instruct 재작성은 28.0이고, RAG 실험(MMLU·GPQA)에서는 리더 모델이 직접 재작성했다. 선택 2(재순위화): QwenRerank는 상위 100개 문서마다 Qwen2.5-32B-Instruct가 추론 토큰 없이 0–5 점수를 1회씩 출력한다. 36.9는 GPT-4 재작성에 이 재순위화까지 쓴 값이다. 표 15(biology)의 테스트 시점 FLOPs는 원 질의 1.9×10^12, GPT4 Reason-query 15.4×10^12, Rank1-7B 946×10^12, Rank1-32B 4.5×10^15다. 이 FLOPs에는 재작성 LLM(GPT-4)의 생성 비용이 들어 있지 않다(제 계산: β는 1024토큰 질의를 인코딩하는 2NL_q 값과 같은 규모).",
+ "index_cost": "색인 시에는 데이터스토어의 모든 문서를 ReasonIR-8B(Llama3.1-8B 기반, 임베딩 외 파라미터 약 70억)로 한 번씩 임베딩해 둔다. 논문은 색인 비용을 따로 보고하지 않으며, 질의 시 FLOPs 비교에서도 색인·유사도 검색 비용은 뺐다(부록 I). RAG 실험은 MassiveDS-1.4T 전체가 아니라, Contriever로 검색한 상위 1000개 패시지를 병합·중복 제거한 풀에 ReasonIR-8B로 데이터스토어를 만들었다(부록 E.3). 학습용 사전 준비로는 Llama3.1-70B-Instruct로 VL 244,970개(지시문 브레인스토밍 → 질의+포지티브 → 별도 턴 하드 네거티브)와 HQ 100,521개(시드 문서로 질의 생성 → 별도 턴 하드 네거티브)를 합성한다. 이를 공개 데이터 1,383,877개와 섞어 배치 2048 × 1000스텝으로 대조 학습한다.",
+ "results": [
+  {
+   "claim": "BRIGHT에서 재순위화기 없이 29.9, 재순위화기와 함께 36.9 nDCG@10로 새 SOTA를 냈다. 29.9는 GPT-4로 재작성한 질의 기준이고, 원 질의는 24.4다.",
+   "quote": "By training on a mixture of our synthetic data and existing public data, ReasonIR-8B achieves a new state-of-the-art of 29.9 nDCG@10 without reranker and 36.9 nDCG@10 with reranker on BRIGHT, a widely-used reasoning-intensive information retrieval (IR) benchmark.",
+   "where": "Abstract / 표 1"
+  },
+  {
+   "claim": "질의 설정별 BRIGHT nDCG@10은 원 질의 24.4, GPT-4 재작성 질의 29.9, LLM 재순위화기 추가 시 36.9다.",
+   "quote": "ReasonIR-8B achieves state-of-the-art results on BRIGHT (Su et al., 2024)—24.4 nDCG@10 using original queries, 29.9 with GPT4-rewritten queries, and 36.9 when further combined with an LLM reranker.",
+   "where": "§1 / 표 1"
+  },
+  {
+   "claim": "소형 재작성기 Llama3.1-8B-Instruct로 재작성해도 28.0이다.",
+   "quote": "Additionally, we demonstrate that ReasonIR-8B can still perform well with a small-sized query rewriter, Llama3.1-8B-Instruct, achieving an nDCG@10 score of 28.0 on BRIGHT.",
+   "where": "§5.1 / 표 1"
+  },
+  {
+   "claim": "BM25 점수와 0.5 비율로 보간한 하이브리드는 32.0이다(GPT-4 재작성 질의 기준).",
+   "quote": "Interpolating the retrieval scores of ReasonIR-8B and BM25 (with a ratio of 0.5) further improves nDCG@10 to 32.0.",
+   "where": "§5.1 / 표 1"
+  },
+  {
+   "claim": "LLM 재순위화기 Rank1-32B(29.4)보다 200배 넘게 적은 테스트 시점 연산으로 더 높다(29.9). 단, 재작성 LLM 비용은 FLOPs에 들어가지 않는다(제 해석, 부록 I 표 15).",
+   "quote": "We find that our bi-encoder retriever ReasonIR-8B outperforms expensive LLM reranker Rank1-32B with over 200× less test-time compute (Figure 1(a)).",
+   "where": "§5.4 / 그림 1(a) / 부록 I 표 15"
+  },
+  {
+   "claim": "데이터 절제에서는 공개 데이터에 HQ와 VL을 함께 더할 때 최고였다(원 질의 24.4, Reason-query 29.9). 표 3 값은 Public 19.6/27.1, Public+HQ 20.9/27.1, Public+VL 23.2/28.0이다.",
+   "quote": "Specifically, combining HQ and VL achieves an nDCG@10 score of 24.4 on original queries and 29.9 on Reason-query.",
+   "where": "§5.3 / 표 3"
+  },
+  {
+   "claim": "쉬운 질의(EQ)는 VL 위에 더해도 향상이 없으므로, 향상은 '어려운 질의' 생성 덕분이다(표 3: Public+EQ+VL 22.3/27.9 vs Public+VL 23.2/28.0).",
+   "quote": "As shown in Table 3, adding EQ does not provide any performance improvement on top of VL, indicating that the improved performance from adding HQ can be attributed to the generation of hard and reasoning-intensive queries, while naively generating simple questions using in-domain documents does not help on BRIGHT.",
+   "where": "§5.3 / 표 3"
+  },
+  {
+   "claim": "합성 데이터가 더 어렵다. 하드 네거티브를 포지티브보다 높게 매기는 오류율은 GRIT-7B 기준 HQ 42.3 / VL 11.3 / Public 3.9, BM25 기준 53.0 / 37.3 / 25.1이다(그림 3(c)에 적힌 값).",
+   "quote": "Figure 3(c) shows that HQ is significantly more challenging and that the public data can be mostly solved using a retriever that is good at semantic matching.",
+   "where": "§4.5 / 그림 3(c)"
+  },
+  {
+   "claim": "RAG에서는 클로즈드북 대비 MMLU +3.9점(71.1→75.0), GPQA +7.1점(31.3→38.4)으로 GRIT-7B보다 높았다(원 질문 기준, 표 2).",
+   "quote": "As shown in Figure 1(b), using ReasonIR-8B for RAG improves the performance of the base LLM (closed-book) by 3.9 and 7.1 absolute points on MMLU and GPQA, respectively, outperforming the previous SOTA retriever GRIT-7B.",
+   "where": "§5.2 / 표 2"
+  },
+  {
+   "claim": "RAG에서 소형 리더 모델로 재작성하면 GPQA에서 모든 밀집 검색기 성능이 떨어진다(ReasonIR-8B 38.4→35.4, 표 2).",
+   "quote": "However, rewritten queries decrease all dense retrievers’ performance on GPQA, which we hypothesize is caused by the small-scale reader model not being able to write good queries for this task, unlike in BRIGHT where a strong model, GPT-4, was used to write good queries.",
+   "where": "§5.2 / 표 2"
+  },
+  {
+   "claim": "질의 분해(LangChain, 하위 질의 3개)는 BRIGHT 성능을 떨어뜨렸다(Nomic 12.1→10.5, GRIT-7B 20.4→17.3).",
+   "quote": "However, we evaluated a popular query decomposition method implemented by LangChain on BRIGHT and found that it reduces performance from 12.1 to 10.5 with Nomic and 20.4 to 17.3 with GRIT-7B when compared with directly retrieving with the original query (detailed results in Appendix C).",
+   "where": "§3 / 부록 C 표 4"
+  },
+  {
+   "claim": "재작성 질의가 길어질수록 ReasonIR-8B는 계속 좋아지고, 다른 검색기는 정체하거나 떨어진다(그림 2. 이 실험의 재작성기는 gpt4o-mini, 부록 B).",
+   "quote": "ReasonIR-8B consistently benefits from longer rewritten queries, whereas other retrievers plateau or even worsen with longer queries; thus, ReasonIR-8B enables the length of the rewritten queries as a new dimension of test-time scaling.",
+   "where": "§1 / 그림 2 / 부록 B"
+  },
+  {
+   "claim": "BM25와 ReasonIR-8B의 상위 100개 문서 중복은 약 28.2%뿐이라 하이브리드가 서로를 보완한다.",
+   "quote": "As shown in Table 11, across 12 subtasks in BRIGHT, BM25 and ReasonIR-8B only share about 28.2% overlap in the top-100 retrieved documents.",
+   "where": "부록 G.5 / 표 11"
+  }
+ ],
+ "limits": [
+  "(저자 언급) 소형 리더 모델로 재작성한 질의는 GPQA에서 모든 밀집 검색기의 성능을 떨어뜨렸다(ReasonIR-8B 38.4→35.4, 표 2). BRIGHT의 29.9는 강한 GPT-4 재작성에 기댄 수치이며, 더 나은 재작성기는 향후 과제로 남겼다.",
+  "(저자 언급) HQ만 공개 데이터에 더하면 원 질의는 19.6→20.9로 조금 오르지만 Reason-query는 오르지 않는다(27.1→27.1, 표 3). HQ가 너무 길고 어려워 VL과 섞어야 효과가 난다.",
+  "(저자 언급) RQ 학습 실험은 연산 제약으로 원 질의의 포지티브·네거티브를 재사용했다(질의 재작성이 관련성을 바꾸지 않는다고 가정, 부록 H).",
+  "(저자 언급) 향후 과제로 합성 데이터의 스케일링 경향, 더 나은 시드 문서 선택, 다국어·멀티모달 확장, 다중 턴 추론 모델과의 결합을 든다. 합성 프롬프트는 영어 출력을 강제한다(그림 6·8).",
+  "생성형 하드 네거티브의 기여만 떼어 본 절제 실험(예: BM25 마이닝 대비)은 본문·부록에 없다(제가 확인한 범위). 4.4절의 근거는 세 가지 논리와 '동시 생성하면 짧고 쉬운 네거티브가 나온다'는 관찰이며, 절제 실험이 보인 것은 질의 유형(HQ/VL/EQ)의 효과다.",
+  "시드 문서가 BRIGHT 저자들이 수집한 문서라 평가 벤치마크와 출처가 겹친다. 논문은 EQ 대조군으로 '같은 문서로 쉬운 질문만 만들면 BRIGHT에서 도움이 안 된다'는 점은 보였지만, 코퍼스 겹침 자체의 영향은 따로 분석하지 않는다(제 관찰).",
+  "테스트 시점 연산 비교(부록 I)는 FLOPs 근사다. 재작성 LLM(GPT-4)의 생성 비용과 색인·유사도 검색 비용은 들어 있지 않다(제 해석: 표 15의 β=15.4×10^12는 1024토큰 질의 인코딩 2NL_q와 같은 규모).",
+  "원문 자체의 수치·표기 불일치(제 확인, 추출 문제 아님): ① QwenRerank 결합 점수가 5.1절 본문은 36.8, 초록·그림 1·표 1은 36.9다. ② 초록의 상대 향상 MMLU 6.4%는 표 2의 Reason-query 75.6 기준(4.5/71.1≈6.3%), GPQA 22.6%는 원 질문 38.4 기준(7.1/31.3≈22.7%)과 맞아 두 설정이 섞여 있다(제 계산). 5.2절의 절대 향상 3.9/7.1점은 둘 다 원 질문 기준이다. ③ 표 15의 'β=15.4×10^12=5.6α'는 α=1.9×10^12와 맞지 않는다(15.4/1.9≈8.1, 제 계산). ④ 5.1절은 밀집 기준선으로 E5를 들지만 표 1에는 E5가 없다. ⑤ 부록 H는 세 합성 데이터를 모두 섞은 결과를 '표 3'이라 하지만 실제로는 표 12에 있다. ⑥ 그림 19 캡션이 그림 18과 같다(내용은 질의 분해 프롬프트)."
+ ],
+ "weave": {
+  "borrow": [
+   "학습 데이터 레시피를 인용할 근거: '문서 하나 → 어렵고 관련 있는 질의 + 그럴듯하지만 도움이 안 되는 하드 네거티브'(초록). Weave에 옮기면 '집들이'라는 단어가 없는 지은의 카톡 초대('이번 주 토요일 6시, 이사 기념으로 우리 집에서 저녁 먹자!')를 포지티브로, '지은이네 집들이 때 마신 화이트 와인'을 질의로, '와인'·'지은'이 겹치지만 이어지지 않는 기록(다른 날의 와인 사진, 지은이와의 다른 약속 카톡)을 하드 네거티브로 LLM이 합성하는 구성이 된다(우리 설계 예시이고 논문 실험은 아님).",
+   "하드 네거티브는 질의와 포지티브를 먼저 만든 뒤 별도 턴에서 생성한다. 동시에 만들면 짧고 쉬운 네거티브가 나온다(4.4절). 프롬프트 조건(그림 6)은 표면적 어휘 겹침은 있되 질문 해결에 도움이 안 되고 포지티브보다 덜 관련될 것, 300단어 이상이다. Weave 합성도 '질의·정답 기록 → 헷갈리는 기록' 2단계로 나누는 근거가 된다.",
+   "마이닝 대신 생성을 택한 이유(약한 검색기로는 못 캐냄, 같은 출처에서 오답 네거티브, 시드 문서가 최적 정답이 아닐 수 있어 거짓 네거티브; 4.4절)는 개인 기록에도 그대로 통하는 논리다. 같은 날·같은 사람 기록이 실제로는 정답일 수 있기 때문이다(Weave 적용은 우리 해석).",
+   "어려운 질의만으로는 부족하고 길이·난이도가 중간인 데이터(VL)와 섞어야 시너지가 난다(표 3: Public+HQ 20.9, Public+VL 23.2, Public+HQ+VL 24.4, 쉬운 질의를 섞은 Public+EQ+VL은 22.3). 학습 데이터 혼합 설계의 근거로 쓸 수 있다.",
+   "BM25 점수와 임베딩 점수를 0.5로 보간하면 29.9→32.0(GPT-4 재작성 질의, 표 1)이고, 두 검색기의 상위 100개 중복은 약 28.2%다(부록 G.5). Weave의 키워드+벡터 색인 병행을 설명하는 근거로 쓸 수 있다.",
+   "BRIGHT에서는 정보가 풍부한 긴 질의 1개가 분해된 짧은 질의 3개보다 나았다(3절, 표 4). '탐색 메모'(찾을 것·아는 단서)를 한 번에 임베딩할 질의로 쓰는 설계와 맞닿는다. 단, 저자도 다중 홉 QA에서는 질의 분해가 효과적이었다는 선행 결과를 함께 적었다.",
+   "그림 1(a)는 검색 시점에 생성 없이 질의를 1회 인코딩하는 바이인코더가 LLM 재순위화기보다 200배 넘게 적은 FLOPs로 더 높다는 그림이다. '매 홉 긴 추론 생성 없이 임베딩으로 찾는다'는 방향의 참고 도식으로 쓸 수 있다(단, 그 29.9는 GPT-4 재작성 질의 기준이고 재작성 비용은 FLOPs에 들어 있지 않다)."
+  ],
+  "contrast": [
+   "ReasonIR-8B는 Llama3.1-8B 기반 8B 모델이고 온디바이스 경량화 실험은 없다. Weave의 경량 Reasoning Embedding 성능을 이 논문 수치로 말하면 안 된다.",
+   "BRIGHT SOTA 29.9/36.9에는 테스트 시점 LLM 호출(GPT-4 질의 재작성, +Qwen2.5-32B 재순위화)이 들어 있다. '생성 없이 임베딩만'의 근거로는 원 질의 24.4(표 1)를 써야 한다.",
+   "단일 홉 검색기다(질의 1개 → 검색 1회). 찾은 단서를 메모에 더해 다음 검색 조건으로 삼는 Weave의 멀티홉 루프(예: '집들이'라는 단어가 없는 카톡 초대 → 3/15(토) 18시 이후 사진 → 라벨 OCR + '소비뇽 블랑 = 화이트' 추론)는 다루지 않는다. 다중 턴 추론 모델과의 결합은 저자의 향후 과제다.",
+   "평가는 과학·수학·코딩 지식 문서(BRIGHT)와 MMLU·GPQA RAG다. 개인 기록(캘린더·사진 OCR·카톡), 시간 같은 정확한 조건 필터, 한국어에서의 효과는 검증되지 않았다.",
+   "'생성형 하드 네거티브가 성능을 올렸다'고 인용하면 안 된다. 그 부분만 떼어 본 절제 실험이 없으므로 '이 레시피(질의+하드 네거티브 합성)를 따른다'로 인용해야 한다."
+  ]
+ },
+ "pipeline_figure": "b035",
+ "glossary": [
+  {
+   "term": "Reasoning-intensive retrieval",
+   "ko": "추론 집약적 검색",
+   "desc": "정답을 직접 담은 문서가 아니라 배경 지식·풀이 패턴·비슷한 예제처럼 추론에 도움이 되는 문서를 찾아야 하는 검색."
+  },
+  {
+   "term": "ReasonIR-Synthesizer",
+   "ko": "ReasonIR 합성 파이프라인",
+   "desc": "VL·HQ 질의, 포지티브, 하드 네거티브를 LLM(Llama3.1-70B-Instruct)으로 합성하는 학습 데이터 생성 레시피."
+  },
+  {
+   "term": "Varied-length (VL) data",
+   "ko": "가변 길이 데이터",
+   "desc": "300 미만–2000단어 길이의 긴 질의와 포지티브 문서를 LLM이 함께 생성한 데이터로, 검색기의 유효 컨텍스트 길이를 늘리기 위한 것."
+  },
+  {
+   "term": "Hard query (HQ)",
+   "ko": "어려운 질의",
+   "desc": "실제 시드 문서에서 출발해 브레인스토밍 지침으로 만든, 문서 없이도 이해되는 추론형 질의. 시드 문서가 포지티브가 된다."
+  },
+  {
+   "term": "Easy query (EQ)",
+   "ko": "쉬운 질의",
+   "desc": "같은 시드 문서로 기준선 프롬프트를 써서 만든 단순 질의로, 질의 난이도 절제 실험의 대조군."
+  },
+  {
+   "term": "Hard negative",
+   "ko": "하드 네거티브",
+   "desc": "질의와 그럴듯하게 관련돼 보이지만(키워드 겹침) 답에는 도움이 안 되는 문서. 이 논문은 캐내지 않고 LLM이 생성한다."
+  },
+  {
+   "term": "Multi-turn hard negative generation",
+   "ko": "다중 턴 하드 네거티브 생성",
+   "desc": "질의·포지티브를 먼저 만든 뒤 다음 턴에서 그것을 조건으로 하드 네거티브를 생성하는 방식(동시 생성 시 짧고 쉬운 네거티브가 나오는 문제를 피함)."
+  },
+  {
+   "term": "Reasoning-worthy document",
+   "ko": "추론 가치가 있는 문서",
+   "desc": "추론 과제 해결에 도움이 될 지식을 담은 문서. BRIGHT 수집 문서 중 FineWeb-Edu 교육 가치 점수 2 이상을 시드로 쓴다."
+  },
+  {
+   "term": "Reason-query",
+   "ko": "추론 재작성 질의",
+   "desc": "LLM이 CoT로 문제를 파악하고 관련 정보를 서술해 길고 정보가 풍부하게 다시 쓴 질의(BRIGHT의 재작성 프롬프트를 재사용)."
+  },
+  {
+   "term": "Query length scaling",
+   "ko": "질의 길이 스케일링",
+   "desc": "재작성 질의를 길게 할수록 검색 성능이 오르는 현상을 테스트 시점 스케일링의 새 차원으로 본 것."
+  },
+  {
+   "term": "Effective context length",
+   "ko": "유효 컨텍스트 길이",
+   "desc": "검색기가 실제로 성능을 유지하며 활용할 수 있는 입력 길이. GRIT-7B는 학습 시 질의 한도가 256토큰이었다."
+  },
+  {
+   "term": "Bi-encoder / cross-encoder",
+   "ko": "바이인코더 / 크로스 인코더",
+   "desc": "바이인코더는 질의·문서를 따로 임베딩해 문서를 미리 색인할 수 있고, 크로스 인코더(LLM 재순위화기)는 질의-문서 쌍마다 함께 넣어 계산해야 한다."
+  },
+  {
+   "term": "Tie-breaking reranking (QwenRerank)",
+   "ko": "동점 처리 재순위화",
+   "desc": "LLM이 매긴 0–5 정수 점수를 0–1로 정규화해 검색기(또는 BM25) 점수와 보간함으로써 동점을 깨는 재순위화."
+  },
+  {
+   "term": "Bidirectional attention mask",
+   "ko": "양방향 어텐션 마스크",
+   "desc": "디코더 LLM의 인과적 마스크를 양방향으로 바꿔 임베딩 모델로 쓰는 기법(GritLM 방식). 임베딩은 마지막 층 평균 풀링으로 얻는다."
+  },
+  {
+   "term": "Error rate (difficulty)",
+   "ko": "오류율(난이도 척도)",
+   "desc": "검색기가 포지티브보다 하드 네거티브에 더 높은 점수를 주는 비율로, 학습 데이터 난이도를 재는 척도."
+  }
+ ],
+ "skipped": "부록 F(Recall@100·오라클 nDCG 추가 결과: b138–b140), G.3–G.5(검색기별 후보 비교·재순위화기 일반화·BM25 중복 분석의 문단과 표 캡션: b150–b151, b153–b156, b158–b159), J.3의 도메인별 질의 예시 표 캡션(표 18–23: b192–b197)은 추가 실험과 사례 나열이라 번역하지 않았다(해당 절 제목은 번역). 그림 4–19의 프롬프트 원문(이미지 속 텍스트), 모든 표 본문, 식 (1)도 지침대로 번역하지 않았다. 부록 A–E, G.1–G.2, H, I, J.1–J.2는 방법·데이터 구성·구현·비용 설명이라 문단과 캡션을 모두 번역했다.",
+ "extract_issues": ""
+}

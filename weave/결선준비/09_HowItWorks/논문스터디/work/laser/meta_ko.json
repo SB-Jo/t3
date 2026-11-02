@@ -1,0 +1,130 @@
+{
+  "key": "laser",
+  "title_ko": "LaSER: 밀집 검색을 위해 명시적 추론을 잠재 공간에 내재화하기",
+  "short": "LaSER",
+  "venue": "SIGIR 2026",
+  "venue_source": "https://doi.org/10.1145/3805712.3809575",
+  "year": 2026,
+  "authors_short": "Jiajie Jin et al. (Renmin University of China, Alibaba Group Tongyi Lab)",
+  "links": {
+    "arxiv": "https://arxiv.org/abs/2603.01425",
+    "pdf": "https://arxiv.org/pdf/2603.01425v1",
+    "html": "https://arxiv.org/html/2603.01425v1",
+    "project": "https://huggingface.co/Alibaba-NLP/LaSER-Qwen3-0.6B",
+    "code": "https://github.com/ignorejjj/LaSER",
+    "doi": "https://doi.org/10.1145/3805712.3809575"
+  },
+  "group": "reasoning_embedding",
+  "one_line": "검색할 때 추론 문장을 생성하지 않고, 학습 때만 CoT를 함께 읽은 ‘자기 자신’(같은 백본의 명시적 뷰)을 교사로 삼아, 검색기가 소프트 토큰 몇 개(K=3)로 조용히 ‘생각’한 뒤 임베딩을 내게 만든 방법.",
+  "problem": "LLM 기반 임베딩 검색기는 추론 능력이 있는 백본을 쓰면서도 대조 학습으로만 학습돼 ‘더 센 인코더’로만 쓰이고, 숨은 의도·다중 홉·모호한 서술이 있는 질의에 약하다. 외부 LLM이 CoT나 확장 질의를 써 준 뒤 검색하는 rewrite-then-retrieve는 정확도를 올리지만 자기회귀 생성 때문에 지연이 매우 크다. 잠재 토큰으로 생각하는 기존 암묵적 방법(GIRCSE 등)은 빠르지만 최종 대조 손실만으로 지도해서 잠재 토큰이 의미 없는 상태로 퇴화하기 쉽다. LaSER는 텍스트 생성 없이 빠르면서도 CoT로 보강한 질의만큼 깊은 질의 임베딩을 목표로 한다.",
+  "pipeline": [
+    "1단계(데이터 준비, 오프라인): 학습 질의마다 외부 추론기(GPT-4o-mini)가 쓴 CoT 근거 r_q를 붙인다. ReasonEmb 81,659개 질의, 평균 추론 길이 984.8(표 2). 질의마다 정답 문서 1개 + 하드 네거티브 1개 + 배치 내 네거티브.",
+    "2단계(명시적 뷰 = 교사, 학습 전용): [q; r_q; EOS]를 한 번 순전파해 EOS 위치의 마지막 은닉 상태를 v_q*로 쓴다. CoT를 구간 M개로 나누고(공개 코드는 빈 줄 기준) 각 구간 끝 토큰의 은닉 상태를 ‘중간 단계’로 뽑아 K개로 균등 다운샘플링한다(식 11, j_i = ⌊i·M/K⌋).",
+    "3단계(잠재 뷰 = 학생, 같은 파라미터): 질의 q만 넣고 ‘마지막 은닉 상태 → LM 헤드 로짓 → softmax 확률 → 임베딩 표의 확률 가중합 = 소프트 토큰 t_j’를 입력 뒤에 붙이는 일을 자기회귀로 반복한다(KV 캐시). 단계별 마지막 층 은닉 상태 h_1…h_K를 평균 풀링해 v_q를 만든다(식 3–6). 문서 v_d도 같은 방식으로 만든다.",
+    "4단계(손실): L = L_cl^L(학생 InfoNCE) + λ1·L_cl^E(교사 InfoNCE, λ1=1) + λ2·L_kl^out(문서 배치 점수 분포를 교사→학생으로 맞추는 KL, λ2=10) + λ3·L_kl^mid(잠재 단계 i ↔ CoT 구간 j_i의 점수 분포 KL, λ3=0.1). 두 뷰가 백본을 공유하며 함께 학습한다(온라인 자기 증류). LoRA 1 에폭, K=3, τ=τ_kd=0.02.",
+    "5단계(색인, 오프라인): 문서를 잠재 뷰로 인코딩해(문서마다 잠재 단계 K개) 단일 벡터로 저장한다.",
+    "6단계(검색): 잠재 뷰만 쓴다. 질의 1회 prefill + 잠재 단계(K=3, 텍스트 생성 없음) → 임베딩 1개 → 코사인 유사도로 문서 순위. 외부 LLM이 재작성한 질의가 있으면 그것을 입력으로 받을 수도 있다(선택)."
+  ],
+  "key_idea": "추론 문장은 검색할 때 생성하기엔 비싸지만 학습 신호로는 귀하다. 그래서 학습 때만 ‘정답 CoT를 함께 읽은 같은 모델’(명시적 뷰)을 교사로 두고, 질의만 보는 잠재 뷰가 K개의 소프트 토큰으로 생각한 결과가 교사의 문서 순위 분포(출력 정렬)와 CoT 진행 단계별 중간 상태(궤적 정렬)를 따라가도록 증류한다. 그 결과 검색 때는 텍스트를 한 글자도 생성하지 않고 순전파 몇 단계만 더 해서, CoT로 보강한 질의에 가까운 임베딩을 얻는다.",
+  "llm_calls": "검색 때 질의 1개: 검색기 자신(같은 0.6B–8B 백본)만 쓴다. 질의 1회 prefill + 잠재 단계(K=3)의 1토큰 순전파(KV 캐시) → 임베딩 1개 → 벡터 검색 1회. 외부 LLM 호출·텍스트 생성 없음. 공개 코드(모델 카드 laser_encode, modeling/laser.py)는 K=3일 때 ‘질의 끝 은닉 상태 1개 + 소프트 토큰 2개(K−1)를 붙여 얻은 은닉 상태 2개’, 모두 3개를 평균한다(논문 식 3–6의 t_1…t_K 표기와 한 칸 차이, 제 관찰). 잠재 단계마다 어휘 전체에 대한 LM 헤드 softmax와 임베딩 표 가중합 연산이 더해진다. 비교: rewrite-then-retrieve는 외부 LLM이 재작성문(CoT)을 자기회귀로 생성한 뒤 검색기를 1회 호출한다. 표 3의 파이프라인은 BGE-Reasoner-Rewriter-7B(4.2절), 그림 1의 지연 측정은 3B 재작성기(캡션)를 쓴다. 학습 때는 질의마다 두 뷰(질의+CoT, 최대 1024 토큰 / 질의+잠재 단계)를 모두 순전파하며, CoT는 GPT-4o-mini가 오프라인에서 미리 생성해 둔다.",
+  "index_cost": "문서도 질의와 같은 방식(잠재 단계 K개)으로 인코딩한다(3.3절 ‘The representation of documents v_d are also obtained in the same way’, 공개 코드 encode_passage = encode_query). 문서마다 1회 prefill(테스트 최대 8192 토큰) + 잠재 단계 순전파를 거쳐 단일 벡터(0.6B 모델 카드 기준 1024차원)로 저장한다. 문서 쪽 LLM 생성·요약·그래프 구축은 없다. 학습 비용: LoRA(r=64, α=32) 1 에폭, A100 4장, ReasonEmb 81k 질의 + GPT-4o-mini CoT(사전 생성된 데이터 사용).",
+  "results": [
+    {
+      "claim": "같은 Qwen3-0.6B 백본·같은 학습 데이터에서 BRIGHT 평균 nDCG@10: 기본 대조 학습(Fair Baseline) 18.3 → LaSER 23.1 (+4.8점, 제 계산). 팀 메모 수치와 일치하며, 표 5 절제에서도 18.25 → 23.10.",
+      "quote": "Fair Baseline (Qwen3-0.6B) | 0.6B | 28.8 | 31.6 | 25.2 | 28.1 | 15.1 | 22.3 | 24.2 | 8.8 | 3.5 | 2.1 | 14.1 | 15.4 | 18.3 / LaSER (Qwen3-0.6B) | 0.6B | 50.0 | 45.9 | 25.7 | 32.4 | 18.4 | 27.1 | 26.5 | 9.1 | 2.7 | 1.2 | 16.0 | 22.4 | 23.1",
+      "where": "Table 3 (‘Basic Contrastive Learning’·‘Latent Reasoning’ 구역, 마지막 열 Avg.) / Table 5 (Basic Contrastive Learn. 18.25, LaSER 23.10)"
+    },
+    {
+      "claim": "같은 백본의 rewrite-then-retrieve보다 Qwen3-0.6B에서 0.7점(22.4 → 23.1), Qwen3-8B에서 1.2점(28.1 → 29.3) 높다. 단 LLaMA3.1-8B에서는 파이프라인 26.9 > LaSER 24.4(표 3, 제 관찰).",
+      "quote": "Experimental results demonstrate that on both Qwen3-0.6B and Qwen3-8B backbones, our method outperforms explicit reasoning approaches based on query rewriting (surpassing them by 0.7 and 1.2 points, respectively).",
+      "where": "§5.1 / Table 3"
+    },
+    {
+      "claim": "지연: 표준(기본) 검색기의 약 1.7배. 측정 조건은 A100 80GB 1장, BRIGHT 80개 질의, 배치 8, 검색기는 HF Transformers(재작성기는 vLLM). 본문은 1.7배가 어느 모델 크기인지 밝히지 않는다. 그림 1에서 0.6B 점이 약 6 ms → 약 10 ms로 0.6B 기준과 맞고, 4B·8B는 약 1.5배다(제 판독, 근삿값).",
+      "quote": "To address RQ3, we evaluate inference latency on a subset of 80 queries from the BRIGHT benchmark, utilizing a single NVIDIA A100 (80GB) GPU. … A batch size of 8 is maintained for all baselines and our method. … Although LaSER introduces a modest latency overhead compared to the standard base retriever (approximately 1.7×) due to the autoregressive generation of latent thinking tokens, this overhead decreases as model scale increases.",
+      "where": "§5.4 Latency Analysis / Figure 1 오른쪽"
+    },
+    {
+      "claim": "rewrite-then-retrieve 파이프라인 지연의 0.3%만 쓴다. 그림 1의 파이프라인은 0.6B 검색기 + 3B 재작성기이며, 그림에서 파이프라인은 약 3.5초, LaSER(0.6B)는 약 10 ms다(제 판독, x축이 비선형이라 근삿값).",
+      "quote": "As demonstrated in Figure 1, LaSER drastically reduces computational costs, incurring only 0.3% of the latency associated with the “rewrite-then-retrieve” pipeline while maintaining comparable retrieval effectiveness. / The “Rewrite-then-Retrieve” method uses a 0.6B retriever and a 3B rewriter.",
+      "where": "§5.4 / Figure 1 캡션"
+    },
+    {
+      "claim": "8B: LaSER(Qwen3-8B) 29.3으로 원본 Qwen3-Embedding-8B(14.0)와, 같은 데이터로 미세 조정한 Fair Baseline(25.7)보다 높다(저자 표현 ‘약 15%’).",
+      "quote": "As shown in Table 3, LaSER (Qwen3-8B) achieves an average nDCG@10 of 29.3. This performance not only surpasses the original Qwen3-Embedding-8B (14.0) but also exceeds the fine-tuned Fair Baseline (25.7) by approximately 15%.",
+      "where": "§5.1 / Table 3"
+    },
+    {
+      "claim": "절제(Qwen3-0.6B, BRIGHT nDCG@10): LaSER 23.10 / 잠재 뷰 제거 19.93 / 명시적 뷰(교사) 제거 20.59 / 출력 증류 제거 19.97 / 궤적 정렬 제거 22.33 / 공동 학습 대신 고정 교사 20.98 / 기본 대조 학습 18.25. 잠재 토큰과 교사 신호가 모두 필요하다.",
+      "quote": "As shown in Table 5, removing the latent view leads to the most significant performance degradation (e.g., from 23.10 to 19.93 on Bright).",
+      "where": "§5.2 / Table 5"
+    },
+    {
+      "claim": "입력과 계산 예산이 같은 잠재 토큰 방법 GIRCSE(대조 손실만 사용)보다 9개 설정 중 8개에서 앞선다(0.6B BRIGHT: GIRCSE 19.1, LaSER 23.1).",
+      "quote": "Across 9 experimental settings involving different model scales and datasets, LaSER outperforms GIRCSE in 8 cases.",
+      "where": "§5.1 / Table 3·4"
+    },
+    {
+      "claim": "잠재 단계 K: 학습·추론 모두 K=3이 기본이다. 학습 K를 3에서 6으로 늘리면 이득이 없거나 소폭 하락하고, 추론 K를 늘리면 향상된다(Qwen3-8B).",
+      "quote": "The number of latent thinking steps K is set to 3 for both training and inference phases. … We observe that increasing the training steps from K=3 to K=6 yields negligible performance gains or even slight degradation. … Conversely, increasing K during inference demonstrates consistent performance improvements, which highlights that LaSER has acquired a robust mechanism for iterative refinement of embedding.",
+      "where": "§4.3 / §5.5 / Figure 5"
+    },
+    {
+      "claim": "도메인 외(학습하지 않은 벤치마크), 0.6B, Fair Baseline → LaSER: FollowIR 평균 Score 7.4 → 11.5, p-MRR −0.2 → 0.0; BrowseComp-Plus R@1000 46.9 → 54.9.",
+      "quote": "Fair Baseline (Qwen3-0.6B) | 0.6B | 2.1 | 3.5 | 13.4 | -0.6 | 6.7 | -3.4 | 7.4 | -0.2 | 3.5 | 21.3 | 46.9 / LaSER (Qwen3-0.6B) | 0.6B | 2.0 | 3.4 | 25.0 | 1.0 | 7.4 | -4.5 | 11.5 | 0.0 | 6.8 | 26.8 | 54.9",
+      "where": "Table 4 (열 순서: Robust04 MAP@5·p-MRR, News21 nDCG@5·p-MRR, Core17 MAP@5·p-MRR, FollowIR-Avg Score·p-MRR, BrowseComp-Plus R@5·R@100·R@1000)"
+    },
+    {
+      "claim": "LaSER가 대신하는 명시적 CoT의 길이: 학습 질의(ReasonEmb) 평균 추론 길이 984.8, BRIGHT 질의 2,412.8(외부 LLM 주석; ‘Reas. Len.’ 단위는 표에 명시되지 않음, ‘Len.’은 토큰 수). LaSER는 이를 검색 때 생성하지 않고 잠재 단계 K=3으로 대신한다.",
+      "quote": "Train | ReasonEmb | 81,659 | – | 222.1 | 984.8 / Test | Bright (ID) | 1,384 | 1,145,164 | 240.8 | 2,412.8 / “Reas. Len.” denotes average reasoning length annotated by external LLM.",
+      "where": "Table 2"
+    }
+  ],
+  "limits": [
+    "(저자 언급) 완전히 자율적인 잠재 추론을 향한 예비 단계일 뿐이며, 검색 효용으로 잠재 추론 궤적을 직접 최적화하는 강화 학습은 향후 과제로 남겼다(6절).",
+    "학습에는 질의마다 강한 외부 추론기(GPT-4o-mini)가 쓴 CoT와 정답·하드 네거티브 문서가 필요하다. 교사(명시적 뷰)의 품질이 학생의 상한을 정한다(3.2·3.4·4.1절).",
+    "지연 수치는 A100 80GB·배치 8·HF Transformers·BRIGHT 80개 질의 기준이며, 1.7배가 어느 모델 크기인지 본문에 없다. 모바일 CPU/NPU 측정은 없다. 잠재 단계마다 어휘 전체에 대한 LM 헤드 softmax와 임베딩 표 가중합이 들어가므로 기기에서의 오버헤드 비율은 다를 수 있다(제 관찰).",
+    "문서도 잠재 사고로 인코딩한다(3.3절, 공개 코드 encode_passage = encode_query). 그래서 색인 비용도 표준 임베딩보다 크지만, 문서 쪽 비용은 보고되지 않았다.",
+    "rewrite-then-retrieve를 이긴 것은 Qwen3 0.6B(+0.7)·8B(+1.2)뿐이고, LLaMA3.1-8B에서는 파이프라인 26.9 > LaSER 24.4다(표 3, 제 관찰). GIRCSE 대비 ‘9개 중 8개’ 우세도 BrowseComp-Plus의 Qwen3-8B에서는 GIRCSE가 R@5·R@100·R@1000을 모두 앞선다(표 4, 제 관찰).",
+    "논문 안의 설정 불일치(제 관찰): 표 3 파이프라인은 BGE-Reasoner-Rewriter-7B(4.2절)인데 그림 1의 지연 측정 파이프라인은 3B 재작성기(캡션)라, 같은 점에 찍힌 성능(22.4)과 지연의 설정이 다를 수 있다. 4.3절 배치 설정(GPU 4장 × 장치당 2 × 누적 8인데 전역 배치 8)은 산술이 맞지 않는다(GitHub README는 장치당 8·누적 2). 그림 4의 점수(45–73)는 표 3의 BRIGHT 평균(18–29)과 척도가 달라 어떤 부분집합·지표인지 불명확하다.",
+    "그림 5 왼쪽(K=3 학습)에서는 추론 단계 4→5에서 성능이 다시 떨어진다(제 판독). ‘추론 K를 늘리면 일관된 향상’이라는 서술은 K=6 학습 곡선에 더 들어맞는다.",
+    "평가는 공개 벤치마크(BRIGHT·FollowIR·BrowseComp-Plus)의 단일 질의 → 문서 1회 검색이다. 다중 홉 반복 검색, 개인 기록, 짧은 대화형 질의는 다루지 않는다.",
+    "번역 원문은 arXiv v1(2026-03-02, Comments ‘Under Review’)이다. SIGIR ’26 게재본(pp. 689–700)은 ACM DL 접근이 막혀(403) 대조하지 못했으므로 문구·수치가 다를 수 있다."
+  ],
+  "weave": {
+    "borrow": [
+      "‘매 홉마다 긴 추론 문장을 생성하지 않는다’는 설계의 직접 근거다. LaSER는 학습 때만 CoT를 쓰고, 검색 때는 텍스트 생성 없이 잠재 단계 K=3으로 임베딩을 만든다(3.2절 Inference, 4.3절). 인용은 조건과 함께: ‘같은 Qwen3-0.6B에서 기본 대조 학습 18.3 → LaSER 23.1(BRIGHT nDCG@10 평균, 표 3)’, ‘표준 검색기 대비 약 1.7배, 재작성 파이프라인의 0.3% 지연(A100 GPU, 5.4절)’.",
+      "장표 그림: 그림 1 왼쪽의 3단 비교(A 기본 검색기: 한 번 순전파 / B Rewrite-then-Retrieve: 재작성기가 문장을 생성한 뒤 검색 / C LaSER: 잠재 토큰 × K)는 How it Works의 ‘긴 추론 문장 대신 Reasoning Embedding’ 구도와 같다. 오른쪽 산점도(ms 대 초 단위)는 비용 차이의 근거로 쓰되 A100 측정임을 표기한다.",
+      "학습 레시피 후보(설계 아이디어, 미검증): 서버 LLM/sLLM이 쓴 ‘탐색 메모 + 다음에 찾을 것’ 추론 문장을 명시적 뷰 입력으로, 기기용 경량 임베딩을 잠재 뷰로 둔다. 같은 백본을 공유하고 문서 배치 점수 분포 KL(λ2=10) + 단계별 궤적 정렬(λ3=0.1)로 증류한다. 예: 와인 시나리오(‘지은이네 집들이 때 마신 화이트 와인’)에서 교사 입력은 ‘3/12 지은의 카톡 초대(이번 주 토요일 6시, 이사 기념으로 우리 집에서 저녁)는 집들이라는 말이 없어도 그 모임이다 → 3/15(토) 18시 이후 그날 저녁 사진 → 와인 라벨 OCR + 소비뇽 블랑 = 화이트’ 같은 추론 문장이고, 학생은 요청과 아는 단서만 보고 같은 순위(그 카톡과 그날 저녁 사진)를 내도록 학습한다. 날짜 조건은 논문 밖의 필터, 라벨 ‘배비치 소비뇽 블랑’은 OCR 몫이다.",
+      "잠재 단계는 작게 시작한다: 논문 기본값은 K=3(학습·추론)이고, 학습 K를 6으로 늘려도 이득이 없었다(5.5절). 기기에서 잠재 단계 2–3회로 시작할 근거가 된다.",
+      "구현 참고(공개 코드): 소프트 토큰 = softmax(LM 헤드 로짓) × 임베딩 표, KV 캐시로 1토큰씩 이어 붙이고, 단계별 마지막 층 은닉 상태를 평균한 뒤 L2 정규화한다. K=3이면 prefill 1회 + 1토큰 순전파 2회다.",
+      "궤적 정렬(잠재 단계 i ↔ CoT 구간 ⌊i·M/K⌋)은 탐색 메모의 단계(찾을 것 → 아는 단서 → 먼저 볼 곳)를 잠재 단계에 대응시키는 학습 신호 설계에 참고할 수 있다(아이디어)."
+    ],
+    "contrast": [
+      "LaSER는 질의 1개 → 문서 검색 1회(단일 홉)다. Weave의 멀티홉 루프(찾은 단서를 메모에 더해 다음 검색), 날짜 필터·OCR, 멈춤 조건, 출처 제시는 논문에 없다. ‘LaSER가 멀티홉 탐색을 푼다’고 쓰면 안 된다.",
+      "18.3 → 23.1, 1.7배, 0.3%는 공개 벤치마크(BRIGHT)와 A100 GPU 수치다. Weave의 개인 기록 검색 성능이나 휴대폰 지연처럼 쓰면 안 되며, 온디바이스 지연은 직접 측정해야 한다.",
+      "LaSER의 ‘추론’은 StackExchange·코딩·수학 질문 같은 지식 추론형 질의의 의도 해석이다. ‘지금 단서에서 이어지는 다음 기록’을 고르는 관계 탐색은 학습·평가되지 않았다.",
+      "문서도 잠재 사고로 인코딩하는 대칭 구조다. 기기 기록 색인에 그대로 쓰면 기록마다 잠재 단계가 추가된다. ‘질의만 잠재 사고, 문서는 일반 인코딩’ 같은 비대칭 구성은 논문이 검증하지 않았다.",
+      "학습에는 질의별 고품질 CoT(GPT-4o-mini)와 정답 문서가 필요하다(ReasonEmb 81k). Weave용으로는 개인 기록 멀티홉 데이터(요청·탐색 메모·다음 홉 정답)를 따로 만들어야 하며, 논문 결과가 그 분포로 옮겨 간다는 근거는 없다."
+    ]
+  },
+  "pipeline_figure": "b022",
+  "glossary": [
+    {"term": "latent thinking token", "ko": "잠재 사고 토큰", "desc": "텍스트로 디코딩하지 않고 임베딩 공간에서 만든 연속 벡터 토큰으로, 질의 뒤에 K개를 자기회귀로 붙여 ‘생각’한다."},
+    {"term": "soft token", "ko": "소프트 토큰", "desc": "LM 헤드 softmax 확률로 어휘 임베딩을 가중 평균한 벡터(t_j = p_j^T E)로, argmax로 단어를 고르지 않아 미분 가능하다."},
+    {"term": "Explicit-View", "ko": "명시적 뷰", "desc": "질의와 외부 LLM이 쓴 CoT를 한 번에 인코딩하는 학습 전용 교사 경로다."},
+    {"term": "Latent-View", "ko": "잠재 뷰", "desc": "질의만 보고 잠재 사고 토큰 K개를 만든 뒤 은닉 상태를 평균해 임베딩을 내는 학생 경로로, 검색 때는 이것만 쓴다."},
+    {"term": "self-distillation", "ko": "자기 증류", "desc": "교사와 학생이 같은 백본 파라미터를 공유하며 함께 학습하는 증류다."},
+    {"term": "output-level distillation", "ko": "출력 수준 증류", "desc": "문서 배치에 대한 교사·학생 점수 분포의 KL을 줄여 순위 선호를 옮기며, 임베딩 좌표는 직접 맞추지 않는다."},
+    {"term": "trajectory alignment", "ko": "궤적 정렬", "desc": "잠재 단계 i의 은닉 상태를 CoT 구간 j_i 위치의 교사 은닉 상태와 문서 점수 분포 기준으로 맞추는 과정 수준 지도다."},
+    {"term": "temporal downsampling", "ko": "시간적 다운샘플링", "desc": "M개의 CoT 구간을 K개의 잠재 단계에 균등 간격으로 대응시키는 방법이다(j_i = ⌊i·M/K⌋)."},
+    {"term": "privileged supervision", "ko": "특권 지도", "desc": "학습 때만 쓸 수 있고 검색 때는 없는 정보(여기서는 CoT)로 주는 지도 신호다."},
+    {"term": "rewrite-then-retrieve", "ko": "재작성 후 검색", "desc": "외부 LLM이 질의를 확장·재작성(CoT 포함)한 뒤 그 텍스트로 검색하는 2단계 파이프라인이다."},
+    {"term": "Fair Baseline", "ko": "공정 베이스라인", "desc": "같은 백본·같은 데이터로 표준 대조 학습만 한, 잠재 사고 없는 검색기다."},
+    {"term": "GIRCSE", "ko": "GIRCSE", "desc": "잠재 토큰을 생성해 임베딩을 만드는 암묵적 추론 베이스라인으로, 대조 손실만으로 학습한다."},
+    {"term": "p-MRR", "ko": "p-MRR", "desc": "FollowIR의 쌍별 지표로, 지시문이 바뀌었을 때 순위가 올바르게 바뀌는지(지시 따르기)를 잰다."},
+    {"term": "BRIGHT", "ko": "BRIGHT", "desc": "StackExchange·코딩·정리(theorem) 기반 12개 부분집합으로 된 추론 집약적 검색 벤치마크로, nDCG@10으로 평가한다."}
+  ],
+  "skipped": "부록 없음: arXiv v1 HTML 목차(1–6절 + 참고문헌)와 PDF(‘Appendix’ 문자열 없음) 모두 부록이 없어 건너뛴 부록 문단은 없다. 규칙상 번역하지 않은 것: 수식 블록(eq) 13개, 표 본문 5개(표 1 프롬프트 원문 포함, 캡션만 번역).",
+  "extract_issues": "1) 초록 각주 누락: 추출기 run()이 초록 문단의 각주를 블록으로 넣지 않아, 각주 1 ‘The code, model, and training data are available at https://github.com/ignorejjj/LaSER.’가 빠져 있었다. src.json abstract의 b001 바로 뒤에 fn 블록 b001a(mark 1, 추출기 Inline 변환 결과 그대로)를 추가하고 src.txt에도 같은 항목을 넣었다(다른 논문 작업의 b001a 방식에 맞춤). 추출기는 고치지 않았다. 2) 그 밖에 본문 문단 78개, 그림 5개, 표 5개, 수식 13개는 HTML과 대조해 빠짐없이 추출됐다. 3) 원문 자체 문제(영문은 그대로 두고 번역에서 처리): b052 ‘refer to 1’은 링크가 표 1이라 ‘표 1’로 번역했다. b048 수식 뒤에 남은 ‘}’와 b025 v_d 수식 안의 여분 ‘)’는 원문 그대로 보존했다. b052 본문의 x_aug와 식 (7)의 x_exp는 표기가 다르다. 오탈자: Letency, latnet, ‘of of’, ‘LaSER the first work’."
+}
