@@ -421,8 +421,9 @@ class Timeline:
         return max([e['delay'] + e['dur'] * (2 if e.get('autorev') else 1) for e in self.steps[i]] or [0])
 
     # -------------------------------------------------------------- XML
-    def xml(self, sp_ids, auto=None):
-        """sp_ids: bldP를 적을 p:sp spid 집합. auto = (첫 대기 ms, [단계별 머무는 ms])면 클릭 없이 자동 재생(미리보기 영상용)."""
+    def xml(self, sp_ids, auto=None, first_auto=False):
+        """sp_ids: bldP를 적을 p:sp spid 집합. auto = (첫 대기 ms, [단계별 머무는 ms])면 클릭 없이 자동 재생(미리보기 영상용).
+        first_auto면 첫 단계만 장이 열리자마자 저절로(모핑 뒤 바로), 나머지 단계는 클릭마다(발표용)."""
         ids = count(1)
         grp_of = {}
         timing = etree.Element(q('p:timing'), nsmap=NS)
@@ -440,6 +441,9 @@ class Timeline:
             okids = el('p:childTnLst', outer)
             t = t0
             for i, effs in enumerate(self.steps):
+                if not effs:            # 빈 묶음(장이 열릴 때 효과 없음)은 시간만 흘려보냄
+                    t += holds[i]
+                    continue
                 inner = el('p:cTn', el('p:par', okids), id=next(ids), fill='hold')
                 el('p:cond', el('p:stCondLst', inner), delay=t)
                 ik = el('p:childTnLst', inner)
@@ -447,14 +451,21 @@ class Timeline:
                     self._effect(ik, ids, e, 'afterEffect' if j == 0 else 'withEffect', grp_of)
                 t += self.step_len(i) + holds[i]
         else:
-            for effs in self.steps:
+            for i, effs in enumerate(self.steps):
+                if not effs:
+                    continue
+                auto0 = first_auto and i == 0
                 outer = el('p:cTn', el('p:par', mkids), id=next(ids), fill='hold')
-                el('p:cond', el('p:stCondLst', outer), delay='indefinite')
+                sc = el('p:stCondLst', outer)
+                el('p:cond', sc, delay='indefinite')
+                if auto0:            # 장이 열리면 바로(클릭 없이)
+                    c = el('p:cond', sc, evt='onBegin', delay=0)
+                    el('p:tn', c, val=2)
                 inner = el('p:cTn', el('p:par', el('p:childTnLst', outer)), id=next(ids), fill='hold')
                 el('p:cond', el('p:stCondLst', inner), delay=0)
                 ik = el('p:childTnLst', inner)
                 for j, e in enumerate(effs):
-                    self._effect(ik, ids, e, 'clickEffect' if j == 0 else 'withEffect', grp_of)
+                    self._effect(ik, ids, e, ('afterEffect' if auto0 else 'clickEffect') if j == 0 else 'withEffect', grp_of)
         pc = el('p:prevCondLst', seq)
         el('p:sldTgt', el('p:tgtEl', el('p:cond', pc, evt='onPrev', delay=0)))
         nc = el('p:nextCondLst', seq)

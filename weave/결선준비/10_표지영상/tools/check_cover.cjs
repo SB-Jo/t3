@@ -4,6 +4,7 @@
 //  - 실의 두 끝이 카드 가장자리·휴대폰 가장자리에 붙어 있는지
 //  - 형광펜 글자가 한 줄인지(줄바꿈으로 형광펜이 갈라지지 않는지)
 //  - (v2) 검색창 글자가 칸을 넘치지 않는지, 결과 상품 이름이 두 줄 안인지, 손이 왼쪽 글자 자리에 들어오지 않는지
+//  - (v3) 보이는 조각·카드·휴대폰이 화면 위·아래·오른쪽 가장자리에서 얼마나 떨어져 있는지(가장 가까운 값)
 // 사용: node tools/check_cover.cjs [--fps 30]
 const path = require('path'), { pathToFileURL } = require('url');
 const HOME = process.env.HOME;
@@ -21,7 +22,7 @@ const SAFE = 846;
   const DUR = await page.evaluate(() => window.__DURATION), fps = arg('--fps', 30), N = Math.round(DUR * fps);
   const lay = await page.evaluate(() => window.__layout);
   const bad = { safeZone: [], chipPhone: [], chipCard: [], chipChip: [], laneChip: [], endGap: [], hlWrap: [], qOverflow: [], resWrap: [] };
-  let maxQ = 0;
+  let maxQ = 0; const edge = { top: 1e9, bottom: 1e9, right: 1e9, phoneRight: 1e9, phoneTop: 1e9, phoneBottom: 1e9 };
   let minChipGap = 1e9, minLaneGap = 1e9, maxEnd = 0;
   for (let i = 0; i <= N; i++) {
     const t = i / fps, P = await page.evaluate(tt => window.__probe(tt), t);
@@ -58,6 +59,7 @@ const SAFE = 846;
     if (g > 4 || !inY) bad.endGap.push([t.toFixed(2), gaps.map(v => v.toFixed(1)).join('/'), inY]);
     if (P.hlLines.some((n, k) => k === 3 ? n > 1 : n !== 1)) bad.hlWrap.push([t.toFixed(2), P.hlLines.join(',')]);   // 3번째(#q)는 빈칸이면 0줄
     maxQ = Math.max(maxQ, P.q.scroll - P.q.client);
+    for (const k of Object.keys(edge)) edge[k] = Math.min(edge[k], P.edges[k]);
     if (P.q.scroll > P.q.client) bad.qOverflow.push([t.toFixed(2), P.q.text, P.q.scroll, P.q.client]);
     if (P.resN.some(n => n > 2)) bad.resWrap.push([t.toFixed(2), P.resN.join(',')]);
     if (P.tok.op > 0.01 && P.tok.r[0] < SAFE) bad.safeZone.push([t.toFixed(2), 'token']);
@@ -66,6 +68,7 @@ const SAFE = 846;
   console.log(`layout: ${lay.placed}/${lay.of} chips placed (seed ${lay.seed})`);
   console.log(`frames checked: ${N + 1} (0–${DUR}s at ${fps}fps)`);
   for (const [k, v] of Object.entries(bad)) console.log(`${k}: ${v.length}`, v.slice(0, 5).map(x => x.join(' ')).join(' | '));
+  console.log(`edge room (closest over all frames): top ${edge.top.toFixed(1)}px, bottom ${edge.bottom.toFixed(1)}px, right ${edge.right.toFixed(1)}px; phone: top ${edge.phoneTop.toFixed(1)}, bottom ${edge.phoneBottom.toFixed(1)}, right ${edge.phoneRight.toFixed(1)}px`);
   console.log(`search box: widest text needs ${maxQ}px more than the box (≤ 0 means it fits)`);
   console.log(`closest chip-to-chip gap: ${minChipGap.toFixed(1)}px, closest drawn thread to a chip: ${minLaneGap.toFixed(1)}px, worst thread-end gap: ${maxEnd.toFixed(1)}px`);
   await browser.close();

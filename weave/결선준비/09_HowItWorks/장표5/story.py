@@ -51,6 +51,11 @@ def C(name, pts, **o):
     return ('curve', name, pts, o)
 
 
+def G(name, prims, **o):
+    """여러 도형을 PowerPoint 묶음 하나로(애니메이션 효과가 묶음당 하나라 발표 PC 부담이 적음)."""
+    return ('group', name, list(prims), o)
+
+
 def tw(text, pt, weight='r'):
     return L.width(text, pt, weight)
 
@@ -263,8 +268,8 @@ class Painter:
         self.tree.append(e)
         return e
 
-    def prim(self, p, cam=None, alpha=100):
-        """원시 도형 하나를 (카메라 변환 + 투명도) 적용해 그림."""
+    def prim(self, p, cam=None, alpha=100, add=True):
+        """원시 도형 하나를 (카메라 변환 + 투명도) 적용해 그림. add=False면 장에 붙이지 않고 요소만 돌려줌(묶음용)."""
         if cam and len(cam) == 5:
             cx, cy, z, vx, vy = cam
         else:
@@ -279,6 +284,16 @@ class Painter:
 
         a = alpha / 100.0
         kind, name = p[0], '!!' + p[1]
+        if not add:
+            _add, self.add = self.add, (lambda e: e)
+            try:
+                return self.prim(p, cam=cam, alpha=alpha)
+            finally:
+                self.add = _add
+        if kind == 'group':
+            _, _, kids, o = p
+            els = [self.prim(kp, cam=cam, alpha=alpha * o.get('alpha', 100) / 100, add=False) for kp in kids]
+            return self.add(L.group(self.sid(), name, els))
         if kind == 'rect':
             _, _, x, y, w, h, o = p
             fa = o.get('alpha', 100) * a if o.get('fill', 'FFFFFF') else None

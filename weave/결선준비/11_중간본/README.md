@@ -1,19 +1,19 @@
-# 결선 중간본 덱 (2026-11-02, 2차)
+# 결선 중간본 덱 (2026-11-02, 3차)
 
 원본 `02_PPT/Weave_결선.pptx`는 그대로 두고, 새 파일 **`02_PPT/Weave_결선_중간본.pptx`**를 조립해요.
 
-## 구성 (36장)
+## 구성 (40장)
 
 | 구분 | 장 | 내용 |
 |---|---|---|
-| 본편 | 1 | **표지 (반복 영상)**: `10_표지영상/표지_루프.mp4`(v2, 4K, 15초). 자동 재생, 끝나면 반복. 왼쪽 글은 PPT 글상자 |
-| 본편 | 2 | **인포그래픽 영상 자리**: 영상 넣을 자리 표시만 있음. 새 영상을 넣고 가운데 안내를 지우면 됨 |
-| 본편 | 3–4 | Motivation, Pain Points (원본 3·4쪽 그대로) |
+| 본편 | 1 | **표지 (반복 영상)**: `10_표지영상/표지_루프.mp4`(v3, 4K, 18초). 자동 재생, 끝나면 반복. 왼쪽 글은 PPT 글상자 |
+| 본편 | 2–3 | Motivation, Pain Points (원본 3·4쪽 그대로) |
+| 본편 | 4 | **인포그래픽 영상 자리**: Pain Points의 세 불편 바로 뒤. 영상 넣을 자리 표시만 있음 |
 | 본편 | 5 | **Solution**: 새 시나리오 셋(요청 자료 / 집들이 와인 / 갈색병). `07_소스/slides/p05_결선/` |
-| 본편 | 6–18 | **How it Works**: 장표5 A1 덱용 13장(`09_HowItWorks/장표5/a1_deck.py`). 키워드·임베딩 실패를 한 장에, 다음 장에 'Weave = Hybrid' |
-| 본편 | 19–25 | Why Samsung, Why Now, 차별화, 기대효과 1~3, END (원본 그대로) |
-| 부록 | 26–28 | App Demo, Q&A 2장 (원본 그대로) |
-| 참고 | 29–36 | 구분 장, 이전 표지, 만화, 이전 시나리오 1~3, 이전 How it Works, 인트로 영상 79초 (발표에서 안 씀) |
+| 본편 | 6–22 | **How it Works**: 장표5 A1 덱용 00판 17장(`09_HowItWorks/장표5/a1_deck00.py`), 클릭으로 차근차근. 00 사전 준비(모든 기록 → 벡터 + 메타데이터)부터 04 전달까지 |
+| 본편 | 23–29 | Why Samsung, Why Now, 차별화, 기대효과 1~3, END (원본 그대로) |
+| 부록 | 30–32 | App Demo, Q&A 2장 (원본 그대로) |
+| 참고 | 33–40 | 구분 장, 이전 표지, 만화, 이전 시나리오 1~3, 이전 How it Works, 인트로 영상 79초 (발표에서 안 씀) |
 
 ## 표지
 
@@ -42,7 +42,7 @@
 ```bash
 ~/.cache/weave-tools/venv/bin/python build_deck.py           # 조립 → 글꼴 바꾸기 → 영상 넣기(PowerPoint) → png/·한눈에.png
 ~/.cache/weave-tools/venv/bin/python build_deck.py --no-png
-~/.cache/weave-tools/venv/bin/python build_deck.py --hiw a1_deck00 --out ../02_PPT/Weave_결선_중간본_00판.pptx   # How it Works 00판
+~/.cache/weave-tools/venv/bin/python build_deck.py --hiw a1_deck --out /tmp/중간본_00없음.pptx                   # How it Works 00 없는 판
 ~/.cache/weave-tools/venv/bin/python build_deck.py --team-style side                                             # 표지 팀 배치 바꾸기
 ```
 
@@ -54,8 +54,8 @@
 ## 원본에서 바뀐 것
 
 - 1쪽 표지: 사진 한 장 → 반복 영상 + 아이콘·제목·부제·팀. 이전 표지는 참고 구간으로 옮겼어요.
-- 2쪽: 만화 → 인포그래픽 영상 자리. 만화는 참고 구간으로 옮겼어요.
+- 2쪽 만화: 참고 구간으로 옮겼어요. 그 대신 Pain Points 뒤(4쪽)에 인포그래픽 영상 자리를 넣었어요.
 - 5쪽 Solution: 시나리오를 새 셋으로 바꿨어요(바뀐 문구는 `07_소스/slides/p05_결선/` 참고).
-- 6~8쪽 시나리오, 9쪽 How it Works: 새 How it Works 13장으로 대체하고, 이전 장표는 참고 구간으로 옮겼어요.
+- 6~8쪽 시나리오, 9쪽 How it Works: 새 How it Works 17장(00판)으로 대체하고, 이전 장표는 참고 구간으로 옮겼어요.
 - 인트로 영상 79초: 02·03 장면이 새 시나리오와 달라 참고 구간에만 넣었어요.
 - 글꼴: 전체를 SamsungOne 계열로 바꿨어요(위 '글꼴').
