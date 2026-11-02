@@ -42,6 +42,7 @@ class Step:
     label: str = ''
     alpha: dict = field(default_factory=dict)      # 키 → 불투명도(%) 따로 줄 때(옅은 기록 더미 등)
     beats: list = field(default_factory=list)      # 클릭마다 나오는 효과 묶음(발표자가 한 마디씩). anim은 장이 열릴 때 바로
+    cap_beat: int = None                            # 설명을 이 클릭 묶음에서 나오게(없으면 장과 함께)
 
 
 def bbox(prims):
@@ -220,8 +221,8 @@ def topbar_prims(h):
         a, b = (x3 + w3 / 2, y0 + hh - 1), (x2 + w2 / 2, y0 + hh - 1)
         on = h.get('loop_on')
         col = PURPLE if on else '9A90C8'
-        out.append(C('top/loop', [a, (a[0], y0 + hh + 26), (b[0], y0 + hh + 26), b], w=2.4 if on else 1.8, color=col))
-        out.append(T('top/loop_head', b[0] - 7, y0 + hh - 2, 14, 12, '▲', size=7.5, color=col, align='c', anchor='ctr'))
+        out.append(C('top/loop', [a, (a[0], y0 + hh + 26), (b[0], y0 + hh + 26), (b[0], b[1] + 3)], w=2.4 if on else 1.8, color=col,
+                     tail='triangle'))
         lab = '반복'
         lw_ = tw(lab, 10, 'b') + 20
         out.append(R('top/loop_bg', (a[0] + b[0]) / 2 - lw_ / 2, y0 + hh + 13, lw_, 22, prst='roundRect', fill='FFFFFF', line=None))
@@ -935,6 +936,48 @@ def short_date(meta):
     return '%s/%s' % (m.group(1), m.group(2)) + (' (%s)' % m.group(3) if m.group(3) else '') + (' ' + m.group(4) if m.group(4) else '')
 
 
+APP_OF = {'talk': 'kakaotalk', 'link': 'kakaotalk', 'pay': 'kakaotalk', 'sms': 'messages', 'gallery': 'gallery', 'photo': 'gallery',
+          'shot': 'gallery', 'note': 'notes', 'mail': 'email', 'cal': 'calendar', 'phone': 'phone', 'call': 'phone', 'map': 'maps',
+          'wallet': 'wallet', 'wpay': 'wallet', 'pass': 'wallet'}
+
+
+def vec_text(seed, n=4):
+    """기록의 벡터를 숫자로(예: '[0.12, −0.53, 0.88, …]'). 값은 글자에서 나온 예시값이라 같은 기록이면 늘 같음."""
+    import hashlib
+    hv = hashlib.md5(seed.encode('utf-8')).digest()
+    vals = []
+    for i in range(n):
+        v = hv[i] / 255 * 1.8 - 0.9
+        vals.append(('−' if v < 0 else '') + '%.2f' % abs(v))
+    return '[' + ', '.join(vals) + ', …]'
+
+
+def iso_date(text, with_time=False, year=2026):
+    """'2026. 3. 15 (일) 20:14' → '2026-03-15 20:14'(with_time), '3월 8일' → '2026-03-08', '3/20 (금) 19:00' → '2026-03-20'. 없으면 None."""
+    import re
+    t = text or ''
+    d = None
+    for pat in (r'(\d{4})\. (\d{1,2})\. (\d{1,2})', r'()(\d{1,2})/(\d{1,2})', r'()(\d{1,2})월 (\d{1,2})일'):
+        m = re.search(pat, t)
+        if m:
+            d = '%s-%02d-%02d' % (m.group(1) or year, int(m.group(2)), int(m.group(3)))
+            break
+    if d is None:
+        return None
+    if with_time:
+        m = re.search(r'(\d{1,2}):(\d{2})', t)
+        if m:
+            d += ' %02d:%s' % (int(m.group(1)), m.group(2))
+    return d
+
+
+def meta_text(date, app, lines=2):
+    """메타데이터를 실제 형식으로: { date: "2026-03-12", app: "kakaotalk" } (두 줄이면 줄을 나눔)."""
+    if lines == 1:
+        return ['{ date: "%s", app: "%s" }' % (date, app)]
+    return ['{ date: "%s",' % date, '  app: "%s" }' % app]
+
+
 def month_day(text):
     """글 속 날짜 → '3/12'. '2026. 3. 12 (목)', '3/20 (금) 19:00', '3월 8일 12:40', '2월 27일' 모두. 없으면 None."""
     import re
@@ -998,11 +1041,12 @@ def build(spec):
         return route_elbow(p0, box)
 
     def pair_items():
-        """키워드 검색(왼쪽)과 임베딩 검색(오른쪽). 발표자가 한 단계씩 짚을 수 있게 클릭 묶음으로 나눔.
-        왼쪽: 판(정적) → 질문 속 단어에 형광펜 → 같은 단어가 든 결과 → 왜 아닌지.
-        오른쪽: 판(정적) → 질문도 벡터로 → 저장해 둔 기록 벡터와 견줘 가까운 정도 → 가장 가까운 두 기록 → 왜 아닌지, 날짜가 든 카톡은 맨 아래."""
+        """키워드 검색(왼쪽)과 임베딩 검색(오른쪽)을 한 장에. 클릭 순서 = 말하는 순서.
+        왼쪽: 판 → 질문 속 단어 형광펜 → 같은 단어가 든 결과 1·2 → 아닌 이유.
+        오른쪽: 판 → 질문 벡터(숫자) → 임베딩 공간의 한 점(저장해 둔 기록들 사이) → 질문 점에서 원이 커지며 가장 가까운 기록을 잡음
+               → 1·2위와 아닌 이유, 날짜가 든 지은 카톡은 원 밖에."""
         PR = dict(F.get('pair', {}))
-        HWL, HWR, GX_ = PR.get('hw', 480), PR.get('hw_r', 560), PR.get('gap', 84)
+        HWL, HWR, GX_ = PR.get('hw', 470), PR.get('hw_r', 520), PR.get('gap', 80)
         LX0 = PR.get('x', 640)
         RX0 = LX0 + HWL + GX_
         TOP = PR.get('top', 150)
@@ -1010,7 +1054,7 @@ def build(spec):
         ebp, _, ebh = search_panel('emb', TOP, '임베딩 검색', None, F['query'], [], False, x=RX0, w=HWR)
         sc.put('kw', kwp)
         sc.put('emb', ebp)
-        # ---- 왼쪽: 질문 속 단어 형광펜
+        # ---- 왼쪽
         qx, qy = LX0 + 16, TOP + 46
         ql = wrap(F['query'], 10.5, HWL - 32 - 24, 'm')[:2]
         hls = []
@@ -1021,11 +1065,11 @@ def build(spec):
                     r_ = band((qx + 12, qy + 7 + 20 * i, ln, 10.5, 'm'), wd, kind='full', start=st)
                     hls.append(R('kw.hl/%d' % len(hls), *r_, prst='roundRect', radius=2.5, fill=HL, alpha=34, line=None))
                     st = ln.index(wd, st) + len(wd)
-        sc.put('kw.hl', [G('kw.hl/g', hls)] if hls else hls)
+        sc.put('kw.hl', [G('kw.hl/g', hls)])
         K = F['kw']
         ws = [REC[k]['w'] for k in K['ranks']]
         n = len(ws)
-        gapc = PR.get('kw_gap', 34)
+        gapc = PR.get('kw_gap', 30)
         x = LX0 + (HWL - sum(ws) - gapc * (n - 1)) / 2
         ry = TOP + kwh + PR.get('kw_dy', 64)
         kbot = ry
@@ -1060,90 +1104,133 @@ def build(spec):
                                  anchor='ctr')])
             kw_keys.append('kw.note')
             k3['kw.note'] = dict(kind='fade_in', delay=200, dur=220)
-        # ---- 오른쪽: 질문 벡터 → 기록 벡터와 견줌 → 가장 가까운 기록
+        # ---- 오른쪽: 질문 벡터(숫자) → 임베딩 공간
         E_ = F['emb']
-        NQ, QCW, QCH, QG = 16, 21, 24, 3
-        qvw = NQ * (QCW + QG) - QG
-        qvx = RX0 + 112
-        qvy = TOP + ebh + 22
-        qlab = PR.get('qv_label', '질문 벡터')
-        sc.put('emb.qv', [G('emb.qv/g', [C('emb.qv/ar', [(qvx + qvw / 2, TOP + ebh - 6), (qvx + qvw / 2, TOP + ebh + 8), (qvx + qvw / 2, qvy - 16),
-                                          (qvx + qvw / 2, qvy - 4)], w=1.6, color=PURPLE2, tail='triangle'),
-                          T('emb.qv/t', RX0 + 16, qvy, qvx - RX0 - 26, QCH, qlab, size=10, color=PURPLE, weight='b', anchor='ctr')] +
-               vec_prims('emb.qv/v', qvx, qvy, NQ, QCW, QCH, F['query']))])
-        rows = E_['rows']
-        close = E_['close']
-        RH, RG = 36, 6
-        yh = qvy + QCH + 16
-        y0 = yh + 20
-        BX, BW = RX0 + 326, 56
-        hdr = [T('emb.hdr/a', RX0 + 16, yh, 300, 18, PR.get('rows_label', '저장해 둔 기록 벡터'), size=9, color=MUTE, weight='b', anchor='ctr'),
-               T('emb.hdr/b', BX, yh, BW + 20, 18, PR.get('bar_label', '가까운 정도'), size=9, color=MUTE, weight='b', anchor='ctr')]
-        sc.put('emb.hdr', [G('emb.hdr/g', hdr)])
-        emb_keys = ['emb', 'emb.qv', 'emb.hdr']
-        e1 = {'emb.qv': dict(kind='wipe_in', dir='left', delay=0, dur=320)}
-        e2 = {'emb.hdr': dict(kind='fade_in', delay=0, dur=200)}
-        e3, e4 = {}, {}
-        rowbox = {}
-        for j, k in enumerate(rows):
+        vy = TOP + ebh + 16
+        vlab = PR.get('qv_label', '질문 벡터')
+        vtx = vec_text(F['query'], 5)
+        vlw = tw(vlab, 10, 'b') + 14
+        vtw = tw(vtx, 11, 'sb') + 8
+        sc.put('emb.qv', [G('emb.qv/g', [T('emb.qv/l', RX0 + 16, vy, vlw, 24, vlab, size=10, color=PURPLE, weight='b', anchor='ctr'),
+                                         T('emb.qv/t', RX0 + 16 + vlw, vy, vtw, 24, vtx, size=11, color=PURPLE2, weight='sb',
+                                           anchor='ctr')])])
+        vcx, vcy = RX0 + 16 + vlw + vtw / 2, vy + 12
+        my0 = vy + 40
+        mh = PR.get('map_h', 250)
+        sx, sy = RX0 + PR.get('star_x', 168), my0 + PR.get('star_y', 128)
+        rr = PR.get('ring_r', 98)
+        mlab = PR.get('map_label', '임베딩 공간')
+        mlab2 = PR.get('map_label2', '가까울수록 비슷한 뜻')
+        sc.put('emap', [G('emap/g', [R('emap/bg', RX0, my0, HWR, mh, prst='roundRect', radius=18, fill='FFFFFF', alpha=80, line=LINE,
+                                       line_w=1.0),
+                                     T('emap/l1', RX0 + 16, my0 + 10, 200, 18, mlab, size=9.5, color=PURPLE, weight='b', anchor='ctr'),
+                                     T('emap/l2', RX0 + HWR - 16 - tw(mlab2, 9, 'sb') - 4, my0 + mh - 28, tw(mlab2, 9, 'sb') + 4, 18,
+                                       mlab2, size=9, color=MUTE, weight='sb', anchor='ctr')])])
+        taken = [(RX0 + 10, my0 + 6, 220, 26), (RX0 + HWR - 30 - tw(mlab2, 9, 'sb'), my0 + mh - 34, tw(mlab2, 9, 'sb') + 24, 30),
+                 (sx - 80, sy - 22, 104, 50)]
+        # 기록들: 가장 가까운 사진 둘(원 안), 스크린샷·선물 메모(원 밖 조금 멀리), 지은 카톡(멀리)
+        near = PR.get('near', {'bar': (46, -46), 'white': (62, 40)})
+        TW_, TH_ = PR.get('thumb', (66, 50))
+        recs, e2, e3, e4 = [], {'emap': dict(kind='fade_in', delay=0, dur=220)}, {}, {}
+        for i, k in enumerate(E_['ranks']):
+            dx, dy = near[k]
+            cx_, cy_ = sx + dx, sy + dy
+            x0, y0 = cx_ - TW_ / 2, cy_ - TH_ / 2
+            img = REC[k]['img']
+            sc.put('emap.rec.' + k, [G('emap.rec.%s/g' % k, [
+                R('er.%s/bg' % k, x0 - 4, y0 - 4, TW_ + 8, TH_ + 8, prst='roundRect', radius=9, fill='FFFFFF', line=GRAY_LINE, line_w=1.3,
+                  shadow=S.L.SHADOW_SOFT),
+                P('er.%s/img' % k, img, x0, y0, TW_, TH_, radius=6, crop=S._fit_crop(img, TW_, TH_))])])
+            recs.append('emap.rec.' + k)
+            e2['emap.rec.' + k] = dict(kind='fade_in', delay=80 + 60 * i, dur=200)
+            rk = 'emap.rank%d' % (i + 1)
+            sc.put(rk, [G(rk + '/g', rank_prims('erank%d' % (i + 1), x0 - 4 - 32, cy_ - 13, i + 1, fill=PURPLE))])
+            e4[rk] = dict(kind='zoom_in', delay=80 * i, dur=200)
+            lab = E_['tags'][k]
+            tgw = tw(lab, 10, 'sb') + 20
+            ty_ = (y0 - 4 - 8 - 24) if dy < 0 else (y0 + TH_ + 4 + 8)
+            sc.put('emap.tag.' + k, [G('emap.tag.%s/g' % k, chip_prims('etag.' + k, cx_ - tgw / 2, ty_, lab, style='grayfill', pt=10, h=24,
+                                                                       padx=10, weight='sb')[0])])
+            e4['emap.tag.' + k] = dict(kind='zoom_in', delay=160 + 80 * i, dur=200)
+            taken += [(x0 - 40, y0 - 8, TW_ + 48, TH_ + 16), (cx_ - tgw / 2 - 6, ty_ - 4, tgw + 12, 32)]
+        for k, (dx, dy) in PR.get('mid', {}).items():          # 원 밖, 조금 먼 기록(아이콘 칩)
             c = REC[k]
-            ry_ = y0 + j * (RH + RG)
-            pr = [R(k + '/bg', RX0, ry_, HWR, RH, prst='roundRect', radius=10, fill='FFFFFF', line=LINE, line_w=0.9)]
-            if c['kind'] == 'photo':
-                pr.append(P(k + '/img', c['img'], RX0 + 10, ry_ + 3, 48, RH - 6, radius=6, crop=S._fit_crop(c['img'], 48, RH - 6)))
-            else:
-                ic = c.get('icon') or KIND_ICON.get(c['kind'], 'talk')
-                pr.append(P(k + '/ic', S.ICON[ic], RX0 + 23, ry_ + 7, 22, 22))
-            pr += [T('er.%s/t' % k, RX0 + 68, ry_ + 2, 116, 17, c['title'], size=10, color=INK, weight='b', anchor='ctr'),
-                   T('er.%s/d' % k, RX0 + 68, ry_ + 18, 116, 15, short_date(c.get('meta', '')), size=8.5, color=MUTE, anchor='ctr')]
-            pr += vec_prims('er.%s/v' % k, RX0 + 188, ry_ + 9, 12, 9, 18, ''.join(c.get('lines', ())) + c['title'] + c.get('meta', ''))
-            pr.append(R('er.%s/bt' % k, BX, ry_ + 14, BW, 8, prst='roundRect', fill='EFECF4', line=None))
-            sc.put('emb.row.' + k, [G('emb.row.%s/g' % k, pr)])
-            top2 = j < 2
-            sc.put('emb.bar.' + k, [R('er.%s/bf' % k, BX, ry_ + 14, max(8, BW * close[k]), 8, prst='roundRect',
-                                      fill=PURPLE2 if top2 else 'B9B3C8', line=None)])
-            emb_keys += ['emb.row.' + k, 'emb.bar.' + k]
-            e2['emb.row.' + k] = dict(kind='fade_in', delay=60 + 60 * j, dur=200)
-            e2['emb.bar.' + k] = dict(kind='wipe_in', dir='left', delay=380 + 60 * j, dur=260)
-            rowbox[k] = (RX0, ry_, HWR, RH)
-            if top2:
-                rk = 'emb.rank%d' % (j + 1)
-                sc.put(rk, [G(rk + '/g', rank_prims('erank%d' % (j + 1), RX0 - 13, ry_ + 5, j + 1, fill=PURPLE) +
-                              [R('erank%d/ring' % (j + 1), RX0 - 1, ry_ - 1, HWR + 2, RH + 2, prst='roundRect', radius=10, fill=None,
-                                 line=PURPLE, line_w=1.8)])])
-                emb_keys.append(rk)
-                e3[rk] = dict(kind='zoom_in', delay=80 * j, dur=200)
-            tg = E_['tags'].get(k)
-            if tg:
-                tw_ = tw(tg, 9.5, 'sb') + 20
-                sc.put('emb.tag.' + k, [G('emb.tag.%s/g' % k, chip_prims('etag.' + k, RX0 + HWR - 10 - tw_, ry_ + 6, tg, style='grayfill',
-                                                                          pt=9.5, h=24, padx=10, weight='sb')[0])])
-                emb_keys.append('emb.tag.' + k)
-                e4['emb.tag.' + k] = dict(kind='zoom_in', delay=80 * j, dur=200)
+            ic = c.get('icon') or KIND_ICON.get(c['kind'], 'talk')
+            pr, cw_ = chip_prims('emc.' + k, sx + dx, sy + dy, c['title'], style='white', pt=9, h=24, padx=9, icon=ic)
+            sc.put('emap.mid.' + k, [G('emap.mid.%s/g' % k, pr)])
+            recs.append('emap.mid.' + k)
+            e2['emap.mid.' + k] = dict(kind='fade_in', delay=200, dur=200)
+            taken.append((sx + dx - 8, sy + dy - 8, cw_ + 16, 40))
         M = F['miss']
         mk_ = M['key']
-        mb = rowbox[mk_]
+        fw = S.frag_w(REC[mk_]['title'], chip_text(REC[mk_]))
+        fx = RX0 + HWR - fw - PR.get('miss_dx', 18)
+        fy = sy - S.FRAG_H / 2 + PR.get('miss_dy', -6)
+        sc.put('emap.miss.rec', [G('emap.miss.rec/g', frag_at('emm.' + mk_, mk_, fx, fy))])
+        recs.append('emap.miss.rec')
+        e2['emap.miss.rec'] = dict(kind='fade_in', delay=260, dur=200)
         mt = M['tag']
-        mtw = tw(mt, 10, 'sb') + 24
-        sc.put('emb.miss', [G('emb.miss/g', [R('miss/r', mb[0] - 4, mb[1] - 4, mb[2] + 8, mb[3] + 8, prst='roundRect', radius=12, fill=None, line=GRAY_LINE,
-                              line_w=1.6, dash='dash'),
-                            R('miss/tag', mb[0] + mb[2] - mtw, mb[1] + mb[3] + 8, mtw, 26, prst='roundRect', fill='EFECF4', line=None),
-                            T('miss/tag_t', mb[0] + mb[2] - mtw, mb[1] + mb[3] + 8, mtw, 26, mt, size=10, color=SUB, weight='sb', align='c',
-                              anchor='ctr')])])
-        emb_keys.append('emb.miss')
-        e4['emb.miss'] = dict(kind='fade_in', delay=200, dur=240)
-        tot_h = max(mb[1] + mb[3] + 44, kbot + 90) - TOP
+        mtw = tw(mt, 10, 'sb') + 22
+        sc.put('emap.miss', [G('emap.miss/g', [
+            R('miss/r', fx - 7, fy - 7, fw + 14, S.FRAG_H + 14, prst='roundRect', radius=17, fill=None, line=GRAY_LINE, line_w=1.6,
+              dash='dash'),
+            R('miss/tag', fx + fw / 2 - mtw / 2, fy + S.FRAG_H + 14, mtw, 26, prst='roundRect', fill='EFECF4', line=None),
+            T('miss/tag_t', fx + fw / 2 - mtw / 2, fy + S.FRAG_H + 14, mtw, 26, mt, size=10, color=SUB, weight='sb', align='c',
+              anchor='ctr')])])
+        e4['emap.miss'] = dict(kind='fade_in', delay=320, dur=220)
+        taken += [(fx - 12, fy - 12, fw + 24, S.FRAG_H + 56)]
+        import random
+        rnd = random.Random(spec.get('seed', 11) + 7)
+        dots = []
+        for _ in range(800):
+            if len(dots) >= PR.get('n_dots', 14):
+                break
+            px_, py_ = rnd.uniform(RX0 + 18, RX0 + HWR - 18), rnd.uniform(my0 + 30, my0 + mh - 16)
+            if ((px_ - sx) ** 2 + (py_ - sy) ** 2) ** 0.5 < rr + 14:
+                continue
+            if any(_overlap((px_ - 6, py_ - 6, 12, 12), t_, 4, 4) for t_ in taken) or any(abs(px_ - a) < 28 and abs(py_ - b) < 24
+                                                                                             for a, b in dots):
+                continue
+            dots.append((px_, py_))
+        sc.put('emap.dots', [G('emap.dots/g', [R('emap/d%d' % j, a - 4.5, b - 4.5, 9, 9, prst='ellipse', fill='D6D0E4', line=None)
+                                               for j, (a, b) in enumerate(dots)])])
+        e2['emap.dots'] = dict(kind='fade_in', delay=60, dur=220)
+        # 질문 점: 벡터 숫자 자리에서 공간 속 자리로 날아옴
+        sc.put('emap.q', [G('emap.q/g', [R('emap/q', sx - 14, sy - 14, 28, 28, prst='star5', fill=PURPLE, line='FFFFFF', line_w=1.2,
+                                           glow=(8, RING, 40)),
+                                         T('emap/q_t', sx - 74, sy + 8, 52, 18, '질문', size=9.5, color=PURPLE, weight='b', align='r',
+                                           anchor='ctr')])])
+        e2['emap.q'] = [dict(kind='fade_in', delay=320, dur=160), dict(kind='path', delay=320, dur=520, wdx=vcx - sx, wdy=vcy - sy, bend=0.18)]
+        # 원: 질문 점에서 커지며 가장 가까운 기록을 잡음(+ 잡힌 기록까지 짧은 선)
+        sc.put('emap.ring', [G('emap.ring/g', [R('emap/ring', sx - rr, sy - rr, 2 * rr, 2 * rr, prst='ellipse', fill=LAV, alpha=55,
+                                                  line=PURPLE2, line_w=1.6, dash='dash')])])
+        e3['emap.ring'] = {'kind': 'zoom_in', 'delay': 0, 'dur': 420, 'from': 0.08}
+        lns = []
+        for i, k in enumerate(E_['ranks']):
+            dx, dy = near[k]
+            ln_ = (dx * dx + dy * dy) ** 0.5
+            ux, uy = dx / ln_, dy / ln_
+            ta = (sx + ux * 15, sy + uy * 15)
+            tb = (sx + dx - ux * 38, sy + dy - uy * 30)
+            lns.append(C('emap/ln%d' % i, [ta, (ta[0] + (tb[0] - ta[0]) / 3, ta[1] + (tb[1] - ta[1]) / 3),
+                                            (ta[0] + 2 * (tb[0] - ta[0]) / 3, ta[1] + 2 * (tb[1] - ta[1]) / 3), tb], w=2.0, color=PURPLE2))
+        sc.put('emap.lns', [G('emap.lns/g', lns)])
+        e3['emap.lns'] = dict(kind='fade_in', delay=380, dur=200)
+        emb_keys = ['emb', 'emb.qv', 'emap', 'emap.dots'] + recs + ['emap.ring', 'emap.lns', 'emap.q'] + \
+            ['emap.rank%d' % (i + 1) for i in range(len(E_['ranks']))] + ['emap.tag.' + k for k in E_['ranks']] + ['emap.miss']
+        tot_h = max(my0 + mh, kbot + 90) - TOP
         sc.put('pair.div', [R('pair/div', LX0 + HWL + GX_ / 2 - 0.6, TOP + 8, 1.2, tot_h - 16, fill=LINE2, line=None)])
         kwbox = union([sc.box[k_] for k_ in kw_keys])
         embbox = union([sc.box[k_] for k_ in emb_keys])
-        return dict(kw=kw_keys, emb=emb_keys, kw_beats=[{'kw.hl': dict(kind='wipe_in', dir='left', delay=0, dur=260)}, k2, k3],
-                    emb_beats=[e1, e2, e3, e4], kwbox=kwbox, embbox=embbox, box=union([kwbox, embbox]), div='pair.div',
-                    zmax=PR.get('zmax', 1.45))
+        e1 = {'emb.qv': dict(kind='wipe_in', dir='left', delay=0, dur=320)}
+        return dict(kw=kw_keys, emb=emb_keys, beats=[{'kw.hl': dict(kind='wipe_in', dir='left', delay=0, dur=260)}, k2, k3, e1, e2, e3, e4],
+                    kwbox=kwbox, embbox=embbox, box=union([kwbox, embbox]), div='pair.div', zmax=PR.get('zmax', 1.3))
 
     # -------------------------------------------------------------- 1 더미: 이야기 기록도 작은 조각으로, 아무 데나 흩어짐(옅게) → 몇 개만 켜짐
     cap_c = dict(t=CP['cloud'])
     _, _, ccw, cch = cap_measure(cap_c, 'top')
-    ccam, ccrect = frame(CLOUD_BOX, 'top', 0.9, ccw, cch)
+    CB = tuple(spec.get('cloud_box', CLOUD_BOX))
+    ccam, ccrect = frame(CB, 'top', 0.9, ccw, cch)
     cx_, cy_, cz, cvx, cvy = ccam
 
     def W(sx, sy):
@@ -1154,9 +1241,30 @@ def build(spec):
     ax1, ay1 = W(ccrect[0] + ccrect[2] + 30, ccrect[1] + ccrect[3] + 22)
     fills = list(spec.get('fill', [])) + EXTRA
     fills = fills[:max(0, spec.get('n_cloud', 26) - len(keys))]
-    fh_ = S.FRAG_H + (24 if spec.get('index') else 0)     # 00판: 조각 아래 벡터 줄·날짜 자리
-    items = [('cl.' + k, S.frag_w(REC[k]['title'], chip_text(REC[k])), fh_) for k in keys]
-    fitems = [('f%d' % i, S.frag_w(t, m), fh_) for i, (_, t, m) in enumerate(fills)]
+    IXS = spec.get('index')
+    ext = {}       # 00판: 조각 → (벡터 숫자, 메타데이터 줄, 글자 크기, 폭, 높이)
+    if IXS:
+        pool = ['2026-03-02', '2026-03-05', '2026-03-07', '2026-03-09', '2026-03-11', '2026-03-13', '2026-03-16', '2026-03-17',
+                '2026-03-18', '2026-03-19', '2026-03-21', '2026-02-26', '2026-02-28', '2026-03-01', '2026-03-03', '2026-03-06']
+
+        def _ext(seed, date, app, pt):
+            vt, ml = vec_text(seed), meta_text(date, app)
+            lh = pt * 4 / 3 + 3
+            return (vt, ml, pt, max(tw(x, pt, 'sb') for x in [vt] + ml) + 10, lh * (1 + len(ml)))
+        for k in keys:
+            c = REC[k]
+            app = APP_OF.get(c['kind'], 'kakaotalk')
+            date = iso_date(c.get('meta', ''), with_time=c['kind'] == 'photo') or pool[0]
+            ext['cl.' + k] = _ext(''.join(c.get('lines', ())) + c['title'] + c.get('meta', ''), date, app, IXS.get('pt_key', 12.5))
+        for i, (ic, t, m) in enumerate(fills):
+            date = iso_date(t + ' ' + m, with_time=ic == 'gallery') or pool[i % len(pool)]
+            ext['f%d' % i] = _ext(t + m, date, APP_OF.get(ic, ic), IXS.get('pt_fill', 9))
+    def _wh(key, fw):
+        if key not in ext:
+            return fw, S.FRAG_H
+        return max(fw, ext[key][3] + 6), S.FRAG_H + 6 + ext[key][4]
+    items = [('cl.' + k,) + _wh('cl.' + k, S.frag_w(REC[k]['title'], chip_text(REC[k]))) for k in keys]
+    fitems = [('f%d' % i,) + _wh('f%d' % i, S.frag_w(t, m)) for i, (_, t, m) in enumerate(fills)]
     import random
     random.Random(spec.get('seed', 11)).shuffle(items)
     random.Random(spec.get('seed', 11) + 1).shuffle(fitems)
@@ -1299,10 +1407,20 @@ def build(spec):
         f = hop.get('filter')
         if f:
             fk = f['keep']
+            # 사진마다 저장해 둔 메타데이터의 날짜(00과 같은 형식). 필터는 이 날짜로 거름
+            for r in list(fk) + list(f.get('drop', {})):
+                c = REC[r]
+                bx_, by_, bw_, bh_ = sc.box[r]
+                txt = 'date: "%s"' % iso_date(c.get('meta', ''), with_time=c['kind'] == 'photo')
+                pos_ = (bx_ + 8, by_ + bh_ + 6, txt, 9.5, 'sb')
+                sc.put('pmeta.' + r, [T('pmeta.%s/t' % r, bx_ + 8, by_ + bh_ + 6, bw_, 18, txt, size=9.5, color=SUB, weight='sb')])
+                if r in fk and f.get('date'):
+                    sc.put('pmk%d.%s' % (n, r), [R('pmk%d.%s/0' % (n, r), *band(pos_, f['date'], kind='full'), prst='roundRect', radius=2.5,
+                                                   fill=HL, alpha=34, line=None)])
             x0 = min(sc.box[k][0] for k in fk) - 14
             y0 = min(sc.box[k][1] for k in fk) - 18
             x1 = max(sc.box[k][0] + sc.box[k][2] for k in fk) + 14
-            y1 = max(sc.box[k][1] + sc.box[k][3] for k in fk) + 14
+            y1 = max(sc.box[k][1] + sc.box[k][3] for k in fk) + 14 + (26 if f.get('date') else 0)
             lab = f['label']
             lw_ = tw('필터  ' + lab, 10, 'b') + 24
             sc.put('fb%d' % n, [R('fb%d/r' % n, x0, y0, x1 - x0, y1 - y0, prst='roundRect', radius=18, fill=LAV, alpha=30,
@@ -1437,38 +1555,37 @@ def build(spec):
                    beats=[b1, b2, b3], mid=mid,
                    box=union([sc.box[k_] for k_ in static + ['hy.l1', 'hy.l2', 'hy.l3', 'hans']]), zmax=HY.get('zmax', 1.3))
 
-    # -------------------------------------------------------------- 00 사전 준비(00판): 떠 있는 모든 기록 아래에 벡터 줄 + 날짜, 그다음 기록 하나를 가까이
+    # -------------------------------------------------------------- 00 사전 준비(00판): 떠 있는 모든 기록 아래에 벡터(숫자) + 메타데이터(실제 형식), 그다음 기록 하나를 가까이
     IX = spec.get('index')
     IXD = None
     if IX:
         ik = IX.get('key', hops[0]['target'])
-        pool = list(IX.get('date_pool', ['3/2', '3/5', '3/7', '3/9', '3/11', '3/13', '3/16', '3/17', '3/18', '3/19', '3/21', '3/22',
-                                         '2/26', '2/28', '3/1', '3/3', '3/6', '3/8', '3/10', '3/14']))
-        items_ = cloud + fill_keys
-        fill_meta = {('f%d' % i): m for i, (_, t, m) in enumerate(fills)}
-        fill_title = {('f%d' % i): t for i, (_, t, m) in enumerate(fills)}
-        strips, dates, b1, b2, date_prims = [], [], {}, {}, []
+        items_ = [x for x in cloud + fill_keys if x in ext]
+        strips, dates, b1, b2 = [], [], {}, {}
         for j, it in enumerate(items_):
             bx, by, bw, bh = sc.box[it]
-            src = REC[it[3:]].get('meta', '') if it.startswith('cl.') else (fill_title.get(it, '') + ' ' + fill_meta.get(it, ''))
-            md = month_day(src) or pool[j % len(pool)]
-            nv = max(6, min(10, int((bw - 24 - 46) // 12)))
-            seed = (''.join(REC[it[3:]].get('lines', ())) + REC[it[3:]]['title']) if it.startswith('cl.') else it + fill_meta.get(it, '')
-            vp = vec_prims('vs.' + it, bx + 12, by + bh + 6, nv, 10, 12, seed)
-            sc.put('vs.' + it, vp if it == 'cl.' + ik else [G('vs.%s/g' % it, vp)])
-            date_prims.append(T('vd.%s/t' % it, bx + 12 + nv * 12 + 4, by + bh + 2, 50, 20, md, size=9.5, color=PURPLE2, weight='b',
-                                anchor='ctr'))
+            vt, ml, pt, ew, eh = ext[it]
+            lh = pt * 4 / 3 + 3
+            key_ = it.startswith('cl.')
+            sc.put('vs.' + it, [T('vs.%s/t' % it, bx + 8, by + bh + 6, ew + 6, lh, vt, size=pt, color=PURPLE2, weight='sb',
+                                  anchor='ctr')])
+            sc.put('vm.' + it, [T('vm.%s/t' % it, bx + 8, by + bh + 6 + lh, ew + 6, lh * len(ml), ml, size=pt,
+                                  color=INK2 if key_ else SUB, weight='sb', lnspc=lh * 0.75)])
             strips.append('vs.' + it)
-            b1['vs.' + it] = dict(kind='wipe_in', dir='left', delay=min(14 * j, 360), dur=240)
-        sc.put('vd.all', [G('vd.all/g', date_prims)])
-        dates.append('vd.all')
-        b2['vd.all'] = dict(kind='fade_in', delay=0, dur=240)
-        # 기록 하나를 가까이: 조각 → 카드, 그 아래 벡터 줄은 오른쪽 판의 '벡터' 줄로 날아감(같은 이름의 칸)
+            dates.append('vm.' + it)
+            b1['vs.' + it] = dict(kind='fade_in', delay=min(16 * j, 320), dur=220)
+            b2['vm.' + it] = dict(kind='fade_in', delay=min(14 * j, 280), dur=220)
+        # 기록 하나를 가까이: 조각 → 카드, 그 아래 벡터·메타데이터 글은 '기기 안에 저장한 모습'의 같은 줄로 날아감(같은 이름)
         ck = REC[ik]
         x0_, y0_ = cpos['cl.' + ik]
         cpr, ch_, _ = card_at(ik, x0_, y0_)
         sc.put('ix.card', cpr)
-        EWD, EH = IX.get('entry_w', 436), 172
+        vt_k, ml_k, _, _, _ = ext['cl.' + ik]
+        vlong = vt_k[:-4] + ', ' + vec_text(ck['title'] + ck.get('meta', '') + 'more', 3)[1:]     # 같은 숫자로 시작해 몇 개 더
+        mone = ml_k[0] + ' ' + ml_k[1].strip()                                      # 한 줄로
+        PT = 11
+        EWD = max(IX.get('entry_w', 440), 104 + max(tw(vlong, PT, 'sb'), tw(mone, PT, 'sb'), tw(IX.get('text', ''), 9.5)) + 26)
+        EH = 156
         ex0 = x0_ + ck['w'] + 78
         ey0 = y0_ + ch_ / 2 - EH / 2
         ent = [R('ixe/bg', ex0, ey0, EWD, EH, prst='roundRect', radius=16, fill='FFFFFF', line=RING, line_w=1.6, shadow=S.L.SHADOW_CARD,
@@ -1477,21 +1594,15 @@ def build(spec):
                T('ixe/h', ex0 + 40, ey0 + 11, 260, 22, IX.get('entry_title', '기기 안에 저장한 모습'), size=10, color=PURPLE2, weight='b',
                  anchor='ctr')]
         LX_, VX_ = ex0 + 18, ex0 + 104
-        for j, (lab_, yy_, hh_) in enumerate([('글자', ey0 + 46, 20), ('벡터', ey0 + 78, 22), ('메타데이터', ey0 + 128, 26)]):
-            ent.append(T('ixe/l%d' % j, LX_, yy_, 84, hh_, lab_, size=9.5, color=PURPLE if j else MUTE, weight='b', anchor='ctr'))
-        ent.append(T('ixe/v0', VX_, ey0 + 46, EWD - (VX_ - ex0) - 14, 20, IX.get('text', ''), size=9.5, color=MUTE, anchor='ctr'))
+        rows_y = [ey0 + 48, ey0 + 82, ey0 + 116]
+        for j, lab_ in enumerate(['글자', '벡터', '메타데이터']):
+            ent.append(T('ixe/l%d' % j, LX_, rows_y[j], 84, 24, lab_, size=9.5, color=PURPLE if j else MUTE, weight='b', anchor='ctr'))
+        ent.append(T('ixe/v0', VX_, rows_y[0], EWD - (VX_ - ex0) - 14, 24, IX.get('text', ''), size=9.5, color=MUTE, anchor='ctr'))
         sc.put('ix.entry', ent)
-        seed_k = ''.join(ck.get('lines', ())) + ck['title']
-        sc.put('ix.vec', vec_prims('vs.cl.' + ik, VX_, ey0 + 78, IX.get('n_vec', 16), 14, 22, seed_k) +
-               [T('ixv/n', VX_, ey0 + 103, 260, 16, IX.get('nums', '[0.12, −0.53, 0.88, …]'), size=8.5, color=MUTE, anchor='ctr')])
-        mx_, meta_ = VX_, []
-        for j, (ic, lab_) in enumerate(IX['meta']):
-            pr, cw_ = chip_prims('ixm%d' % j, mx_, ey0 + 128, lab_, style='outline', pt=9, h=26, padx=10, icon=ic)
-            meta_ += pr
-            mx_ += cw_ + 8
-        sc.put('ix.meta', meta_)
-        if mx_ - 8 > ex0 + EWD - 12:
-            print('   ! 00 메타데이터 칩이 판을 넘침 (%.0f > %.0f)' % (mx_ - 8, ex0 + EWD - 12))
+        sc.put('ix.vec', [T('vs.cl.%s/t' % ik, VX_, rows_y[1], EWD - (VX_ - ex0) - 10, 24, vlong, size=PT, color=PURPLE2, weight='sb',
+                            anchor='ctr')])
+        sc.put('ix.meta', [T('vm.cl.%s/t' % ik, VX_, rows_y[2], EWD - (VX_ - ex0) - 10, 24, mone, size=PT, color=INK2, weight='sb',
+                             anchor='ctr')])
         sc.put('ixth', S.thread_prims('ixth', scurve((x0_ + ck['w'] + 2, y0_ + ch_ / 2), (ex0 - 2, ey0 + EH / 2), 0.5)))
         close = ['ixth', 'ix.card', 'ix.entry', 'ix.vec', 'ix.meta']
         IXD = dict(key=ik, strips=strips, dates=dates, beats=[b1, b2], close=close, box1=union([sc.box[k_] for k_ in close]))
@@ -1516,7 +1627,7 @@ def build(spec):
                 cur.insert(0, k)
 
     def shot(key, frame_keys, side, focus, hud, zmax, anim=None, half=(), pad=16, cap=None, notes=None, morph=1400, frame_box=None,
-             cap_y=None, cap_x=None, alpha=None, beats=None):
+             cap_y=None, cap_x=None, alpha=None, beats=None, cap_beat=None):
         cap = cap or CP[key]
         cap = cap if isinstance(cap, dict) else dict(t=cap)
         shown = list(cur)
@@ -1542,7 +1653,7 @@ def build(spec):
         lab = ' '.join(''.join(t for t, _ in cap['t']).split())
         sc.steps.append(Step(key=key, cam=cam, cap=cap, cap_rect=(crect, side), show=shown, focus=focus, half=half, styles=dict(styles),
                              hud=hud, anim=anim or {}, notes=notes if notes is not None else NT[key], morph_ms=morph, label=lab,
-                             alpha=dict(alpha or {}), beats=list(beats or [])))
+                             alpha=dict(alpha or {}), beats=list(beats or []), cap_beat=cap_beat))
 
     def cx_of(k):
         b = sc.box[k]
@@ -1574,10 +1685,10 @@ def build(spec):
         # 1 기록 더미가 먼저: 매일 쌓이는 기록들
         show(*all_cloud)
         ca_ = {k: IX.get('cloud_alpha', 72) for k in all_cloud}
-        shot('cloud', [], 'top', set(all_cloud), {}, 0.9, frame_box=CLOUD_BOX, alpha=ca_, anim=float_in)
+        shot('cloud', [], 'top', set(all_cloud), {}, 0.9, frame_box=CB, alpha=ca_, anim=float_in)
         # 2 00 사전 준비: 모든 기록 아래에 벡터 줄(클릭), 날짜(클릭)
         show(*IXD['strips'], *IXD['dates'])
-        shot('idx1', [], 'top', set(all_cloud + IXD['strips'] + IXD['dates']), {}, 0.9, frame_box=CLOUD_BOX, alpha=ca_, morph=800,
+        shot('idx1', [], 'top', set(all_cloud + IXD['strips'] + IXD['dates']), {}, 0.9, frame_box=CB, alpha=ca_, morph=800,
              cap=CP['idx1'], notes=NT['idx1'], beats=IXD['beats'])
         # 3 기록 하나를 가까이: 조각이 카드로, 그 벡터 줄은 '기기 안에 저장한 모습'의 벡터 줄로
         hide(*all_cloud, *IXD['strips'], *IXD['dates'])     # 다른 조각은 걷음(가까이 볼 때 흐린 벡터 줄이 떠 보이지 않게)
@@ -1591,21 +1702,17 @@ def build(spec):
         open_step()
         show(*all_cloud, *lits)
         t_end = min(20 * len(order), 480) + 260
-        shot('cloud', [], 'top', set(all_cloud + lits), {}, 0.9, frame_box=CLOUD_BOX, morph=1500,
+        shot('cloud', [], 'top', set(all_cloud + lits), {}, 0.9, frame_box=CB, morph=1500,
              alpha={k: CLOUD_ALPHA for k in all_cloud},
              anim=dict(float_in, **{x: dict(kind='zoom_in', delay=t_end + 150 * j, dur=220) for j, x in enumerate(lits)}))
         hide(*lits, *all_cloud)
     # 실패: 키워드 검색(왼쪽, 클릭마다) → 임베딩 검색(오른쪽, 클릭마다) → 둘을 나란히
     prev = []
-    if PAIR:
-        show(*PAIR['kw'])
-        shot('fail_kw', [], 'top', set(PAIR['kw']), {}, PAIR['zmax'], frame_box=PAIR['kwbox'], morph=1500, beats=PAIR['kw_beats'])
-        hide(*PAIR['kw'])
-        show(*PAIR['emb'])
-        shot('fail_emb', [], 'top', set(PAIR['emb']), {}, PAIR['zmax'], frame_box=PAIR['embbox'], morph=1400, beats=PAIR['emb_beats'])
+    if PAIR:      # 키워드(왼쪽)와 임베딩(오른쪽)을 한 장에. 맺음 설명은 마지막 클릭에
         show_under(PAIR['div'])
-        show(*PAIR['kw'])
-        shot('fail_both', [], 'top', set(PAIR['kw'] + PAIR['emb'] + [PAIR['div']]), {}, PAIR['zmax'], frame_box=PAIR['box'], morph=1400)
+        show(*PAIR['kw'], *PAIR['emb'])
+        shot('fail', [], 'top', set(PAIR['kw'] + PAIR['emb'] + [PAIR['div']]), {}, PAIR['zmax'], frame_box=PAIR['box'], morph=1500,
+             beats=PAIR['beats'] + [{}], cap_beat=len(PAIR['beats']))
         prev = PAIR['kw'] + PAIR['emb'] + [PAIR['div']]
     for j, P_ in enumerate(passes):
         hide(*prev)
@@ -1660,135 +1767,72 @@ def build(spec):
     show(*qkeys)
     shot('split', ['qp'], 'right', set(qkeys), dict(cur='02', done=D('01')), 1.9, morph=1500,
          beats=[{x: dict(kind='zoom_in', delay=0, dur=220)} for x in qrows])
-    re_cur = None
+    # 03 연쇄 탐색: 질문 판은 왼쪽에 그대로 두고, 오른쪽에서 찾기 → 이어지는 기록 → 근거와 단서(마지막 홉은 답).
+    # 다음 홉으로 넘어갈 때 단서 칩이 질문 판의 빈칸으로 날아가 질문이 다시 써짐(모핑)
+    qp_box = sc.box['qp']
+    hop_shown = []
     for h in H:
         n, hop = h['n'], h['hop']
         f = hop.get('filter')
         k = hop['target']
         cands = h['cands']
-        hud3 = dict(cur='03', done=D('01', '02'), **({'loop': n} if n > 1 else {}))
         k_re = re_key(n)
         hc = CP['hops'][n - 1]
         hn = NT['hops'][n - 1]
         if n > 1:
-            # 02 다시 쓰기: 앞 기록의 단서 칩이 다음 질문의 빈칸으로 날아감(판을 가까이)
             pv = H[n - 2]
-            hide('tok%d@src' % (n - 1), *['pl%d.%s' % (n - 1, x) for x in hops[n - 2].get('pills', {})], 'pm%d' % (n - 1),
-                 'im%d' % (n - 1), 'hm%d' % (n - 1), pv['target'])
+            hide(*hop_shown)
             styles.pop(pv['target'], None)
-            show(*qkeys, 'tok%d@q' % (n - 1))
+            show('tok%d@q' % (n - 1))
             styles['q%d' % (n - 1)] = 'done' + ('_rw' if n > 2 else '')
             styles['q%d' % n] = 'cur_rw'
-            if re_cur:
-                hide(re_cur)
-                re_cur = None
-            shot('rw%d' % n, ['qp'], 'right', (set(qkeys) - {'qorig', 'q%d' % (n - 1)}) | {'tok%d@q' % (n - 1)},
-                 dict(cur='02', done=D('01', '03'), loop=n - 1, loop_on=True), 1.9, cap=hc['rw'], notes=hn['rw'], morph=1800,
-                 half=['qorig', 'q%d' % (n - 1)])
-            hide('tok%d@q' % (n - 1))
-        hide(*qkeys)
-        if re_cur != k_re:
-            if re_cur:
-                hide(re_cur)
-            show(k_re)
-            re_cur = k_re
-        hop_box = union([sc.box[x] for x in [k_re, k] + cands + (list(f.get('drop', {})) if f else [])] +
-                        ([sc.box['fb%d' % n]] if f else []) + [sc.box['why%d.%s' % (n, c)] for c in cands])
-        # 03 찾기: 판 → 실 → 기록. 가까운 후보는 옅은 실 + 이유 태그(후보 카드는 옅게). 필터가 있으면 같은 장에서 먼저 거름
         whys = ['why%d.%s' % (n, c) for c in cands]
         drops = ['drop%d.%s' % (n, x) for x in f.get('drop', {})] if f else []
-        fms = ['fm%d.%s' % (n, x) for x in f.get('marks', {})] if f else []
+        drop_recs = list(f.get('drop', {})) if f else []
         keep_other = [x for x in (f['keep'] if f else []) if x != k and x not in cands]
-        show(k, *cands, *keep_other, *(list(f.get('drop', {})) if f else []))
-        show_under('th%d' % n, *['thc%d.%s' % (n, c) for c in cands], *(['fb%d' % n] if f else []))
-        show(*whys, *drops, *fms)
-        styles.pop(k, None)                 # 찾은 기록의 보라 테두리는 클릭 때(미리 답이 보이지 않게)
+        recs = [k] + cands + keep_other + drop_recs
+        pmeta = [('pmeta.' + x) for x in recs if ('pmeta.' + x) in sc.items] if f else []
+        pmks = [x for x in ('pmk%d.%s' % (n, r) for r in (f['keep'] if f else [])) if x in sc.items]
         tbx_ = sc.box[k]
         sc.put('tring%d' % n, [R('tring%d/r' % n, tbx_[0] - 3, tbx_[1] - 3, tbx_[2] + 6, tbx_[3] + 6, prst='roundRect', radius=14,
                                  fill=None, line=RING, line_w=2.4, glow=(10, RING, 28))])
-        show('tring%d' % n)
-        focus = set([k_re, k, 'th%d' % n, 'tring%d' % n] + whys + drops + fms + (['fb%d' % n] if f else []))
-        tbx = sc.box[k]
-        if tbx[1] <= hop_box[1] + 34:
-            fside, fkw = 'top', dict(cap_x=cx_of(k))
-        elif tbx[1] + tbx[3] >= hop_box[1] + hop_box[3] - 34:
-            fside, fkw = 'bottom', dict(cap_x=cx_of(k))
-        else:
-            fside, fkw = 'right', dict(cap_y=cy_of(k))
-        # 클릭마다: (필터가 있으면 먼저 날짜로 거름) → 가까운 후보와 아닌 이유 → 이어지는 기록(실 + 테두리)
-        b_cand = dict({'thc%d.%s' % (n, c): dict(kind='wipe_in', dir='left', delay=100 * j, dur=260) for j, c in enumerate(cands)},
-                      **{w_: dict(kind='zoom_in', delay=220 + 100 * j, dur=200) for j, w_ in enumerate(whys)})
+        pills = ['pl%d.%s' % (n, x) for x in hop.get('pills', {})]
+        ev = [x for x in ('hm%d' % n, 'im%d' % n, 'pm%d' % n) if x in sc.items]
+        tok = 'tok%d@src' % n
+        threads = ['th%d' % n] + ['thc%d.%s' % (n, c) for c in cands] + (['fb%d' % n] if f else [])
+        show(k_re, *recs, *pmeta)
+        show_under(*threads)
+        show(*whys, *drops, *pmks, 'tring%d' % n, *pills, *ev, tok)
+        shown_now = [k_re] + recs + pmeta + threads + whys + drops + pmks + ['tring%d' % n] + pills + ev + [tok]
+        hop_shown = shown_now
+        b_rec = ({k: dict(kind='fade_in', delay=0, dur=200)} if not f else {})
+        if not f:
+            b_rec.update({c: dict(kind='fade_in', delay=80 + 80 * j, dur=200) for j, c in enumerate(cands)})
+        b_cand = dict({'thc%d.%s' % (n, c): dict(kind='wipe_in', dir='left', delay=(250 if not f else 0) + 100 * j, dur=260)
+                       for j, c in enumerate(cands)},
+                      **{w_: dict(kind='zoom_in', delay=(450 if not f else 220) + 100 * j, dur=200) for j, w_ in enumerate(whys)})
         b_hit = {'th%d' % n: dict(kind='wipe_in', dir='left', delay=0, dur=320), 'tring%d' % n: dict(kind='zoom_in', delay=260, dur=220)}
-        if not f:      # 첫 홉: 판(질문)이 먼저, 가까운 기록들은 클릭에 나타남
-            b_cand.update({k: dict(kind='fade_in', delay=0, dur=200)})
-            b_cand.update({c: dict(kind='fade_in', delay=80 + 80 * j, dur=200) for j, c in enumerate(cands)})
-            b_cand.update({kk: dict(v, delay=v['delay'] + 250) for kk, v in b_cand.items() if kk.startswith(('thc', 'why'))})
+        b_ev = dict({x: dict(kind='wipe_in', dir='left', delay=(220 if x.startswith('pm') else 0), dur=300) for x in ev},
+                    **{x: dict(kind='zoom_in', delay=100 * j, dur=200) for j, x in enumerate(pills)})
+        b_ev[tok] = dict(kind='zoom_in', delay=520, dur=240)
         if f:
             b_f = dict({'fb%d' % n: dict(kind='fade_in', delay=0, dur=240)},
-                       **{x: dict(kind='wipe_in', dir='left', delay=180, dur=240) for x in fms},
+                       **{x: dict(kind='wipe_in', dir='left', delay=180, dur=240) for x in pmks},
                        **{x: dict(kind='zoom_in', delay=300 + 100 * j, dur=200) for j, x in enumerate(drops)})
-            beats_ = [b_f, dict(b_cand, **{kk: dict(v, delay=v['delay'] + 450) for kk, v in b_hit.items()})]
+            beats_ = [b_f, dict(b_cand, **{kk: dict(v, delay=v['delay'] + 450) for kk, v in b_hit.items()}), b_ev]
         else:
-            beats_ = [b_cand, b_hit]
-        dim_c = {c: 40 for c in cands}
-        dim_c.update({x: 40 for x in (f.get('drop', {}) if f else {})})
-        shot('find%d' % n, [], fside, focus, hud3, 1.45, cap=hc['find'], notes=hn['find'], frame_box=hop_box, morph=1500,
-             beats=beats_, half=cands + ['thc%d.%s' % (n, c) for c in cands] + keep_other + (list(f.get('drop', {})) if f else []),
-             alpha=dim_c, **fkw)
-        hide('th%d' % n, *['thc%d.%s' % (n, c) for c in cands], 'fb%d' % n, *whys, *drops, *fms, *cands, *keep_other,
-             *(list(f.get('drop', {})) if f else []), k_re, 'tring%d' % n)
-        styles[k] = 'weave'
-        re_cur = None
-        # 가까이: 기록 하나만 크게. 근거에 형광펜 → 단서 칩
-        pills = ['pl%d.%s' % (n, x) for x in hop.get('pills', {})]
-        extra = [x for x in ('hm%d' % n, 'im%d' % n, 'pm%d' % n) if x in sc.items]
-        show(*pills, *extra, 'tok%d@src' % n)
-        focus = set([k, 'tok%d@src' % n] + extra + pills)
-        shot('close%d' % n, [k, 'tok%d@src' % n], hop.get('cside', 'right'), focus, hud3, hop.get('zclose', 2.8), cap=hc['close'],
-             notes=hn['close'], pad=20, cap_y=cy_of(k), morph=1500,
-             beats=[dict({'hm%d' % n: dict(kind='wipe_in', dir='left', delay=0, dur=300),
-                          'im%d' % n: dict(kind='wipe_in', dir='left', delay=0, dur=300),
-                          'pm%d' % n: dict(kind='wipe_in', dir='left', delay=220, dur=300)},
-                         **{x: dict(kind='zoom_in', delay=100 * j, dur=200) for j, x in enumerate(pills)}),
-                    {'tok%d@src' % n: dict(kind='zoom_in', delay=0, dur=240)}])
-    # 04 전달: 카드를 가까이. 카드가 열리면 빨간 배지는 사라지고, 자판은 내려감
-    last_h = H[-1]
-    hide('tok%d@src' % nh, *['pl%d.%s' % (nh, x) for x in hops[-1].get('pills', {})], 'pm%d' % nh, 'im%d' % nh, 'hm%d' % nh,
-         last_h['target'])
-    styles.pop(last_h['target'], None)
-    show(*phone_now)
-    hide('ui.loc', 'ui.keys')
-    if sc.ui.get('ans_overlaps_msg'):
-        hide('ui.msg')
-    show('ans', 'ui.tap2')
-    styles['ui.on'] = 'nobadge'
-    if kind == 'sheet':
-        styles['ui.sheet'] = 'big'
-        hide('ui.kbd', 'ui.on')
-        db = union([sc.box['ans'], sc.box['ui.sheet.big']])
-        dfocus = ['ui', 'ui.head', 'ui.sheet', 'ans', 'ui.tap2']
-    elif kind == 'google':
-        db = union([sc.box['ui.sbox'], sc.box['ans'], sc.box['ui.kbd']])
-        dfocus = ui_base + ['ans', 'ui.tap2', 'ui.on']
-    else:
-        db = union([sc.box['ans'], sc.box['ui.kbd']])
-        dfocus = ui_base + ['ans', 'ui.tap2', 'ui.on']
-    shot('deliver', [], 'right', set(dfocus), dict(cur='04', done=D('01', '02', '03')), 2.3, frame_box=db, cap_y=cy_of('ans'),
-         anim={'ans': dict(kind='rise', delay=0, dur=260)}, beats=[{'ui.tap2': dict(kind='zoom_in', delay=0, dur=200)}], morph=1500)
-    # 결과: 조금 빼서 화면 전체
-    hide('ui.tap2', 'ans', 'ui.on', 'ui.kbd', 'ui.keys')
-    show('ui.msg')
-    if kind == 'google':
-        styles['ui.sbox'] = 'done'
-        res_keys = ['ui.res'] if 'ui.res' in sc.items else []
-        rb = union([sc.box['ui.glogo']] + [sc.box[x] for x in ['ui.sbox'] + res_keys])
-    else:
-        hide('ui.sheet')
-        res_keys = ['res'] if 'res' in sc.items else []
-        rb = union([sc.box['ui.head'], sc.box['ui.msg']] + [sc.box[x] for x in res_keys])
-    rb = (PX + 4, rb[1], PW - 8, rb[3])
-    show(*res_keys)
-    shot('result', [], 'right', set(ui_base + res_keys), dict(cur='04', done=D('01', '02', '03')), 1.5, frame_box=rb, morph=1500)
+            beats_ = [dict(b_rec, **b_cand), b_hit, b_ev]
+        hud3 = dict(cur='03', done=D('01', '02'), **({'loop': n, 'loop_on': True} if n > 1 else {}))
+        frame_keys = ['qp'] + [x for x in shown_now if x in sc.box and not x.startswith(('th', 'fb'))] + (['fb%d' % n] if f else [])
+        hb = union([sc.box[x] for x in frame_keys])
+        dim_c = {c: 45 for c in cands}
+        dim_c.update({x: 45 for x in drop_recs})
+        shot('hop%d' % n, [], 'top', set(shown_now) | set(qkeys) | {'tok%d@q' % (n - 1)} if n > 1 else set(shown_now) | set(qkeys), hud3,
+             1.3, cap=hc['find'], notes=hn.get('hop') or ' '.join(x for x in (hn.get('rw'), hn.get('find'), hn.get('close')) if x), frame_box=hb, morph=1500, beats=beats_, alpha=dim_c,
+             half=cands + ['thc%d.%s' % (n, c) for c in cands] + drop_recs)
+    hide(*hop_shown)
+    for h in H:
+        styles.pop(h['target'], None)
     # 정리: 찾은 기록이 질문 판 옆으로 모여듦. 질문 줄 → 기록에 번호 붙은 짧은 실.
     # 같은 대화방의 기록이 이어지면 카드 하나(앱 아이콘 하나) 아래 말풍선 두 개로 묶음
     gx = EX + EW + 70
@@ -1846,7 +1890,6 @@ def build(spec):
         prev = dict(k=k, box=(gx, (prev['box'][1] if merge else y_), max(c2['w'], prev['box'][2]) if merge else c2['w'],
                               (y_ + h2 - prev['box'][1]) if merge else h2))
         gy = full[1] + full[3] + 18
-    hide(*phone_now, *res_keys)
     show(*qkeys, *sum_keys, *sth, *['tok%d@q' % h['n'] for h in H], 'qans.ok')
     hide('qans.slot')
     for i in range(1, nh + 1):
@@ -1854,9 +1897,44 @@ def build(spec):
     toks = ['tok%d@q' % h['n'] for h in H]
     sum_cap = dict(t=CP['sum'], pill=CP.get('sum_pill', '모두 기기 안에서'))
     shot('sum', ['qp'] + sum_keys, 'top', set(['qp', 'qorig', 'qans', 'qans.ok'] + qrows + toks + sum_keys + sth),
-         dict(all=True), 1.45, cap=sum_cap,
+         dict(done=D('01', '02', '03')), 1.45, cap=sum_cap,
          anim=dict({x: dict(kind='wipe_in', dir='left', delay=150 + 180 * j, dur=260) for j, x in enumerate(sth)},
                    **{'qans.ok': dict(kind='zoom_in', delay=200 + 180 * len(sth), dur=200)}), morph=1500)
+    # 04 전달: 카드를 가까이. 카드가 열리면 빨간 배지는 사라지고, 자판은 내려감
+    hide(*qkeys, *sum_keys, *sth, *toks, 'qans.ok')
+    show(*phone_now)
+    hide('ui.loc', 'ui.keys')
+    if sc.ui.get('ans_overlaps_msg'):
+        hide('ui.msg')
+    show('ans', 'ui.tap2')
+    styles['ui.on'] = 'nobadge'
+    if kind == 'sheet':
+        styles['ui.sheet'] = 'big'
+        hide('ui.kbd', 'ui.on')
+        db = union([sc.box['ans'], sc.box['ui.sheet.big']])
+        dfocus = ['ui', 'ui.head', 'ui.sheet', 'ans', 'ui.tap2']
+    elif kind == 'google':
+        db = union([sc.box['ui.sbox'], sc.box['ans'], sc.box['ui.kbd']])
+        dfocus = ui_base + ['ans', 'ui.tap2', 'ui.on']
+    else:
+        db = union([sc.box['ans'], sc.box['ui.kbd']])
+        dfocus = ui_base + ['ans', 'ui.tap2', 'ui.on']
+    shot('deliver', [], 'right', set(dfocus), dict(cur='04', done=D('01', '02', '03')), 2.3, frame_box=db, cap_y=cy_of('ans'),
+         anim={'ans': dict(kind='rise', delay=0, dur=260)}, beats=[{'ui.tap2': dict(kind='zoom_in', delay=0, dur=200)}], morph=1500)
+    # 결과: 조금 빼서 화면 전체
+    hide('ui.tap2', 'ans', 'ui.on', 'ui.kbd', 'ui.keys')
+    show('ui.msg')
+    if kind == 'google':
+        styles['ui.sbox'] = 'done'
+        res_keys = ['ui.res'] if 'ui.res' in sc.items else []
+        rb = union([sc.box['ui.glogo']] + [sc.box[x] for x in ['ui.sbox'] + res_keys])
+    else:
+        hide('ui.sheet')
+        res_keys = ['res'] if 'res' in sc.items else []
+        rb = union([sc.box['ui.head'], sc.box['ui.msg']] + [sc.box[x] for x in res_keys])
+    rb = (PX + 4, rb[1], PW - 8, rb[3])
+    show(*res_keys)
+    shot('result', [], 'right', set(ui_base + res_keys), dict(cur='04', done=D('01', '02', '03')), 1.5, frame_box=rb, morph=1500)
     if IXD:       # 00판: 위 띠는 00~04. 00 다음 장부터는 00에 ✓
         after = False
         for st in sc.steps:

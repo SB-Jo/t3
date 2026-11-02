@@ -152,23 +152,28 @@ def add_steps(prs, sc, layout, note_tpl, video_hold=None):
         for p in scene5.topbar_prims(step.hud):
             pa.prim(p)
         crect, side = step.cap_rect
-        for p in scene5.caption_prims(i, step.cap, side, crect):
-            pa.prim(p)
+        spids['__cap__'] = [int(pa.prim(p).find('.//' + q('p:cNvPr')).get('id')) for p in scene5.caption_prims(i, step.cap, side, crect)]
         if i > 0:
             S.morph_transition(slide, step.morph_ms)
-        groups = [step.anim or {}] + [b for b in (getattr(step, 'beats', None) or [])]
+        groups = [step.anim or {}] + [dict(b) for b in (getattr(step, 'beats', None) or [])]
+        if getattr(step, 'cap_beat', None) is not None:      # 맺음 설명처럼 설명을 클릭에 나오게
+            groups[step.cap_beat + 1]['__cap__'] = dict(kind='fade_in', delay=0, dur=300)
         tl = L.Timeline()
         for g in groups:
             tl.step()
-            for key, a in g.items():
+            for key, aa in g.items():
                 if key not in spids:
                     if g is not groups[0] and key in step.show:
                         warns.append('%d장 %s: 클릭 효과 대상 %s 이(가) 장에서 빠짐' % (i + 1, step.key, key))
                     continue
-                a = dict(a)
-                kind, delay, dur = a.pop('kind'), a.pop('delay', 0), a.pop('dur', 400)
-                for sp in spids[key]:
-                    tl.add(kind, sp, delay=delay, dur=dur, **a)
+                for a in (aa if isinstance(aa, list) else [aa]):     # 한 요소에 효과 여럿(예: 나타나며 날아옴)
+                    a = dict(a)
+                    kind, delay, dur = a.pop('kind'), a.pop('delay', 0), a.pop('dur', 400)
+                    if 'wdx' in a:          # 세계 좌표의 이동 거리 → 화면(장) 좌표
+                        z_ = step.cam[2]
+                        a['dx'], a['dy'] = a.pop('wdx') * z_, a.pop('wdy') * z_
+                    for sp in spids[key]:
+                        tl.add(kind, sp, delay=delay, dur=dur, **a)
         total = 0
         if any(tl.steps):
             sp_ids = {int(e.find(q('p:nvSpPr')).find(q('p:cNvPr')).get('id')) for e in slide._element.iter(q('p:sp'))}
