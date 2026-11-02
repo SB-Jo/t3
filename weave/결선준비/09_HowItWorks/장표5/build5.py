@@ -11,6 +11,7 @@ import importlib
 import sys
 from pathlib import Path
 
+from lxml import etree
 from PIL import Image, ImageDraw, ImageFont
 from pptx import Presentation
 
@@ -101,7 +102,7 @@ def place(sc, step):
     return out, warn
 
 
-def render(sc, dst):
+def render(sc, dst, video_hold=None):
     prs = Presentation(str(DECK))
     layout = prs.slides[8].slide_layout
     note_tpl = [copy.deepcopy(sh._element) for sh in prs.slides[8].notes_slide.placeholders]
@@ -109,14 +110,28 @@ def render(sc, dst):
     for s in list(lst):
         prs.part.drop_rel(s.get(q('r:id')))
         lst.remove(s)
-    _, warns = add_steps(prs, sc, layout, note_tpl)
+    _, warns = add_steps(prs, sc, layout, note_tpl, video_hold=video_hold)
     samsung_fonts.remap_prs(prs)
     prs.save(str(dst))
     return len(sc.steps), warns
 
 
-def add_steps(prs, sc, layout, note_tpl):
-    """장면의 단계마다 장을 prs 끝에 붙임(덱 조립에서도 씀). 돌려줌: (새 장 목록, 경고)."""
+def set_advance(slide, ms):
+    """미리보기 영상용: 이 장을 ms 뒤에 저절로 넘김(모핑 전환이 있으면 그 전환에, 없으면 새 전환에)."""
+    sld = slide._element
+    trs = list(sld.iter(q('p:transition')))
+    if not trs:
+        tr = etree.Element(q('p:transition'))
+        sld.find(q('p:clrMapOvr')).addnext(tr)
+        trs = [tr]
+    for tr in trs:
+        tr.set('advTm', str(int(ms)))
+
+
+def add_steps(prs, sc, layout, note_tpl, video_hold=None):
+    """장면의 단계마다 장을 prs 끝에 붙임(덱 조립에서도 씀). 돌려줌: (새 장 목록, 경고).
+    장마다 효과 묶음: step.anim = 장이 열리자마자 저절로(짧게), step.beats = 클릭마다 하나씩(발표자가 말하는 순서).
+    video_hold(ms)를 주면 미리보기 영상용으로 클릭 묶음도 그 간격으로 저절로 나오고, 장은 다 나온 뒤 넘어감."""
     warns, new = [], []
     for i, step in enumerate(sc.steps):
         slide = prs.slides.add_slide(layout)
@@ -141,19 +156,30 @@ def add_steps(prs, sc, layout, note_tpl):
             pa.prim(p)
         if i > 0:
             S.morph_transition(slide, step.morph_ms)
-        if step.anim:
-            tl = L.Timeline()
+        groups = [step.anim or {}] + [b for b in (getattr(step, 'beats', None) or [])]
+        tl = L.Timeline()
+        for g in groups:
             tl.step()
-            for key, a in step.anim.items():
+            for key, a in g.items():
                 if key not in spids:
+                    if g is not groups[0] and key in step.show:
+                        warns.append('%d장 %s: 클릭 효과 대상 %s 이(가) 장에서 빠짐' % (i + 1, step.key, key))
                     continue
                 a = dict(a)
                 kind, delay, dur = a.pop('kind'), a.pop('delay', 0), a.pop('dur', 400)
                 for sp in spids[key]:
                     tl.add(kind, sp, delay=delay, dur=dur, **a)
-            if tl.steps[0]:
-                sp_ids = {int(e.get('id')) for e in slide._element.iter(q('p:cNvPr'))}
-                slide._element.append(tl.xml(sp_ids, auto=(0, [0])))
+        total = 0
+        if any(tl.steps):
+            sp_ids = {int(e.find(q('p:nvSpPr')).find(q('p:cNvPr')).get('id')) for e in slide._element.iter(q('p:sp'))}
+            if video_hold:
+                holds = [(900 if j == 0 else video_hold) for j in range(len(tl.steps))]
+                slide._element.append(tl.xml(sp_ids, auto=(150, holds)))
+                total = 150 + sum(tl.step_len(j) + holds[j] for j in range(len(tl.steps)))
+            else:
+                slide._element.append(tl.xml(sp_ids, first_auto=True))
+        if video_hold:
+            set_advance(slide, max(total, 0) + video_hold)
         ns = slide.notes_slide
         if ns.notes_text_frame is None:
             for e in note_tpl:

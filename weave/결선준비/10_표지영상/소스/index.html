@@ -45,6 +45,8 @@
 
 <div id="stage">
   <div id="bg"><div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div></div>
+  <!-- v3: 오른쪽 장면 전체(물결·조각·실·카드·휴대폰·단서 표·손)를 한 판에 담아 살짝 줄임 → 위·아래·오른쪽 여백 -->
+  <div id="world">
   <svg id="wave" viewBox="0 0 1920 1080" width="1920" height="1080"><defs><linearGradient id="wfade" gradientUnits="userSpaceOnUse" x1="860" y1="0" x2="1000" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient><mask id="wmask" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080"><rect x="0" y="0" width="1920" height="1080" fill="url(#wfade)"/></mask></defs><g mask="url(#wmask)"><circle id="wv1" cx="0" cy="0" r="0"/><circle id="wv2" cx="0" cy="0" r="0"/></g></svg>
 
   <!-- 흩어진 기록(흐리게, 천천히 떠다님) -->
@@ -102,13 +104,14 @@
   </div>
 
   <span class="tok kr" id="tok">3/15 (일) 저녁</span>
-  <div id="vignette"></div>
   <div id="spark"><svg viewBox="-60 -60 120 120" width="120" height="120"><g stroke-linecap="round" stroke-width="5" fill="none">
     <path class="sp" pathLength="1" d="M-26 -22 L-40 -36" stroke="#fff" stroke-width="10"/><path class="sp" pathLength="1" d="M-26 -22 L-40 -36" stroke="url(#tg)"/>
     <path class="sp" pathLength="1" d="M-6 -32 L-8 -50" stroke="#fff" stroke-width="10"/><path class="sp" pathLength="1" d="M-6 -32 L-8 -50" stroke="url(#tg)"/>
     <path class="sp" pathLength="1" d="M-34 -2 L-52 -4" stroke="#fff" stroke-width="10"/><path class="sp" pathLength="1" d="M-34 -2 L-52 -4" stroke="url(#tg)"/>
   </g></svg></div>
   <div id="hand"><svg viewBox="0 0 80 102"><defs><radialGradient id="skin" cx=".45" cy=".35" r=".85"><stop stop-color="#FFF"/><stop offset=".7" stop-color="#FCF9FF"/><stop offset="1" stop-color="#E8DDF6"/></radialGradient></defs><path d="M27 56V13C27 3 41 3 41 13v29c0-9 13-9 13 0v3c2-9 14-6 14 2v3c5-6 12-2 12 5v20c0 13-10 18-11 25H32c0-9-7-17-13-24L7 62C0 54 10 45 17 51l10 8" transform="translate(-2 -1) scale(.98)" fill="url(#skin)" stroke="#9168C1" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M39 44v15m13-13v15m13-10v12" fill="none" stroke="#BEA4D9" stroke-width="2.3" stroke-linecap="round"/></svg></div>
+  </div>
+  <div id="vignette"></div>
   <div id="dbg"></div>
 </div>
 

@@ -162,3 +162,6 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 .rel .rh { font-size: 15px; font-weight: 700; color: var(--ink); margin: 2px 2px 9px; }
 .rel .rc { display: flex; flex-wrap: wrap; gap: 8px; }
 .rel .rc span { display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 18px; background: #F1F3F4; font-size: 13px; color: #3c4043; white-space: nowrap; }
+
+/* ── v3: 오른쪽 장면을 한 판(#world)에 담아 (846, 540)을 기준으로 살짝 줄임 → 위·아래·오른쪽 여백. 배경·비네트는 화면 전체 ── */
+#world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 846px 540px; }

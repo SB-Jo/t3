@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """결선 중간본 덱 조립. 원본 02_PPT/Weave_결선.pptx는 고치지 않고, 새 파일 02_PPT/Weave_결선_중간본.pptx를 만든다.
 
-본편: 표지(반복 영상) → 인포그래픽 영상 자리 → Motivation → Pain Points → Solution(새 시나리오 셋)
-      → How it Works(장표5 A1 덱용, --hiw로 00판 선택) → Why Samsung → Why Now → 차별화 → 기대효과 1~3 → END
+본편: 표지(반복 영상) → Motivation → Pain Points → 인포그래픽 영상 자리 → Solution(새 시나리오 셋)
+      → How it Works(장표5 A1 덱용 00판, --hiw a1_deck이면 00 없는 판) → Why Samsung → Why Now → 차별화 → 기대효과 1~3 → END
 부록: App Demo, Q&A 2장
 참고(발표에서 안 씀): 구분 장 → 이전 표지, 만화, 이전 시나리오 1~3, 이전 How it Works, 인트로 영상 79초
 
   python build_deck.py              조립 → 삼성 글꼴로 바꾸기 → PowerPoint로 영상 넣기 → 장별 PNG·한눈에
   python build_deck.py --no-png     PNG 없이
-  python build_deck.py --hiw a1_deck00 --out ../02_PPT/Weave_결선_중간본_00판.pptx   How it Works 00판으로
+  python build_deck.py --hiw a1_deck --out /tmp/중간본_00없음.pptx   How it Works를 00 없는 판으로
   python build_deck.py --team-style side      표지 팀 이름을 '이름 둘 | 팀 두 줄'로
   python build_deck.py --embed-fonts          글꼴을 pptx 안에 넣어 저장(받는 사람이 글꼴 없이도 보게, 용량 늘어남)
 
@@ -70,8 +70,8 @@ def text_slide(prs, layout, name, lines, notes):
 
 TEAMS = [('AI System Team', ['이재웅', '양서윤']), ('AI Core Team', ['장이준', '이지현']), ('오디오개발Lab', ['조성빈'])]
 TITLE, TAGLINE = 'Weave Assist', '흩어진 기억을 엮어, 지금을 완성하다'     # 이전 표지와 같은 문구
-CX = 76                                         # 표지 글 왼쪽 끝. 영상의 왼쪽 빈 자리는 x < 564(1280 기준)
-MARK = 54                                       # 'Weave' 앞 아이콘(인트로 끝 화면의 보라 네모 + 흰 실타래)
+CX = 70                                         # 표지 글 왼쪽 끝. 영상의 왼쪽 빈 자리는 x < 564(1280 기준)
+MARK = 56                                       # 'Weave' 앞 아이콘(인트로 끝 화면의 보라 네모 + 흰 실타래)
 FONTS = Path.home() / '.cache' / 'weave-tools' / 'fonts'
 GRAD = ('<a:gradFill xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" rotWithShape="1">'
         '<a:gsLst><a:gs pos="0"><a:srgbClr val="4E36CF"/></a:gs><a:gs pos="100000"><a:srgbClr val="8F66FF"/>'
@@ -95,13 +95,13 @@ def cover_text(slide, team_style='under'):
     """
     pa = S.Painter(slide)                        # 바탕은 영상이 깔므로 도형 바탕은 그리지 않음(영상이 그 뒤로 숨지 않게)
     cy = 260                                     # 제목 줄 가운데
-    pa.prim(S.R('cover/mark', CX, cy - MARK / 2, MARK, MARK, prst='roundRect', radius=14, line=None,
+    pa.prim(S.R('cover/mark', CX, cy - MARK / 2, MARK, MARK, prst='roundRect', radius=15, line=None,
                 grad=dict(stops=[(0, '8D6BFF', None), (55, '6B4EFF', None), (100, '5A3FE0', None)], ang=55),
                 shadow=(18, 7, '6B4EFF', 30)))
     ic = MARK * 2 / 3
     pa.prim(S.P('cover/mark_icon', 'weave-spool-white.png', CX + (MARK - ic) / 2, cy - ic / 2, ic, ic))
     tx = CX + MARK + 13
-    t = pa.prim(S.T('cover/title', tx - 2, cy - 38, 470, 76, TITLE, size=46, color=S.PURPLE, weight='b', anchor='ctr',
+    t = pa.prim(S.T('cover/title', tx - 2, cy - 38, 470, 76, TITLE, size=48, color=S.PURPLE, weight='b', anchor='ctr',
                     spc=-0.5))
     for rp in t.iter(q('a:rPr'), q('a:endParaRPr')):
         for tag in ('a:latin', 'a:ea', 'a:cs'):          # 로고 글꼴(인트로 끝 화면과 같음). 굵게는 이 글꼴의 Bold
@@ -113,7 +113,7 @@ def cover_text(slide, team_style='under'):
             continue
         old.addprevious(etree.fromstring(GRAD))
         rp.remove(old)
-    pa.prim(S.T('cover/sub', CX + 1, 306, 520, 40, TAGLINE, size=22, color=S.INK2, weight='m', anchor='ctr'))
+    pa.prim(S.T('cover/sub', CX + 1, 306, 520, 40, TAGLINE, size=20, color=S.INK2, weight='m', anchor='ctr'))
 
     x = CX + 1
     if team_style == 'under':
@@ -144,7 +144,7 @@ def cover_text(slide, team_style='under'):
 
 
 INFO_NOTES = ('인포그래픽 영상 자리(약 1분 20초, 자동 재생). 새 인포그래픽 영상을 이 장에 넣고, 가운데 안내 표시는 지웁니다. '
-              '표지에서 팀을 소개한 뒤 바로 영상으로 문제 상황과 Weave를 보여 주고, Motivation으로 이어 갑니다.')
+              'Pain Points의 세 불편 바로 뒤에서, 영상의 세 장면이 하나씩 답하고 Weave Assist 로고로 끝나 Solution으로 이어 갑니다.')
 
 
 def info_slide(prs, layout):
@@ -289,7 +289,7 @@ def sheet(pngs, dst, labels, cols=6, w=400):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--no-png', action='store_true')
-    ap.add_argument('--hiw', default='a1_deck', help='장표5의 SPEC 모듈(a1_deck, a1_deck00 …)')
+    ap.add_argument('--hiw', default='a1_deck00', help='장표5의 SPEC 모듈(a1_deck00 = 00 있는 덱용, a1_deck = 00 없는 판)')
     ap.add_argument('--out', default=str(DST))
     ap.add_argument('--team-style', default='under', choices=['under', 'side'])
     ap.add_argument('--embed-fonts', action='store_true')
@@ -331,7 +331,7 @@ def main():
                      '참고용 구분 장. 이 뒤의 장표는 발표에서 쓰지 않습니다.')
     intro = blank_slide(prs, layout, INTRO_NOTES)
 
-    main_ = [cover, info, orig[2], orig[3], orig[4], *hiw, orig[9], orig[10], orig[11], orig[12], orig[13], orig[14], orig[18]]
+    main_ = [cover, orig[2], orig[3], info, orig[4], *hiw, orig[9], orig[10], orig[11], orig[12], orig[13], orig[14], orig[18]]
     appx = [orig[15], orig[16], orig[17]]
     refs = [ref, orig[0], orig[1], orig[5], orig[6], orig[7], orig[8], intro]
     order = main_ + appx + refs

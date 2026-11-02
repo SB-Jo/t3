@@ -1,11 +1,15 @@
-/* Weave 결선 표지 루프 v2 — 15초, 끝과 처음이 똑같아 끊김 없이 반복된다.
-   모든 상태는 시간 t의 순수 함수(render(t)). 떠다니는 움직임은 주기가 15초(또는 7.5초)인 사인파.
+/* Weave 결선 표지 루프 v3 — 18초, 끝과 처음이 똑같아 끊김 없이 반복된다.
+   모든 상태는 시간 t의 순수 함수(render(t)). 떠다니는 움직임은 주기가 18초(또는 9초)인 사인파.
    window.__seek(t), window.__DURATION, window.__ready, window.__probe(t)
    이야기는 How it Works A1(장표5/a1.py)과 같고, v1(14초)보다 앞뒤가 늘었다:
    빈 구글 검색창에 '지은이네 집들이 때 마신 화이트 와인'을 침 → 실타래 버튼 → 지은 카톡(3/12 목 '이번 일요일 6시, 이사 기념으로…')
    → 단서 '3/15 (일) 저녁'이 그날 사진(3/15 20:14)으로 → 라벨 'SAUVIGNON BLANC' → 추천 '배비치 소비뇽 블랑'
-   → 입력하기 → 검색어가 '배비치 소비뇽 블랑'으로 바뀜 → 검색 키 → 쇼핑 결과 → 처음 화면(빈 검색창)으로 */
-const LOOP = 15.0;
+   → 입력하기 → 검색어가 '배비치 소비뇽 블랑'으로 바뀜 → 검색 키 → 쇼핑 결과 → 처음 화면(빈 검색창)으로
+   v3: 빠르기는 v1과 v2의 중간(실 0.65~0.7초, 버튼 → 추천 카드 5.35초), 오른쪽 장면 전체를 0.93배로(위·아래·오른쪽 여백) */
+const LOOP = 18.0;
+// 오른쪽 장면(#world)은 (846, 540)을 기준으로 줄임. 안쪽 계산은 모두 줄이기 전 좌표(1920×1080)로 하고, 검사용 값만 화면 좌표로 바꿈
+const WS = 0.93, WO = { x: 846, y: 540 };
+const toScreen = p => ({ x: WO.x + (p.x - WO.x) * WS, y: WO.y + (p.y - WO.y) * WS });
 const QTEXT = '지은이네 집들이 때 마신 화이트 와인';   // v1 '집들이 때 마신 화이트 와인' 앞에 '지은이네'만 더함(README)
 const ANS = '배비치 소비뇽 블랑';
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -19,20 +23,20 @@ const seg = (t, t0, d) => clamp((t - t0) / d);
 const pulse = (t, t0, d0, t1, d1, ein = e2o, eout = e2io) => Math.min(ein(seg(t, t0, d0)), 1 - eout(seg(t, t1, d1)));
 
 /* ── 시각(초) ── */
-const THR = 0.5;                     // 실 한 가닥이 그려지는 시간(v1은 0.8~0.9초)
+const THR = { A: 0.7, B: 0.65, C: 0.7 };   // 실 한 가닥이 그려지는 시간(v1 0.9·0.8·0.9초, v2 0.5초)
 const T = {
-  type0: 0.7, cps: 11.5,             // 타자 시작, 초당 글자 수(띄어쓰기는 더 빠르게)
-  tap: 2.95, wave: 3.03, shim: 3.12, // 실타래 버튼(손은 0.75초 전부터 들어옴)
-  t1: 3.28, litJ: 3.6, hlJ: 3.86,
-  t2: 4.2, tokIn: 4.24, tokRide: 4.3, tokDur: 0.62, litP: 4.84, hlD: 4.92,
-  scan: 5.12, ocrbox: 5.5, hlL: 5.74,
-  t3: 6.02, sug: 6.44,
-  tapIn: 8.0,                        // 입력하기(추천 카드를 1초쯤 읽을 시간)
-  sel: 8.1, swap: 8.38,              // 검색어가 선택됐다가 '배비치 소비뇽 블랑'으로 바뀜
-  reset: 8.22,                       // 실·카드·형광펜이 걷힘
-  tapS: 8.98,                        // 검색 키
-  res: 9.1, mark: 9.72,              // 쇼핑 결과, 결과 속 이름에 형광펜
-  back: 12.2,                        // 처음 화면(빈 검색창)으로 0.75초, 12.95초부터 쉬는 모습
+  type0: 0.8, cps: 10,               // 타자 시작, 초당 글자 수(띄어쓰기는 더 빠르게)
+  tap: 3.55, wave: 3.65, shim: 3.75, // 실타래 버튼(손은 0.8초 전부터 들어옴)
+  t1: 4.09, litJ: 4.6, hlJ: 5.08,
+  t2: 5.63, tokIn: 5.7, tokRide: 5.77, tokDur: 0.8, litP: 6.52, hlD: 6.61,
+  scan: 7.01, ocrbox: 7.48, hlL: 7.82,
+  t3: 8.29, sug: 8.9,                // 버튼 → 추천 카드 5.35초(v1 7.2초, v2 3.5초)
+  tapIn: 10.85,                      // 입력하기(추천 카드를 1.5초쯤 읽을 시간)
+  sel: 10.98, swap: 11.33,           // 검색어가 선택됐다가 '배비치 소비뇽 블랑'으로 바뀜
+  reset: 11.13,                      // 실·카드·형광펜이 걷힘
+  tapS: 12.1,                        // 검색 키
+  res: 12.25, mark: 13.05,           // 쇼핑 결과, 결과 속 이름에 형광펜
+  back: 15.8,                        // 처음 화면(빈 검색창)으로 0.9초, 16.7초부터 쉬는 모습
 };
 // 타자 시각: 글자마다 조금씩 다르게(씨앗 고정이라 늘 같음)
 const TYPE_T = (() => {
@@ -111,8 +115,8 @@ const dOf = P => `M${P[0].x.toFixed(2)} ${P[0].y.toFixed(2)} C ${P[1].x.toFixed(
 /* ── 카드: 쉬는 자리 + 떠다님 + 켜질 때 살짝 커짐(가운데 기준) ── */
 const drift = (d, t) => ({ x: d.ax * Math.sin(TAU * d.kx * t / LOOP + d.px), y: d.ay * Math.sin(TAU * d.ky * t / LOOP + d.py) });
 const DJ = { ax: 5, kx: 1, px: 0.6, ay: 4, ky: 1, py: 2.1 }, DP = { ax: 4.5, kx: 1, px: 2.4, ay: 5, ky: 1, py: 0.3 };
-const litJ = t => pulse(t, T.litJ, 0.4, T.reset + 0.15, 0.6);
-const litP = t => pulse(t, T.litP, 0.4, T.reset + 0.25, 0.6);
+const litJ = t => pulse(t, T.litJ, 0.48, T.reset + 0.15, 0.7);
+const litP = t => pulse(t, T.litP, 0.48, T.reset + 0.25, 0.7);
 function cardBox(base, d, s, t) {        // 화면에서의 카드 상자
   const o = drift(d, t), w = base.w * s, h = base.h * s, cx = base.cx + o.x, cy = base.cy + o.y;
   return { l: cx - w / 2, t: cy - h / 2, r: cx + w / 2, b: cy + h / 2, w, h, cx, cy, s, ox: o.x, oy: o.y };
@@ -178,12 +182,12 @@ const pressAt = (t, tp) => t < tp - 0.06 ? 1 : t < tp + 0.03 ? lerp(1, 0.9, e2o(
 function handPose(t) {
   if (t < (T.tap + T.tapIn) / 2) {
     const P = { x: G.wv.cx + 3, y: G.wv.cy + 3 };
-    const ain = e3o(seg(t, T.tap - 0.75, 0.75)), aout = e2i(seg(t, T.tap + 0.38, 0.6)), off = (1 - ain) + aout;
+    const ain = e3o(seg(t, T.tap - 0.8, 0.8)), aout = e2i(seg(t, T.tap + 0.42, 0.62)), off = (1 - ain) + aout;
     return { x: P.x + 190 * off, y: P.y + 250 * off, vis: clamp(ain * 1.4) * (1 - aout), press: pressAt(t, T.tap) };
   }
   const P2 = { x: G.btn.cx + 12, y: G.btn.cy + 4 }, P3 = { x: G.srch.cx + 2, y: G.srch.cy + 2 };
-  const ain = e3o(seg(t, T.tapIn - 0.7, 0.7)), aout = e2i(seg(t, T.tapS + 0.35, 0.6)), off = (1 - ain) + aout;
-  const mv = e2io(seg(t, T.tapIn + 0.3, T.tapS - T.tapIn - 0.36));
+  const ain = e3o(seg(t, T.tapIn - 0.78, 0.78)), aout = e2i(seg(t, T.tapS + 0.4, 0.62)), off = (1 - ain) + aout;
+  const mv = e2io(seg(t, T.tapIn + 0.36, T.tapS - T.tapIn - 0.43));
   const x = lerp(P2.x, P3.x, mv), y = lerp(P2.y, P3.y, mv) - 36 * Math.sin(Math.PI * mv);   // 살짝 들어 올려 옮김
   return { x: x + 190 * off, y: y + 250 * off, vis: clamp(ain * 1.4) * (1 - aout), press: Math.min(pressAt(t, T.tapIn), pressAt(t, T.tapS)) };
 }
@@ -217,6 +221,7 @@ async function build() {
   { const q = $('#q'), tx = $('.gbox .tx'); q.textContent = ANS;
     Object.assign($('#gsweep').style, { left: `${tx.offsetLeft + q.offsetLeft}px`, width: `${q.offsetWidth + 2}px` }); q.textContent = ''; }
   layoutChips();
+  $('#world').style.transform = `scale(${WS})`;       // 재고 배치한 뒤에 줄임(안쪽 좌표는 그대로)
   render(0);
   return true;
 }
@@ -232,7 +237,7 @@ function qState(t) {
     return { html: esc([...QTEXT].slice(0, n).join('')), caret: solid || blink(t - TYPE_END - 0.45) };
   }
   if (t < T.swap) return { html: `<span class="sel">${esc(QTEXT)}</span>`, caret: false };
-  if (t < T.back + 0.3) return { html: esc(ANS), caret: t < T.tapS + 0.05 };
+  if (t < T.back + 0.36) return { html: esc(ANS), caret: t < T.tapS + 0.05 };
   return { html: '', caret: blink(t) };
 }
 let lastQ = null;
@@ -248,7 +253,7 @@ function render(t) {
 
   // 누른 뒤 물결(버튼에서 화면 끝까지)
   const wo = { x: G.wv.cx, y: G.wv.cy };
-  const waveR = k => { const u = seg(t, T.wave + k * 0.24, 1.45); return { u, r: 1950 * e2o(u) }; };
+  const waveR = k => { const u = seg(t, T.wave + k * 0.26, 1.58); return { u, r: 1950 * e2o(u) }; };
   [['#wv1', 0], ['#wv2', 1]].forEach(([id, k]) => {
     const { u, r } = waveR(k), c = $(id);
     c.setAttribute('cx', wo.x); c.setAttribute('cy', wo.y); c.setAttribute('r', r.toFixed(1));
@@ -281,22 +286,22 @@ function render(t) {
 
   // 형광펜(같은 단서) — 켜질 때 왼쪽에서 오른쪽으로, 걷힐 때 반대로
   const hl = (el, v) => { el.style.setProperty('--w', `${(100 * v).toFixed(1)}%`); el.style.color = v > 0.02 ? '#5B3FE6' : ''; };
-  hl($('#hlJ'), pulse(t, T.hlJ, 0.4, T.reset, 0.4, e2io, e2io));
-  hl($('#hlD'), pulse(t, T.hlD, 0.38, T.reset + 0.05, 0.4, e2io, e2io));
-  hl($('#hlL'), pulse(t, T.hlL, 0.4, T.reset + 0.1, 0.4, e2io, e2io));
+  hl($('#hlJ'), pulse(t, T.hlJ, 0.48, T.reset, 0.45, e2io, e2io));
+  hl($('#hlD'), pulse(t, T.hlD, 0.46, T.reset + 0.05, 0.45, e2io, e2io));
+  hl($('#hlL'), pulse(t, T.hlL, 0.48, T.reset + 0.1, 0.45, e2io, e2io));
 
   // 사진 라벨 읽기: 훑는 빛 → 라벨 테두리
-  const su = seg(t, T.scan, 0.5);
+  const su = seg(t, T.scan, 0.62);
   $('#scan').style.opacity = (su > 0 && su < 1) ? String(Math.sin(Math.PI * su)) : '0';
   $('#scan').style.transform = `translateY(${lerp(-64, 202, e2io(su)).toFixed(1)}px)`;
-  const ob = pulse(t, T.ocrbox, 0.4, T.reset + 0.1, 0.4, eBack, e2io);
+  const ob = pulse(t, T.ocrbox, 0.42, T.reset + 0.1, 0.45, eBack, e2io);
   $('#ocrbox').style.opacity = clamp(ob).toFixed(3);
-  $('#ocrbox').style.transform = `scale(${lerp(1.25, 1, clamp(seg(t, T.ocrbox, 0.4) ? eBack(seg(t, T.ocrbox, 0.4)) : 0)).toFixed(3)})`;
+  $('#ocrbox').style.transform = `scale(${lerp(1.25, 1, clamp(seg(t, T.ocrbox, 0.42) ? eBack(seg(t, T.ocrbox, 0.42)) : 0)).toFixed(3)})`;
 
   // 실 세 가닥: 그려지고(머리가 나아감) → 입력하기 뒤 함께 옅어짐
-  const fade = 1 - e2io(seg(t, T.reset, 0.6));
-  [['#tA', th.A, T.t1], ['#tB', th.B, T.t2], ['#tC', th.C, T.t3]].forEach(([id, P, t0]) => {
-    const p = e2io(seg(t, t0, THR)), d_ = dOf(P);
+  const fade = 1 - e2io(seg(t, T.reset, 0.7));
+  [['#tA', th.A, T.t1, THR.A], ['#tB', th.B, T.t2, THR.B], ['#tC', th.C, T.t3, THR.C]].forEach(([id, P, t0, d]) => {
+    const p = e2io(seg(t, t0, d)), d_ = dOf(P);
     $$(`${id} path`).forEach(pa => { pa.setAttribute('d', d_); pa.style.strokeDashoffset = (1 - p).toFixed(4); });
     $(id).style.opacity = p > 0.002 ? fade.toFixed(3) : '0';
   });
@@ -304,7 +309,7 @@ function render(t) {
   // 단서 표 '3/15 (일) 저녁': 지은 카톡의 '이번 일요일 6시'에서 나와 실을 타고 그날 사진의 날짜로
   {
     const tok = $('#tok');
-    const a = clamp(eBack(seg(t, T.tokIn, 0.26))), out = e2i(seg(t, T.tokRide + T.tokDur - 0.05, 0.22));
+    const a = clamp(eBack(seg(t, T.tokIn, 0.28))), out = e2i(seg(t, T.tokRide + T.tokDur - 0.05, 0.24));
     const vis = a * (1 - out);
     if (vis <= 0.001) tok.style.opacity = '0';
     else {
@@ -320,18 +325,18 @@ function render(t) {
   }
 
   // 휴대폰: 버튼 누름 → 버튼이 보라로, 빛·물결, 휴대폰 테두리 빛, 도구줄을 지나는 빛
-  const bt = pulse(t, T.tap, 0.25, T.tap + 1.1, 0.45);
+  const bt = pulse(t, T.tap, 0.25, T.tap + 1.25, 0.45);
   $('#kb .wv').style.backgroundColor = `rgb(${Math.round(lerp(230, 107, bt))}, ${Math.round(lerp(222, 78, bt))}, ${Math.round(lerp(255, 255, bt))})`;
   $('#kb .wv').style.boxShadow = bt > 0.01 ? `0 6px 16px rgba(107,78,255,${(0.55 * bt).toFixed(3)})` : 'none';
   $('#kb .wv img.lit').style.opacity = bt.toFixed(3);
   $('#kb .wv img:not(.lit)').style.opacity = (1 - bt).toFixed(3);
-  const gl = pulse(t, T.tap, 0.4, T.tap + 0.75, 0.5);
+  const gl = pulse(t, T.tap, 0.42, T.tap + 0.82, 0.52);
   $('#kb .wvfx .glow').style.opacity = gl.toFixed(3);
-  $('#kb .wvfx .glow').style.transform = `scale(${lerp(0.2, 1, e2o(seg(t, T.tap, 0.4))).toFixed(3)})`;
-  $$('#kb .wvfx .rg').forEach((r, k) => { const u = seg(t, T.tap + 0.05 + 0.26 * k, 0.9); r.style.opacity = (u > 0 && u < 1) ? (0.9 * (1 - u)).toFixed(3) : '0'; r.style.transform = `scale(${lerp(1, 3.4, e2o(u)).toFixed(3)})`; });
-  const eg = pulse(t, T.tap + 0.05, 0.4, T.tap + 0.75, 0.5);
+  $('#kb .wvfx .glow').style.transform = `scale(${lerp(0.2, 1, e2o(seg(t, T.tap, 0.42))).toFixed(3)})`;
+  $$('#kb .wvfx .rg').forEach((r, k) => { const u = seg(t, T.tap + 0.05 + 0.28 * k, 0.95); r.style.opacity = (u > 0 && u < 1) ? (0.9 * (1 - u)).toFixed(3) : '0'; r.style.transform = `scale(${lerp(1, 3.4, e2o(u)).toFixed(3)})`; });
+  const eg = pulse(t, T.tap + 0.05, 0.42, T.tap + 0.8, 0.5);
   $('#phone .frame').style.boxShadow = `0 60px 110px rgba(52,30,130,.26), 0 18px 34px rgba(52,30,130,.14), 0 0 ${Math.round(52 * eg)}px ${(8 * eg).toFixed(1)}px rgba(139,104,245,${(0.55 * eg).toFixed(3)})`;
-  const sh = seg(t, T.shim, 0.5);
+  const sh = seg(t, T.shim, 0.52);
   $('#kb .shim').style.opacity = (sh > 0 && sh < 1) ? String(Math.sin(Math.PI * sh)) : '0';
   $('#kb .shim').style.transform = `translateX(${lerp(-40, 440, e2io(sh)).toFixed(1)}px)`;
 
@@ -339,16 +344,16 @@ function render(t) {
   const qs = qState(t);
   if (qs.html !== lastQ) { $('#q').innerHTML = qs.html; lastQ = qs.html; }
   $('#caret').style.opacity = qs.caret ? '1' : '0';
-  const sw = seg(t, T.swap, 0.45);
+  const sw = seg(t, T.swap, 0.5);
   $('#gsweep').style.transform = `scaleX(${e2o(sw).toFixed(4)})`;
-  $('#gsweep').style.opacity = (sw > 0 ? 1 - e2io(seg(t, T.swap + 0.5, 0.22)) : 0).toFixed(3);
+  $('#gsweep').style.opacity = (sw > 0 ? 1 - e2io(seg(t, T.swap + 0.6, 0.25)) : 0).toFixed(3);
 
   // 추천 카드(휴대폰 안): 떠오름 → 입력하기 누르면 걷힘
-  const sg = pulse(t, T.sug, 0.45, T.tapIn + 0.12, 0.3, e3o, e2io);
+  const sg = pulse(t, T.sug, 0.5, T.tapIn + 0.14, 0.35, e3o, e2io);
   const sgEl = $('#sug');
   sgEl.style.opacity = sg.toFixed(3);
   sgEl.style.transform = `translateY(${((1 - sg) * 14).toFixed(2)}px) scale(${lerp(0.96, 1, sg).toFixed(4)})`;
-  const rp = seg(t, T.sug + 0.1, 1.0);
+  const rp = seg(t, T.sug + 0.1, 1.05);
   sgEl.style.boxShadow = `0 16px 34px rgba(84,56,190,.20), 0 0 0 1.5px #D9CBFF inset, 0 0 0 ${(rp > 0 && rp < 1 ? 26 * e2o(rp) : 0).toFixed(1)}px rgba(166,124,242,${(rp > 0 && rp < 1 ? 0.55 * (1 - rp) : 0).toFixed(3)})`;
   const bp = pulse(t, T.tapIn - 0.04, 0.08, T.tapIn + 0.08, 0.25);
   $('#sug .b').style.transform = `scale(${(1 - 0.04 * bp).toFixed(4)})`;
@@ -358,26 +363,26 @@ function render(t) {
   const kp = pulse(t, T.tapS - 0.04, 0.08, T.tapS + 0.08, 0.25), kr = seg(t, T.tapS, 0.6);
   $('#kb .srch').style.background = `rgb(${Math.round(lerp(47, 31, kp))}, ${Math.round(lerp(107, 85, kp))}, ${Math.round(lerp(255, 224, kp))})`;
   $('#kb .srch').style.boxShadow = (kr > 0 && kr < 1) ? `0 0 0 ${(12 * e2o(kr)).toFixed(2)}px rgba(47,107,255,${(0.55 * (1 - kr)).toFixed(3)})` : 'none';
-  const ld = seg(t, T.tapS + 0.05, 0.4);
+  const ld = seg(t, T.tapS + 0.05, 0.45);
   $('#gload').style.transform = `scaleX(${E('power1.inOut')(ld).toFixed(4)})`;
-  $('#gload').style.opacity = (ld > 0 ? 1 - seg(t, T.tapS + 0.45, 0.15) : 0).toFixed(3);
-  const inR = e3o(seg(t, T.res, 0.42));                    // 0: 처음 화면, 1: 결과 화면
-  const out1 = e2io(seg(t, T.back, 0.28));                 // 결과 화면이 걷힘
-  const in1 = e2o(seg(t, T.back + 0.3, 0.42));             // 처음 화면이 다시 나타남
-  const resOn = t >= T.res && t < T.back + 0.3;
-  const kbDown = t < T.res ? 0 : t < T.back + 0.28 ? inR : 1 - e3o(seg(t, T.back + 0.28, 0.45));   // 1이면 키보드가 화면 아래로
+  $('#gload').style.opacity = (ld > 0 ? 1 - seg(t, T.tapS + 0.5, 0.15) : 0).toFixed(3);
+  const inR = e3o(seg(t, T.res, 0.45));                    // 0: 처음 화면, 1: 결과 화면
+  const out1 = e2io(seg(t, T.back, 0.34));                 // 결과 화면이 걷힘
+  const in1 = e2o(seg(t, T.back + 0.36, 0.55));             // 처음 화면이 다시 나타남
+  const resOn = t >= T.res && t < T.back + 0.36;
+  const kbDown = t < T.res ? 0 : t < T.back + 0.34 ? inR : 1 - e3o(seg(t, T.back + 0.34, 0.55));   // 1이면 키보드가 화면 아래로
   $('#kb').style.transform = `translateY(${(340 * kbDown).toFixed(2)}px)`;
   const homeOp = t < T.res ? 1 : resOn ? 1 - clamp(inR * 2) : in1;
   $('.glogo').style.opacity = homeOp.toFixed(3); $('.gtop').style.opacity = homeOp.toFixed(3);
   $('.gbox').style.transform = `translateY(${(resOn ? -178 * inR : 0).toFixed(2)}px)`;
-  $('.gbox').style.opacity = (t < T.back ? 1 : t < T.back + 0.3 ? 1 - out1 : in1).toFixed(3);
+  $('.gbox').style.opacity = (t < T.back ? 1 : t < T.back + 0.36 ? 1 - out1 : in1).toFixed(3);
   $('#gres').style.opacity = (resOn ? 1 - out1 : 0).toFixed(3);
   $$('#gres > *').forEach((el, k) => {
-    const u = eExpo(seg(t, T.res + 0.12 + 0.07 * k, 0.5));
+    const u = eExpo(seg(t, T.res + 0.14 + 0.08 * k, 0.55));
     el.style.opacity = (resOn ? u : 0).toFixed(3);
     el.style.transform = `translateY(${((1 - u) * 14).toFixed(2)}px)`;
   });
-  $$('#gres .hl').forEach((el, k) => hl(el, resOn ? e2io(seg(t, T.mark + 0.05 * k, 0.4)) : 0));
+  $$('#gres .hl').forEach((el, k) => hl(el, resOn ? e2io(seg(t, T.mark + 0.05 * k, 0.45)) : 0));
 
   // 손
   {
@@ -402,9 +407,13 @@ window.__probe = t => {
   return {
     chips: chips.map(c => ({ i: c.i, title: c.title, layer: c.layer, op: +c.el.style.opacity, r: box(c.el) })),
     cJ: box($('#cJ')), cP: box($('#cP')), frame: box($('#phone .frame')), sug: box($('#sug')), hand: box($('#hand')), handOp: +$('#hand').style.opacity,
-    wave: ['#wv1', '#wv2'].map(s => ({ r: +$(s).getAttribute('r'), op: +$(s).style.opacity })), waveO: { x: G.wv.cx, y: G.wv.cy },
-    lanes: [th.A, th.B, th.C].map(P => { const pts = []; for (let i = 0; i <= 40; i++) pts.push(bAt(P, i / 40)); return pts; }),
-    ends: { A: [th.A[0], th.A[3]], B: [th.B[0], th.B[3]], C: [th.C[0], th.C[3]] },
+    wave: ['#wv1', '#wv2'].map(s => ({ r: +$(s).getAttribute('r') * WS, op: +$(s).style.opacity })), waveO: toScreen({ x: G.wv.cx, y: G.wv.cy }),
+    lanes: [th.A, th.B, th.C].map(P => { const pts = []; for (let i = 0; i <= 40; i++) pts.push(toScreen(bAt(P, i / 40))); return pts; }),
+    ends: { A: [th.A[0], th.A[3]].map(toScreen), B: [th.B[0], th.B[3]].map(toScreen), C: [th.C[0], th.C[3]].map(toScreen) },
+    edges: (() => {   // 화면 가장자리까지 남은 여백(보이는 조각·카드·휴대폰)
+      const bs = [...chips.filter(c => +c.el.style.opacity > 0.01).map(c => box(c.el)), box($('#cJ')), box($('#cP')), box($('#phone .frame'))];
+      return { top: Math.min(...bs.map(b => b[1])), bottom: 1080 - Math.max(...bs.map(b => b[3])), right: 1920 - Math.max(...bs.map(b => b[2])), phoneRight: 1920 - box($('#phone .frame'))[2], phoneTop: box($('#phone .frame'))[1], phoneBottom: 1080 - box($('#phone .frame'))[3] };
+    })(),
     drawn: ['#tA', '#tB', '#tC'].map(id => +getComputedStyle($(id)).opacity),
     hlLines: ['#hlJ', '#hlD', '#hlL', '#q', ...$$('#gres .hl')].map(s => (typeof s === 'string' ? $(s) : s).getClientRects().length),
     hl: ['#hlJ', '#hlD', '#hlL'].map(s => ({ r: box($(s)), w: $(s).style.getPropertyValue('--w') })),
