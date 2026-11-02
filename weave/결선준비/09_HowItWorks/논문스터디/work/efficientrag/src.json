@@ -1,0 +1,503 @@
+{
+ "title": "EfficientRAG: Efficient Retriever for Multi-Hop Question Answering",
+ "authors": "Ziyuan Zhuang Email: ziyuan.zhuang@smail.nju.edu.cn Zhiyang Zhang Sitao Cheng Affiliation: State Key Laboratory for Novel Software Technology, Nanjing University Fangkai Yang Jia Liu Affiliation: State Key Laboratory for Novel Software Technology, Nanjing University Shujian Huang Affiliation: State Key Laboratory for Novel Software Technology, Nanjing University Qingwei Lin Affiliation: Microsoft Saravan Rajmohan Affiliation: Microsoft Dongmei Zhang Affiliation: Microsoft Qi Zhang Affiliation: Microsoft",
+ "abstract": [
+  {
+   "id": "b001",
+   "type": "p",
+   "html": "Retrieval-augmented generation (RAG) methods encounter difficulties when addressing complex questions like multi-hop queries. While iterative retrieval methods improve performance by gathering additional information, current approaches often rely on multiple calls of large language models (LLMs). In this paper, we introduce EfficientRAG, an efficient retriever for multi-hop question answering. EfficientRAG iteratively generates new queries without the need for LLM calls at each iteration and filters out irrelevant information. Experimental results demonstrate that EfficientRAG surpasses existing RAG methods on three open-domain multi-hop question-answering datasets. The code is available in <a href=\"https://github.com/NIL-zhuang/EfficientRAG-official\">aka.ms/efficientrag</a>."
+  }
+ ],
+ "blocks": [
+  {
+   "id": "b002",
+   "type": "h2",
+   "html": "1 Introduction"
+  },
+  {
+   "id": "b003",
+   "type": "p",
+   "html": "Large-language models (LLMs) have shown remarkable performance in numerous applications and tasks <span class=\"cite\">OpenAI (2023) ; Jiang et al. (2023a) ; Touvron et al. (2023b)</span>. However, LLMs lack knowledge underrepresented in their training data, especially in domain-specific settings, and still face the issues of hallucinations <span class=\"cite\">Zhang et al. (2023) ; Huang et al. (2023) ; Yang et al. (2023)</span>. Retrieval-augmented generation (RAG) techniques <span class=\"cite\">Lewis et al. (2020) ; Gao et al. (2023)</span> have been widely adapted to retrieve knowledge from external resources to ground the generated responses. Previous RAG methods often adapt one-round retrieval, <i>e.g.</i>, only use the user query or question as the input to retrieve knowledge <span class=\"cite\">Guu et al. (2020) ; Borgeaud et al. (2022) ; Izacard et al. (2023) ; Shi et al. (2023)</span>. Such one-round RAG is capable of answering questions which clearly state all the needed information in the input query <span class=\"cite\">Thorne et al. (2018) ; Trischler et al. (2017) ; Rajpurkar et al. (2016)</span>, such as one-hop question, <i>e.g.</i>, <i>“what is Newton’s third law of motion?”</i>. However, one-round RAG methods could fail in complex questions where more information is required beyond the first-round retrieved information, <i>e.g.</i>, multi-hop questions <span class=\"cite\">Yang et al. (2018a) ; Trivedi et al. (2022a) ; Ho et al. (2020b)</span>. In order to deal with complex multi-hop questions, recent works propose to obtain required information through multi-round retrievals or reasonings, such as rewriting or generating queries for the following multi-round retrievals <span class=\"cite\">Khattab et al. (2022) ; Ma et al. (2023) ; Shao et al. (2023) ; Jiang et al. (2023b)</span>, interleaving multiple retrieval and reasoning steps <span class=\"cite\">Trivedi et al. (2023)</span>, multi-rounds of self-asking <span class=\"cite\">Press et al. (2023)</span>. However, such iterative retrieval approaches have the following limitations: (1) they require multiple LLM calls concerning rewriting or generating new queries for the next round of retrieval, thus increasing the latency and cost. (2) they require dedicated prompting and few-shot examples that might need updating across different scenarios."
+  },
+  {
+   "id": "b004",
+   "type": "p",
+   "html": "In this paper, we are inspired by the intuition that the types of relations in multi-hop questions are limited, or significantly fewer compared to the number of entities. As proved in <span class=\"cite\">Zhu et al. (2023)</span> that small models have a certain ability of reasoning, we propose that identifying relations and their associated entities from retrieved information can be effectively managed by small models instead of LLMs. Thus, we propose EfficientRAG consists of a Labeler and a Filter to iteratively generate new queries for retrieval and in the meanwhile keep the most relevant retrieved information, enhancing efficiency compared to other RAG methods."
+  },
+  {
+   "id": "b005",
+   "type": "h2",
+   "html": "2 Empirical Study"
+  },
+  {
+   "id": "b006",
+   "type": "h3",
+   "html": "2.1 Capability of LLM generator"
+  },
+  {
+   "id": "b007",
+   "type": "p",
+   "html": "In this section, we conducted an empirical study to assess how well an LLM-based generator performs with different levels of retrieved information. We test on three settings: direct prompt (no retrieved chunks), oracle chunks (oracle chunks as the context), and mixed chunks (both oracle and irrelevant chunks as the context) on three datasets, <i>i.e.</i>, HotpotQA <span class=\"cite\">Yang et al. (2018b)</span>, 2Wiki-multihop (2WikiMQA) <span class=\"cite\">Ho et al. (2020a)</span> and MuSiQue <span class=\"cite\">Trivedi et al. (2022b)</span>. The generator model includes GPT-3.5 <span class=\"cite\">OpenAI (2022)</span>, GPT-4 <span class=\"cite\">OpenAI (2023)</span> with 1106-preview version, and Llama-3-8B<sup class=\"fnm\">1</sup> <span class=\"cite\">Touvron et al. (2023a)</span>. We evaluate the model answer with accuracy metric by GPT-3.5, the prompt can be found in Appendix B.1. As illustrated in Figure  1, retrieval proves beneficial, with both oracle and mixture settings outperforming the direct answering approach. Nonetheless, the presence of irrelevant chunks continues to challenge the LLM generator, underscoring the need for more precise information retrieval."
+  },
+  {
+   "id": "b008",
+   "type": "fn",
+   "html": "https://llama.meta.com/llama3/",
+   "mark": "1"
+  },
+  {
+   "id": "b009",
+   "type": "fig",
+   "html": "Figure 1: The performance with varying chunks settings over 2WikiMQA dataset with GPT-3.5/GPT-4/Llama3-8B as the generator.",
+   "img": [
+    {
+     "src": "assets/efficientrag/fig01.svg",
+     "w": 191
+    }
+   ]
+  },
+  {
+   "id": "b010",
+   "type": "h3",
+   "html": "2.2 Retrieve with Query Decomposition"
+  },
+  {
+   "id": "b011",
+   "type": "p",
+   "html": "It is a common practice to use LLMs for query decomposition when facing complex multi-hop questions <span class=\"cite\">Gao et al. (2023)</span>. We conduct another empirical study to check how query decomposition approaches impact the retrieval stage. As shown in Figure 2, the number of oracle chunks retrieved by one-time decomposition (LLM Decompose, detailed in Table 11) outperforms the Direct retrieval for the original query. At a similar number of chunks, iterative decomposition (EfficientRAG Decompose) achieves higher recall. When retrieving approximately 20 chunks, the Recall achieved by EfficientRAG Decompose has comparable performance with the LLM Decompose when retrieving around 200 chunks, thus demonstrating the efficiency of EfficientRAG Decompose. All retrievers used the contriever-msmarco <span class=\"cite\">Izacard et al. (2022)</span> setup, with chunk retrievals configured as 1/3/5/10/20/30/50/100, and the LLM endpoint is gpt35-turbo-1106."
+  },
+  {
+   "id": "b012",
+   "type": "fig",
+   "html": "Figure 2: Recall of retrieve efficiency over three retrieval strategies on MuSiQue dataset. The x-axis is log-scaled. Each point on different lines represents the same number of retrieved chunks.",
+   "img": [
+    {
+     "src": "assets/efficientrag/fig02.svg",
+     "w": 215
+    }
+   ]
+  },
+  {
+   "id": "b013",
+   "type": "h2",
+   "html": "3 Methodology"
+  },
+  {
+   "id": "b014",
+   "type": "fig",
+   "html": "Figure 3: EfficientRAG framework operates within the iterative RAG system. Initially, EfficientRAG retrieves relevant chunks from the knowledge base, tagging each as either &lt;Terminate&gt; or &lt;Continue&gt;, and annotates preserved tokens <i>\"KGOT in the Dimond Center\"</i> from the &lt;Continue&gt; chunks. The Filter then processes the concatenation of the original question and the previously annotated tokens, <i>\"Q: How large is the shopping mall where KGOT radio station has its studios? Info: KGOT, in the Dimond Center\"</i>, and annotates the next-hop query tokens <i>\"How large is Dimond Center?\"</i>. This iterative process continues until all chunks are tagged &lt;Terminate&gt; or the maximum number of iterations is reached.",
+   "img": [
+    {
+     "src": "assets/efficientrag/fig03.png",
+     "w": 429
+    }
+   ]
+  },
+  {
+   "id": "b015",
+   "type": "h3",
+   "html": "3.1 EfficientRAG Framework"
+  },
+  {
+   "id": "b016",
+   "type": "p",
+   "html": "In this section, we introduce EfficientRAG , a plug-and-play approach designed to efficiently retrieve relevant information with multiple retrieval rounds to enrich the retrieved information and reduce irrelevant information, then help improve the quality and accuracy of answers."
+  },
+  {
+   "id": "b017",
+   "type": "p",
+   "html": "EfficientRAG  consists of two lightweight components: the Labeler &amp; Tagger and the Filter. These components share the same model structure, with the Labeler &amp; Tagger<sup class=\"fnm\">2</sup> producing outputs from separate heads within the same model and the filter’s output comes from another model. Both the Labeler and the Filter function as token-level classifiers, classifying tokens as either true or false. Figure 3 shows that how EfficientRAG  fits into traditional RAG systems. Given a query, the retriever obtains relevant chunks from the database. Then the labeler module annotates a sequence of tokens in this document representing the useful information that could (partially) answer the query. The tagger module then tags the chunk, indicating whether the retrieved chunk is helpful or irrelevant. If the tag indicates there needs more information to answer the query, <i>i.e.</i>, tagged as &lt;Continue&gt;, we will add this chunk to a candidate pool, which will be fed to the LLM-based generator to have the final answer. Otherwise, if the document is labeled useless or irrelevant, we stop searching for the successor branches from this query. The filter module takes both the labeled tokens and the current query to construct a new query for the next round of retrieval. It is done by replacing the unknown part of the query with labeled tokens (useful information)."
+  },
+  {
+   "id": "b018",
+   "type": "fn",
+   "html": "We use the term Labeler as the representation.",
+   "mark": "2"
+  },
+  {
+   "id": "b019",
+   "type": "p",
+   "html": "Our approach efficiently generates new queries for subsequent retrieval rounds, aiming to retrieve information beyond the scope of the initial query. Once our approach gets enough information to answer the initial question, it stops and passes all this information to the final generator to get the final response. Leveraging our efficient RAG approach eliminates the need for multiple LLM calls for query generation, resulting in improved performance when tackling complex queries."
+  },
+  {
+   "id": "b020",
+   "type": "h3",
+   "html": "3.2 Synthetic Data Construction"
+  },
+  {
+   "id": "b021",
+   "type": "p",
+   "html": "We utilize LLM to synthesize training data for the Labeler and Filter. The process consists of multi-hop question decomposition, token labeling, next-hop question filtering, and negative sampling. Synthetic data is detailed in Table 1."
+  },
+  {
+   "id": "b022",
+   "type": "p",
+   "html": "<b>Multi-hop question decomposition.</b> Given a multi-hop question and relevant chunks, we first prompt the LLM to decompose the original question into several single-hop questions. Each single-hop question corresponds to a chunk. Then, we ask the LLM to parse the dependency for the sub-questions."
+  },
+  {
+   "id": "b023",
+   "type": "p",
+   "html": "<b>Token Labeling.</b> For each sub-question and corresponding chunk, we prompt the LLM to label important words in the chunk pertinent to the sub-question answering. We annotate each word in the chunk with a binary label to determine if it is important and should be preserved by EfficientRAG Labeler. We use the SpaCy toolkit<sup class=\"fnm\">3</sup> following  <span class=\"cite\">Pan et al. (2024)</span>."
+  },
+  {
+   "id": "b024",
+   "type": "fn",
+   "html": "https://spacy.io/",
+   "mark": "3"
+  },
+  {
+   "id": "b025",
+   "type": "p",
+   "html": "<b>Next-hop question filtering.</b> Given a single-hop question and the labeled tokens from its dependent questions, we prompt the LLM to generate a next-hop question, which is ideally the next query for retrieval. We extract the next-hop question tokens same as the Token Labeling procedure."
+  },
+  {
+   "id": "b026",
+   "type": "p",
+   "html": "<b>Negative Sampling.</b> With each filtered next-hop question, we retrieve the most similar but not relevant chunk as the hard negative chunk. These negative chunks will be tagged &lt;Terminate&gt; while other relevant chunks are tagged &lt;Continue&gt;."
+  },
+  {
+   "id": "b027",
+   "type": "tab",
+   "html": "Table 1: Amount of synthesized training data for different datasets.",
+   "table": "<table><tr><th>Dataset</th><th>HotpotQA</th><th>MuSiQue</th><th>2WikiMQA</th><td></td></tr><tr><th>Labeler</th><td>357k</td><td>93k</td><td>70k</td><td></td></tr><tr><th>Filter</th><td>73k</td><td>25k</td><td>13k</td><td></td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b028",
+   "type": "tab",
+   "html": "Table 2: Results on retrieval performance. Baselines are implemented from the source code. Bold and underlined fonts denote the best and second-best results respectively. EfficientRAG demonstrates comparable recall while retrieving the fewest number of chunks.",
+   "table": "<table><tr><th><b>Method/Dataset</b></th><th colspan=\"2\"><b>HotpotQA</b></th><th colspan=\"2\"><b>MuSiQue</b></th><th colspan=\"2\"><b>2WikiMQA</b></th></tr><tr><th></th><th><b>Recall@K</b></th><th><b>K</b></th><th><b>Recall@K</b></th><th><b>K</b></th><th><b>Recall@K</b></th><th><b>K</b></th></tr><tr><th><b>Direct-R@10</b></th><td>70.52</td><td>10.00</td><td>50.86</td><td>10.00</td><td>61.58</td><td>10.00</td></tr><tr><th><b>Direct-R@20</b></th><td>74.87</td><td>20.00</td><td>57.12</td><td>20.00</td><td>65.24</td><td>20.00</td></tr><tr><th><b>Direct-R@30</b></th><td>77.05</td><td>30.00</td><td>60.67</td><td>30.00</td><td>66.91</td><td>30.00</td></tr><tr><th><b>Decompose-R</b></th><td>74.38</td><td>21.31</td><td><b>67.23</b></td><td>19.74</td><td>71.02</td><td>21.24</td></tr><tr><th><b>Iter-RetGen iter2</b></th><td>81.69</td><td>14.44</td><td>57.74</td><td>14.82</td><td>73.80</td><td>14.95</td></tr><tr><th><b>Iter-RetGen iter3</b></th><td><b>83.05</b></td><td>16.42</td><td>58.26</td><td>17.19</td><td>74.29</td><td>17.32</td></tr><tr><th><b>SelfASK</b></th><td>73.42</td><td>35.27</td><td>60.43</td><td>32.36</td><td><b>88.90</b></td><td>33.68</td></tr><tr><th><b>EfficientRAG</b></th><td>81.84</td><td><b>6.41</b></td><td>49.51</td><td><b>6.09</b></td><td>84.08</td><td><b>3.69</b></td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b029",
+   "type": "tab",
+   "html": "Table 3: Results on end-to-end question answering performance across three datasets. The highest accuracy (Acc) values are highlighted in bold, while the second-highest are underlined. EfficientRAG exhibits promising high accuracy, comparable to that of the LLM-based baselines.",
+   "table": "<table><tr><th><b>Method/Dataset</b></th><th colspan=\"3\"><b>HotpotQA</b></th><th colspan=\"3\"><b>MuSiQue</b></th><th colspan=\"3\"><b>2WikiMQA</b></th></tr><tr><th></th><th><b>EM</b></th><th><b>F1</b></th><th><b>Acc</b></th><th><b>EM</b></th><th><b>F1</b></th><th><b>Acc</b></th><th><b>EM</b></th><th><b>F1</b></th><th><b>Acc</b></th></tr><tr><th><b>Direct</b></th><td>22.87</td><td>26.94</td><td>25.79</td><td>5.59</td><td>8.76</td><td>5.51</td><td>27.33</td><td>31.11</td><td>28.67</td></tr><tr><th><b>CoT</b></th><td>27.99</td><td>34.05</td><td>30.53</td><td>10.16</td><td>13.85</td><td>9.21</td><td>29.25</td><td>35.14</td><td>31.71</td></tr><tr><th><b>Direct-R@10</b></th><td>38.24</td><td>44.55</td><td>44.56</td><td>13.39</td><td>18.14</td><td>17.12</td><td>26.18</td><td>31.88</td><td>32.70</td></tr><tr><th><b>Decompose-R</b></th><td>36.15</td><td>42.68</td><td>46.31</td><td>12.59</td><td>19.25</td><td>19.53</td><td>25.22</td><td>31.44</td><td>32.53</td></tr><tr><th><b>Iter-RetGen iter2</b></th><td>55.45</td><td>59.47</td><td><b>59.29</b></td><td>26.95</td><td>29.15</td><td>26.28</td><td>43.85</td><td>49.96</td><td>49.22</td></tr><tr><th><b>Iter-RetGen iter3</b></th><td>56.76</td><td>60.89</td><td>57.56</td><td>28.20</td><td>30.31</td><td>25.31</td><td>43.07</td><td>49.83</td><td>46.59</td></tr><tr><th><b>SelfASK</b></th><td>33.58</td><td>39.10</td><td>42.36</td><td>24.56</td><td>29.22</td><td><b>26.97</b></td><td>47.56</td><td>54.84</td><td><b>55.16</b></td></tr><tr><th><b>EfficientRAG</b></th><td>50.59</td><td>57.93</td><td>57.86</td><td>16.44</td><td>21.18</td><td>20.00</td><td>44.18</td><td>51.64</td><td>53.41</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b030",
+   "type": "h3",
+   "html": "3.3 Training"
+  },
+  {
+   "id": "b031",
+   "type": "p",
+   "html": "We train EfficientRAG Labeler for two tasks, token labeling and chunk filtering, as they both take in the same input. We use an auto-encoder language model as an encoder to derive embeddings for each token of concatenated sequence \\(\\text{query},\\text{chunk}\\). Subsequently, we use one fully connected layer to project the token embedding into a 2-dimensional space, indicating \"useful token\" and \"useless token\". Another fully connected layer is adapted to project the average pooling of the sequence embedding into a 2-dimensional space, representing the chunk tag &lt;Continue&gt; and &lt;Terminate&gt;. We train EfficientRAGFilter similarly, while its input sequence is the concatenation of query and labeled tokens. The Filter extracts words and concatenates them to formulate the next-hop query."
+  },
+  {
+   "id": "b032",
+   "type": "h2",
+   "html": "4 Experiments"
+  },
+  {
+   "id": "b033",
+   "type": "h3",
+   "html": "4.1 End2end QA performance"
+  },
+  {
+   "id": "b034",
+   "type": "p",
+   "html": "We conduct evaluations of our EfficientRAG and multiple baselines on three multi-hop question-answering datasets same as §2.1. We select the following models as our baselines. First is direct answering without retrieval, including LMs with proprietary data. We include direct prompting and Chain-of-Thought prompting <span class=\"cite\">Touvron et al. (2023a)</span> and question decomposition prompting in this setting. Secondly, we include baselines with naive RAG with top-10 retrieve chunks as its knowledge. Third, we include advanced iterative RAG methods like Iter-RetGen <span class=\"cite\">Shao et al. (2023)</span> and SelfAsk <span class=\"cite\">Press et al. (2023)</span>. The implementation prompts are in Appendix  B.3."
+  },
+  {
+   "id": "b035",
+   "type": "p",
+   "html": "<b>Implementation Details.</b> EfficientRAG Labeler and Filter are fine-tuned based on DeBERTa-v3-large <span class=\"cite\">He et al. (2021)</span> with 24 layers and 304M parameters. We adopt Llama-3-8B-Instruct for the question-answering stage and all other baselines. We utilize Contriever-MSMARCO <span class=\"cite\">Izacard et al. (2022)</span> as the retriever for both data synthesis and inference stages."
+  },
+  {
+   "id": "b036",
+   "type": "p",
+   "html": "We constructed the training data following Section 3.2 with Llama-3-70B-Instruct (Prompts are detailed in Appendix  B.2). We trained our model on \\(4\\times\\) Nvidia A100 GPUs for about 10 GPU-hours separately, with AdamW <span class=\"cite\">Loshchilov and Hutter (2019)</span> optimizer and a learning rate of 5e-6."
+  },
+  {
+   "id": "b037",
+   "type": "h2",
+   "html": "5 Results and Analysis"
+  },
+  {
+   "id": "b038",
+   "type": "h3",
+   "html": "5.1 Retrieval Performance"
+  },
+  {
+   "id": "b039",
+   "type": "p",
+   "html": "The model’s performance was assessed using the Recall@K metric across three distinct datasets. As presented in Table  2, EfficientRAG achieves notably high recall scores on HotpotQA and 2WikiMQA datasets, with recall values of 81.84 and 84.08, respectively. These results are impressive considering the minimal number of chunks retrieved 6.41 for HotpotQA and 3.69 for 2WikiMQA. However, the performance of EfficientRAG on the MuSiQue dataset was less satisfactory. This suboptimal result may be attributed to the smaller number of chunks retrieved and the increased complexity of the dataset."
+  },
+  {
+   "id": "b040",
+   "type": "p",
+   "html": "We further evaluate the QnA performance on the three datasets. As is illustrated in Table  3, our EfficientRAG framework achieves the second-highest accuracy on both HotpotQA and 2WikiMQA, and it also performs well on MuSiQue even with low recall."
+  },
+  {
+   "id": "b041",
+   "type": "p",
+   "html": "Those LLM-based systems perform unsatisfying since they require LLMs to generate partial answers with noisy knowledge inputs, but they always fail in the intermediate steps. We posit that more helpful knowledge and fewer irrelevant chunks are the key points to the RAG system, even a simple model can beat LLMs with the correct RAG paradigm."
+  },
+  {
+   "id": "b042",
+   "type": "h3",
+   "html": "5.2 Inference Efficiency"
+  },
+  {
+   "id": "b043",
+   "type": "p",
+   "html": "We randomly selected 200 samples from the MusiQue dataset for empirical research and calculated four indicators: LLM calls, iterations, latency, and GPU utilization. As shown in table 4 our method requires fewer iterations and achieves a 60%-80% improvement in time efficiency compared to other iterative methods while maintaining similar GPU utilization."
+  },
+  {
+   "id": "b044",
+   "type": "tab",
+   "html": "Table 4: Efficiency evaluation on different RAG paradigms. EfficientRAG exhibits a speed equivalent to direct retrieval methods and is three times faster than LLM-based baselines while maintaining a similar number of iterations.",
+   "table": "<table><tr><th><b>Method</b></th><th><b># LLM calls</b></th><th><b># Iteration</b></th><th><b>Latency (s)</b></th><th><b>GPU utils (%)</b></th></tr><tr><th><b>Direct</b></th><td>1.00</td><td>-</td><td>2.16</td><td>15.55</td></tr><tr><th><b>Direct-R</b></th><td>1.00</td><td>-</td><td>2.47</td><td>35.05</td></tr><tr><th><b>Iter-RetGen iter3</b></th><td>3.00</td><td>3.00</td><td>9.68</td><td>66.37</td></tr><tr><th><b>SelfASK</b></th><td>7.18</td><td>3.59</td><td>27.47</td><td>65.02</td></tr><tr><th><b>EfficientRAG</b></th><td>1.00</td><td>2.73</td><td>3.62</td><td>65.55</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b045",
+   "type": "h3",
+   "html": "5.3 Performance with Various Generators"
+  },
+  {
+   "id": "b046",
+   "type": "p",
+   "html": "EfficientRAG can benefit from more powerful generators. As is shown in Table 5, the use of GPT-3.5 as a generator enhances the end-to-end performance of both the baselines and our method. Notably, EfficientRAG continues to deliver exceptional results."
+  },
+  {
+   "id": "b047",
+   "type": "tab",
+   "html": "Table 5: End-to-end QA performance on the 2WikiMQA dataset using GPT-3.5-turbo-1106 generator. EfficientRAG achieves state-of-the-art accuracy.",
+   "table": "<table><tr><th><b>Method</b></th><th><b>EM</b></th><th><b>F1</b></th><th><b>Acc</b></th></tr><tr><td><b>Direct</b></td><td>27.85</td><td>33.22</td><td>33.79</td></tr><tr><td><b>CoT</b></td><td>38.56</td><td>47.28</td><td>46.62</td></tr><tr><td><b>Direct-R</b></td><td>34.09</td><td>39.46</td><td>41.07</td></tr><tr><td><b>iter-RetGen iter2</b></td><td>47.51</td><td>58.56</td><td>58.34</td></tr><tr><td><b>Iter-RetGen iter3</b></td><td>49.41</td><td>60.60</td><td>60.60</td></tr><tr><td><b>EfficientRAG</b></td><td>49.00</td><td>56.93</td><td><b>61.88</b></td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b048",
+   "type": "h3",
+   "html": "5.4 Out-Of-Domain Adaptation"
+  },
+  {
+   "id": "b049",
+   "type": "p",
+   "html": "EfficientRAG has the potential to adapt to different scenarios without further downstream training. We propose an out-of-domain experiment across HotpotQA and 2WikiMQA datasets, where we train the model on one dataset and test it on the other. Table 6 shows that our model adapts well to different datasets, and even surpasses the model trained on the original data in some cases. It shows that EfficientRAG does not rely on domain-specific knowledge, exhibiting a certain degree of transferability."
+  },
+  {
+   "id": "b050",
+   "type": "tab",
+   "html": "Table 6: Out-of-domain experiments on 2WikiMQA and HotpotQA dataset. EfficientRAG demonstrates remarkable transferability across diverse datasets.",
+   "table": "<table><tr><th><b>Test Set</b></th><th><b>Training Set</b></th><th><b>EM</b></th><th><b>F1</b></th><th><b>Acc</b></th></tr><tr><td>HotpotQA</td><td>HotpotQA</td><td>50.59</td><td>57.93</td><td>57.86</td></tr><tr><td>HotpotQA</td><td>2WikiMQA</td><td>43.38</td><td>49.70</td><td>53.38</td></tr><tr><td>2WikiMQA</td><td>2WikiMQA</td><td>44.18</td><td>51.64</td><td>53.41</td></tr><tr><td>2WikiMQA</td><td>HotpotQA</td><td>44.54</td><td>51.98</td><td>56.59</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b051",
+   "type": "h2",
+   "html": "6 Conclusion"
+  },
+  {
+   "id": "b052",
+   "type": "p",
+   "html": "In this study, we introduce the EfficientRAG retriever, a novel approach for multi-hop question retrieval that iteratively generates new queries while circumventing the need for large language models. Evaluations across three benchmark datasets demonstrate that EfficientRAG not only achieves high recall with a minimal number of retrieved chunks but also delivers promising outcomes in subsequent question-answering tasks. These findings indicate that EfficientRAG outperforms traditional retrieval-augmented generation methods, particularly in the context of complex, multi-hop question-answering scenarios."
+  },
+  {
+   "id": "b053",
+   "type": "h2",
+   "html": "Limitations"
+  },
+  {
+   "id": "b054",
+   "type": "p",
+   "html": "The EfficientRAG framework can theoretically adapt to other models, but we opt not to implement a larger LLM as the final QnA reasoner due to time and resource limits. We analyze our method mainly on open-domain datasets, as it is hard to identify multi-hop question-answering datasets in in-domain settings."
+  },
+  {
+   "id": "b055",
+   "type": "h2",
+   "html": "Ethics Statement"
+  },
+  {
+   "id": "b056",
+   "type": "p",
+   "html": "The authors declare no competing interests. The datasets used in the training and evaluation come from publicly available sources and do not contain sensitive content such as personal information."
+  },
+  {
+   "id": "b057",
+   "type": "h2",
+   "appendix": true,
+   "html": "Appendix A Capability of LLM generator"
+  },
+  {
+   "id": "b058",
+   "type": "fig",
+   "appendix": true,
+   "html": "Figure 4: The performance with varying chunks settings over HotpotQA, 2Wiki-Multihop and MuSiQue dataset with GPT-3.5/GPT-4/Llama-3 8B as the generator.",
+   "img": [
+    {
+     "src": "assets/efficientrag/fig04.svg",
+     "w": 215
+    }
+   ]
+  },
+  {
+   "id": "b059",
+   "type": "h2",
+   "appendix": true,
+   "html": "Appendix B Prompt List"
+  },
+  {
+   "id": "b060",
+   "type": "h3",
+   "appendix": true,
+   "html": "B.1 Accuracy Evaluation Prompt"
+  },
+  {
+   "id": "b061",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 7: Detailed prompts for GPT-3.5 evaluation.",
+   "table": "<table><tr><td>You are an experienced linguist who is responsible for evaluating the correctness of the generated responses. You are provided with question, the generated responses and the corresponding ground truth answer. Your task is to compare the generated responses with the ground truth responses and evaluate the correctness of the generated responses. Response in JSON format with key \"response\" and value \"yes\" or \"no\".</td></tr><tr><td>Question: {question}</td></tr><tr><td>Prediction: {prediction}</td></tr><tr><td>Ground-truth Answer: {answer}</td></tr><tr><td>Your response:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b062",
+   "type": "h3",
+   "appendix": true,
+   "html": "B.2 Data Synthesize Prompt"
+  },
+  {
+   "id": "b063",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 8: Detailed prompts for training data construction with Llama-3 70B",
+   "table": "<table><tr><td><b>Question Decomposition Prompt</b></td></tr><tr><td>You are assigned a multi-hop question decomposition task.</td></tr><tr><td>Your mission is to decompose the original multi-hop question into a list of single-hop sub_questions, based on supporting documents for each sub_question, and such that you can answer each sub_question independently from each document. Each document infers a sub_question id which starts with ‘#‘. The evidence in the document indicates the relation of two entities, in the form of ‘entity1 - relation - entity2‘.</td></tr><tr><td>The JSON output must contain the following keys:</td></tr><tr><td>- \"question\": a string, the original multi-hop question.</td></tr><tr><td>- \"decomposed_questions\": a dict of sub_questions and answers. The key should be the sub_question number(string format), and each value should be a dict containing:</td></tr><tr><td>- \"sub_question\": a string, the decomposed single-hop sub_question. It MUST NOT contain information more than the original question and its dependencies. NEVER introduce information from documents.</td></tr><tr><td>- \"answer\": a string, the answer of the sub_question.</td></tr><tr><td>- \"dependency\": a list of sub_question number(string format). If the sub_question relies on the answer of other sub_questions, you should list the sub_question number here. Leave it empty for now because the questions now are all comparison type.</td></tr><tr><td>- \"document\": a string, the document id that supports the sub_question.</td></tr><tr><td>Notice that you don’t need to come out the compare question, just the sub_questions and answers.</td></tr><tr><td><b>Token Labeling Prompt</b></td></tr><tr><td>You have been assigned an information extraction task.</td></tr><tr><td>Your mission is to extract the words from a given paragraph so that others can answer a question using only your extracted words.</td></tr><tr><td>Your extracted words should cover information from both the question and the answer, including entities (e.g. people, location, film) and core relations.</td></tr><tr><td>Your response should be in JSON format and include the following key:</td></tr><tr><td>- \"extracted_words\": a string composed of a list of words extracted from the paragraph, separated by a space. Please adhere to the following guidelines:</td></tr><tr><td>- Do not reorder, change, miss, or add words. Keep it the same as the original paragraph.</td></tr><tr><td>- Identify and extract ONLY the words explicitly mentioned in either the question or its answer, and strongly related to the question or its answer.</td></tr><tr><td>- NEVER label any words that do not contribute meaningful information to the question or answer.</td></tr><tr><td>- Only extract words that occurred in the paragraph.</td></tr><tr><td><b>Query Filtering Prompt</b></td></tr><tr><td>You are assigned a multi-hop question refactoring task.</td></tr><tr><td>Given a complex question along with a set of related known information, you are required to refactor the question by applying the principle of retraining difference and removing redundancies. Specifically, you should eliminate the content that is duplicated between the question and the known information, leaving only the parts of the question that have not been answered, and the new knowledge points in the known information. The ultimate goal is to reorganize these retrained parts to form a new question.</td></tr><tr><td>You can only generate the question by picking words from the question and known information. You should first pick up words from the question, and then from each known info, and concatenate them finally. You are not allowed to add, change, or reorder words. The given known information starts with the word \"Info: \".</td></tr><tr><td>You response should be in JSON format and include the following key:</td></tr><tr><td>- \"filtered_query\": a string representing the concatenation of the words from both the question and newly added information, separated by a space.</td></tr><tr><td>Please adhere to the following guidelines:</td></tr><tr><td>- Do not reorder, change, or add words. Keep it the same as the original question.</td></tr><tr><td>- Identify and remove ONLY the words that are already known, keep the unknown information from both the question and information.</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b064",
+   "type": "h3",
+   "appendix": true,
+   "html": "B.3 Prompts List"
+  },
+  {
+   "id": "b065",
+   "type": "p",
+   "appendix": true,
+   "html": "All prompts can be found in this section, and are given in the order of Direct, CoT, Decompose, Direct-R, Iter-RetGen, and Self-ask, as shown in Tables 9 to 22."
+  },
+  {
+   "id": "b066",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 9: Detailed prompts for Direct Question Answering with Llama-3 8B",
+   "table": "<table><tr><td><b>Direct Prompting for HotpotQA</b></td></tr><tr><td>As an assistant, your task is to answer the question directly after &lt;Question&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"answer\" and its value should be string.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;Question&gt;: What is the name of this American musician, singer, actor, comedian, and songwriter, who worked with Modern Records and born in December 5, 1932?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"Little Richard\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Between Chinua Achebe and Rachel Carson, who had more diverse jobs?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"Chinua Achebe\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Remember Me Ballin’ is a CD single by Indo G that features an American rapper born in what year?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"1979\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your Question is</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td><b>Direct Prompting for MuSiQue</b></td></tr><tr><td>As an assistant, your task is to answer the question directly after &lt;Question&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"answer\" and its value should be string. There are some examples for you to refer to:</td></tr><tr><td>&lt;Question&gt;: In which year did the publisher of In Cold Blood form?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"2001\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Who was in charge of the city where The Killing of a Sacred Deer was filmed?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"John Cranley\"}}</td></tr><tr><td>``` &lt;Question&gt;: Where on the Avalon Peninsula is the city that Signal Hill overlooks?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"eastern tip\"}}</td></tr><tr><td>``` Now your Question is</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td><b>Direct Prompting for 2Wiki-MultihopQA</b></td></tr><tr><td>As an assistant, your task is to answer the question directly after &lt;Question&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"answer\" and its value should be string.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;Question&gt;: Which film came out first, Blind Shaft or The Mask Of Fu Manchu?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"The Mask Of Fu Manchu\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: When did John V, Prince Of Anhalt-Zerbst’s father die?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"12 June 1516\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Which film has the director who was born later, El Extrano Viaje or Love In Pawn?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"El Extrano Viaje\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your Question is</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b067",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 10: Detailed prompts for Chain-of-Thought Question Answering with Llama-3 8B On hotpotQA",
+   "table": "<table><tr><td><b>CoT Prompting for HotpotQA</b></td></tr><tr><td>As an assistant, your task is to answer the question after &lt;Question&gt;. You should first think step by step about the question and give your thought and then answer the &lt;Question&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"thought\" and \"answer\" and their values should be string.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;Question&gt;: What is the name of this American musician, singer, actor, comedian, and songwriter, who worked with Modern Records and born in December 5, 1932?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\":\"Modern Record is a big R&amp;B label with artists including Etta James, Joe Houston, Little Richard, Ike, Tina Turner and John Lee Hooker in the 1950s and 1960s. Little Richard is an American musician, signer actor and songwriter, born in December 5 1932. So the answer is Little Richard.\",\"answer\": \"Little Richard\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Between Chinua Achebe and Rachel Carson, who had more diverse jobs?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\":\"Chinua Achebe was a Nigerian novelist, poet, professor, and critic. Rachel Carson was an American marine biologist, author, and conservationist. Chinua Achebe has 4 jobs while Rachel Carson has 3 jobs. So the answer is Chinua Achebe.\",\"answer\": \"Chinua Achebe\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Remember Me Ballin’ is a CD single by Indo G that features an American rapper born in what year?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\":\"Remember Me Ballin’ is the CD singer by Indo G that features Gangsta Boo, who is named Lola Mitchell, an American rapper born in 1979. So the answer is 1979.\",\"answer\": \"1979\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your Question is</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b068",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 11: Detailed prompts for multi-hop question decomposition, applicable to all datasets.",
+   "table": "<table><tr><td><b>Question Decomposition Prompt</b> You are assigned a multi-hop question decomposition task.</td></tr><tr><td>You should decompose the given multi-hop question into multiple single-hop questions, and such that you can answer each single-hop question independently.</td></tr><tr><td>Your response must be wrapped with ```json and ```.</td></tr><tr><td>You should answer in JSON format, your answer must contain the following keys:</td></tr><tr><td>- \"decomposed_questions\": a list of strings, each string is a single-hop question.</td></tr><tr><td>Here are some examples for your reference:</td></tr><tr><td>## Examples</td></tr><tr><td>&lt;Multi-hop question&gt;: Which film came out first, The Love Route or Engal Aasan?</td></tr><tr><td>Your response:</td></tr><tr><td>```json</td></tr><tr><td>{{\"decomposed_questions\": [ \"When does the film The Love Route come out?\", \"When does the film Engal Aasan come out?\" ] }}</td></tr><tr><td>```</td></tr><tr><td>&lt;Multi-hop question&gt;: Where did the spouse of Moderen’s composer die?</td></tr><tr><td>Your response:</td></tr><tr><td>```json</td></tr><tr><td>{{\"decomposed_questions\": [ \"Who is Modern’s composer?\", \"Who is the spouse of Carl Nielsen?\", \"In what place did Anne Marie Carl-Nielsen die?\" ] }}</td></tr><tr><td>```</td></tr><tr><td>&lt;Multi-hop question&gt;: Where was the director of film The Fascist born?</td></tr><tr><td>Your response:</td></tr><tr><td>```json</td></tr><tr><td>{{\"decomposed_questions\": [ \"Who is the director of film The Fascist?\", \"Where was Luciano Salce born?\" ] }}</td></tr><tr><td>```</td></tr><tr><td></td></tr><tr><td>## Now it’s your turn:</td></tr><tr><td>&lt;Multi-hop question&gt;: {question}</td></tr><tr><td>Your response:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b069",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 12: Detailed prompts for Chain-of-Thought Question Answering with Llama-3 8B on MuSiQue",
+   "table": "<table><tr><td><b>CoT Prompting for MuSiQue</b></td></tr><tr><td>As an assistant, your task is to answer the question after &lt;Question&gt;. You should first think step by step about the question and give your thought and then answer the &lt;Question&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"thought\" and \"answer\" and their values should be string.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;Question&gt;: In which year did the publisher of In Cold Blood form?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"The publisher of In Cold Blood is Random house, which was formed in 2001. So the answer is 2001.\", \"answer\": \"2001\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Who was in charge of the city where The Killing of a Sacred Deer was filmed?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"The killing of a Scared Deer was filmed in Cincinnati, Ohio, where John Cranley is the mayor. So the answer is John Cranley.\", \"answer\": \"John Cranley\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Where on the Avalon Peninsula is the city that Signal Hill overlooks?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"Signal Hill overlooks the city St. John’s, which is located on the eastern tip of the Avalon Peninsula. So the answer is eastern tip.\", \"answer\": \"eastern tip\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your Question is</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b070",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 13: Detailed prompts for Chain-of-Thought Question Answering with Llama-3 8B on 2Wiki-MultihopQA",
+   "table": "<table><tr><td><b>CoT Prompting for 2Wiki-MultihopQA</b></td></tr><tr><td>As an assistant, your task is to answer the question after &lt;Question&gt;. You should first think step by step about the question and give your thought and then answer the &lt;Question&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"thought\" and \"answer\" and their values should be string.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;Question&gt;: Which film came out first, Blind Shaft or The Mask Of Fu Manchu?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"Blind Shaft is a 2003 Chinese film, and The Mask Of Fu Manchu is a 1932 American pre-Code adventure film. The Mask Of Fu Manchu came out first. So the answer is The Mask Of Fu Manchu.\", \"answer\": \"The Mask Of Fu Manchu\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: When did John V, Prince Of Anhalt-Zerbst’s father die?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"The father of John V, Prince Of Anhalt-Zerbst is Ernest I, Prince of Anhalt-Dessau. He died on 12 June 1516. So the answer is 12 June 1516.\", \"answer\": \"12 June 1516\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;Question&gt;: Which film has the director who was born later, El Extrano Viaje or Love In Pawn?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"The director of El Extrano Viaje is Fernando Fernan Gomez, he was born on 29 August 1921. The director of Love In Pawn is Charles Saunders, he was born on 8 April 1904. Fernando Fernan Gomez was born later, so film El Extrano Viaje has the director who was born later. So the answer is El Extrano Viaje.\", \"answer\": \"El Extrano Viaje\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your Question is</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b071",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 14: Detailed prompt for retrieval on HotpotQA",
+   "table": "<table><tr><td><b>Retrieval Prompting for HotpotQA</b></td></tr><tr><td>Answer the given question in JSON format, you can refer to the document provided.</td></tr><tr><td>As an assistant, your task is to answer the question based on the given knowledge. Your answer should be after &lt;Answer&gt; in JSON format with key \"answer\" and its value should be string.</td></tr><tr><td>The given knowledge will be embraced by &lt;doc&gt; and &lt;/doc&gt; tags. You can refer to the knowledge to answer the question. If the knowledge does not contain the answer, answer the question directly.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: What is the name of this American musician, singer, actor, comedian, and songwriter, who worked with Modern Records and born in December 5, 1932?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"Little Richard\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Between Chinua Achebe and Rachel Carson, who had more diverse jobs?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"Chinua Achebe\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Remember Me Ballin’ is a CD single by Indo G that features an American rapper born in what year?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"1979\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your question and reference knowledge are as follows.</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{knowledge}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b072",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 15: Detailed prompt for retrieval on MuSiQue",
+   "table": "<table><tr><td><b>Retrieval Prompting for MuSiQue</b></td></tr><tr><td>As an assistant, your task is to answer the question based on the given knowledge. Your answer should be after &lt;Answer&gt; in JSON format with key \"answer\" and its value should be string.</td></tr><tr><td>The given knowledge will be embraced by &lt;doc&gt; and &lt;/doc&gt; tags. You can refer to the knowledge to answer the question. If the knowledge does not contain the answer, answer the question directly.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: In which year did the publisher of In Cold Blood form?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"2001\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Who was in charge of the city where The Killing of a Sacred Deer was filmed?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"John Cranley\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Where on the Avalon Peninsula is the city that Signal Hill overlooks?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"eastern tip\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your question and reference knowledge are as follows.</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{knowledge}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b073",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 16: Detailed prompt for retrieval on 2Wiki-MultihopQA",
+   "table": "<table><tr><td><b>Retrieval Prompting for 2Wiki-MultihopQA</b></td></tr><tr><td>As an assistant, your task is to answer the question based on the given knowledge. Your answer should be after &lt;Answer&gt; in JSON format with key \"answer\" and its value should be string.</td></tr><tr><td>The given knowledge will be embraced by &lt;doc&gt; and &lt;/doc&gt; tags. You can refer to the knowledge to answer the question. If the knowledge does not contain the answer, answer the question directly.</td></tr><tr><td>There are some examples for you to refer to:</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Which film came out first, Blind Shaft or The Mask Of Fu Manchu?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"The Mask Of Fu Manchu\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: When did John V, Prince Of Anhalt-Zerbst’s father die?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"12 June 1516\"}}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR YOUR REFERENCE}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Which film has the director who was born later, El Extrano Viaje or Love In Pawn?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"answer\": \"El Extrano Viaje\"}}</td></tr><tr><td>```</td></tr><tr><td>Now your question and reference knowledge are as follows.</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{knowledge}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b074",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 17: Detailed prompt for Iter-RetGen on HotpotQA",
+   "table": "<table><tr><td><b>Iter-RetGen Prompting for HotpotQA</b></td></tr><tr><td>You should think step by step and answer the question after &lt;Question&gt; based on given knowledge embraced with &lt;doc&gt; and &lt;/doc&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"thought\" and \"answer\", their value should be string.</td></tr><tr><td>Here are some examples for you to refer to:</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: What is the name of this American musician, singer, actor, comedian, and songwriter, who worked with Modern Records and born in December 5, 1932?</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"Artists who worked with Modern Records include Etta James, Joe Houston, Little Richard, Ike and Tina Turner and John Lee Hooker in the 1950s and 1960s. Of these Little Richard, born in December 5, 1932, was an American musician, singer, actor, comedian, and songwriter.\", \"answer\": \"Little Richard\" }}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Between Chinua Achebe and Rachel Carson, who had more diverse jobs?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"Chinua Achebe was a Nigerian novelist, poet, professor, and critic. Rachel Carson was an American marine biologist, author, and conservationist. So Chinua Achebe had 4 jobs, while Rachel Carson had 3 jobs. Chinua Achebe had more diverse jobs than Rachel Carson.\", \"answer\": \"Chinua Achebe\" }}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Remember Me Ballin’ is a CD single by Indo G that features an American rapper born in what year?</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"Remember Me Ballin’ is the CD single by Indo G featuring Gangsta Boo. Gangsta Boo is Lola Mitchell’s stage name, who was born in August 7, 1979, and is an American rapper.\", \"answer\": \"1979\" }}</td></tr><tr><td>```</td></tr><tr><td>Now based on the given doc, answer the question after &lt;Question&gt;.</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{documents}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b075",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 18: Detailed prompt for Iter-RetGen on MuSiQue",
+   "table": "<table><tr><td><b>Iter-RetGen Prompting for MuSiQue</b></td></tr><tr><td>You should think step by step and answer the question after &lt;Question&gt; based on given knowledge embraced with &lt;doc&gt; and &lt;/doc&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"thought\" and \"answer\", their value should be string.</td></tr><tr><td>Here are some examples for you to refer to:</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: In which year did the publisher of In Cold Blood form?</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"In Cold Blood was first published in book form by Random House. Random House was form in 2001.\", \"answer\": \"2011\" }}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Who was in charge of the city where The Killing of a Sacred Deer was filmed?</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"The Killing of a Sacred Deer was filmed in Cincinnati. The present Mayor of Cincinnati is John Cranley. Therefore, John Cranley is in charge of the city.\", \"answer\": \"John Cranley\" }}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Where on the Avalon Peninsula is the city that Signal Hill overlooks?</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"Signal Hill is a hill which overlooks the city of St. John’s. St. John’s is located on the eastern tip of the Avalon Peninsula.\", \"answer\": \"eastern tip\" }}</td></tr><tr><td>```</td></tr><tr><td>Now based on the given doc, answer the question after &lt;Question&gt;.</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{documents}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b076",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 19: Detailed prompt for Iter-RetGen on 2Wiki-MultihopQA",
+   "table": "<table><tr><td><b>Iter-RetGen Prompting for 2Wiki-MultihopQA</b></td></tr><tr><td>You should think step by step and answer the question after &lt;Question&gt; based on given knowledge embraced with &lt;doc&gt; and &lt;/doc&gt;. Your answer should be after &lt;Answer&gt; in JSON format with key \"thought\" and \"answer\", their value should be string.</td></tr><tr><td>Here are some examples for you to refer to:</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Which film came out first, Blind Shaft or The Mask Of Fu Manchu?</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"Blind Shaft is a 2003 film, while The Mask Of Fu Manchu opened in New York on December 2, 1932. 2003 comes after 1932. Therefore, The Mask Of Fu Manchu came out earlier than Blind Shaft.\", \"answer\": \"The Mask Of Fu Manchu\" }}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: When did John V, Prince Of Anhalt-Zerbst’s father die?</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"John V, Prince Of Anhalt-Zerbst was the son of Ernest I, Prince of Anhalt-Dessau. Ernest I, Prince of Anhalt-Dessau died on 12 June 1516.\", \"answer\": \"12 June 1516\" }}</td></tr><tr><td>```</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{{KNOWLEDGE FOR THE QUESTION}}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: Which film has the director who was born later, El Extrano Viaje or Love In Pawn?</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr><tr><td>```json</td></tr><tr><td>{{\"thought\": \"The director of El Extrano Viaje is Fernando Fernan Gomez, who was born on 28 August 1921. The director of Love In Pawn is Charles Saunders, who was born on 8 April 1904. 28 August 1921 comes after 8 April 1904. Therefore, Fernando Fernan Gomez was born later than Charles Saunders.\", \"answer\": \"El Extrano Viaje\" }}</td></tr><tr><td>```</td></tr><tr><td>Now based on the given doc, answer the question after &lt;Question&gt;</td></tr><tr><td>&lt;doc&gt;</td></tr><tr><td>{documents}</td></tr><tr><td>&lt;/doc&gt;</td></tr><tr><td>&lt;Question&gt;: {question}</td></tr><tr><td>Let’s think step by step.</td></tr><tr><td>&lt;Answer&gt;:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b077",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 20: Detailed prompt for self-ask on HotpotQA",
+   "table": "<table><tr><td><b>Self-ask Prompting for HotpotQA</b></td></tr><tr><td>Solve the question with the given knowledge.</td></tr><tr><td>Each line should start with either \"Intermediate answer:\", \"Follow up:\", \"So the final answer is:\", or \"Are follow up questions needed here:\".</td></tr><tr><td>#</td></tr><tr><td>Question: What is the name of this American musician, singer, actor, comedian, and songwriter, who worked with Modern Records and born in December 5, 1932?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: Who worked with Modern Records?</td></tr><tr><td>Intermediate answer: Artists worked with Modern Records include Etta James, Little Richard, Joe Houston, Ike and Tina Turner and John Lee Hooker.</td></tr><tr><td>Follow up: Is Etta James an American musician, singer, actor, comedian, and songwriter, and was born in December 5, 1932?</td></tr><tr><td>Intermediate answer: Etta James was born in January 25, 1938, not December 5, 1932, so the answer is no.</td></tr><tr><td>Follow up: Is Little Richard an American musician, singer, actor, comedian, and songwriter, and was born in December 5, 1932?</td></tr><tr><td>Intermediate answer: Yes, Little Richard, born in December 5, 1932, is an American musician, singer, actor, comedian and songwriter.</td></tr><tr><td>So the final answer is: Little Richard</td></tr><tr><td>#</td></tr><tr><td>Question: Between Chinua Achebe and Rachel Carson, who had more diverse jobs?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: What jobs did Chinua Achebe have?</td></tr><tr><td>Intermediate answer: Chinua Achebe was a Nigerian (1) novelist, (2) poet, (3) professor, and (4) critic, so Chinua Achebe had 4 jobs.</td></tr><tr><td>Follow up: What jobs did Rachel Carson have?</td></tr><tr><td>Intermediate answer: Rachel Carson was an American (1) marine biologist, (2) author, and (3) conservationist, so Rachel Carson had 3 jobs.</td></tr><tr><td>Follow up: Did Chinua Achebe have more jobs than Rachel Carson?</td></tr><tr><td>Intermediate answer: Chinua Achebe had 4 jobs, while Rachel Carson had 3 jobs. 4 is greater than 3, so yes, Chinua Achebe had more jobs.</td></tr><tr><td>So the final answer is: Chinua Achebe</td></tr><tr><td>#</td></tr><tr><td>Question: Remember Me Ballin’ is a CD single by Indo G that features an American rapper born in what year?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: Which American rapper is featured by Remember Me Ballin’, a CD single by Indo G?</td></tr><tr><td>Intermediate answer: Gangsta Boo</td></tr><tr><td>Follow up: In which year was Gangsta Boo born?</td></tr><tr><td>Intermediate answer: Gangsta Boo was born in August 7, 1979, so the answer is 1979.</td></tr><tr><td>So the final answer is: 1979</td></tr><tr><td>#</td></tr><tr><td>Question: {question}</td></tr><tr><td>Are follow up questions needed here:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b078",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 21: Detailed prompt for self-ask on MuSiQue",
+   "table": "<table><tr><td><b>Self-ask Prompting for MuSiQue</b></td></tr><tr><td>Solve the question with the given knowledge.</td></tr><tr><td>Each line should start with either \"Intermediate answer:\", \"Follow up:\", \"So the final answer is:\", or \"Are follow up questions needed here:\".</td></tr><tr><td>#</td></tr><tr><td>Question: In which year did the publisher of In Cold Blood form?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: What business published In Cold Blood?</td></tr><tr><td>Intermediate answer: In Cold Blood was published in book form by Random House.</td></tr><tr><td>Follow up: Which year witnessed the formation of Random House?</td></tr><tr><td>Intermediate answer: Random House was form in 2001.</td></tr><tr><td>So the final answer is: 2001</td></tr><tr><td>#</td></tr><tr><td>Question: Who was in charge of the city where The Killing of a Sacred Deer was filmed?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: In which city was The Killing of a Sacred Deer filmed</td></tr><tr><td>Intermediate answer: The Killing of a Sacred Deer was filmed in Cincinnati.</td></tr><tr><td>Follow up: Who was in charge of Cincinnati?</td></tr><tr><td>Intermediate answer: The present Mayor of Cincinnati is John Cranley, so John Cranley is in charge.</td></tr><tr><td>So the final answer is: John Cranley</td></tr><tr><td>#</td></tr><tr><td>Question: Where on the Avalon Peninsula is the city that Signal Hill overlooks?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: What city does Signal Hill overlook?</td></tr><tr><td>Intermediate answer: Signal Hill is a hill which overlooks the city of St. John’s.</td></tr><tr><td>Follow up: Where on the Avalon Peninsula is St. John’s located?</td></tr><tr><td>Intermediate answer: St. John’s is located on the eastern tip of the Avalon Peninsula.</td></tr><tr><td>So the final answer is: eastern tip</td></tr><tr><td>#</td></tr><tr><td>Question: {question}</td></tr><tr><td>Are follow up questions needed here:</td></tr></table>",
+   "img": []
+  },
+  {
+   "id": "b079",
+   "type": "tab",
+   "appendix": true,
+   "html": "Table 22: Detailed prompt for self-ask on 2Wiki-MultihopQA",
+   "table": "<table><tr><td><b>Self-ask Prompting for 2Wiki-MultihopQA</b></td></tr><tr><td>Solve the question with the given knowledge.</td></tr><tr><td>Each line should start with either \"Intermediate answer:\", \"Follow up:\", \"So the final answer is:\", or \"Are follow up questions needed here:\".</td></tr><tr><td>Follow the examples below to answer the questions with natural language.</td></tr><tr><td>#</td></tr><tr><td>Question: Which film came out first, Blind Shaft or The Mask Of Fu Manchu?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: When did Blind Shaft come out?</td></tr><tr><td>Intermediate answer: Blind Shaft came out in 2003.</td></tr><tr><td>Follow up: When did The Mask Of Fu Manchu come out?</td></tr><tr><td>Intermediate answer: The Mask Of Fu Manchu came out in 1932.</td></tr><tr><td>So the final answer is: The Mask Of Fu Manchu</td></tr><tr><td>#</td></tr><tr><td>Question: When did John V, Prince Of Anhalt-Zerbst’s father die?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: Who is the father of John V, Prince Of Anhalt-Zerbst?</td></tr><tr><td>Intermediate answer: The father of John V, Prince Of Anhalt-Zerbst is Ernest I, Prince of Anhalt-Dessau.</td></tr><tr><td>Follow up: When did Ernest I, Prince of Anhalt-Dessau die?</td></tr><tr><td>Intermediate answer: Ernest I, Prince of Anhalt-Dessau died on 12 June 1516.</td></tr><tr><td>So the final answer is: 12 June 1516</td></tr><tr><td>#</td></tr><tr><td>Question: Which film has the director who was born later, El Extrano Viaje or Love In Pawn?</td></tr><tr><td>Are follow up questions needed here: Yes.</td></tr><tr><td>Follow up: Who is the director of El Extrano Viaje?</td></tr><tr><td>Intermediate answer: The director of El Extrano Viaje is Fernando Fernan Gomez.</td></tr><tr><td>Follow up: Who is the director of Love in Pawn?</td></tr><tr><td>Intermediate answer: The director of Love in Pawn is Charles Saunders.</td></tr><tr><td>Follow up: When was Fernando Fernan Gomez born?</td></tr><tr><td>Intermediate answer: Fernando Fernan Gomez was born on 28 August 1921.</td></tr><tr><td>Follow up: When was Charles Saunders (director) born?</td></tr><tr><td>Intermediate answer: Charles Saunders was born on 8 April 1904.</td></tr><tr><td>So the final answer is: El Extrano Viaje</td></tr><tr><td>#</td></tr><tr><td>Question: {question}</td></tr><tr><td>Are follow up questions needed here:</td></tr></table>",
+   "img": []
+  }
+ ],
+ "key": "efficientrag",
+ "arxiv": "2408.04259",
+ "version": "2408.04259v2",
+ "url": "https://arxiv.org/abs/2408.04259",
+ "html_url": "https://arxiv.org/html/2408.04259v2",
+ "pdf_url": "https://arxiv.org/pdf/2408.04259v2"
+}

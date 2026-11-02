@@ -1,0 +1,238 @@
+{
+ "key": "hipporag",
+ "title_ko": "HippoRAG: 신경생물학에서 영감을 받은 대규모 언어 모델의 장기 기억",
+ "short": "HippoRAG",
+ "venue": "NeurIPS 2024 (Main Conference Track)",
+ "venue_source": "https://papers.nips.cc/paper_files/paper/2024/hash/6ddc001d07ca4f319af96a3024f6dbd1-Abstract-Conference.html",
+ "year": 2024,
+ "authors_short": "Bernal Jiménez Gutiérrez et al. (The Ohio State University, Stanford University)",
+ "links": {
+  "arxiv": "https://arxiv.org/abs/2405.14831",
+  "pdf": "https://arxiv.org/pdf/2405.14831v3",
+  "html": "https://arxiv.org/html/2405.14831v3",
+  "code": "https://github.com/OSU-NLP-Group/HippoRAG"
+ },
+ "group": "multihop",
+ "one_line": "문서 전체를 미리 LLM으로 지식 그래프(명사구–관계)로 바꿔 두고, 질문 속 개체명에서 개인화 페이지랭크를 한 번 돌려 여러 문단에 흩어진 근거를 한꺼번에 찾는 검색법.",
+ "problem": "기존 RAG는 문단을 하나씩 따로 인코딩하므로, 답에 필요한 정보가 여러 문단에 흩어져 있으면(다중 홉) 한 번의 검색으로 함께 찾기 어렵다. IRCoT 같은 반복 검색은 검색과 LLM 생성을 여러 번 돌려 이를 메우지만 비싸고 느리며, 탐색할 경로가 많은 ‘경로 찾기(path-finding)’ 질문(예: 알츠하이머를 연구하는 Stanford 교수 찾기)에는 여전히 약하다. 이 논문은 해마 색인 이론을 본떠, 새로 들어온 지식을 문단 경계를 넘어 통합하는 장기 기억형 검색 구조를 제안한다.",
+ "pipeline": [
+  "[색인 1] 문단마다 LLM(기본 GPT-3.5-turbo-1106, temperature 0)에 1-shot 프롬프트로 개체명을 뽑는다(문단 NER, 그림 7).",
+  "[색인 2] 뽑은 개체명을 넣은 OpenIE 1-shot 프롬프트로 (주어, 관계, 목적어) 트리플을 뽑는다(그림 9). 개체명 외의 개념(명사구)도 포함되며, 명사구 = 노드 N, 관계 = 간선 E인 스키마 없는 KG가 말뭉치 전체에 대해 문단 단위로 쌓인다.",
+  "[색인 3] 검색 인코더 M(Contriever 또는 ColBERTv2)으로 노드를 임베딩해 코사인 유사도가 τ(0.8)를 넘는 명사구 쌍에 동의어 간선 E′을 추가하고, 각 명사구가 각 문단에 등장한 횟수를 담은 |N|×|P| 행렬 P를 저장한다.",
+  "[질의 1] LLM 1-shot 프롬프트로 질의에서 개체명 C_q만 뽑는다(질의 NER, 그림 8; 예: Stanford, Alzheimer’s). 질의당 LLM 호출은 이 1회뿐이다.",
+  "[질의 2] 각 질의 개체명을 M으로 임베딩해 코사인 유사도가 가장 높은 KG 노드 1개씩을 고른다 → 질의 노드 R_q(PPR 시작점).",
+  "[질의 3] 질의 노드에 같은 확률(나머지 0)을 주고 노드 특이도 s_i = 1/|P_i|를 곱한 개인화 분포로, 트리플 간선 + 동의어 간선 그래프에서 PPR을 한 번 실행한다(감쇠 계수 0.5 = 질의 노드로 되돌아갈 확률). 확률이 질의 노드들의 (공동) 이웃으로 퍼져 노드 확률 n′이 나온다.",
+  "[질의 4] n′에 행렬 P를 곱해 문단 점수 p를 얻고 상위 문단을 반환한다. QA는 상위 5개 문단 + 1-shot CoT로 답을 만들고, IRCoT와 결합하면 IRCoT의 각 단계 검색기로 이 과정을 쓴다."
+ ],
+ "key_idea": "색인 때 LLM(OpenIE)으로 모든 문단을 스키마 없는 KG(명사구 노드 + 관계 간선 + 인코더 유사도 기반 동의어 간선)로 바꿔 두고, 질의 때는 질의 개체명에 가장 가까운 노드들을 시작점으로 PPR을 한 번 돌려 그 (공동) 이웃 노드에 확률을 퍼뜨린 뒤, 노드 확률을 문단별로 합산해 순위를 매긴다. 그래서 같은(또는 유사한) 명사구를 공유하며 이어진 문단들을 LLM 반복 생성 없이 그래프 탐색 한 번으로 함께 끌어올린다(‘단일 단계 다중 홉 검색’). 반대로 트리플·개체로 추출되지 않은 정보(질의 맥락, 시간 속성, 놓친 긴 개체명 등)는 그래프에 없으므로 이 방식으로는 연결되지 않는다.",
+ "llm_calls": "색인: 문단마다 LLM 2회(① 문단 NER 1-shot → ② 그 개체명을 넣은 OpenIE 1-shot) + 검색 인코더로 명사구 노드 임베딩·동의어 간선 계산. 질의: LLM 1회(질의 NER 1-shot) + 인코더로 질의 개체명 임베딩·최근접 노드 연결 + PPR 1회(CPU, python-igraph) + 행렬곱(n′×P)으로 문단 점수. 홉마다 생성이 없고 검색된 문서를 LLM이 읽지 않는다. QA 단계는 별도로 상위 5개 문단 + 1-shot CoT 생성 1회. IRCoT와 결합하면 IRCoT 단계(최대 2회: HotpotQA·2Wiki, 4회: MuSiQue)마다 CoT 생성 + HippoRAG 검색.",
+ "index_cost": "말뭉치의 모든 문단에 LLM OpenIE(문단당 호출 2회)를 돌리고, 노드 임베딩과 동의어 간선(코사인 > 0.8)을 계산한다. 표 18(문단 10,000개): GPT-3.5 Turbo-1106 $15·60분(API 10스레드 병렬), GPT-3.5 Turbo-0125 $8·60분, Llama-3.1-8B $0·120분, Llama-3.1-70B $0·250분(vLLM, H100 4장) — ColBERTv2·IRCoT 색인은 $0·7분. 저자 표현으로 IRCoT 대비 ‘around 10 times slower and $15 more expensive for every 10,000 passages’(부록 G). 색인 결과물: KG + 노드×문단 등장 횟수 행렬 P + 노드 임베딩. 규모 예(표 1, MuSiQue 11,656문단): 고유 노드 91,729, 고유 트리플 107,448, 고유 간선(E) 21,714, 동의어 간선 145,990(Contriever)/191,636(ColBERTv2). (제 해석) 표 8에서 REBEL의 고유 간선이 269개뿐인 점으로 보아 ‘고유 간선’은 서로 다른 관계 표현의 수로 보인다. 갱신: 저자는 ‘simply adding edges to its KG’로 새 지식을 넣을 수 있다고 하지만(§6.1), 새 문단마다 OpenIE LLM 호출 2회와 기존 노드와의 동의어 계산은 여전히 필요하다(제 해석).",
+ "results": [
+  {
+   "claim": "초록: 다중 홉 QA에서 기존 최신 RAG 방법보다 최대 20% 높다(‘up to’ 표현, 데이터셋·지표별 최대치).",
+   "quote": "We compare HippoRAG with existing RAG methods on multi-hop question answering (QA) and show that our method outperforms the state-of-the-art methods remarkably, by up to 20%.",
+   "where": "Abstract"
+  },
+  {
+   "claim": "핵심 주장(단일 단계 다중 홉): PPR이 KG 경로를 탐색해 관련 부분 그래프를 찾으므로, 검색 한 번에 다중 홉 추론을 하는 셈이다.",
+   "quote": "PPR enables HippoRAG to explore KG paths and identify relevant subgraphs, essentially performing multi-hop reasoning in a single retrieval step.",
+   "where": "§1 Introduction"
+  },
+  {
+   "claim": "초록 기준 효율: 단일 단계 HippoRAG가 IRCoT와 비슷하거나 낫고 10–20배 저렴·6–13배 빠름. 주의: 같은 비교를 본문(§1·§4·§5.2)과 부록 G는 ‘10–30배 저렴’으로 적어 초록과 표기가 다르다(표 17: 1,000질의당 IRCoT $1–3 vs HippoRAG $0.1).",
+   "quote": "Single-step retrieval with HippoRAG achieves comparable or better performance than iterative retrieval like IRCoT while being 10-20 times cheaper and 6-13 times faster, and integrating HippoRAG into IRCoT brings further substantial gains.",
+   "where": "Abstract"
+  },
+  {
+   "claim": "본문 기준 효율: 단일 단계 HippoRAG는 온라인 검색에서 IRCoT와 대등하거나 더 낫고 10–30배 저렴, 6–13배 빠르다.",
+   "quote": "Notably, single-step HippoRAG is on par or outperforms IRCoT while being 10-30 times cheaper and 6-13 times faster during online retrieval (Appendix G).",
+   "where": "§4 Question Answering Results"
+  },
+  {
+   "claim": "왜 싼가: 질의에서 개체명만 뽑으면 되고, 검색된 문서 전부를 LLM이 처리하지 않기 때문(IRCoT 대비 검색 비용 10–30배 차이).",
+   "quote": "Specifically, as seen in Table 17, retrieval costs for IRCoT are 10 to 30 times higher than HippoRAG since it only requires extracting relevant named entities from the query instead of processing all of the retrieved documents.",
+   "where": "Appendix G"
+  },
+  {
+   "claim": "온라인 비용 실측(1,000질의, GPT-3.5 Turbo): ColBERTv2 $0·1분, IRCoT $1–3·20–40분, HippoRAG $0.1·3분.",
+   "quote": "Table 17 — API Cost ($): ColBERTv2 0 | IRCoT 1-3 | HippoRAG 0.1; Time (minutes): ColBERTv2 1 | IRCoT 20-40 | HippoRAG 3",
+   "where": "Table 17 (Appendix G)"
+  },
+  {
+   "claim": "단일 단계 검색: 2WikiMultiHopQA에서 R@2·R@5가 각각 11%·20%, MuSiQue에서 약 3% 향상(표 2: 2Wiki R@5 HippoRAG(ColBERTv2) 89.1 vs ColBERTv2 68.2, MuSiQue R@5 51.9 vs 49.2).",
+   "quote": "We notice an impressive improvement of 11 and 20% for R@2 and R@5 on 2WikiMultiHopQA and around 3% on MuSiQue.",
+   "where": "§4 Single-Step Retrieval Results, Table 2"
+  },
+  {
+   "claim": "저자 해석: 2Wiki의 큰 차이는 개체 중심(entity-centric) 데이터셋이라 HippoRAG에 잘 맞기 때문이기도 하다.",
+   "quote": "This difference can be partially explained by 2WikiMultiHopQA’s entity-centric design, which is particularly well-suited for HippoRAG.",
+   "where": "§4 Single-Step Retrieval Results"
+  },
+  {
+   "claim": "HotpotQA에서는 밀집 검색기보다 낮다: R@2/R@5가 ColBERTv2 64.7/79.3, HippoRAG(ColBERTv2) 60.5/77.7(표 2 수치). 저자 표현은 ‘comparable’.",
+   "quote": "HippoRAG outperforms all baselines on MuSiQue and 2WikiMultiHopQA and achieves comparable performance on the less challenging HotpotQA dataset.",
+   "where": "Table 2 (caption, values)"
+  },
+  {
+   "claim": "반복 검색과 결합: IRCoT의 검색기로 쓰면 R@5가 MuSiQue 약 4%, 2Wiki 18%, HotpotQA 1% 더 오른다(상호 보완적).",
+   "quote": "Using HippoRAG as the retriever for IRCoT continues to bring R@5 improvements of around 4% for MuSiQue, 18% for 2WikiMultiHopQA and an additional 1% on HotpotQA.",
+   "where": "§4 Multi-Step Retrieval Results, Table 3"
+  },
+  {
+   "claim": "QA(같은 리더): F1이 MuSiQue·2Wiki·HotpotQA에서 각각 최대 3%·17%·1% 향상.",
+   "quote": "As expected, improved retrieval performance in both single and multi-step settings leads to strong overall improvements of up to 3%, 17% and 1% F1 scores on MuSiQue, 2WikiMultiHopQA and HotpotQA respectively using the same QA reader.",
+   "where": "§4 Question Answering Results, Table 4"
+  },
+  {
+   "claim": "근거 문단을 ‘모두’ 찾은 질의 비율(AR@5) 격차가 더 크다: MuSiQue 3%→6%, 2Wiki 20%→38%(표 6: 2Wiki AR@5 HippoRAG 75.7 vs ColBERTv2 37.1).",
+   "quote": "Table 6 below shows that the gap between our method and ColBERTv2, using the top-5 passages, increases even more from 3% to 6% on MuSiQue and from 20% to 38% on 2WikiMultiHopQA, suggesting that large improvements come from obtaining all supporting documents rather than achieving partially retrieval on more questions.",
+   "where": "§5.2, Table 6"
+  },
+  {
+   "claim": "PPR이 핵심: 질의 노드만 쓰거나 직접 이웃에 확률을 조금 나누는 단순 대안보다 세 데이터셋 모두에서 훨씬 낫다(표 5 평균 R@2/R@5: HippoRAG 57.4/72.9, 질의 노드만 50.7/56.2, 노드+이웃 42.2/59.2). (제 확인) ‘이웃 추가가 질의 노드만보다 나쁘다’는 문장은 R@2에서는 세 데이터셋 모두 맞지만, 2Wiki R@5(74.7 vs 61.4)와 평균 R@5에서는 오히려 높다.",
+   "quote": "First, we find that PPR is a much more effective method for including associations for retrieval on all three datasets compared to both simple baselines. It is interesting to note that adding the neighborhood of R_q nodes without PPR leads to worse performance than only using the query nodes themselves.",
+   "where": "§5.1 PPR Alternatives, Table 5 rows 5-6"
+  },
+  {
+   "claim": "KG 품질이 성능을 좌우: REBEL로 KG를 만들면 크게 떨어진다(표 5 평균 R@5 72.9→58.4). Llama-3.1-8B는 2Wiki 외에는 GPT-3.5와 비슷, 70B는 세 곳 중 두 곳에서 GPT-3.5보다 낫다.",
+   "quote": "As shown in Table 5 row 2, building our KG using REBEL results in large performance drops, underscoring the importance of LLM flexibility.",
+   "where": "§5.1 OpenIE Alternatives, Table 5"
+  },
+  {
+   "claim": "증분 갱신: 요약 기반 색인(RAPTOR·MemWalker·GraphRAG)은 새 데이터마다 요약을 다시 해야 하지만, HippoRAG는 KG에 간선을 추가해 새 지식을 넣는다(저자 주장, 갱신 비용 실험은 없음).",
+   "quote": "In contrast, HippoRAG can continuously integrate new knowledge by simply adding edges to its KG.",
+   "where": "§6.1"
+  },
+  {
+   "claim": "색인 비용: IRCoT(일반 밀집 색인) 대비 문단 1만 개당 약 10배 느리고 $15 더 든다(표 18: GPT-3.5 Turbo-1106 $15·60분 vs ColBERTv2/IRCoT $0·7분; Llama-3.1-8B 120분, 70B 250분, vLLM·H100 4장).",
+   "quote": "Although offline indexing time and costs are higher for HippoRAG than IRCoT—around 10 times slower and $15 more expensive for every 10,000 passages, these costs can be dramatically reduced by leveraging open source LLMs.",
+   "where": "Appendix G, Table 18"
+  },
+  {
+   "claim": "오류의 출처(MuSiQue 오류 100건): NER 한계 48%, OpenIE 누락·오류 28%, PPR 24%(표 11).",
+   "quote": "The main error type, with nearly half of all error examples, is due to limitations of our NER based design.",
+   "where": "Appendix F.1, Table 11"
+  }
+ ],
+ "limits": [
+  "(저자 언급) 질의에서는 개체명만 뽑는다: MuSiQue 오류 100건 중 48%가 NER 한계 — “Windows 8”만 추출되고 ‘browsers’·‘accessibility’ 같은 신호는 그래프 탐색에서 빠진다(부록 F.1, 표 11). 저자는 이를 개념-맥락 트레이드오프로 부르며 “ignoring contextual cues accounts for around 48% of errors”라고 쓴다(부록 F.2).",
+  "(저자 언급) 트리플로 추출되지 않은 정보는 그래프에 없다: OpenIE 누락·오류가 오류의 28%(표 11). GPT-3.5가 긴 개체(노래 제목 “Don’t Let Me Wait Too Long”)를 놓치고 전쟁의 시작·종료 연도를 잡지 못한 예 — “This is an example of how models routinely ignore temporal properties.”(부록 F.3)",
+  "(저자 언급) PPR은 질의 맥락을 직접 쓰지 못한다: 비슷한 주제의 문단이 여럿이면 엉뚱한 부분 그래프로 확률이 퍼진다(PPR 오류 24%) — “the PPR algorithm is not able to leverage query context directly”(부록 F.1). 관계(술어)가 순회를 이끌게 하는 것은 향후 과제로 남겼다 — “allowing relations to guide graph traversal directly”(§7).",
+  "(저자 언급) 긴 문서에서 OpenIE 품질이 떨어진다: GPT-3.5 OpenIE F1이 가장 짧은 문단 10개 71.8 → 가장 긴 문단 10개 53.9(표 16). 더 잘게 자르면 문장 간 의존성 때문에 다른 문제가 생긴다(부록 F.4, §7).",
+  "(저자 언급) 확장성 미검증: “we are yet to empirically prove the efficiency and efficacy of our synthetic hippocampal index as its size grows way beyond current benchmarks”(§7). 실험 말뭉치는 6,119–11,656문단(표 1).",
+  "(저자 언급) 모든 구성 요소(LLM·인코더·PPR)를 추가 학습 없이 기성품으로 쓴다. 오류 대부분이 NER·OpenIE에서 나오므로 미세 조정 여지가 크다(§7).",
+  "(저자 언급) 색인이 비싸다: IRCoT 대비 문단 1만 개당 약 10배 느리고 $15 더 든다(부록 G, 표 18). 오픈 LLM으로 줄일 수 있다고 하지만 Llama-3.1-70B도 H100 4장으로 약 4시간이다.",
+  "(저자 언급) 개체가 덜 중요한 데이터에서는 약하다: HotpotQA에서 ColBERTv2보다 낮고(표 2), 저자는 낮은 지식 통합 요구와 개념-맥락 트레이드오프로 설명한다(§4). 불확실성 앙상블로 일부 보완되지만 단순 앙상블은 특히 2Wiki에서 성능을 낮추기도 한다(부록 F.2).",
+  "(제 판단) 연결은 공유 명사구를 통해서만 생긴다: 두 문단이 같은 명사구 노드(또는 코사인 > 0.8의 동의어 노드)나 트리플 경로로 이어지지 않으면 PPR이 그 사이로 확률을 보낼 수 없고, 문단 점수도 그 문단에서 나온 노드를 통해서만 받는다(n′×P). 같은 시간대·같은 장소·사진 속 내용처럼 트리플로 적히지 않는 관계는 색인 때 따로 노드·간선을 만들지 않는 한 잇지 못한다.",
+  "(제 판단) 단일 단계라 질의 도중 새로 찾은 단서를 반영하지 못한다: PPR 한 번으로 끝나므로, 검색 결과에서 얻은 정보로 다음 검색을 바꾸려면 IRCoT 같은 반복 틀이 필요하다(논문도 IRCoT + HippoRAG로 추가 향상을 보고).",
+  "(제 판단) ‘경로 찾기(path-finding)’ 능력의 근거는 정성 사례(표 7, 부록 E에서 직접 만든 질문 몇 개)뿐이며 정량 벤치마크는 없다. 평가는 위키피디아 기반 영어 텍스트 다중 홉 QA 3종(각 1,000문항)이다."
+ ],
+ "weave": {
+  "borrow": [
+   "무거운 구조화는 색인 때, 질의 때는 가볍게: HippoRAG는 질의당 LLM 1회(개체명 추출) + PPR로 다중 홉 연결을 탄다 — “retrieval costs for IRCoT are 10 to 30 times higher than HippoRAG since it only requires extracting relevant named entities from the query instead of processing all of the retrieved documents”(부록 G). Weave가 기록을 미리 사람·시간·장소·사진 속 글자로 정리하고 홉마다 긴 추론 문장을 생성하지 않으려는 방향의 선행 근거로 인용할 수 있다(수치는 GPT-3.5 기준 HippoRAG 대 IRCoT 비교이며 Weave 수치가 아님).",
+   "아는 단서 → 기록 연결 방식: 질의 개체명을 인코더 유사도로 가장 가까운 색인 노드에 붙이는 ‘질의 노드’ 단계와, 비슷한 표기를 묶는 동의어 간선(코사인 > 0.8)은 ‘지은’·‘지은이’·연락처 이름처럼 같은 사람을 가리키는 표기를 하나로 묶는 Weave 색인의 별칭 처리에 참고할 만하다.",
+   "드문 단서에 무게: 노드 특이도(1/등장 문단 수, IDF와 비슷)처럼 흔한 단서(‘와인’)보다 드문 단서(‘지은 집들이’)에 더 무게를 두는 가중을 탐색 메모의 단서 가중에 참고할 수 있다.",
+   "실패 분석을 설계 근거로: 질의에서 개체만 뽑으면 ‘찾을 것’과 맥락이 사라진다(오류 48%) → 탐색 메모에 ‘찾을 것’(와인 ‘이름’)을 따로 둔다. OpenIE는 시간 속성을 놓친다(“routinely ignore temporal properties”) → 날짜·시간은 추출 트리플이 아니라 필터로 처리한다(와인 예: 카톡 초대 ‘이번 주 토요일 6시’(3/12 발신)에서 얻은 3/15(토) 18시 이후 → 그 시간대 사진만 보기).",
+   "설명 용어: 와인 시나리오는 앞 홉에서 찾은 단서가 다음 홉을 정하는 ‘경로 따라가기(path-following)’형 다중 홉이다(‘집들이’라는 단어가 없는 카톡 초대 → 3/15(토) 18시 이후 그날 저녁 사진 → 라벨 OCR ‘BABICH SAUVIGNON BLANC’ + ‘소비뇽 블랑 = 화이트’ 추론 → ‘배비치 소비뇽 블랑’).",
+   "증분 갱신: 요약을 다시 만들지 않고 간선 추가로 새 지식을 넣는 구조(§6.1)는 새 기록이 계속 쌓이는 기기 안 색인에 필요한 성질이라는 점을 짚을 때 참고할 수 있다."
+  ],
+  "contrast": [
+   "KG 구축 비용: HippoRAG는 모든 문단에 LLM을 2번 돌려 트리플을 뽑는다(GPT-3.5로 1만 문단당 $15·60분, Llama-3.1-70B는 H100 4장으로 250분, 표 18). 기기 안의 카톡·사진·노트 전부에 같은 일을 하려면 부담이 크다. Weave는 KG를 만들지 않고 필드 정리 + 키워드·벡터 색인을 쓴다 — 단, Weave 쪽 색인 비용은 직접 측정하기 전까지 수치로 주장하지 않는다.",
+   "무엇이 이어지는가: HippoRAG에서는 같은(또는 유사한) 명사구를 공유해야 문단이 이어진다. 와인 예에서 ‘집들이’라는 단어가 없는 지은의 카톡 초대(‘이번 주 토요일 6시, 이사 기념으로 우리 집에서 저녁 먹자!’)와 와인 라벨 사진은 공유하는 명사구 없이 ‘같은 시간대’(3/15(토) 18시 이후)로만 이어지고, 라벨 글자는 사진 OCR로만 얻는다. HippoRAG를 그대로 쓰면 이 다리를 놓을 노드·간선이 없다(제 해석. 시간 노드를 추가하는 KG 설계는 가능하지만 이 논문 범위 밖).",
+   "단일 단계 대 홉별 갱신: HippoRAG는 질의 개체에서 PPR을 한 번 돌리고 끝나며, 도중에 찾은 새 단서(예: OCR로 읽은 ‘BABICH SAUVIGNON BLANC’)를 다음 검색 조건으로 쓰지 않는다. Weave는 단서를 메모에 더해 다음 홉을 찾는 반복 구조라 오히려 IRCoT 쪽 구조에 가깝다. 따라서 HippoRAG의 ‘IRCoT보다 10–30배 저렴·6–13배 빠름’을 Weave의 효율 근거처럼 쓰면 안 된다.",
+   "평가 범위: 결과는 위키피디아 기반 영어 텍스트 다중 홉 QA(MuSiQue·2Wiki·HotpotQA, 각 1,000문항)에서 나왔다. 개인 기록·한국어·사진/OCR·온디바이스 환경에서의 성능은 이 논문으로 말할 수 없다.",
+   "삼성 PDE와 비교할 때 주의: 이 논문은 ‘KG 기반 검색’의 한 구현(LLM OpenIE + PPR)일 뿐이다. PDE가 같은 방식으로 KG를 만들고 검색한다는 근거는 이 논문에 없으므로, ‘HippoRAG 같은 KG 기반 접근은 ~’으로 한정해 말하고 PDE의 한계로 단정하지 않는다.",
+   "KG 접근이 약하다고 말하면 안 된다: 개체 중심 질문(2Wiki)에서는 HippoRAG가 R@5 89.1로 ColBERTv2 68.2를 크게 앞선다(표 2). 우리 주장은 ‘개인 기록 사이의 연결은 시간·장소·사진 속 글자처럼 트리플로 잘 적히지 않는 경우가 많다’는 범위로 제한한다."
+  ]
+ },
+ "pipeline_figure": "b024",
+ "glossary": [
+  {
+   "term": "OpenIE (open information extraction)",
+   "ko": "개방형 정보 추출",
+   "desc": "정해진 스키마 없이 문장에서 (주어, 관계, 목적어) 트리플을 뽑는 작업으로, HippoRAG는 LLM 1-shot 프롬프트로 수행한다."
+  },
+  {
+   "term": "schemaless KG",
+   "ko": "스키마 없는 지식 그래프",
+   "desc": "개체·관계 유형을 미리 정하지 않고, 추출된 명사구를 노드로, 관계 표현을 간선으로 그대로 쓰는 그래프."
+  },
+  {
+   "term": "triple",
+   "ko": "트리플",
+   "desc": "(주어, 관계, 목적어) 한 묶음의 사실, 예: (Thomas, researches, Alzheimer’s)."
+  },
+  {
+   "term": "NER (named entity recognition)",
+   "ko": "개체명 인식",
+   "desc": "사람·장소·기관 같은 고유 이름을 찾는 것으로, HippoRAG는 문단 색인과 질의 처리 모두 LLM NER을 쓴다."
+  },
+  {
+   "term": "query named entities / query nodes",
+   "ko": "질의 개체명 / 질의 노드",
+   "desc": "질의에서 뽑은 개체명과, 인코더 코사인 유사도로 각 개체명에 가장 가까운 KG 노드(PPR의 시작점)."
+  },
+  {
+   "term": "Personalized PageRank (PPR)",
+   "ko": "개인화 페이지랭크",
+   "desc": "지정한 시작 노드로만 되돌아가는 무작위 보행으로 노드 중요도를 계산해, 시작 노드들의 (공동) 이웃에 확률이 몰리게 하는 알고리즘."
+  },
+  {
+   "term": "damping factor",
+   "ko": "감쇠 계수",
+   "desc": "이 논문 정의로는 PPR이 탐색을 계속하지 않고 질의 노드에서 무작위 보행을 다시 시작할 확률(0.5로 설정)."
+  },
+  {
+   "term": "synonymy edge",
+   "ko": "동의어 간선",
+   "desc": "검색 인코더 코사인 유사도가 임계값 τ(0.8)를 넘는 두 명사구 노드를 잇는 추가 간선."
+  },
+  {
+   "term": "node specificity",
+   "ko": "노드 특이도",
+   "desc": "노드가 추출된 문단 수의 역수(s_i = 1/|P_i|)로, PPR 전에 질의 노드 확률에 곱하는 IDF 비슷한 국소 가중치."
+  },
+  {
+   "term": "passage-node matrix P",
+   "ko": "노드-문단 행렬",
+   "desc": "각 명사구가 각 문단에 등장한 횟수를 담은 |N|×|P| 행렬로, PPR 노드 확률을 문단 점수로 바꿀 때 곱한다."
+  },
+  {
+   "term": "single-step multi-hop retrieval",
+   "ko": "단일 단계 다중 홉 검색",
+   "desc": "LLM 반복 없이 검색 한 번(여기서는 PPR 1회)으로 여러 홉 떨어진 근거 문단을 함께 찾는 것."
+  },
+  {
+   "term": "path-following / path-finding",
+   "ko": "경로 따라가기 / 경로 찾기",
+   "desc": "앞 홉의 답이 다음 홉을 정하는 질문 / 탐색할 경로가 많은 가운데 여러 조건을 잇는 경로 하나를 찾아야 하는 질문."
+  },
+  {
+   "term": "all-recall (AR@k)",
+   "ko": "전체 재현율",
+   "desc": "상위 k개 안에 근거 문단이 모두 들어온 질의의 비율."
+  },
+  {
+   "term": "hippocampal index",
+   "ko": "해마 색인",
+   "desc": "신피질의 기억 단위를 가리키며 그 사이의 연합을 저장하는 색인으로, HippoRAG에서는 KG가 이 역할을 한다."
+  },
+  {
+   "term": "pattern separation / pattern completion",
+   "ko": "패턴 분리 / 패턴 완성",
+   "desc": "서로 다른 경험을 구별되게 저장하는 기능 / 부분 단서로 전체 기억을 떠올리는 기능."
+  },
+  {
+   "term": "uncertainty ensemble",
+   "ko": "불확실성 앙상블",
+   "desc": "질의 개체와 KG 노드의 코사인 유사도가 임계값 θ보다 낮을 때 HippoRAG 점수와 밀집 검색 점수를 정규화해 평균하는 보완책(부록 F.2)."
+  },
+  {
+   "term": "concept-context tradeoff",
+   "ko": "개념-맥락 트레이드오프",
+   "desc": "개체(개념) 중심 설계 덕분에 다중 홉 연결은 잘 타지만 질의의 맥락 단서를 버리게 되는 장단점."
+  }
+ ],
+ "skipped": "부록 B 본문·그림 6 캡션(b096–b097, 데이터셋 비교 분석), 부록 C 본문·표 8 캡션(b099–b100, OpenIE 대안별 KG 통계), 부록 D 본문·표 9 캡션(b102–b103, OpenIE 내재적 평가), 부록 E.2 정성 사례 분석 문단과 표 10 캡션(b110–b113), 부록 F의 표 캡션(표 11–16: b119·b123·b124·b127·b130·b133)은 추가 실험·사례 나열이라 번역하지 않았다. 그림 7–9의 프롬프트 원문(이미지)도 대상이 아니다. 부록의 모든 절 제목·목차와 A(파이프라인 예시 문단·그림 3–5 캡션), E 도입·E.1(질문 구축 절차), F 본문(오류 유형, 개념-맥락 트레이드오프, 불확실성 앙상블, OpenIE 한계, 문서 길이), G(비용·효율 문단, 각주 6·7, 표 17·18 캡션), H(구현·계산 자원, 각주 8), I(프롬프트 안내·그림 7–9 캡션)는 번역했다.",
+ "extract_issues": "src.json을 최소한으로 고쳤다(영문 내용은 그대로). ① arXiv HTML(LaTeXML) 참조 오류: 2.2·2.3절에서 그림 2를 가리키는 참조 5곳(b017, b022, b023×2, b026)이 그림 2 캡션 안 각주 4로 연결되어 ‘Figure 4’로 렌더됨 → PDF v3에서 ‘Figure 2’임을 확인하고 수정. ② esvect 벡터 기호 \\vv{}가 KaTeX가 못 읽는 저수준 TeX(\\montraitd, \\fldr, \\hfil 등)로 풀려 있어 b025·b026·b051의 6곳을 \\overrightarrow{n}, \\overrightarrow{n^{\\prime}}, \\overrightarrow{p}로 교체. ③ b023의 사용자 정의 매크로 \\argmax(KaTeX 미지원)를 \\operatorname*{arg\\,max}로 교체. ④ 추출기가 초록과 그림 캡션 속 각주를 버림 → 각주 1(코드 링크)을 b001fn(초록 b001 뒤), 각주 4(해마 이론 세부 생략 안내)를 b024fn(그림 2 뒤)으로 추가. 각주 3은 PDF에도 없다(번호 건너뜀). ⑤ 중첩 tabular가 있는 표 7·10·12·15(b057, b113, b123, b130)에서 안쪽 행이 1칸짜리 행으로 중복 출력됨 → 최상위 행만 남기도록 다시 생성(셀 내용은 추출기 변환 그대로; 표 7은 38행→3행). src.txt도 고친 src.json으로 다시 만들었다. 추출기 원인(초록·캡션 각주 누락, 중첩 표 행 중복)은 tools/extract_arxiv.py를 고치지 않고 보고만 한다. 참고: ‘IRCoT 대비 저렴’ 배수는 원문 자체가 초록 10–20배, 본문·부록 G 10–30배로 다르다."
+}

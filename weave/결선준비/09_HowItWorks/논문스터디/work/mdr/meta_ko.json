@@ -1,0 +1,187 @@
+{
+ "key": "mdr",
+ "title_ko": "다중 홉 밀집 검색으로 복잡한 오픈 도메인 질문에 답하기",
+ "short": "MDR",
+ "venue": "ICLR 2021 (Poster)",
+ "venue_source": "https://iclr.cc/virtual/2021/poster/2806",
+ "year": 2021,
+ "authors_short": "Wenhan Xiong et al. (UC Santa Barbara, Facebook AI)",
+ "links": {
+  "arxiv": "https://arxiv.org/abs/2009.12756",
+  "pdf": "https://arxiv.org/pdf/2009.12756v2",
+  "html": "https://arxiv.org/html/2009.12756v2",
+  "code": "https://github.com/facebookresearch/multihop_dense_retrieval"
+ },
+ "group": "multihop",
+ "one_line": "질문과 앞 홉에서 찾은 패시지 원문을 그대로 이어 붙여 다시 인코딩한 벡터로 다음 패시지를 찾는 2홉 밀집 검색기. 하이퍼링크나 중간 텍스트 생성 없이, HotpotQA에서 기존 최고 정확도와 맞먹으면서 추론은 10배 빠르다(저자 보고).",
+ "problem": "다중 홉 질문은 답에 필요한 근거가 여러 문서에 흩어져 있고, 두 번째 근거(예: 질문에 이름이 나오지 않는 중간 개체의 문서)는 첫 번째 근거를 읽어야 무엇을 찾을지 알 수 있어서 질문만으로 한 번 검색해서는 찾기 어렵다. 기존 방법은 위키백과 하이퍼링크나 개체 연결로 문서 그래프를 만들어 홉마다 기하급수적으로 커지는 탐색 공간을 줄였지만, 링크가 적거나 개체 연결이 약한 새 도메인으로는 일반화되기 어렵고, 최고 모델은 답 하나에 대형 사전학습 모델을 수백 번 호출할 만큼 느렸다. 이 논문은 코퍼스 고유 정보(하이퍼링크·개체 표시) 없이 비구조화 텍스트만으로, 답에 충분한 패시지 시퀀스를 정확하고 빠르게 찾는 문제를 푼다.",
+ "pipeline": [
+  "1단계(색인): 공유 RoBERTa-base 인코더(패시지 인코더 h)로 코퍼스의 모든 패시지를 한 번씩 벡터로 바꿔 밀집 색인을 만든다. 하이퍼링크 그래프나 개체 연결은 만들지 않는다.",
+  "2단계(1홉): 질문 q만 같은 인코더(질의 인코더 g)로 인코딩해 질의 벡터를 만들고, MIPS(최대 내적 검색)로 첫 패시지 후보 p₁을 찾는다.",
+  "3단계(2홉): 질문과 p₁ 원문을 그대로 이어 붙인 텍스트 [q; p₁]을 다시 g에 넣어 새 질의 벡터 q₂ = g(q, p₁)를 만들고, 같은 색인에서 MIPS로 p₂를 찾는다. 다음 질의를 문장으로 생성하지 않는다.",
+  "4단계(빔 탐색): 1홉 후보마다 2홉 검색을 하고, (p₁, p₂) 시퀀스를 두 내적 점수의 합으로 매겨 상위 k개 시퀀스를 남긴다. 본문 실험은 2홉 고정(n=2).",
+  "5단계(선택: 재순위화·읽기): 상위 시퀀스 앞에 질문을 붙여 ELECTRA-large 교차 인코더로 재순위화하고, 같은 인코더가 답 스팬과 근거 문장을 예측한다(추출형 리더). FiD·다중 홉 RAG 같은 생성형 리더도 시험했고, FEVER에서는 검색 부분만 MDR로 바꿔 기존 KGAT에 넣었다."
+ ],
+ "key_idea": "다음 홉 질의를 따로 '생성'하거나 링크를 따라가지 않고, 질문과 앞서 찾은 패시지를 텍스트로 이어 붙여 다시 인코딩한 벡터 하나(q_t = g(q, p_1, …, p_{t-1}))를 다음 홉 질의로 쓴다. 질의·패시지 인코더를 공유하고, 홉 순서를 지킨 단계별 정답 패시지로 대조 학습(배치 내 + TF-IDF 하드 네거티브 + 메모리 뱅크)하면, 사전학습 인코더가 이어 붙인 입력에서 다음 홉에 필요한 정보(예: 1홉 패시지에 처음 나온 중간 개체)를 스스로 골라낸다. 저자들은 이를 홉마다 다른 대상을 찾는 일종의 의사 적합성 피드백(질의 확장)으로 위치시킨다.",
+ "llm_calls": "생성 LLM 호출 없음(홉 사이에 텍스트를 생성하지 않음). 검색: 1홉은 질의 인코더(RoBERTa-base) 순전파 1회 + MIPS 1회, 2홉은 빔에 남은 1홉 후보마다 [q; p₁] 인코딩 1회 + MIPS 1회(빔 크기 값은 본문에 없음). 재순위화·읽기(선택): 상위 k개 시퀀스마다 ELECTRA-large 순전파 1회(그림 3은 k=1~200, 부록 B.2.1 최고 설정은 상위 250개). 저자들은 메모리 내 HNSW 색인에서 검색 시간이 대형 사전학습 모델 순전파에 비해 무시할 만하다고 보고한다. direct 모드는 검색 단계에서 끝난다.",
+ "index_cost": "코퍼스의 모든 패시지를 공유 인코더로 한 번씩 인코딩해 벡터 색인을 만든다(HotpotQA 코퍼스는 위키백과 문서의 도입부 패시지만 사용 — 부록 D). 문서 그래프·하이퍼링크·개체 연결을 구성하지 않고, 색인 때 LLM 요약 같은 생성 단계도 없다. 최고 검색 결과는 FAISS 정확 내적 색인(IndexFlatIP), 효율 측정은 메모리 내 HNSW 근사 색인(정확 탐색과 거의 같은 성능)을 썼다. 학습 쪽 추가 비용은 TF-IDF로 하드 네거티브 수집, 수렴 후 고정한 인코더 복사본으로 여러 배치의 패시지 벡터를 모으는 메모리 뱅크이며, 실험 장비는 32GB V100 8장 머신이다. 코퍼스 크기·색인 크기·인코딩 시간 수치는 본문에 없다.",
+ "results": [
+  {
+   "claim": "다음 홉 질의는 질문과 이전에 검색된 패시지를 이어 붙여 질의 인코더 g에 다시 넣어 만든다(텍스트 생성 없음). 각 홉의 정식화는 기존 단일 홉 밀집 검색과 비슷하고, 이전 검색 결과를 조건으로 한 질의 재구성만 추가된다.",
+   "quote": "In order to reformulate the query representation to account for previous retrieval results at time step \\(t\\), we simply concatenate the question and the retrieved passages as the inputs to \\(g(\\cdot)\\).",
+   "where": "§2.2 Model"
+  },
+  {
+   "claim": "추론은 밀집 패시지 색인과 질의 표현만 쓰며, 하이퍼링크나 개체 연결로 그래프를 만들 필요가 없다(빔 점수 = 내적의 합).",
+   "quote": "Such inference relies only on the dense passage index and the query representations, and does not need explicit graph construction using hyperlinks or entity linking.",
+   "where": "§2.2 Training and Inference"
+  },
+  {
+   "claim": "재순위화 없는 직접 검색에서 HotpotQA R@2/R@10/R@20은 MDR 65.9/77.5/80.2로, 하이퍼링크를 쓰는 DrKIT(38.3/67.2/71.0)와 TF-IDF + Linked(17.3/50.0/62.7)보다 높다. FEVER 정밀도/재현율/F1은 MDR 45.7/69.1/55.0, Entity Linking 30.6/53.8/39.0.",
+   "quote": "On both datasets, MDR substantially outperforms all baselines. [Table 1] TF-IDF + Linked 17.3 | 50.0 | 62.7 | 18.6 | 35.8 | 24.5; DrKIT 38.3 | 67.2 | 71.0 | - | - | -; Entity Linking - | - | - | 30.6 | 53.8 | 39.0; MDR 65.9 | 77.5 | 80.2 | 45.7 | 69.1 | 55.0",
+   "where": "§3.1.1, Table 1"
+  },
+  {
+   "claim": "ELECTRA-large로 상위 100개 시퀀스를 재순위화하면 SP EM 81.2, 답 재현율 88.2로, 하이퍼링크 그래프를 쓰는 Graph Recurrent Retriever(75.7/87.5)보다 높다. 재순위화 없는 direct는 65.9/75.4.",
+   "quote": "After we rerank the top-100 sequences from the dense retriever, our passage recall is better than the state-of-the-art Graph Recurrent Retriever, which uses BERT to process more than 500 passages. [Table 2] Graph Rec Retriever 75.7 | 87.5; MDR (direct) 65.9 | 75.4; MDR (reranking) 81.2 | 88.2",
+   "where": "§3.1.2, Table 2"
+  },
+  {
+   "claim": "절제(R@2): 홉 순서를 무시하고 학습하면 65.9 → 17.6으로 무너져 단일 홉(DPR) 25.2보다도 낮다. 공유 인코더를 빼면 59.9, 메모리 뱅크를 빼면 63.7, 링크 네거티브를 빼면 64.6.",
+   "quote": "Respecting the ordering of passages in two hops is essential - training in an order-agnostic manner hardly works at all, and underperforms even the single-hop baseline. [Table 3] Full Retrieval Model 65.9 | 77.5 | 80.2; - w/o linked negatives 64.6 | 76.8 | 79.6; - w/o memory bank 63.7 | 74.2 | 77.2; - w/o shared encoder 59.9 | 70.6 | 73.1; - w/o order 17.6 | 55.6 | 62.3; Single-hop 25.2 | 45.4 | 52.1",
+   "where": "§3.1.3 Retriever Ablation Study, Table 3"
+  },
+  {
+   "claim": "사람이 만든 오라클 질문 분해(중간 정답까지 대입)도 MDR보다 뚜렷이 낫지 않았다. 브리지 질문 100개에서 R@2는 MDR 54.9, 분해 50.0/51.0(R@10은 분해 64.7 vs MDR 63.7로 분해가 약간 높음). 저자는 인코더가 각 홉에 필요한 정보를 질문에서 스스로 고른다고 해석한다.",
+   "quote": "As shown in Table 4, we did not observe any strong improvements from explicit question decomposition, which is contrary to the findings by Wolfson et al. (2020) when using term-based IR methods. … This suggests that strong pretrained encoders can effectively learn to select necessary information from the multi-hop question at each retrieval step. [Table 4] MDR 54.9 | 63.7 | 70.6; Decomp (SubQ1;SubQ2) 50.0 | 64.7 | 67.6; Decomp (Q;SubQ2) 51.0 | 64.7 | 68.6",
+   "where": "§3.1.3 Question Decomposition for Retrieval, Table 4"
+  },
+  {
+   "claim": "비교 질문은 거의 해결됐고, 브리지 질문 오류 50개 중 절반은 실제로는 타당한 다른 시퀀스여서 top-1 정확도는 약 90%로 추정된다. 나머지 오류는 정확한 n-gram 일치를 놓친 경우다.",
+   "quote": "This gives an estimated top-1 passage sequence accuracy of about 90%. Other remaining errors are due to the dense method’s inability to capture the exact n-gram match between the question and passages.",
+   "where": "§3.1.3 Retrieval Error Analysis"
+  },
+  {
+   "claim": "HotpotQA fullwiki 테스트(공식 리더보드)에서 MDR(ELECTRA 리더)은 답 EM/F1 62.3/75.3, 근거 57.5/80.9, 결합 41.8/66.6으로 Graph Recurrent Retriever(60.0/73.0, 49.1/76.4, 35.4/61.2)를 앞서며, 특히 근거 예측에서 차이가 크다.",
+   "quote": "Despite not using such prior knowledge, our model outperforms all previous systems by large margins, especially on supporting fact prediction, which benefits more directly from better retrieval. [Table 5] Graph Recurrent Retriever 60.0 | 73.0 | 49.1 | 76.4 | 35.4 | 61.2; MDR (ELECTRA Reader) 62.3 | 75.3 | 57.5 | 80.9 | 41.8 | 66.6",
+   "where": "§3.2.1 Comparison with Existing Systems, Table 5"
+  },
+  {
+   "claim": "CPU 16코어·배치 1 기준으로, 비슷한 성능에서 기존 최고 시스템보다 약 10배 빠르다. 메모리 내 색인에서 검색 시간은 대형 사전학습 모델 순전파에 비해 무시할 만하다(코드 미공개 시스템의 시간은 BERT 순전파 횟수로 추정).",
+   "quote": "With an in-memory index, we observe that the retrieval time is negligible compared to the forward pass of large pretrained models. … As shown in Figure 3, our method is about 10 times faster than current state-of-the-art systems while achieving a similar level of performance.",
+   "where": "§3.2.1 Inference Efficiency, Figure 3"
+  },
+  {
+   "claim": "FEVER에서 다운스트림(KGAT)은 그대로 두고 검색만 MDR로 바꿔도, 여러 문서가 필요한 Strict-Multi에서 LA 51.0 → 72.1, FEVER 점수 6.2 → 16.2로 오른다.",
+   "quote": "As shown by the results, even without finetuning the downstream modules, simply replacing the retrieval component with MDR leads to significant improvements, especially on the strict multi-evidence subset. [Table 7] KGAT with BERT rerank 65.9 | 40.1 | 51.0 | 6.2; Ours + KGAT with BERT rerank 77.9 | 42.0 | 72.1 | 16.2",
+   "where": "§3.3, Table 7"
+  },
+  {
+   "claim": "(부록 D) 1홉 뒤 q와 p₁을 이어 붙여 인코딩하고 첫 토큰으로 '검색을 멈출지'를 예측하는 이진 헤드를 단 통합 모델은, NQ에서는 단일 데이터셋 모델과 비슷했지만 HotpotQA에서는 더 떨어졌다(AR@20: NQ 79.5 vs 80.7, HotpotQA 78.1 vs 83.4).",
+   "quote": "Once the retriever finishes the 1-hop retrieval, it encodes concatenation of \\(q\\) and \\(p_{1}\\) and predicts whether to stop retrieval using the final hidden state of the first token. … Specifically, for NQ, the unified retrieval model achieves very similar performance as the single-dataset DPR model, while the performance on HotpotQA decreases more. [Table 13] single-hop only 80.7 | 87.3 | - | -; multi-hop only - | - | 83.4 | 89.4; unified 79.5 | 86.1 | 78.1 | 83.0",
+   "where": "Appendix D, Table 13"
+  }
+ ],
+ "limits": [
+  "2홉 고정: 두 데이터셋이 2홉을 가정하므로 모든 실험에서 n=2로 고정했다(저자 언급, §3 Implementation Details). 홉 수를 스스로 정하지 않으며 3홉 이상은 실험하지 않았다. 멈춤 예측은 부록 D의 통합 모델 실험뿐이고, 그때 HotpotQA 성능이 단일 데이터셋 모델보다 떨어졌다(저자 언급).",
+  "위키백과 QA 지도학습에 의존: 홉별 정답(근거) 패시지 주석으로 학습하며, 순서를 무시하고 학습하면 거의 작동하지 않는다(저자 언급, 표 3). HotpotQA는 순서를 주지 않아 답 스팬이 든 패시지를 마지막 패시지로 두는 휴리스틱을 썼다(저자 언급). 실험 코퍼스는 위키백과(HotpotQA·FEVER)뿐이다.",
+  "정확한 어휘 일치에 약함: 브리지 질문의 남은 오류는 밀집 방법이 질문과 패시지 사이의 정확한 n-gram 일치를 포착하지 못해서이며, 저자들은 용어+밀집 하이브리드 색인을 대안으로 제시한다(저자 언급, §3.1.3).",
+  "빔 탐색·재순위화 비용: 2홉 질의 벡터는 1홉 결과에 따라 달라지므로 미리 계산할 수 없고, 빔에 남긴 1홉 후보마다 [q; p₁]을 다시 인코딩·검색해야 한다(제 추론). HotpotQA 최고 성능(표 5)은 상위 시퀀스를 ELECTRA-large로 재순위화·읽기 했을 때이며, 재순위화 없는 direct는 SP EM 65.9로 재순위화 후 81.2보다 낮다(표 2).",
+  "입력 길이: 이전 패시지 원문 전체를 이어 붙이므로 2홉 질의 최대 길이를 350 토큰으로 두었다(1홉 질의 70, 패시지 300; 표 11). 홉이 늘거나 긴 문서를 다루면 질의 입력이 계속 길어진다(제 추론).",
+  "효율 비교의 단서: 코드를 공개하지 않은 경쟁 시스템의 실행 시간은 BERT 교차 어텐션 순전파 횟수로 추정했고, TF-IDF나 링크 그래프 구성 같은 추가 처리 오버헤드는 무시했다(저자 언급, §3.2.1)."
+ ],
+ "weave": {
+  "borrow": [
+   "다음 홉 질의 = '원래 요청 + 지금까지 찾은 단서 원문'을 이어 붙여 한 번 인코딩: 탐색 메모(찾을 것 / 아는 단서 / + 새 단서)를 다음 검색 조건으로 쓰는 Weave 설계의 가장 직접적인 선례다. 장표 인용: \"we simply concatenate the question and the retrieved passages as the inputs to g(·)\" (§2.2). 와인 예시에 대응시키면, 1홉 단서인 지은의 카톡 초대 '이번 주 토요일 6시, 이사 기념으로 우리 집에서 저녁 먹자!'(3/12 수, '집들이'라는 단어 없음)를 요청에 붙여 다음 질의를 만드는 부분이 MDR의 [q; p₁]에 해당한다(시간 필터·라벨 OCR은 MDR에 없는 Weave 고유 단계).",
+   "홉 사이에 텍스트 생성이 없다: MDR의 다음 홉 질의는 LLM이 쓴 문장이 아니라 인코더 순전파 1회로 만든 벡터다. '매 홉 긴 추론 문장을 생성하지 않는다'는 Weave 목표가 실현 가능한 방향이라는 선행 근거로 쓸 수 있다(단 근거 범위는 위키백과 2홉 QA).",
+   "하이퍼링크·그래프 없이 동작: \"does not need explicit graph construction using hyperlinks or entity linking\" (§2.2). 카톡·캘린더·사진처럼 기록 사이에 링크가 없는 개인 기록에도, 다음 단서를 텍스트로 이어 붙여 다시 검색하는 같은 원리를 쓸 수 있다는 논거.",
+   "분해보다 맥락 누적: 사람이 만든 오라클 하위 질문도 R@2가 MDR보다 낮았고(54.9 vs 50.0/51.0, 표 4), 저자는 분해하면 한 하위 질문의 정보가 다른 홉에서 쓰이지 못하기 때문이라고 가정한다. 요청 원문과 단서를 메모에 계속 들고 가는 설계의 근거.",
+   "학습 레시피 참고: 질의·패시지 인코더 공유, 홉 순서 유지, 배치 내 + 하드 네거티브 + 메모리 뱅크. 순서 없이 학습하면 R@2가 17.6으로 무너진다(표 3) → 경량 Reasoning Embedding의 학습 데이터는 '(요청 + 현재 단서) → 다음 기록' 순서쌍으로 만들어야 한다는 시사점.",
+   "멈춤 판단의 선례: 부록 D는 1홉 뒤 q와 p₁을 이어 붙인 인코딩의 첫 토큰으로 '검색을 멈출지'를 예측하는 이진 헤드를 검색 인코더 위에 얹었다. Weave의 '필요한 정보가 채워지거나 새 단서가 없으면 멈춤'을 생성 없이 임베딩 모델 위 작은 분류기로 구현하는 아이디어로 가져올 수 있다(단 이 실험에서 HotpotQA 성능은 떨어졌다).",
+   "키워드+벡터 하이브리드의 근거: MDR의 남은 오류가 정확한 n-gram 일치 부족이고 저자도 용어+밀집 하이브리드 색인을 제안한다 → 날짜·이름·라벨 글자 같은 정확한 조건은 필터·키워드로, 의미로 이어지는 단서는 벡터로 찾는 Weave 설계와 맞닿는다(와인 예시의 3/15 18:00 시간 필터, 라벨 OCR 'BABICH SAUVIGNON BLANC')."
+  ],
+  "contrast": [
+   "MDR 수치(HotpotQA R@2 65.9, SP EM 81.2, 약 10배 빠름)는 위키백과 벤치마크와 서버 환경(V100 GPU, CPU 16코어) 기준이다. Weave의 온디바이스 정확도·지연 시간으로 옮겨 쓰면 안 된다.",
+   "MDR은 본문에서 2홉 고정(n=2)이다. '필요한 만큼 홉을 돌고 새 단서가 없으면 멈춘다'는 Weave 루프는 MDR이 검증한 것이 아니다(부록 D 멈춤 헤드는 예비 실험이고 HotpotQA 성능이 떨어졌다).",
+   "MDR의 단서는 위키백과 패시지 원문 전체이고, 매 홉 같은 종류의 텍스트 패시지를 찾는다. 카톡 초대 → 사진 → 라벨 OCR처럼 기록 종류가 바뀌는 홉, 시간 필터, 사진 속 글자, 대화·위치 맥락은 MDR 범위 밖이다.",
+   "MDR은 홉별 정답 패시지가 주석된 대규모 데이터(HotpotQA 113k 질문)로 지도학습한다. 개인 기록에는 이런 주석이 없으므로 Reasoning Embedding 학습 데이터 구성은 Weave가 따로 풀어야 할 문제다.",
+   "MDR 검색기는 RoBERTa-base이고, HotpotQA 최고 성능은 ELECTRA-large 재순위화·리더를 붙였을 때다. 온디바이스 경량 모델로 같은 효과가 난다는 근거는 이 논문에 없다.",
+   "MDR은 'reasoning embedding'이라는 표현을 쓰지 않는다. 이어 붙인 텍스트를 인코딩하는 다중 홉 밀집 검색기이며, 추론 능력을 따로 학습·평가하지 않는다. 장표에서는 'MDR식 질의 재구성(질문 + 이전 단서 이어 붙이기)'처럼 논문 표현 그대로 인용할 것."
+  ]
+ },
+ "pipeline_figure": "b008",
+ "glossary": [
+  {
+   "term": "multi-hop dense retrieval (MDR)",
+   "ko": "다중 홉 밀집 검색(기)",
+   "desc": "질문과 이전 홉 패시지를 이어 붙여 다시 인코딩한 벡터로 다음 패시지를 MIPS 검색하는 반복 검색 방법이자 이 논문의 모델 이름."
+  },
+  {
+   "term": "dense retrieval",
+   "ko": "밀집 검색",
+   "desc": "질문과 문서를 사전학습 인코더로 밀집 벡터로 바꿔 내적으로 검색하는 방식으로, TF-IDF·BM25 같은 희소 용어 검색과 대비된다."
+  },
+  {
+   "term": "MIPS (maximum inner-product search)",
+   "ko": "최대 내적 검색",
+   "desc": "질의 벡터와 내적이 가장 큰 패시지 벡터를 색인에서 찾는 것으로, MDR은 FAISS(정확)와 HNSW(근사)로 구현했다."
+  },
+  {
+   "term": "query reformulation",
+   "ko": "질의 재구성",
+   "desc": "이전 검색 결과를 반영해 다음 홉의 질의 표현을 새로 만드는 것으로, MDR은 질문과 패시지 텍스트를 이어 붙여 인코더에 다시 넣는다."
+  },
+  {
+   "term": "bridge question",
+   "ko": "브리지 질문",
+   "desc": "질문에 없는 중간 개체를 먼저 찾아야 답할 수 있는 HotpotQA 질문 유형(예: 그림 1의 Judy Lewis → Clark Gable)."
+  },
+  {
+   "term": "comparison question",
+   "ko": "비교 질문",
+   "desc": "질문에 두 개체가 모두 나오고 이를 비교하는 HotpotQA 질문 유형으로, 필요한 개체가 질문에 있어 검색이 쉽다."
+  },
+  {
+   "term": "hard negative",
+   "ko": "하드 네거티브",
+   "desc": "질문과 관련 있어 보이지만 정답이 아닌 패시지로, MDR은 TF-IDF 검색 결과와 그 링크 페이지에서 뽑았다."
+  },
+  {
+   "term": "in-batch negative",
+   "ko": "배치 내 네거티브",
+   "desc": "같은 배치의 다른 질문에 해당하는 패시지를 네거티브로 재사용하는 것."
+  },
+  {
+   "term": "memory bank",
+   "ko": "메모리 뱅크",
+   "desc": "고정한 인코더 복사본으로 여러 배치의 패시지 벡터를 모아 두고 네거티브로 써서 네거티브 수를 늘리는 장치."
+  },
+  {
+   "term": "shared encoder",
+   "ko": "공유 인코더",
+   "desc": "질의 인코더 g와 패시지 인코더 h에 같은 RoBERTa-base를 쓰는 것으로, 절제에서 빼면 R@2가 65.9에서 59.9로 떨어진다."
+  },
+  {
+   "term": "beam search",
+   "ko": "빔 탐색",
+   "desc": "홉마다 상위 후보 여러 개를 유지하며 내적 점수의 합으로 패시지 시퀀스를 고르는 탐색."
+  },
+  {
+   "term": "SP EM (Support Passage Exact Match)",
+   "ko": "근거 패시지 정확 일치",
+   "desc": "최종 예측 시퀀스가 두 정답 패시지를 모두 포함하는지 여부로 매기는 HotpotQA 검색 지표."
+  },
+  {
+   "term": "question decomposition",
+   "ko": "질문 분해",
+   "desc": "다중 홉 질문을 하위 질문들로 나눠 따로 검색하는 방식으로, 이 논문 실험에서는 오라클 분해도 뚜렷한 이득이 없었다."
+  },
+  {
+   "term": "pseudo-relevance feedback",
+   "ko": "의사 적합성 피드백",
+   "desc": "첫 검색 결과를 관련 문서로 가정해 사용자 개입 없이 질의를 확장하는 전통 IR 기법으로, MDR은 홉마다 다른 대상을 찾는다는 점이 다르다."
+  }
+ ],
+ "skipped": "부록 A.1 설명 문단(b088)과 표 8 캡션, A.2 표 9 캡션(오류 사례 덤프), A.3 리더 추가 분석 문단 2개(b094, b095)와 표 10 캡션, 부록 C 검색 없는 방식 추가 실험 문단(b121)과 그림 4 캡션은 사례 덤프·추가 실험이라 절 제목만 번역했다(부록 블록 39개 중 8개 미번역). 부록 표 본문(표 8–13)과 수식은 지침대로 번역하지 않았다. 부록 B(하이퍼파라미터 표 캡션, 추출형 리더·FiD·다중 홉 RAG 구현 설명)와 부록 D(통합 검색·멈춤 헤드) 전체는 번역했다.",
+ "extract_issues": "① 초록의 각주 1(코드 URL)이 추출되지 않아 fn 블록 b001a로 추가했다(blocks 맨 앞). ② b002(초록 아래 LaTeX rule 여백용 빈 1칸 표)를 삭제했다. ③ 표 2와 표 3이 한 float 안의 minipage 두 개라 b038 하나로 합쳐지고 표 3 캡션이 빠져 있었다 → b038(표 2)과 b038a(표 3, 캡션 복원)로 나눴다. ④ arXiv HTML(LaTeXML)의 상호참조 오류 2건을 PDF v2 원문대로 고쳤다: b039 'Table 3 shows the reranking results' → 'Table 2 …', b066 '… found in Appendix 10.' → '… found in Appendix A.3.' (LaTeX 소스의 label 위치와 PDF 본문으로 확인). src.txt도 같은 형식으로 다시 만들었다. 추출기는 고치지 않았다 — 초록 각주를 버리는 문제와 한 float 안 여러 캡션 중 첫 캡션만 쓰는 문제는 다른 논문에도 생길 수 있다."
+}

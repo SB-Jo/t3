@@ -1,0 +1,238 @@
+# EfficientRAG: Efficient Retriever for Multi-Hop Question Answering (2408.04259v2)
+
+### b001 [p]
+Retrieval-augmented generation (RAG) methods encounter difficulties when addressing complex questions like multi-hop queries. While iterative retrieval methods improve performance by gathering additional information, current approaches often rely on multiple calls of large language models (LLMs). In this paper, we introduce EfficientRAG, an efficient retriever for multi-hop question answering. EfficientRAG iteratively generates new queries without the need for LLM calls at each iteration and filters out irrelevant information. Experimental results demonstrate that EfficientRAG surpasses existing RAG methods on three open-domain multi-hop question-answering datasets. The code is available in <a href="https://github.com/NIL-zhuang/EfficientRAG-official">aka.ms/efficientrag</a>.
+
+### b002 [h2]
+1 Introduction
+
+### b003 [p]
+Large-language models (LLMs) have shown remarkable performance in numerous applications and tasks <span class="cite">OpenAI (2023) ; Jiang et al. (2023a) ; Touvron et al. (2023b)</span>. However, LLMs lack knowledge underrepresented in their training data, especially in domain-specific settings, and still face the issues of hallucinations <span class="cite">Zhang et al. (2023) ; Huang et al. (2023) ; Yang et al. (2023)</span>. Retrieval-augmented generation (RAG) techniques <span class="cite">Lewis et al. (2020) ; Gao et al. (2023)</span> have been widely adapted to retrieve knowledge from external resources to ground the generated responses. Previous RAG methods often adapt one-round retrieval, <i>e.g.</i>, only use the user query or question as the input to retrieve knowledge <span class="cite">Guu et al. (2020) ; Borgeaud et al. (2022) ; Izacard et al. (2023) ; Shi et al. (2023)</span>. Such one-round RAG is capable of answering questions which clearly state all the needed information in the input query <span class="cite">Thorne et al. (2018) ; Trischler et al. (2017) ; Rajpurkar et al. (2016)</span>, such as one-hop question, <i>e.g.</i>, <i>“what is Newton’s third law of motion?”</i>. However, one-round RAG methods could fail in complex questions where more information is required beyond the first-round retrieved information, <i>e.g.</i>, multi-hop questions <span class="cite">Yang et al. (2018a) ; Trivedi et al. (2022a) ; Ho et al. (2020b)</span>. In order to deal with complex multi-hop questions, recent works propose to obtain required information through multi-round retrievals or reasonings, such as rewriting or generating queries for the following multi-round retrievals <span class="cite">Khattab et al. (2022) ; Ma et al. (2023) ; Shao et al. (2023) ; Jiang et al. (2023b)</span>, interleaving multiple retrieval and reasoning steps <span class="cite">Trivedi et al. (2023)</span>, multi-rounds of self-asking <span class="cite">Press et al. (2023)</span>. However, such iterative retrieval approaches have the following limitations: (1) they require multiple LLM calls concerning rewriting or generating new queries for the next round of retrieval, thus increasing the latency and cost. (2) they require dedicated prompting and few-shot examples that might need updating across different scenarios.
+
+### b004 [p]
+In this paper, we are inspired by the intuition that the types of relations in multi-hop questions are limited, or significantly fewer compared to the number of entities. As proved in <span class="cite">Zhu et al. (2023)</span> that small models have a certain ability of reasoning, we propose that identifying relations and their associated entities from retrieved information can be effectively managed by small models instead of LLMs. Thus, we propose EfficientRAG consists of a Labeler and a Filter to iteratively generate new queries for retrieval and in the meanwhile keep the most relevant retrieved information, enhancing efficiency compared to other RAG methods.
+
+### b005 [h2]
+2 Empirical Study
+
+### b006 [h3]
+2.1 Capability of LLM generator
+
+### b007 [p]
+In this section, we conducted an empirical study to assess how well an LLM-based generator performs with different levels of retrieved information. We test on three settings: direct prompt (no retrieved chunks), oracle chunks (oracle chunks as the context), and mixed chunks (both oracle and irrelevant chunks as the context) on three datasets, <i>i.e.</i>, HotpotQA <span class="cite">Yang et al. (2018b)</span>, 2Wiki-multihop (2WikiMQA) <span class="cite">Ho et al. (2020a)</span> and MuSiQue <span class="cite">Trivedi et al. (2022b)</span>. The generator model includes GPT-3.5 <span class="cite">OpenAI (2022)</span>, GPT-4 <span class="cite">OpenAI (2023)</span> with 1106-preview version, and Llama-3-8B<sup class="fnm">1</sup> <span class="cite">Touvron et al. (2023a)</span>. We evaluate the model answer with accuracy metric by GPT-3.5, the prompt can be found in Appendix B.1. As illustrated in Figure  1, retrieval proves beneficial, with both oracle and mixture settings outperforming the direct answering approach. Nonetheless, the presence of irrelevant chunks continues to challenge the LLM generator, underscoring the need for more precise information retrieval.
+
+### b008 [fn]
+https://llama.meta.com/llama3/
+
+### b009 [fig caption]
+Figure 1: The performance with varying chunks settings over 2WikiMQA dataset with GPT-3.5/GPT-4/Llama3-8B as the generator.
+
+### b010 [h3]
+2.2 Retrieve with Query Decomposition
+
+### b011 [p]
+It is a common practice to use LLMs for query decomposition when facing complex multi-hop questions <span class="cite">Gao et al. (2023)</span>. We conduct another empirical study to check how query decomposition approaches impact the retrieval stage. As shown in Figure 2, the number of oracle chunks retrieved by one-time decomposition (LLM Decompose, detailed in Table 11) outperforms the Direct retrieval for the original query. At a similar number of chunks, iterative decomposition (EfficientRAG Decompose) achieves higher recall. When retrieving approximately 20 chunks, the Recall achieved by EfficientRAG Decompose has comparable performance with the LLM Decompose when retrieving around 200 chunks, thus demonstrating the efficiency of EfficientRAG Decompose. All retrievers used the contriever-msmarco <span class="cite">Izacard et al. (2022)</span> setup, with chunk retrievals configured as 1/3/5/10/20/30/50/100, and the LLM endpoint is gpt35-turbo-1106.
+
+### b012 [fig caption]
+Figure 2: Recall of retrieve efficiency over three retrieval strategies on MuSiQue dataset. The x-axis is log-scaled. Each point on different lines represents the same number of retrieved chunks.
+
+### b013 [h2]
+3 Methodology
+
+### b014 [fig caption]
+Figure 3: EfficientRAG framework operates within the iterative RAG system. Initially, EfficientRAG retrieves relevant chunks from the knowledge base, tagging each as either &lt;Terminate&gt; or &lt;Continue&gt;, and annotates preserved tokens <i>"KGOT in the Dimond Center"</i> from the &lt;Continue&gt; chunks. The Filter then processes the concatenation of the original question and the previously annotated tokens, <i>"Q: How large is the shopping mall where KGOT radio station has its studios? Info: KGOT, in the Dimond Center"</i>, and annotates the next-hop query tokens <i>"How large is Dimond Center?"</i>. This iterative process continues until all chunks are tagged &lt;Terminate&gt; or the maximum number of iterations is reached.
+
+### b015 [h3]
+3.1 EfficientRAG Framework
+
+### b016 [p]
+In this section, we introduce EfficientRAG , a plug-and-play approach designed to efficiently retrieve relevant information with multiple retrieval rounds to enrich the retrieved information and reduce irrelevant information, then help improve the quality and accuracy of answers.
+
+### b017 [p]
+EfficientRAG  consists of two lightweight components: the Labeler &amp; Tagger and the Filter. These components share the same model structure, with the Labeler &amp; Tagger<sup class="fnm">2</sup> producing outputs from separate heads within the same model and the filter’s output comes from another model. Both the Labeler and the Filter function as token-level classifiers, classifying tokens as either true or false. Figure 3 shows that how EfficientRAG  fits into traditional RAG systems. Given a query, the retriever obtains relevant chunks from the database. Then the labeler module annotates a sequence of tokens in this document representing the useful information that could (partially) answer the query. The tagger module then tags the chunk, indicating whether the retrieved chunk is helpful or irrelevant. If the tag indicates there needs more information to answer the query, <i>i.e.</i>, tagged as &lt;Continue&gt;, we will add this chunk to a candidate pool, which will be fed to the LLM-based generator to have the final answer. Otherwise, if the document is labeled useless or irrelevant, we stop searching for the successor branches from this query. The filter module takes both the labeled tokens and the current query to construct a new query for the next round of retrieval. It is done by replacing the unknown part of the query with labeled tokens (useful information).
+
+### b018 [fn]
+We use the term Labeler as the representation.
+
+### b019 [p]
+Our approach efficiently generates new queries for subsequent retrieval rounds, aiming to retrieve information beyond the scope of the initial query. Once our approach gets enough information to answer the initial question, it stops and passes all this information to the final generator to get the final response. Leveraging our efficient RAG approach eliminates the need for multiple LLM calls for query generation, resulting in improved performance when tackling complex queries.
+
+### b020 [h3]
+3.2 Synthetic Data Construction
+
+### b021 [p]
+We utilize LLM to synthesize training data for the Labeler and Filter. The process consists of multi-hop question decomposition, token labeling, next-hop question filtering, and negative sampling. Synthetic data is detailed in Table 1.
+
+### b022 [p]
+<b>Multi-hop question decomposition.</b> Given a multi-hop question and relevant chunks, we first prompt the LLM to decompose the original question into several single-hop questions. Each single-hop question corresponds to a chunk. Then, we ask the LLM to parse the dependency for the sub-questions.
+
+### b023 [p]
+<b>Token Labeling.</b> For each sub-question and corresponding chunk, we prompt the LLM to label important words in the chunk pertinent to the sub-question answering. We annotate each word in the chunk with a binary label to determine if it is important and should be preserved by EfficientRAG Labeler. We use the SpaCy toolkit<sup class="fnm">3</sup> following  <span class="cite">Pan et al. (2024)</span>.
+
+### b024 [fn]
+https://spacy.io/
+
+### b025 [p]
+<b>Next-hop question filtering.</b> Given a single-hop question and the labeled tokens from its dependent questions, we prompt the LLM to generate a next-hop question, which is ideally the next query for retrieval. We extract the next-hop question tokens same as the Token Labeling procedure.
+
+### b026 [p]
+<b>Negative Sampling.</b> With each filtered next-hop question, we retrieve the most similar but not relevant chunk as the hard negative chunk. These negative chunks will be tagged &lt;Terminate&gt; while other relevant chunks are tagged &lt;Continue&gt;.
+
+### b027 [tab caption]
+Table 1: Amount of synthesized training data for different datasets.
+
+### b028 [tab caption]
+Table 2: Results on retrieval performance. Baselines are implemented from the source code. Bold and underlined fonts denote the best and second-best results respectively. EfficientRAG demonstrates comparable recall while retrieving the fewest number of chunks.
+
+### b029 [tab caption]
+Table 3: Results on end-to-end question answering performance across three datasets. The highest accuracy (Acc) values are highlighted in bold, while the second-highest are underlined. EfficientRAG exhibits promising high accuracy, comparable to that of the LLM-based baselines.
+
+### b030 [h3]
+3.3 Training
+
+### b031 [p]
+We train EfficientRAG Labeler for two tasks, token labeling and chunk filtering, as they both take in the same input. We use an auto-encoder language model as an encoder to derive embeddings for each token of concatenated sequence \(\text{query},\text{chunk}\). Subsequently, we use one fully connected layer to project the token embedding into a 2-dimensional space, indicating "useful token" and "useless token". Another fully connected layer is adapted to project the average pooling of the sequence embedding into a 2-dimensional space, representing the chunk tag &lt;Continue&gt; and &lt;Terminate&gt;. We train EfficientRAGFilter similarly, while its input sequence is the concatenation of query and labeled tokens. The Filter extracts words and concatenates them to formulate the next-hop query.
+
+### b032 [h2]
+4 Experiments
+
+### b033 [h3]
+4.1 End2end QA performance
+
+### b034 [p]
+We conduct evaluations of our EfficientRAG and multiple baselines on three multi-hop question-answering datasets same as §2.1. We select the following models as our baselines. First is direct answering without retrieval, including LMs with proprietary data. We include direct prompting and Chain-of-Thought prompting <span class="cite">Touvron et al. (2023a)</span> and question decomposition prompting in this setting. Secondly, we include baselines with naive RAG with top-10 retrieve chunks as its knowledge. Third, we include advanced iterative RAG methods like Iter-RetGen <span class="cite">Shao et al. (2023)</span> and SelfAsk <span class="cite">Press et al. (2023)</span>. The implementation prompts are in Appendix  B.3.
+
+### b035 [p]
+<b>Implementation Details.</b> EfficientRAG Labeler and Filter are fine-tuned based on DeBERTa-v3-large <span class="cite">He et al. (2021)</span> with 24 layers and 304M parameters. We adopt Llama-3-8B-Instruct for the question-answering stage and all other baselines. We utilize Contriever-MSMARCO <span class="cite">Izacard et al. (2022)</span> as the retriever for both data synthesis and inference stages.
+
+### b036 [p]
+We constructed the training data following Section 3.2 with Llama-3-70B-Instruct (Prompts are detailed in Appendix  B.2). We trained our model on \(4\times\) Nvidia A100 GPUs for about 10 GPU-hours separately, with AdamW <span class="cite">Loshchilov and Hutter (2019)</span> optimizer and a learning rate of 5e-6.
+
+### b037 [h2]
+5 Results and Analysis
+
+### b038 [h3]
+5.1 Retrieval Performance
+
+### b039 [p]
+The model’s performance was assessed using the Recall@K metric across three distinct datasets. As presented in Table  2, EfficientRAG achieves notably high recall scores on HotpotQA and 2WikiMQA datasets, with recall values of 81.84 and 84.08, respectively. These results are impressive considering the minimal number of chunks retrieved 6.41 for HotpotQA and 3.69 for 2WikiMQA. However, the performance of EfficientRAG on the MuSiQue dataset was less satisfactory. This suboptimal result may be attributed to the smaller number of chunks retrieved and the increased complexity of the dataset.
+
+### b040 [p]
+We further evaluate the QnA performance on the three datasets. As is illustrated in Table  3, our EfficientRAG framework achieves the second-highest accuracy on both HotpotQA and 2WikiMQA, and it also performs well on MuSiQue even with low recall.
+
+### b041 [p]
+Those LLM-based systems perform unsatisfying since they require LLMs to generate partial answers with noisy knowledge inputs, but they always fail in the intermediate steps. We posit that more helpful knowledge and fewer irrelevant chunks are the key points to the RAG system, even a simple model can beat LLMs with the correct RAG paradigm.
+
+### b042 [h3]
+5.2 Inference Efficiency
+
+### b043 [p]
+We randomly selected 200 samples from the MusiQue dataset for empirical research and calculated four indicators: LLM calls, iterations, latency, and GPU utilization. As shown in table 4 our method requires fewer iterations and achieves a 60%-80% improvement in time efficiency compared to other iterative methods while maintaining similar GPU utilization.
+
+### b044 [tab caption]
+Table 4: Efficiency evaluation on different RAG paradigms. EfficientRAG exhibits a speed equivalent to direct retrieval methods and is three times faster than LLM-based baselines while maintaining a similar number of iterations.
+
+### b045 [h3]
+5.3 Performance with Various Generators
+
+### b046 [p]
+EfficientRAG can benefit from more powerful generators. As is shown in Table 5, the use of GPT-3.5 as a generator enhances the end-to-end performance of both the baselines and our method. Notably, EfficientRAG continues to deliver exceptional results.
+
+### b047 [tab caption]
+Table 5: End-to-end QA performance on the 2WikiMQA dataset using GPT-3.5-turbo-1106 generator. EfficientRAG achieves state-of-the-art accuracy.
+
+### b048 [h3]
+5.4 Out-Of-Domain Adaptation
+
+### b049 [p]
+EfficientRAG has the potential to adapt to different scenarios without further downstream training. We propose an out-of-domain experiment across HotpotQA and 2WikiMQA datasets, where we train the model on one dataset and test it on the other. Table 6 shows that our model adapts well to different datasets, and even surpasses the model trained on the original data in some cases. It shows that EfficientRAG does not rely on domain-specific knowledge, exhibiting a certain degree of transferability.
+
+### b050 [tab caption]
+Table 6: Out-of-domain experiments on 2WikiMQA and HotpotQA dataset. EfficientRAG demonstrates remarkable transferability across diverse datasets.
+
+### b051 [h2]
+6 Conclusion
+
+### b052 [p]
+In this study, we introduce the EfficientRAG retriever, a novel approach for multi-hop question retrieval that iteratively generates new queries while circumventing the need for large language models. Evaluations across three benchmark datasets demonstrate that EfficientRAG not only achieves high recall with a minimal number of retrieved chunks but also delivers promising outcomes in subsequent question-answering tasks. These findings indicate that EfficientRAG outperforms traditional retrieval-augmented generation methods, particularly in the context of complex, multi-hop question-answering scenarios.
+
+### b053 [h2]
+Limitations
+
+### b054 [p]
+The EfficientRAG framework can theoretically adapt to other models, but we opt not to implement a larger LLM as the final QnA reasoner due to time and resource limits. We analyze our method mainly on open-domain datasets, as it is hard to identify multi-hop question-answering datasets in in-domain settings.
+
+### b055 [h2]
+Ethics Statement
+
+### b056 [p]
+The authors declare no competing interests. The datasets used in the training and evaluation come from publicly available sources and do not contain sensitive content such as personal information.
+
+### b057 [h2 appendix]
+Appendix A Capability of LLM generator
+
+### b058 [fig appendix caption]
+Figure 4: The performance with varying chunks settings over HotpotQA, 2Wiki-Multihop and MuSiQue dataset with GPT-3.5/GPT-4/Llama-3 8B as the generator.
+
+### b059 [h2 appendix]
+Appendix B Prompt List
+
+### b060 [h3 appendix]
+B.1 Accuracy Evaluation Prompt
+
+### b061 [tab appendix caption]
+Table 7: Detailed prompts for GPT-3.5 evaluation.
+
+### b062 [h3 appendix]
+B.2 Data Synthesize Prompt
+
+### b063 [tab appendix caption]
+Table 8: Detailed prompts for training data construction with Llama-3 70B
+
+### b064 [h3 appendix]
+B.3 Prompts List
+
+### b065 [p appendix]
+All prompts can be found in this section, and are given in the order of Direct, CoT, Decompose, Direct-R, Iter-RetGen, and Self-ask, as shown in Tables 9 to 22.
+
+### b066 [tab appendix caption]
+Table 9: Detailed prompts for Direct Question Answering with Llama-3 8B
+
+### b067 [tab appendix caption]
+Table 10: Detailed prompts for Chain-of-Thought Question Answering with Llama-3 8B On hotpotQA
+
+### b068 [tab appendix caption]
+Table 11: Detailed prompts for multi-hop question decomposition, applicable to all datasets.
+
+### b069 [tab appendix caption]
+Table 12: Detailed prompts for Chain-of-Thought Question Answering with Llama-3 8B on MuSiQue
+
+### b070 [tab appendix caption]
+Table 13: Detailed prompts for Chain-of-Thought Question Answering with Llama-3 8B on 2Wiki-MultihopQA
+
+### b071 [tab appendix caption]
+Table 14: Detailed prompt for retrieval on HotpotQA
+
+### b072 [tab appendix caption]
+Table 15: Detailed prompt for retrieval on MuSiQue
+
+### b073 [tab appendix caption]
+Table 16: Detailed prompt for retrieval on 2Wiki-MultihopQA
+
+### b074 [tab appendix caption]
+Table 17: Detailed prompt for Iter-RetGen on HotpotQA
+
+### b075 [tab appendix caption]
+Table 18: Detailed prompt for Iter-RetGen on MuSiQue
+
+### b076 [tab appendix caption]
+Table 19: Detailed prompt for Iter-RetGen on 2Wiki-MultihopQA
+
+### b077 [tab appendix caption]
+Table 20: Detailed prompt for self-ask on HotpotQA
+
+### b078 [tab appendix caption]
+Table 21: Detailed prompt for self-ask on MuSiQue
+
+### b079 [tab appendix caption]
+Table 22: Detailed prompt for self-ask on 2Wiki-MultihopQA

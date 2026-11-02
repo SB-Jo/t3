@@ -1,0 +1,366 @@
+# LaSER: Internalizing Explicit Reasoning into Latent Space for Dense Retrieval (2603.01425v1)
+
+### b001 [p]
+Large Language Models (LLMs) have fundamentally transformed dense retrieval, upgrading backbones from discriminative encoders to generative architectures. However, a critical disconnect remains: while LLMs possess strong reasoning capabilities, current retrievers predominantly utilize them as static encoders, leaving their potential for complex reasoning unexplored. To address this, existing approaches typically adopt “rewrite-then-retrieve” pipelines to generate explicit Chain-of-Thought (CoT) rationales before retrieval. However, this incurs prohibitive latency. Conversely, implicit reasoning methods utilizing latent tokens offer efficiency but often suffer from semantic degeneration due to the lack of explicit supervision. In this paper, we propose <b>LaSER</b>, a novel self-distillation framework that internalizes explicit reasoning into the latent space of dense retrievers. Operating on a shared LLM backbone, LaSER introduces a dual-view training mechanism: an Explicit view that explicitly encodes ground-truth reasoning paths, and a Latent view that performs implicit latent thinking. To bridge the gap between these views, we design a multi-grained alignment strategy. Beyond standard output alignment, we introduce a <i>trajectory alignment</i> mechanism that synchronizes the intermediate latent states of the latent path with the semantic progression of the explicit reasoning segments. This allows the retriever to ‘‘think’’ silently and effectively without autoregressive text generation. Extensive experiments on both in-domain and out-of-domain reasoning-intensive benchmarks demonstrate that LaSER significantly outperforms state-of-the-art baselines. Furthermore, analyses across diverse backbones and model scales validate the robustness of our approach, confirming that our unified learning framework is essential for eliciting effective latent thinking. Our method successfully combines the reasoning depth of explicit CoT pipelines with the inference efficiency of standard dense retrievers<sup class="fnm">1</sup>.
+
+### b001a [fn]
+The code, model, and training data are available at <a href="https://github.com/ignorejjj/LaSER">https://github.com/ignorejjj/LaSER</a>.
+
+### b002 [h2]
+1. Introduction
+
+### b003 [p]
+Dense retrieval has evolved into a fundamental component of modern Information Retrieval (IR) systems, widely deployed in web search, question answering <span class="cite">( Yang et al., 2018 ; Karpukhin et al., 2020 )</span>, and Retrieval-Augmented Generation (RAG) systems <span class="cite">( Lewis et al., 2020 ; Gao et al., 2024 )</span>. These retrievers effectively bridge the vocabulary mismatch gap via semantic matching in a shared embedding space <span class="cite">( Karpukhin et al., 2020 ; Xiao et al., 2024 ; Wang et al., 2022 )</span>. With the advent of Large Language Models (LLMs) <span class="cite">( Zhao et al., 2023 ; Zhu et al., 2023 ; Ai et al., 2023 )</span>, the field has witnessed a critical paradigm shift: retriever backbones are transitioning from small-scale discriminative models (e.g., BERT, RoBERTa) to large-scale generative LLMs <span class="cite">( Wang et al., 2024 ; Li et al., 2023 )</span>. State-of-the-art LLM-based retrievers <span class="cite">( Lee et al., 2025 ; Zhang et al., 2025a ; Xiao et al., 2024 )</span> have demonstrated superior semantic understanding capabilities compared to their predecessors. While LLM-based retrievers have demonstrated superior semantic understanding capabilities <span class="cite">( Wang et al., 2024 ; Zhang et al., 2025a ; Chen et al., 2023 )</span>, a paradox remains: while these retrievers inherit the massive knowledge and reasoning potential of the underlying LLMs, they are primarily trained via contrastive learning to optimize representational distinctiveness <span class="cite">( Izacard et al., 2022 )</span>. This training objective largely leaves the inherent reasoning capabilities of the generative architecture dormant, treating the LLM merely as a stronger encoder rather than a reasoner <span class="cite">( Su et al., 2025 ; Shao et al., 2025 ; Tsai et al., 2025 )</span>.
+
+### b004 [p]
+This limitation becomes particularly evident when handling complex user queries. Real-world search scenarios often involve implicit intents <span class="cite">( Zhao et al., 2025 ; Mo et al., 2025 )</span>, multi-hop logic <span class="cite">( Yang et al., 2018 ; Ho et al., 2020 )</span>, or ambiguous descriptions <span class="cite">( Min et al., 2020 ; Weller et al., 2025 )</span> that require reasoning beyond superficial semantic matching. To bridge this gap, a prevalent solution adopts a “rewrite-then-retrieve” pipeline <span class="cite">( Gao et al., 2023 ; Yang et al., 2025 )</span>, utilizing external LLMs to explicitly generate query expansions or Chain-of-Thought (CoT) rationales before retrieval <span class="cite">( Wei et al., 2022 ; Cui et al., 2025 ; Yao et al., 2025 ; Sun et al., 2025 ; Zhang et al., 2025b )</span>. While effective in enhancing performance, their dependency on verbose autoregressive generation creates prohibitive latency bottlenecks <span class="cite">( Gui and Cheng, 2025 )</span> (as shown in Figure 1). To mitigate these latency issues, recent studies have explored <i>implicit reasoning</i> approaches, allowing retrievers to generate “latent thinking tokens” within the embedding space before producing the final representation <span class="cite">( Tsai et al., 2025 )</span>. While promising, these methods face a critical challenge: <b>the lack of explicit semantic supervision.</b> Relying solely on the final contrastive learning loss, the generated latent tokens often lack sufficient guidance to accurately capture the critical information required for retrieval, particularly for queries involving reasoning.
+
+### b005 [p]
+We argue that <b>the key to resolving this dilemma lies in internalization</b>: leveraging the explicit reasoning capabilities of LLMs as privileged supervision to guide the lightweight latent thinking of the retriever. Our core insight is that while generating explicit CoT during inference is inefficient, the semantics carried by these reasoning paths are invaluable. Instead of treating explicit and implicit reasoning as separate paradigms, we propose to align them within a unified framework, allowing the retriever to “think” silently in latent space.
+
+### b006 [fig caption]
+Figure 1. <b>Left:</b> Comparison between our proposed pipeline and conventional retriever and rewrite-then-retrieve method. <b>Right:</b> Comparison of performance and latency of different methods on the Bright benchmark. Letency represents the time consumption of processing a single query. The “Rewrite-then-Retrieve” method uses a 0.6B retriever and a 3B rewriter.
+
+### b007 [p]
+Driven by this insight, we propose a dual-view framework where the model learns to internalizes explicit reasoning capabilities within latent space. The Explicit-View learns to encoding the reasoning logic into embedding, serving as a semantic upper bound. The <b>Latent-View</b> generates latent thinking tokens to simulate the reasoning process internally.
+
+### b008 [p]
+To effectively transfer reasoning capabilities from the explicit view to the latent view, we introduce a multi-grained alignment strategy. We align not only the final query representations (output alignment) but also apply auxiliary supervision to intermediate latent states (trajectory alignment), encouraging the latent tokens to capture the semantic progression of the explicit CoT. This framework offers significant versatility. During training, the explicit view acts as a semantic teacher; during inference, LaSER operates in a streamlined mode using latent reasoning, eliminating the need for text generation while maintaining performance comparable to computationally intensive pipeline methods. We evaluate LaSER on a comprehensive suite of embedding benchmarks, focusing on reasoning-intensive tasks such as Bright <span class="cite">( Su et al., 2025 )</span>, BrowseComp-Plus <span class="cite">( Chen et al., 2025d )</span>, and FollowIR <span class="cite">( Weller et al., 2025 )</span>. Empirical results demonstrate that our method significantly enhances retrieval performance by introducing only a few latent tokens during inference, avoiding the latency of autoregressive decoding. Furthermore, LaSER consistently outperforms existing explicit and implicit reasoning baselines. Notably, in certain reasoning-intensive scenarios, it even achieves superior performance compared to computation-heavy pipelines that rely on external LLMs for query rewriting, validating the effectiveness of our proposed distillation mechanism.
+
+### b009 [p]
+Our main contributions are summarized as follows:
+
+### b010 [li]
+We propose LaSER, a unified retrieval framework that bridges the gap between explicit CoT reasoning and implicit latent thinking via self-distillation within a shared backbone.
+
+### b011 [li]
+We design a dual-view alignment mechanism, featuring both output-level and process-level trajectory alignment, which effectively distills reasoning semantics into latent tokens and prevents the degeneration often observed in implicit reasoning models.
+
+### b012 [li]
+Extensive experiments demonstrate that LaSER consistently outperforms baselines across diverse backbone architectures and model scales, robustly validating the efficacy of our proposed self-distillation mechanism.
+
+### b013 [li]
+We empirically validate that the semantics of explicit reasoning paths can be effectively distilled into the latent space. This allows LaSER to achieve performance comparable to computationally intensive "rewrite-then-retrieve" pipelines while maintaining the inference efficiency of standard dense retrievers.
+
+### b014 [h2]
+2. Related Work
+
+### b015 [h3]
+2.1. LLM-Based Retrieval and Query Expansion
+
+### b016 [p]
+The paradigm of dense retrieval has shifted significantly from small-scale discriminative backbones (e.g., BERT <span class="cite">( Kenton and Toutanova, 2019 )</span>) to large-scale generative LLMs <span class="cite">( Wang et al., 2024 ; Zhang et al., 2025a )</span>. By leveraging the massive world knowledge and semantic understanding inherent in LLMs, these retrievers achieve superior performance in standard semantic matching. However, they continue to rely primarily on contrastive learning objectives, which often struggle with complex queries requiring deep reasoning or intent disambiguation. To bridge this gap, the “rewrite-then-retrieve” pipeline has become prevalent (as shown in Figure 1), utilizing external LLMs to expand queries <span class="cite">( Gao et al., 2023 ; Wang et al., 2023 )</span> or generate reasoning rationales prior to retrieval <span class="cite">( Chen et al., 2025b ; Qin et al., 2025 )</span>. While effective, this approach decouples reasoning from retrieval, introducing significant latency due to autoregressive decoding and complicating system deployment. Unlike these multi-stage pipelines, our work aims to <i>internalize</i> the rewriting and reasoning capabilities directly into the retriever’s parameters, preserving the inference efficiency of a single-stage dual-encoder while retaining the semantic benefits of generative expansion.
+
+### b017 [h3]
+2.2. Reasoning in Retrieval
+
+### b018 [p]
+Recent research has explored integrating reasoning capabilities directly into retrieval systems, generally categorized into data-centric <span class="cite">( Liu et al., 2025 ; Das et al., 2025 ; Xiao et al., 2024 )</span> and mechanism-centric approaches. Data-centric methods enhance retrieval by synthesizing reasoning-intensive queries with corresponding hard negatives. Mechanism-centric approaches, conversely, modify the architecture of retriever to support reasoning, further dividing into <i>explicit</i> and <i>implicit</i> strategies. Explicit methods leverage the retriever itself to generate natural language CoT rationales before producing the final embedding <span class="cite">( Sun et al., 2025 ; Yao et al., 2025 ; Cui et al., 2025 ; Gui and Cheng, 2025 ; Peng et al., 2024 )</span>. While this approach improves interpretability, it complicates training by requiring the model to learn two tasks simultaneously <span class="cite">( Muennighoff et al., 2024 )</span>. Furthermore, it suffers from the same computational bottlenecks as external rewriting. Implicit reasoning, alternatively, simulates this process within the embedding space by generating “latent thinking tokens” <span class="cite">( Tsai et al., 2025 )</span> or multi-vector representations <span class="cite">( Chen et al., 2025a )</span> that capture query nuances without visible text generation. Despite their efficiency, existing implicit methods predominantly rely on the final contrastive loss for supervision, which acts as a bottleneck for capturing complex query semantics and hinders further performance improvements. Our framework addresses this limitation by using explicit CoT as a privileged supervisor, distilling the semantics of explicit reasoning paths into latent tokens to ensure the implicit process is semantically meaningful.
+
+### b019 [h3]
+2.3. Knowledge Distillation in IR
+
+### b020 [p]
+Knowledge Distillation (KD) is widely used to transfer capabilities from powerful teachers to efficient students <span class="cite">( Mansourian et al., 2025 )</span>, generally fall into <i>output-level</i> and <i>feature-level</i> distillation in IR. Output-level distillation typically utilizes LLMs to generate synthetic training data, such as query expansions or pseudo-relevance labels <span class="cite">( Zhang et al., 2025a )</span>, which the student mimics. Feature-level distillation focuses on aligning continuous representations, commonly training a student retriever to approximate the hidden space or relevance scores of a powerful teacher model <span class="cite">( Zhang and FulongWang, 2024 ; Liang et al., 2024 )</span>. Critically, these methods are outcome-oriented: they improve relevance signals but do not fundamentally alter the student’s information processing mechanism. Distinct from this paradigm, we draw inspiration from LLM latent reasoning <span class="cite">( Chen et al., 2025c ; Hao et al., 2024 ; Shen et al., 2025 )</span> to internalize explicit reasoning steps into latent states <span class="cite">( Tsai et al., 2025 )</span>. Instead of merely distilling relevance scores, we leverage explicit Chain-of-Thought as “ground truth” logic to supervise the latent thinking. To our knowledge, LaSER the first work to apply explicit-to-latent reasoning distillation in dense retrieval.
+
+### b021 [h2]
+3. Methodology
+
+### b022 [fig caption]
+Figure 2. Illustration of the LaSER. During training, each step involves two inference pathways: the explicit-view and the latent-view (shown on the left). The inputs for these two paths differ, with the explicit-view incorporating additional information. However, during the inference phase, only the latent-view mode is utilized. The loss function is computed based on the results from both paths (shown on the right).
+
+### b023 [p]
+In this section, we present LaSER, a unified framework designed to internalize explicit reasoning capabilities into the latent space of dense retrievers. We first formulate the retrieval problem and give an overview of our framework. Then, we detail the training process and optimization objectives of our framework, highlighting our multi-grained self-distillation mechanism.
+
+### b024 [h3]
+3.1. Problem Formulation
+
+### b025 [p]
+Given a user query \(q\) and a candidate document corpus \(\mathcal{D}=\{d_{1},d_{2},\dots,d_{N}\}\), the goal of dense retrieval is to learn an encoder \(f(\cdot)\) that maps textual inputs into a \(m\)-dimensional embedding space \(\mathbb{R}^{m}\). The relevance score between a query \(q\) and a document \(d\) is typically computed via the cosine similarity of their embeddings \(\mathit{v}_{q}\) and \(\mathit{v}_{d})\), i.e., \(s(q,d)=\cos(\mathit{v}_{q},\mathit{v}_{d})\).
+
+### b026 [p]
+In standard LLM-based retrievers, the query representation is obtained through a single forward pass. To enhance instruction following, a task-specific instruction \(I\) is often prepended to \(q\). An [EOS] token is then appended to the input sequence, and the hidden state of the last layer corresponding to this token is extracted as the embedding:
+
+### b027 [eq] (번역 안 함) \mathit{v}_{q}=f([I_{\text{task}};q;\text{[EOS]}]).
+### b028 [p]
+However, this shallow processing often fails to capture the complex implicit intents required for reasoning-intensive queries.
+
+### b029 [p]
+To address this, existing “rewrite-then-retrieve” approaches introduce an external LLM reasoner \(\mathcal{M}\) to generate an explicit reasoning path and the retriever then encodes this enriched context:
+
+### b030 [eq] (번역 안 함) \mathit{v}_{q}^{*}=f([I_{\text{task}};q;r_{q};\text{[EOS]}]),\\
+\text{where}\;r_{q}=\mathcal{M}(I_{q2r},q).
+### b031 [p]
+While \(\mathit{v}_{q}^{*}\) captures deeper semantics, the autoregressive generation of textual \(r_{q}\) incurs prohibitive latency and deployment costs.
+
+### b032 [p]
+In this work, we aim to bridge this gap by training a model to perform <i>latent reasoning</i>. Instead of generating explicit text \(r_{q}\), the model autonomously generates a sequence of \(K\) continuous latent thinking tokens \(T=\{\mathit{t}_{1},\dots,\mathit{t}_{K}\}\) within the embedding space. The final query representation \(\mathit{v}_{q}\) is derived from these latent states, aiming to approximate the semantic depth of \(\mathit{v}_{q}^{*}\) while maintaining the efficiency of a single-model architecture.
+
+### b033 [h3]
+3.2. Overview of Framework
+
+### b034 [p]
+As illustrated in Figure 2, LaSER is built upon a unified generative LLM backbone with causal attention. To achieve the internalization of reasoning capabilities, we employ a dual-view training paradigm where the model learns through two aligned perspectives sharing the same parameters \(\theta\):
+
+### b035 [p]
+<b>Explicit-View.</b> This view acts as the semantic upper bound during training. It receives the query augmented with a high-quality, explicit CoT rationale generated by a superior reasoner. By performing a single forward pass on this enriched context, the explicit-view acquires a representation that comprehensively synthesizes the original query and the explicit reasoning path.
+
+### b036 [p]
+<b>Latent-View.</b> This view serves as the target mode for inference. It takes only the original query as input, and generate a sequence of <i>latent thinking tokens</i> in the latent embedding space before producing the final query representation. We design a self-distillation framework to facilitate the co-training of these two views, especially the latent-view, as detailed in Section 3.5.
+
+### b037 [p]
+<b>Inference.</b> During inference, LaSER operates exclusively in the <b>latent-view</b>. It utilizes the learned latent thinking tokens to encode queries, ensuring the latency matches standard dense retrievers while benefiting from internalized reasoning. Optionally, the model retains the flexibility to accept rewritten queries from external LLMs if available, further adapting to diverse deployment scenarios.
+
+### b038 [h3]
+3.3. Latent View
+
+### b039 [p]
+The primary objective of the Latent View is to enhance the model’s reasoning capacity for complex queries while circumventing the latency overhead associated with explicit text generation. Inspired by recent advances in continuous reasoning, we propose a mechanism where the encoder model, parameterized by \(\theta\), performs “thinking” within a continuous embedding space. This approach replaces discrete token generation with an autoregressive sequence of continuous thought vectors, allowing the model to refine its understanding of the query intent in a fully differentiable manner.
+
+### b040 [p]
+As shown in Figure 2, given an input query \(q\), the model first maps the discrete token sequence into dense embeddings \(\mathbf{X}_{0}=\mathbf{E}(q)\), where \(\mathbf{E}\in\mathbb{R}^{|\mathcal{V}|\times m}\) is the embedding matrix and \(|\mathcal{V}|\) is the vocabulary size. The backbone LLM \(f_{\theta}\) processes this sequence to produce initial hidden states.
+
+### b041 [p]
+To facilitate latent reasoning, we extend the query with a sequence of \(K\) latent thinking tokens \(T=\{\mathit{t}_{1},\dots,\mathit{t}_{K}\}\). Unlike standard decoding which samples discrete indices, we construct these tokens as continuous vectors to preserve semantic richness and differentiability. The process proceeds autoregressively: at the \(j\)-th thinking step (\(1\leq j\leq K\)), let \(\mathit{h}_{j-1}\in\mathbb{R}^{m}\) be the last hidden state output by the backbone. We project \(\mathit{h}_{j-1}\) to the vocabulary space via the language modeling head \(\mathit{W}_{\text{lm}}\in\mathbb{R}^{m\times|\mathcal{V}|}\) to obtain logits \(\mathit{l}_{j}\):
+
+### b042 [eq] (번역 안 함) \mathit{l}_{j}=\mathit{W}_{\text{lm}}\mathit{h}_{j-1}.
+### b043 [p]
+Rather than performing a hard selection (e.g., \(\arg\max\)), we compute a probability distribution \(\mathit{p}_{j}=\text{Softmax}(\mathit{l}_{j})\) over the vocabulary. The soft latent token \(\mathit{t}_{j}\) is then computed as the expected embedding vector under this distribution:
+
+### b044 [eq] (번역 안 함) \mathit{t}_{j}=\mathit{p}_{j}^{\top}\mathbf{E}=\left(\text{Softmax}(\mathit{W}_{\text{lm}}\mathit{h}_{j-1})\right)^{\top}\mathbf{E}.
+### b045 [p]
+This soft token \(\mathit{t}_{j}\) is appended to the input sequence for the next step. The model operates autoregressively, where the input at step \(j\) includes the original query and all preceding latent tokens:
+
+### b046 [eq] (번역 안 함) \mathbf{H}_{j}=f_{\theta}\left([\mathbf{E}(q),\mathit{t}_{1},\dots,\mathit{t}_{j}]\right),
+### b047 [p]
+where \(\mathbf{H}_{j}\) represents the sequence of hidden states. Through the causal attention mechanism, each latent token \(\mathit{t}_{j}\) can attend to the query context and previous thinking steps, mimicking the sequential logic of explicit Chain-of-Thought reasoning.
+
+### b048 [p]
+After \(K\) steps, we obtain a sequence of reasoning states \(\mathcal{H}_{\text{think}}=\{\mathit{h}_{1},\dots,\mathit{h}_{K}\)}. To synthesize the global semantics of this reasoning process into a unified representation, we apply mean-pooling over these states to derive the final query vector \(\mathit{v}_{q}\):
+
+### b049 [eq] (번역 안 함) \mathit{v}_{q}=\frac{1}{K}\sum_{j=1}^{K}\mathit{h}_{j}.
+### b050 [p]
+The representation of documents \(\mathit{v}_{d}\) are also obtained in the same way. This latent thinking process maintains strict autoregressiveness, ensuring full compatibility with KV caching optimizations. Furthermore, by limiting the reasoning horizon \(K\) (typically \(K&lt;10\)), the method achieves inference latency comparable to standard dense retrievers, significantly outperforming generative approaches that require decoding long textual chains.
+
+### b051 [h3]
+3.4. Explicit-View
+
+### b052 [p]
+The Explicit-View serves as the semantic teacher, learning explicit reasoning processes through privileged knowledge derived from an advanced external reasoner. Specifically, for each query \(q\), we prompt the external reasoner to generate a comprehensive CoT rationale \(r_{q}\), which includes the intermediate reasoning logic and understanding of the potential intent behind the query (refer to 1 for the detailed prompt). We construct the augmented input sequence \(x_{\text{aug}}\) by concatenating the original query \(q\), the generated rationale \(r_{q}\), and [EOS] token:
+
+### b053 [eq] (번역 안 함) x_{\text{exp}}=[q;r_{q};\text{[EOS]}].
+### b054 [p]
+The model then encodes this augmented input as in Equation 2. As the inputs of the explicit-view and latent-view are different, there is no mutual interference between the two tasks. Since the reasoning logic is explicitly included in the textual input, the encoder only performs a single forward pass and get the last hidden state as the final representation \(\mathit{v}_{q}^{*}\), as shown in Equation (2). Given that the explicit path itself can provide intermediate signals, we additionally extract the hidden states of certain intermediate tokens in the sequence to represent the intermediate reasoning process (as shown in Figure 2). These details will be discussed in Section 3.5.3.
+
+### b055 [tab caption]
+Table 1. The prompt used for annotating the explicit reasoning path of the given query.
+
+### b056 [h3]
+3.5. Optimization via Self-Distillation
+
+### b057 [p]
+To transfer the reasoning capability from the Explicit-View to the Latent-View, we propose a joint training objective combining contrastive learning and multi-grained distillation.
+
+### b058 [h4]
+3.5.1. Contrastive Training
+
+### b059 [p]
+Both two views must learn basic discriminative signals. We employ the standard InfoNCE loss <span class="cite">( Izacard et al., 2022 )</span> for both views using ground-truth positive documents \(d^{+}\) and negatives \(d^{-}\). For the latent-view:
+
+### b060 [eq] (번역 안 함) \mathcal{L}_{cl}^{L}=-\frac{1}{N}\sum_{i=1}^{N}\log\frac{\exp(\mathit{v}_{q}\cdot\mathit{v}_{d^{+}}/\tau)}{\sum_{d\in\{d^{+}\}\cup\{d^{-}\}}\exp(\mathit{v}_{q}\cdot\mathit{v}_{d}/\tau)},
+### b061 [p]
+where \(N\) is the batch size, \(\tau\) is the temperature hyperparameter. A similar loss \(\mathcal{L}_{cl}^{E}\) is computed for the explicit view using \(\mathit{v}_{q}^{*}\).
+
+### b062 [h4]
+3.5.2. Output-Level Distillation
+
+### b063 [p]
+To ensure the Latent-View effectively internalizes the explicit reasoning capabilities, we distill the semantic knowledge from the Explicit-View to the Latent-View. Instead of strictly aligning the query embeddings \(\mathit{v}_{q}\) and \(\mathit{v}_{q}^{*}\) , which may over-constrain the latent view given the inherent information gap between the raw and reasoning-augmented inputs, we adopt a score-based distillation strategy. This approach focuses on transferring the ranking preferences encapsulated in the explicit view. Formally, for a query \(q\) and a document batch \(\mathcal{B}=\{d_{1},\dots,d_{N}\}\), we align the probability distributions of relevance scores derived from both views.
+
+### b064 [p]
+Let \(s^{E}_{i}=\mathit{v}_{q}^{*}\cdot\mathit{v}_{d_{i}}\) and \(s^{L}_{i}=\mathit{v}_{q}\cdot\mathit{v}_{d_{i}}\) denote the similarity scores from the Teacher and Student, respectively. We apply a softmax function with a distillation temperature \(\tau_{kd}\) to obtain the probability distributions:
+
+### b065 [eq] (번역 안 함) p^{E}_{i}=\frac{\exp(s^{E}_{i}/\tau_{kd})}{\sum_{k=1}^{N}\exp(s^{E}_{k}/\tau_{kd})},\quad p^{L}_{i}=\frac{\exp(s^{L}_{i}/\tau_{kd})}{\sum_{k=1}^{N}\exp(s^{L}_{k}/\tau_{kd})}.
+### b066 [p]
+The output-level distillation loss is then defined as the Kullback-Leibler (KL) divergence between these two distributions:
+
+### b067 [eq] (번역 안 함) \mathcal{L}_{kl}^{out}=\frac{1}{N}\sum_{i=1}^{N}p^{E}_{i}\log\left(\frac{p^{E}_{i}}{p^{L}_{i}}\right).
+### b068 [p]
+By minimizing \(\mathcal{L}_{kl}^{out}\), the latent view learns to mimic the fine-grained information of document relevance in explicit view, effectively capturing the reasoning-enhanced judgment logic without requiring identical embedding coordinates.
+
+### b069 [h4]
+3.5.3. Process-Level Trajectory Alignment
+
+### b070 [p]
+Relying solely on output alignment often treats the reasoning process as a black box, which may lead to the degeneration of latent tokens where they fail to encode meaningful intermediate semantics. To prevent this, we introduce a <i>Trajectory Alignment</i> mechanism to explicitly supervises the intermediate thinking steps.
+
+### b071 [p]
+Our design operates on the hypothesis that the sequence of latent tokens should function as a compressed semantic trajectory of the verbose explicit CoT. While the explicit rationale \(r\) consists of variable-length logical segments \(\{s_{1},...,s_{M}\}\) (where \(M\) is the number of reasoning steps), the latnet view operates with a fixed budget of \(K\) tokens. Since typically \(M\geq K\), we posit that each latent token \(t_{i}\) should correspond to a specific semantic keyframe within the explicit reasoning path. To realize this, we employ a <b>Temporal Downsampling</b> strategy to align the granularities of the two views. We map the \(i\)-th latent step to a corresponding explicit segment index \(j_{i}\) via uniform sampling:
+
+### b072 [eq] (번역 안 함) j_{i}=\lfloor i\times\frac{M}{K}\rfloor.
+### b073 [p]
+This mapping ensures that the model synchronizes its latent thoughts with the semantic progression of the explicit reasoning chain. We then align the intermediate states by minimizing the KL divergence between their projected distributions over the document batch:
+
+### b074 [eq] (번역 안 함) \mathcal{L}_{kl}^{mid}=\frac{1}{K}\sum_{i=1}^{K}\text{KL}\left(\sigma(\mathit{h}^{E}_{j_{i}}\cdot\mathit{v}_{\mathcal{D}}),\sigma(\mathit{h}_{i}\cdot\mathit{v}_{\mathcal{D}})\right),
+### b075 [p]
+where \(\sigma\) denotes the softmax function over the document batch. By enforcing this alignment, we ensure that the latent tokens don’t drift but instead act as semantic checkpoints that rigorously approximate the explicit reasoning logic.
+
+### b076 [h4]
+3.5.4. Overall Objective
+
+### b077 [p]
+The final training objective is a weighted sum of the components:
+
+### b078 [eq] (번역 안 함) \mathcal{L}=\mathcal{L}_{cl}^{L}+\lambda_{1}\mathcal{L}_{cl}^{E}+\lambda_{2}\mathcal{L}_{kl}^{out}+\lambda_{3}\mathcal{L}_{kl}^{mid},
+### b079 [p]
+where \(\lambda_{1},\lambda_{2},\lambda_{3}\) are hyperparameters that used to balance the tasks.
+
+### b080 [h2]
+4. Experiments Design
+
+### b081 [h3]
+4.1. Datasets and Metrics
+
+### b082 [p]
+To improve the model’s reasoning capabilities, we utilize the synthetic dataset from ReasonEmb <span class="cite">( Chen et al., 2025b )</span> for training, which includes 81k training examples across 12 domains. Each training query accompany with a reasoning path, which is generated by GPT-4o-mini <span class="cite">( Hurst et al., 2024 )</span> as a reasoner, serving as the explicit input in our explicit-view.
+
+### b083 [p]
+For evaluation, we select three benchmarks requiring deep reasoning: Bright <span class="cite">( Su et al., 2025 )</span>, FollowIR <span class="cite">( Weller et al., 2025 )</span>(out-of-domain) and BrowseComp-Plus <span class="cite">( Chen et al., 2025d )</span>(out-of-domain). Following standard practices, we report nDCG@10 for BRIGHT, and Recall@5, Recall@100 and Recall@1000 for BC-Plus. For FollowIR, the evaluation for each subset includes a standard metric alongside p-MRR, a pairwise metric designed to assess instruction-following capability. Adhering to official protocols, in addition to p-MRR, we report MAP@5 for the Robust’04 and Core’17 subsets, and nDCG@5 for the News’21 subset.
+
+### b084 [p]
+The statistics of both training datasets and evaluation datasets are shown in Table 2.
+
+### b085 [h3]
+4.2. Baselines
+
+### b086 [p]
+We compare LaSER against four categories of baseline methods. To ensure a rigorous comparison, unless otherwise noted, all trainable baselines utilize the same backbone and training data as our method.
+
+### b087 [tab caption]
+Table 2. Statistics of the datasets used in our experiments. “Q” and “C” denote Query and Corpus respectively. “Len.” denotes average token count. “Reas. Len.” denotes average reasoning length annotated by external LLM.
+
+### b088 [tab caption]
+Table 3. Main retrieval performance on the Bright benchmark. We report nDCG@10 for all subsets. The best results in the same backbone setting are formatted in <b>bold</b> and the second best are underlined. \(\dagger\) indicates the pipeline method that uses an external LLM to rewrite queries during inference.
+
+### b089 [p]
+<b>Standard Dense Retrievers:</b> We include state-of-the-art encoder-based models such as BGE-M3 <span class="cite">( Chen et al., 2023 )</span> and E5-Large-Instruct <span class="cite">( Wang et al., 2022 )</span>, as well as LLM-based retrievers including E5-Mistral <span class="cite">( Wang et al., 2024 )</span> and Qwen3-Embedding <span class="cite">( Zhang et al., 2025a )</span>. Additionally, we train a “Fair Baseline” using standard contrastive learning on our composite dataset to isolate the gains attributed to our architecture.
+
+### b090 [p]
+<b>Pipeline Methods (Rewrite-then-Retrieve):</b> This category employs an external LLM to explicitly rewrite the query before retrieval. We utilize BGE-Reasoner-Rewriter-7B <span class="cite">( Chen et al., 2025b )</span> to generate rewritten queries as input to the retriever (using the Fair Baseline model) during inference.
+
+### b091 [p]
+<b>Explicit Reasoning Methods:</b> These approaches integrate generation and retrieval within a single model, generating an explicit CoT prior to outputting the representation. We compare against Search-R3 <span class="cite">( Gui and Cheng, 2025 )</span> and GRACE <span class="cite">( Sun et al., 2025 )</span>. As training codes for some baselines are not publicly available, we perform inference using their official checkpoints.
+
+### b092 [p]
+<b>Implicit Reasoning Methods:</b> We compare against GIRCSE, a representative method that also employs latent tokens to model reasoning steps before producing the final embedding.
+
+### b093 [h3]
+4.3. Implementation Details
+
+### b094 [p]
+We conduct experiments using base version of Qwen3 series (0.6B, 4B, 8B) and LLaMA 3.2 series (1B, 3B, 8B). As LLaMA 3.2 does not offer an 8B variant, we utilize LLaMA 3.1-8B to evaluate performance at that scale. All models are fine-tuned for 1 epoch using LoRA (\(r=64,\alpha=32\)) on 4 A100 GPUs, with a global batch size of 8 (batch size per device set to 2 with 8 gradient accumulation steps). We use the AdamW optimizer with a learning rate of 1e-4 and a warmup ratio of 0.1. Each query is paired with one hard negative sample and in-batch negatives for training. The maximum sequence length for both query and documents is set to 512 during training and expanded to 8192 during testing to accommodate longer contexts. To accommodate the explicit reasoning paths processed by the Explicit-View, we set the maximum sequence length for this view to 1024 during training. The temperature hyperparameters for both the contrastive loss (\(\tau\)) and the distillation loss (\(\tau_{kd}\)) are set to 0.02. To balance the multi-task objective, we set the loss weights as follows: \(\lambda_{1}=1\), \(\lambda_{2}=10\), and \(\lambda_{3}=0.1\). The number of latent thinking steps \(K\) is set to 3 for both training and inference phases.
+
+### b095 [h2]
+5. Results
+
+### b096 [p]
+In this section, we present the experimental results of LaSER, followed by a detailed ablation study and efficiency analysis. Our evaluation aims to answer the following three research questions:
+
+### b097 [p]
+RQ1: How does our proposed framework perform compared to fair baselines utilizing standard contrastive learning and other training methods?
+
+### b098 [p]
+RQ2: What is the impact of the proposed multi-grained self-distillation strategies?
+
+### b099 [p]
+RQ3: Can LaSER achieve a superior trade-off between retrieval performance and latency compared to other baseline methods?
+
+### b100 [h3]
+5.1. Main Results
+
+### b101 [p]
+In this section, we present a comprehensive analysis of LaSER’s performance on the in-domain reasoning benchmark (BRIGHT) and out-of-domain benchmarks (FollowIR and BrowseComp-Plus). To ensure a fair comparison, we reproduced fair baselines using identical training data across all methods and conducted experiments using three model scales based on two distinct architectures. The main results are reported in Table 3 and Table 4 (experiments on the full range of parameter scales are detailed in Subsection 5.3). Our key observations are summarized below.
+
+### b102 [p]
+<b>LaSER Shows Significant Improvements over Standard Dense Retrievers.</b> First, LaSER demonstrates a significant improvement over fair baselines trained with standard contrastive learning. As shown in Table 3, LaSER (Qwen3-8B) achieves an average nDCG@10 of 29.3. This performance not only surpasses the original Qwen3-Embedding-8B (14.0) but also exceeds the fine-tuned Fair Baseline (25.7) by approximately 15%. This substantial performance gap indicates that standard contrastive training with conventional retriever architectures is insufficient for complex reasoning tasks, as it fails to leverage the model’s underlying reasoning potential. By internalizing reasoning into the latent space, LaSER effectively activates the reasoning capabilities of the LLM backbone, bridging the gap between shallow semantic matching and complex reasoning.
+
+### b103 [p]
+<b>LaSER Matches the Upper Bound of of Explicit Pipelines.</b> A key motivation of our work is to match the performance of computationally heavy “rewrite-then-retrieve” pipelines without incurring their high latency costs. Experimental results demonstrate that on both Qwen3-0.6B and Qwen3-8B backbones, our method outperforms explicit reasoning approaches based on query rewriting (surpassing them by 0.7 and 1.2 points, respectively). Furthermore, LaSER significantly outperforms explicit reasoning models that require generating multiple thinking tokens, such as Search-R3 and InBedder. Crucially, LaSER achieves this competitive performance using only a few latent tokens, thereby avoiding the prohibitive computational cost associated with decoding long explicit CoT rationales. This validates our core insight: the semantics of reasoning paths can be effectively compressed into latent states via self-distillation. With an appropriate backbone, our method more effectively elicits the model’s inherent reasoning capabilities, leading to superior performance.
+
+### b104 [p]
+<b>LaSER Superiority over Existing Implicit Reasoning Methods.</b> We further compare LaSER with state-of-the-art implicit reasoning methods, specifically GIRCSE. Across 9 experimental settings involving different model scales and datasets, LaSER outperforms GIRCSE in 8 cases. Given that both methods utilize identical input contexts and computational budgets, these results highlight the effectiveness of our proposed self-distillation framework. This suggests that integrating supervision from the teacher model significantly aids the learning of latent thinking. Unlike GIRCSE, which relies solely on output contrastive signals, LaSER employs a dual alignment strategy which incorporate both process-level and output-level distillation to ensure that intermediate latent tokens capture richer semantic information.
+
+### b105 [tab caption]
+Table 4. Retrieval performance. Columns under Robust04, News21, and Core17 belong to the <b>FollowIR</b> benchmark.
+
+### b106 [h3]
+5.2. Ablation Study
+
+### b107 [p]
+To address RQ2, we conduct a comprehensive ablation study utilizing Qwen3-0.6B as the backbone model. Given that LaSER functions as a self-distillation framework designed to internalize explicit reasoning, our analysis focuses on two critical dimensions:
+
+### b108 [p]
+<b>(1) Architectural Effectiveness.</b> We examine the contribution of the dual-view structure and the latent thinking mechanism. <b>w/o Explicit View</b> removes the explicit-view branch entirely, training the student to perform latent reasoning relying solely on contrastive loss without privileged supervision. <b>w/o Latent View</b> replaces the latent reasoning mechanism with a standard single-forward pass to obtain the final embedding, assessing whether the shared backbone learning benefits standard architectures even in the absence of latent tokens.
+
+### b109 [tab caption]
+Table 5. Ablation study of our proposed method. For FollowIR, we report the average score on all subsets.
+
+### b110 [p]
+<b>(2) Learning Strategy Effectiveness.</b> We isolate the impact of the co-learning paradigm and our alignment objectives. <b>w/o Process KD</b> excludes the trajectory alignment loss (\(\mathcal{L}_{kl}^{mid}\)), isolating the impact of supervising intermediate latent states. <b>w/o Output-level Distillation</b> removes the final output alignment loss (\(\mathcal{L}_{kl}^{out}\)), retaining only process-level supervision. <b>w/o Co-Learning</b> replaces online self-distillation with a two-stage process, where a fixed explicit-view teacher (fine-tuned offline) generates static supervision labels, validating the efficacy of our dynamic shared-backbone training.
+
+### b111 [fig caption]
+Figure 3. Performance comparison of LaSER and baselines across different backbones and model sizes on Bright.
+
+### b112 [p]
+<b>Architectural Effectiveness.</b> We first validate the necessity of the proposed latent reasoning mechanism. As shown in Table 5, removing the latent view leads to the most significant performance degradation (e.g., from 23.10 to 19.93 on Bright). This suggests that the single-vector output form inherent to standard dense retrievers creates a representational bottleneck that constrains reasoning capabilities and hinders the model from effectively absorbing the additional information provided by the teacher input. In contrast, our latent thinking tokens successfully expand the semantic capacity. We also examine the role of the explicit teacher. Removing the explicit view similarly impairs performance. This indicates that without explicit CoT supervision, the learning efficacy of the intermediate latent tokens diminishes, likely due to the absence of explicit semantic guidance.
+
+### b113 [p]
+<b>Impact of Multi-grained Alignment.</b> We further analyze the effectiveness of our learning strategies. Experimental results demonstrate that both output-level and process-level distillation are essential; removing either component significantly compromises reasoning capabilities and generalization performance across tasks. Notably, the exclusion of output distillation leads to a more pronounced decline, confirming that transferring fine-grained ranking preferences from the teacher is a prerequisite for effective student learning. We also observe that online learning has a substantial impact. On both in-domain and out-of-domain datasets, allowing the teacher to learn dynamically yields superior results. This validates that our shared backbone design promotes better mutual adaptation between views (further analysis of this claim is provided in Section 5.6).
+
+### b114 [h3]
+5.3. Robust Analysis
+
+### b115 [p]
+We verify the robustness of LaSER across different backbone architectures, key observations are two fold:
+
+### b116 [p]
+<b>Consistent Superiority over Baselines.</b> We conduct experiments with various backbone model on Bright. As shown in Figure 3, LaSER maintains consistent superiority over all baselines across diverse model families in all 6 settings. Notably, on lightweight backbones (e.g., 0.6B and 1B), LaSER demonstrates superior effectiveness (23.10), even surpassing the computationally intensive rewrite pipeline (22.35). This indicates that our self-distillation framework enables small models to “think” effectively without the overhead of external reasoners.
+
+### b117 [p]
+<b>Instability of Contrastive-only Latent Thinking.</b> We observe that GIRCSE, which relies solely on the contrastive learning objective, exhibits instability across different architectures. In certain settings (e.g., LLaMA3.2-3B), it yields performance degradations compared to the standard retriever baseline, while showing only marginal improvements in others. In contrast, by incorporating distillation signals, our method achieves substantial gains on similar architectures. This suggests that latent thinking mechanisms may require privileged supervision to facilitate effective learning.
+
+### b118 [fig caption]
+Figure 4. Comparison of the performance of using rewrite path on Bright between our method and basic training.
+
+### b119 [h3]
+5.4. Latency Analysis
+
+### b120 [p]
+To address RQ3, we evaluate inference latency on a subset of 80 queries from the BRIGHT benchmark, utilizing a single NVIDIA A100 (80GB) GPU. To ensure a rigorous comparison, we employ vLLM <span class="cite">( Kwon et al., 2023 )</span> for the inference of external rewriter models in explicit reasoning pipelines, while the native Hugging Face Transformers implementation is used for all retriever backbones (including ours). A batch size of 8 is maintained for all baselines and our method. As demonstrated in Figure 1, LaSER drastically reduces computational costs, incurring only 0.3% of the latency associated with the “rewrite-then-retrieve” pipeline while maintaining comparable retrieval effectiveness. Although LaSER introduces a modest latency overhead compared to the standard base retriever (approximately \(1.7\times\)) due to the autoregressive generation of latent thinking tokens, this overhead decreases as model scale increases. For larger backbones, the relative cost of vector operations becomes marginal compared to the model’s forward pass time, allowing the system to benefit more significantly from KV caching mechanisms.
+
+### b121 [h3]
+5.5. Impact of Latent Reasoning Steps
+
+### b122 [p]
+We investigate the impact of the number of latent thinking steps (\(K\)) during both the training and inference on Qwen3-8B, with results illustrated in Figure 5.
+
+### b123 [p]
+<b>Training Efficiency.</b> We observe that increasing the training steps from \(K=3\) to \(K=6\) yields negligible performance gains or even slight degradation. We attribute this phenomenon to the high semantic density of the latent space facilitated by our framework. Unlike standard implicit reasoning, the introduction of the Explicit-View provides privileged supervision, serving as a clear optimization target. This allows LaSER to effectively compress the reasoning process, where a few latent steps are sufficient to capture the core logic of the reasoning path. Consequently, enforcing a larger \(K\) during training may introduce noise by compelling the model to align with granular, non-informative segments of the explicit text.
+
+### b124 [p]
+<b>Inference Scaling.</b> Conversely, increasing \(K\) during inference demonstrates consistent performance improvements, which highlights that LaSER has acquired a robust mechanism for iterative refinement of embedding. Rather than merely memorizing fixed step trajectories or copying preceding states, the model actively utilizes additional computing steps to deepen its semantic understanding and optimize the query representation.
+
+### b125 [fig caption]
+Figure 5. Effect of latent thinking steps during training and inference.
+
+### b126 [h3]
+5.6. Analysis of Co-Learning of Both Views
+
+### b127 [p]
+Since our framework involves the joint training of two distinct views sharing a common backbone, we further investigate the synergistic interaction between them. Specifically, we evaluate the backbone’s capability to process explicit reasoning by comparing the performance gains achieved when providing explicit rewritten queries to both the Basic Retriever and LaSER during inference. As shown in Figure 4, LaSER demonstrates a significantly larger performance boost from explicit rewrites compared to the Basic baseline across all model sizes (e.g. 3.4 v.s. 1.7 in Qwen3-4B). This substantial difference indicates that our Explicit-View training objective effectively optimizes the shared backbone, enabling it to better capture and encode the semantic information within CoT rationales for retrieval tasks. Consequently, this enhanced explicit processing capability serves as a superior semantic upper bound, thereby facilitating more effective distillation into the Latent-View.
+
+### b128 [h2]
+6. Conclusion &amp; Future Work
+
+### b129 [p]
+In this paper, we propose LaSER, a novel self-distillation framework that internalizes explicit CoT reasoning into the latent space of dense retrievers. By employing a multi-grained alignment strategy that synchronizes latent thinking tokens with explicit reasoning trajectories, LaSER effectively bridges the gap between deep semantic reasoning and retrieval efficiency. Extensive experiments demonstrate that LaSER significantly outperforms state-of-the-art baselines, achieving performance comparable to computationally expensive “rewrite-then-retrieve” pipelines while maintaining low inference latency. Our work validates that the semantics of explicit reasoning can be effectively compressed into latent states, offering an efficient solution for complex query understanding. Despite these promising results, our method represents only a preliminary step toward fully autonomous latent reasoning. In future work, we plan to explore reinforcement learning techniques to further optimize the intermediate reasoning process by directly optimizing the latent reasoning trajectory based on retrieval utility.
