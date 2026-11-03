@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weave Assist 결선 고도화 마스터플랜</title>
+<style>
+  :root {
+    --purple: #6B4EFF;
+    --purple-soft: rgba(107, 78, 255, 0.12);
+    --border-col: var(--border, #e2e0ee);
+    --card-bg: var(--card, #ffffff);
+    --fg: var(--foreground, #1e1b2e);
+    --muted-fg: var(--muted-foreground, #65607a);
+    --code-bg: var(--code-background, #f6f5fb);
+    --rad: var(--radius, 12px);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans, 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif);
+    color: var(--fg);
+    line-height: 1.55;
+  }
+  .wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-col);
+    padding-bottom: 10px;
+  }
+  .tab-btn {
+    border: 1px solid var(--border-col);
+    background: var(--card-bg);
+    color: var(--muted-fg);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab-btn.active {
+    background: var(--purple);
+    color: #fff;
+    border-color: var(--purple);
+  }
+  .panel { display: none; flex-direction: column; gap: 16px; }
+  .panel.active { display: flex; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-col);
+    border-radius: var(--rad);
+    padding: 18px;
+  }
+  .card h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--purple-soft);
+    color: var(--purple);
+  }
+  .badge.warn {
+    background: rgba(240, 68, 82, 0.14);
+    color: #e11d48;
+  }
+  .badge.ok {
+    background: rgba(16, 185, 129, 0.14);
+    color: #059669;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 12px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  th, td {
+    border: 1px solid var(--border-col);
+    padding: 9px 11px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--code-bg);
+    font-weight: 700;
+  }
+  .hop-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .hop-step {
+    background: var(--code-bg);
+    border-left: 3.5px solid var(--purple);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .hop-step strong { color: var(--purple); }
+  .ba-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .ba-box {
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    border: 1px solid var(--border-col);
+  }
+  .ba-before { background: rgba(240, 68, 82, 0.06); }
+  .ba-after { background: rgba(107, 78, 255, 0.07); }
+  ul { margin: 6px 0 0 0; padding-left: 18px; font-size: 13px; }
+  li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(0)">1. 폴더 현황 & 현재 부족한 점</button>
+    <button class="tab-btn" onclick="showTab(1)">2. KG · RAG · BM25 · Hybrid 비교</button>
+    <button class="tab-btn" onclick="showTab(2)">3. 시나리오 1·2·3 고도화 & 애니메이션</button>
+    <button class="tab-btn" onclick="showTab(3)">4. 전 장표 문체 교정 (Claude → 자연스러운 한국어)</button>
+  </div>
+
+  <!-- TAB 0 -->
+  <div class="panel active" id="tab-0">
+    <div class="grid-2">
+      <div class="card">
+        <h3><span class="badge">세션 1</span> weave/결선준비 폴더 구조</h3>
+        <ul>
+          <li><b>01_최종제출본/</b>: 예선 제출본 19장 (보존용)</li>
+          <li><b>02_PPT/Weave_결선_중간본.pptx</b>: 현재 통합본 (35장: 본문 1~24, 부록 25~27, 참고 28~35)</li>
+          <li><b>07_소스/</b>: Slide 5 (Solution 3 UX) & Slide 26~27 (Q&A 2장) HTML 원본</li>
+          <li><b>09_HowItWorks/장표5/</b>: 모프 애니메이션 생성기 (<code>scene5.py</code>, <code>a1_deck00.py</code>, <code>b1.py</code>, <code>c3.py</code> 등)</li>
+          <li><b>10_표지영상/ & 11_중간본/</b>: 4K 표지 루프 영상 및 <code>build_deck.py</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="badge">세션 2</span> 에이전트 메모리 & 추론 검색 리서치</h3>
+        <ul>
+          <li><b>docs/multisession/multisession_research.html</b>: 기초 가이드 3편 + S-VEAM + 핵심 논문 8편</li>
+          <li><b>비교 연구</b>: HippoRAG 2 (KG+PPR), Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025), BRIGHT (ICLR 2025), LaSER, MDR</li>
+          <li><b>삼성 PDE 조사</b>: Oxford Semantic Technologies <code>RDFox</code> 기반 온톨로지·규칙 추론과 Weave의 차별점 도출</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="badge warn">핵심 진단</span> 현재 덱의 3대 부족한 점 (결선 전 반드시 보완해야 할 포인트)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">구분</th>
+            <th style="width:39%">현재 상태 및 취약점</th>
+            <th style="width:39%">고도화 해결 방향</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>UX 1 (회사·통합검색)</b><br><code>b1.py</code> / Slide 5</td>
+            <td>메모의 <code>"3분기 반품 현황"</code>과 메일 첨부 <code>3분기_반품현황.xlsx</code>의 키워드가 그대로 겹치고 <code>민수</code> 인물 엔티티가 명확해, <b>"BM25나 PDE 그래프 조회로도 풀린다"</b>는 반론에 취약함.</td>
+            <td>메모(<code>유럽 배터리 영문 성적서 · 민수 수석님</code>) ↔ 메일 2통 중 함정(<code>10/29 국내 KC 배터리 일정.xlsx</code>)을 걸러내고 <b>어휘가 다른 정답(<code>10/30 CE 규격 통과본 / EU_Cell_Safety_Report_EN.pdf</code>)을 Reasoning Embedding으로 특정</b>.</td>
+          </tr>
+          <tr>
+            <td><b>UX 2 (자동완성·와인/대안)</b><br><code>a1_deck00.py</code></td>
+            <td><code>"블랑 = 화이트 와인"</code>이 외부 와인 상식에 의존한다는 인상을 줄 수 있음. 또한 전 연령대 초공감 일상 시나리오 대안 비교 필요.</td>
+            <td><b>[유지 고도화]</b> 사진 시각 특징+백라벨(<code>Crisp Dry White</code>) 추론으로 보강.<br><b>[신규 교체안]</b> <code>"현우 선배가 추천한 도수치료 병원"</code> ↔ 카톡(<code>거북목·역삼역 4번 출구·수기 교정</code>) → 캡처(<code>바른마디 마취통증의학과</code>).</td>
+          </tr>
+          <tr>
+            <td><b>UX 3 (먼저 건네기·갈색병)</b><br><code>c3.py</code> / Slide 5</td>
+            <td>아내 카톡 보낸 날 밤(10/12) 찍은 캡처가 1장뿐이라 <b>단순 시간 필터</b>로 풀리며, 캡처에 정식 명칭만 있어 별명(<code>갈색병</code>) 암기에 의존함.</td>
+            <td>같은 날 밤(10/12 23시)에 <b>함정 캡처(<code>면세점 화장품 15% 할인 쿠폰</code>)</b>와 <b>정답 캡처(<code>에스티 로더 나이트 리페어 50ml · 베스트셀러 갈색 보틀 리페어 세럼</code>)</b> 2장을 두어 Reasoning Embedding의 진가를 입증.</td>
+          </tr>
+          <tr>
+            <td><b>슬라이드 정합성 & 말투</b><br>Slide 1~27</td>
+            <td>Slide 22에 폐기된 <code>무화과시루</code> 잔존, Slide 24에 예선 댓글 유도 문구 잔존, Slide 27에 구버전 <code>탐색 메모</code> 잔존. 전반적인 Claude 번역투/쉼표 남발.</td>
+            <td>전 슬라이드 정합성 100% 일치 + 삼성 언팩/토스 스타일의 자연스러운 한국어 발표 문체로 전면 교정.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 1 -->
+  <div class="panel" id="tab-1">
+    <div class="card">
+      <h3><span class="badge">아키텍처 비교</span> BM25 vs. 일반 Dense RAG vs. 지식그래프(KG/PDE) vs. Weave Hybrid</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>방식</th>
+            <th>강점 (잘하는 것)</th>
+            <th>이 시나리오에서 막히는 지점 (한계)</th>
+            <th>온디바이스 비용·특성</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>BM25 (키워드 검색)</b></td>
+            <td>정확한 단어·파일명·고유명사 일치 검색에 가장 빠르고 정확함</td>
+            <td><b>어휘 불일치(Lexical Gap)</b>: <code>"집들이"</code>로 <code>"이사 기념 저녁"</code>을 못 찾고, 단어만 겹치는 <code>"집들이 선물 메모"</code>만 상위 노출</td>
+            <td>매우 가벼움 (역색인)</td>
+          </tr>
+          <tr>
+            <td><b>일반 Dense RAG (단일 홉 임베딩)</b></td>
+            <td>비슷한 뜻의 문장이나 사진을 스키마 없이 의미 유사도로 검색</td>
+            <td><b>중간 단서 부재(Missing Bridge)</b>: <code>"집들이 화이트 와인"</code> 벡터 주변에는 다른 날(회식) 와인 사진이 오고, 와인 단어가 없는 <code>"지은 카톡(날짜)"</code>은 멀리 떨어져 누락됨</td>
+            <td>질의당 1회 인코딩으로 가벼움</td>
+          </tr>
+          <tr>
+            <td><b>지식 그래프 (KG · 삼성 PDE / HippoRAG)</b></td>
+            <td>미리 정의된 온톨로지(인물·일정·장소·예약) 내 다단계 관계 추론 및 높은 설명 가능성</td>
+            <td><b>스키마 경직성 & 색인 비용</b>: 캘린더에 등록 안 된 카톡 수다(<code>이사 기념 저녁</code>, <code>거북목 수기 교정</code>)나 사진 속 비정형 묘사를 모두 트리플로 사전 추출하려면 모든 메시지에 무거운 LLM(OpenIE)을 돌려야 함</td>
+            <td>정형 규칙(RDFox)은 가벼우나, 자유 텍스트 전체의 KG화는 배터리 부담 큼</td>
+          </tr>
+          <tr>
+            <td><b>Weave Hybrid (Query Rewriting + Reasoning Embedding + Metadata Filter)</b></td>
+            <td><b>비정형 원문 간 암묵적 단서 추론 + 정확한 메타데이터 필터링 결합</b></td>
+            <td>홉 수 증가 시 지연 가능성 → <b>최대 2~3홉 제한 및 조기 종료(Early Stopping)</b>로 1초 내 응답 보장</td>
+            <td>유휴 시간 사전 벡터/메타 색인 + 질의 시 경량 추론 임베딩으로 온디바이스 최적화</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div class="panel" id="tab-2">
+    <div class="card">
+      <h3><span class="badge ok">UX 1 고도화</span> 기록 통합 검색 (회사/업무): "지난주 A사 미팅 때 요청받은 자료"</h3>
+      <div class="hop-flow">
+        <div class="hop-step">
+          <strong>01 순간 감지 & 02 질문 다시 쓰기</strong>: 통화 중 하단 Weave 시트를 쓸어 올려 질문 입력 → ① <code>"지난주 A사가 요청한 자료와 담당자는?"</code> / ② <code>"[그 단서]의 최종 완료 파일은?"</code>
+        </div>
+        <div class="hop-step">
+          <strong>03 Hop 1 (삼성노트 회의 메모 · 10/28)</strong>: 날짜 필터(<code>10/26~10/30</code>) + Reasoning Embedding으로 <code>A사 미팅 메모</code> 연결 → <code>"A사: 유럽 수출 배터리 인증 데이터 요구 → 민수 수석님이 영문 성적서 찾아주기로"</code> 단서 포착!
+        </div>
+        <div class="hop-step">
+          <strong>03 Hop 2 (민수 수석님 메일 2통 중 추론 선별)</strong>: 필터(<code>from: "민수", date >= "2026-10-28"</code>) 적용 시 2통 남음.<br>
+          • <b>함정 오답(10/29)</b>: <code>국내 KC 배터리 시험 일정표.xlsx</code> (단순 키워드 <code>배터리</code>, <code>인증</code> 매칭 함정)<br>
+          • <b>정답 선택(10/30)</b>: <code>CE 규격 테스트 통과본 공유 / 첨부: EU_Cell_Safety_Report_EN.pdf</code> (Reasoning Embedding이 <code>유럽 영문 성적서 ↔ CE 규격·EN</code> 추론!)
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge ok">UX 2 교체/고도화</span> 단서로 찾는 기억 (키보드 자동완성): 신규 추천안 vs 와인 고도화안</h3>
+      <div class="grid-2">
+        <div class="hop-step">
+          <strong>[강력 추천 교체안] "현우 선배가 추천해 준 도수치료 병원"</strong><br>
+          • <b>실패</b>: BM25는 <code>보험 청구 서류 메모</code>, 일반 임베딩은 <code>강남 척추병원 광고 캡처(10/02)</code> 노출.<br>
+          • <b>Hop 1 (카톡 10/14)</b>: 현우 선배 <code>"너 거북목 심하댔지? 어제 역삼역 4번 출구 마취통증의학과 갔는데 원장님이 수기 교정을 기가 막히게 하시더라"</code> (<code>도수치료 병원 ↔ 거북목·수기 교정</code> 추론!)<br>
+          • <b>Hop 2 (갤러리 10/14 필터)</b>: 같은 날 찍은 <code>역삼역 맛집 캡처</code>를 걸러내고 <code>바른마디 마취통증의학과의원 (역삼역 4번 출구)</code> 캡처 특정 → 검색창 자동완성!
+        </div>
+        <div class="hop-step">
+          <strong>[기존 유지 고도화안] "집들이 때 마신 화이트 와인"</strong><br>
+          • <b>표지·인트로 영상 100% 호환</b> 장점.<br>
+          • <b>Hop 1 (카톡 3/12)</b>: 지은 <code>"이번 일요일(3/15) 6시, 이사 기념으로 우리 집에서 저녁 먹자!"</code><br>
+          • <b>Hop 2 보강 (갤러리 3/15 필터)</b>: 프랑스어(<code>Blanc</code>) 암기에만 의존하지 않도록, 사진 속 <b>투명한 화이트 와인 잔 시각 특징 + 라벨 텍스트(<code>BABICH Sauvignon Blanc · Crisp Dry White</code>)</b>로 같은 날 레드 와인(<code>19:52</code>)을 제치고 정답 특정!
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge ok">UX 3 고도화</span> 먼저 건네는 기억 (면세점 갈색병): "출장길 공항 면세구역 진입"</h3>
+      <div class="hop-flow">
+        <div class="hop-step">
+          <strong>01 순간 감지</strong>: <code>GPS(인천공항 면세구역)</code> + <code>월렛(15:20 싱가포르행 탑승권)</code> + <code>카톡(아내와 대화 중)</code> 결합 시 실타래 버튼이 먼저 반짝임.
+        </div>
+        <div class="hop-step">
+          <strong>03 Hop 1 (아내 카톡 · 10/12)</strong>: 본인 출장 메모(<code>선크림, 립밤</code>)를 제외하고 아내 카톡(<code>"동생이 갈색병 에센스 써 봤는데 좋대 / 면세점에서 사면 더 싸대"</code>)에서 <code>10/12 · 갈색병 에센스</code> 단서 추출.
+        </div>
+        <div class="hop-step">
+          <strong>03 Hop 2 (같은 날 밤 10/12 캡처 2장 중 추론 선별)</strong>: 시간 필터만으로도 풀린다는 반론을 막기 위해 10/12 밤 캡처 2장 배치!<br>
+          • <b>함정 오답(10/12 23:05)</b>: <code>[신라면세점] 화장품 최대 15% 할인 쿠폰팩 캡처</code> (키워드 <code>면세점</code>, <code>화장품</code> 겹침)<br>
+          • <b>정답 선택(10/12 23:12)</b>: <code>에스티 로더 어드밴스드 나이트 리페어 50ml (밤사이 피부를 케어하는 베스트셀러 갈색 보틀 리페어 세럼)</code> → <code>"면세점이야! 그 갈색병 50ml로 사 갈까?"</code> 추천!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3 -->
+  <div class="panel" id="tab-3">
+    <div class="card">
+      <h3><span class="badge">문체 리모델링</span> Claude 번역투/명사 끊어치기 → 삼성 언팩 · 토스 스타일 자연스러운 한국어</h3>
+      <div class="ba-row">
+        <div class="ba-box ba-before">
+          <b>[Before · Slide 2 Motivation]</b><br>
+          "당신의 휴대폰은 이미 당신을 담고 있습니다."<br>
+          <span style="color:var(--muted-fg); font-size:11.5px;">→ 영어 'Your phone already holds you' 직역투</span>
+        </div>
+        <div class="ba-box ba-after">
+          <b>[After · 자연스러운 키노트 문체]</b><br>
+          "내 휴대폰 안에는 이미 모든 답이 들어 있습니다."
+        </div>
+      </div>
+      <div class="ba-row">
+        <div class="ba-box ba-before">
+          <b>[Before · Slide 7~10 How It Works]</b><br>
+          "뜻을 숫자의 줄, 벡터로 바꾸면"<br>
+          "뜻은 숫자로, 날짜와 앱은 그대로"<br>
+          "Weave는 단서로 빠진 한 단계를 채웁니다"
+        </div>
+        <div class="ba-box ba-after">
+          <b>[After · 자연스러운 키노트 문체]</b><br>
+          "기록에 담긴 맥락을 의미 벡터로 변환하면"<br>
+          "맥락은 의미 벡터로, 날짜와 출처는 메타데이터로"<br>
+          "Weave는 단서를 이어 끊어진 기억의 고리를 완성합니다"
+        </div>
+      </div>
+      <div class="ba-row">
+        <div class="ba-box ba-before">
+          <b>[Before · Slide 14~17 캡션 & 노트]</b><br>
+          "먼저, 집들이 날부터" / "막힐 땐, 키보드의 실타래 버튼"<br>
+          "선물 메모엔 날짜가 없고, 지은의 카톡이 이어집니다"
+        </div>
+        <div class="ba-box ba-after">
+          <b>[After · 자연스러운 키노트 문체]</b><br>
+          "첫 번째 탐색, 카톡 대화에서 집들이 날짜 찾기"<br>
+          "선물 메모에는 날짜 정보가 없지만, 지은이와 나눈 카톡에서 결정적인 단서를 찾습니다"
+        </div>
+      </div>
+      <div class="ba-row">
+        <div class="ba-box ba-before">
+          <b>[Before · Slide 22, 24, 27 정합성 오류]</b><br>
+          • Slide 22: "엄마가 먹고 싶다던 무화과시루가..."<br>
+          • Slide 24: "'좋아요'와 '응원 댓글'은 큰 힘이 됩니다."<br>
+          • Slide 27: "찾은 기록의 단서를 탐색 메모에 더하고..."
+        </div>
+        <div class="ba-box ba-after">
+          <b>[After · 결선 시나리오 및 파이프라인 일치]</b><br>
+          • Slide 22: "아내가 지나가듯 말했던 면세점 갈색병이..."<br>
+          • Slide 24: "경청해 주셔서 감사합니다." (팀명도 표지와 통일)<br>
+          • Slide 27: "복합 질문을 하위 질문으로 나누고(Query Rewriting)..."
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(idx) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+    document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  }
+</script>
+</body>
+</html>
