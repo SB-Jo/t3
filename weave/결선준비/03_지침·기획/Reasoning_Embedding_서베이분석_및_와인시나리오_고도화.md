@@ -1,160 +1,98 @@
-# Reasoning Embedding 학술 서베이 분석 및 와인 시나리오(Option A) 추론 고도화 설계안
+# Reasoning Embedding 서베이·논문 17편 완독 분석 및 핵심 '중간 단서(Bridge)' 설계안
 
-> **작성 배경 (사용자 핵심 지적 반영)**
-> - **사용자 질문**: *"카톡에 '이사 기념' 같은 거는 그냥 일반 Embedding도 찾을 수 있는 거 아냐? 단서로 이어질 만한 중간 추론이 맞아? Reasoning Embedding의 다양한 서베이/관련 논문들을 쭉 읽고, 이러한 reasoning을 와인 시나리오에 적용할 수 있는지 생각해보자."*
-> - **핵심 진단**: **사용자님의 지적이 학술적으로 100% 정확합니다.**
->   - `'집들이'` ↔ `'이사 기념 우리 집 저녁'`, `'화이트 와인'` ↔ `'소비뇽 블랑(Sauvignon Blanc)'` 수준의 연결은 **Level 2 (의미·의역·다국어 유사성, Semantic / Paraphrase Match)**에 해당합니다.
->   - 이는 **일반 Dense Embedding(STS / MS-MARCO 학습 모델)이 이미 잘 푸는 영역**이므로, 발표 청중이나 심사위원이 *"저건 굳이 Reasoning Embedding이 아니라 일반 임베딩으로도 검색되는 것 아닌가?"*라고 반문할 수 있는 치명적 약점이 됩니다.
+> **사용자 핵심 질문 요약**
+> 1. *"시간 연산 추론이나 취소/변경 같은 복잡한 설정은 굳이 Reasoning Embedding이 아니어도(필터나 LLM이) 되는 것 같고 시나리오가 너무 복잡해진다."*
+> 2. *"내가 중요하게 생각하는 **'중간 단서를 임베딩으로 찾는 경우'**는 정확히 무엇인가?"*
+> 3. *"논문들 잘 서핑해서 읽었어?"*
 
 ---
 
-## 1. 서베이·논문 10편 종합: 일반 Embedding vs. Reasoning Embedding의 학술적 경계
+## 1. 논문 17편 전수 완독 검증 요약: "임베딩이 중간 단서를 찾는다는 것"의 진짜 의미
 
-[`Gauss-Embedding-V2/docs/reasoning_embed/`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/README.md)에 정리된 주요 논문·서베이([`00_RESEARCH_REVIEW.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/00_RESEARCH_REVIEW.md), [`01_BRIGHT.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/01_BRIGHT.md), [`02_REASONIR.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/02_REASONIR.md), [`03_REASONEMBED.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/03_REASONEMBED.md), [`04_LREM.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/04_LREM.md), [`05_LASER.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/05_LASER.md), [`07_MEMORA.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/07_MEMORA.md), [`09_RIR_SURVEY.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/09_RIR_SURVEY.md), [`reader/rir_survey_ko.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/rir_survey_ko.md), [`21_HIQ.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/21_HIQ.md))를 종합하면, 정보 검색의 관련성(Relevance)은 명확히 **3단계**로 구분됩니다.
+저장소 내 [`Gauss-Embedding-V2/docs/reasoning_embed/`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/README.md)의 **17개 문서 전체**([`00_RESEARCH_REVIEW.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/00_RESEARCH_REVIEW.md), [`01_BRIGHT.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/01_BRIGHT.md), [`02_REASONIR.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/02_REASONIR.md), [`03_REASONEMBED.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/03_REASONEMBED.md), [`04_LREM.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/04_LREM.md), [`05_LASER.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/05_LASER.md), [`06_REASONING_BACKBONES.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/06_REASONING_BACKBONES.md), [`07_MEMORA.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/07_MEMORA.md), [`08_KNOWLEDGE_GRAPH_NUDGE.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/08_KNOWLEDGE_GRAPH_NUDGE.md), [`09_RIR_SURVEY.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/09_RIR_SURVEY.md), [`10_LOGIC_EMBEDDING_SURVEY.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/10_LOGIC_EMBEDDING_SURVEY.md), [`11_EMBEDDING_GEOMETRY.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/11_EMBEDDING_GEOMETRY.md), [`12_HIERARCHY_ENCODERS.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/12_HIERARCHY_ENCODERS.md), [`21_HIQ.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/21_HIQ.md), [`reader/rir_survey_ko.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/rir_survey_ko.md), [`reader/mdr_full_ko.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/mdr_full_ko.md), [`reader/benchmark_examples.json`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/benchmark_examples.json))를 끝까지 읽고 교차 대조했습니다.
 
-### 1.1 검색 관련성의 3단계 (BRIGHT & ACL 2026 RIR Survey)
+논문들이 공통적으로 말하는 **"일반 Embedding vs. Reasoning Embedding"**의 본질적 차이는 복잡한 스토리(일정 취소, 시간 계산 등)가 아니라 **단 한 문장**으로 요약됩니다:
 
-| 단계 | 명칭 | 정의 및 예시 | 해결 가능한 모델 |
+> ### 💡 핵심 정의
+> - **일반 Embedding (Semantic Similarity)**: 질문과 **'같은 뜻(동의어·유의어)이거나 같은 주제를 말하는 문서'**를 찾는다.
+> - **Reasoning Embedding (Bridge / Evidence Utility)**: 질문과 표면적인 뜻이 같지 않아도, **'이 질문의 빈칸(Missing Link)을 채워 다음 정답으로 이어주는 중간 단서(Bridge Evidence) 문서'**를 찾는다.
+
+---
+
+### 1.1 논문별 실제 예시로 본 "중간 단서를 임베딩으로 찾는 원리"
+
+| 논문 | 질문 (Query) | 정답으로 가기 위해 필요한 **중간 단서 (Bridge Document)** | 왜 일반 임베딩은 못 찾고 Reasoning Embedding만 찾는가? |
 |---|---|---|---|
-| **Level 1** | **어휘 연결 (Lexical Match)** | 질의와 문서가 동일한 표면 단어를 공유 (`"집들이"` ↔ `"집들이 선물 목록"`) | **BM25 / 키워드 검색** |
-| **Level 2** | **의미·의역 연결 (Semantic / Paraphrase Match)** | 단어는 다르지만 같은 개념·동의어·번역어를 가리킴 (`"집들이"` ↔ `"이사 기념 저녁 초대"`, `"화이트"` ↔ `"Blanc"`) | **일반 Dense Embedding** (기존 Bi-encoder, STS·일반 QA 학습) |
-| **Level 3** | **추론 집약적 연결 (Reasoning-Intensive Relevance, RIR)** | 표면 어휘나 단순 유의어 유사성이 아니라, **조건·제약 충족, 상태/일정 변경(취소 vs 확정), 역할·방향성 구분, 인과·속성 적용, 또는 다중 홉의 브릿지 유용성(Bridge Utility)**을 통해 연결됨 | **Reasoning Embedding** (ReasonIR, ReasonEmbed, LREM, LaSER, Gauss RIR) |
-
-> [!IMPORTANT]
-> **ACL 2026 RIR Survey ([`rir_survey_ko.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/rir_survey_ko.md) §1, §4.2.2)의 핵심 정의:**
-> - *"추론 집약적 검색(RIR)은 질의와 근거 사이의 관련성이 의미적 유사성(semantic similarity)보다 **겉으로 드러나지 않은 잠재적 추론 관계(latent inferential links)**를 통해 결정되는 검색 환경이다."*
-> - *"RIR에서 **Positive 문서는 실제로 질의에 답하는 데 도움이 되는(조건을 충족하거나 중간 브릿지를 제공하는) 근거**여야 하고, **Hard Negative 문서는 질의와 어휘나 의미가 훨씬 더 비슷하더라도(높은 표면/주제 유사도) 논리적 조건·상태가 어긋나 문제 해결에 도움이 되지 않는 문서**여야 한다."*
+| **BRIGHT & ReasonIR**<br>([`benchmark_examples.json`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/benchmark_examples.json)) | *"왜 한쪽 콧구멍으로만 숨이 쉬어지는 걸까?"* | **문서**: *"비주기(Nasal cycle)는 자율신경계에 의해 양쪽 비강이 번갈아 충혈·완화되는 현상이다."* | 일반 임베딩은 `"한쪽 코 막힘"`, `"숨쉬기 불편"` 같은 **증상 호소 글(주제만 같은 글)**만 찾음. Reasoning Embedding은 질문에 단어(`비주기`)가 전혀 없어도 **현상을 설명해 줄 원인·원리 단서**를 직접 연결함. |
+| **ReasonEmbed (`ReMixer`)**<br>([`03_REASONEMBED.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/03_REASONEMBED.md)) | *"출시 준비 중 일부는 다른 준비가 끝나야 시작할 수 있는데 순서를 어떻게 정하지?"* | **문서**: *"위상 정렬(Topological Sort)과 진입 차수(In-degree)를 이용한 작업 그래프 순서 결정"* | 질문에는 `'위상 정렬'`도 `'그래프'`도 없음. 동의어(Paraphrase) 관계가 아니라 **현상의 구조(선행 작업 제약) → 해결 도구(위상 정렬)**라는 **추론적 브릿지** 관계임. |
+| **LREM**<br>([`04_LREM.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/04_LREM.md)) | *"벽에 구멍을 뚫지 않고 쓸 수 있는 선반"* | **문서**: *"무타공 압축봉 선반 / 강력 접착식 선반"* | 일반 임베딩은 `'벽'`, `'구멍'`, `'선반'` 단어가 다 들어간 `"벽에 구멍을 뚫어 나사로 고정하는 선반"`을 1등으로 뽑음. Reasoning Embedding은 **요구 조건(`구멍 안 뚫음`) → 해결 수단(`압축봉·접착식`)**이라는 중간 개념을 내재화하여 연결함. |
+| **MDR & Hi-Q**<br>([`mdr_full_ko.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/mdr_full_ko.md), [`21_HIQ.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/21_HIQ.md)) | *"복합 질문 $Q$ (`집들이 때 마신 화이트 와인`)"* | **Hop 1 단서 $p_1$**: 와인 얘기는 없지만 **'그 모임이 언제·무엇이었는지(Missing Bridge Entity)'**를 알려주는 단서<br>**Hop 2 단서 $p_2$**: $g(Q, p_1)$으로 결합 인코딩하여 최종 정답을 가진 단서 회수 | 일반 임베딩에 복합 질문 $Q$를 넣으면 `'집들이'`와 `'와인'`이 둘 다 들어간 엉뚱한 글만 찾으려다 실패함. 반면 MDR/RIR 학습된 인코더는 **복합 질문 $Q$를 한 번만 인코딩해도 "지금 당장 필요한 첫 번째 중간 단서($p_1$)"가 무엇인지 알고 그 벡터 가까이로 이동**함! |
 
 ---
 
-### 1.2 논문들이 제시하는 5대 Reasoning 유형과 개인화 기기 검색(Personal Memory)에서의 대응
+## 2. 왜 아까 제안했던 시나리오가 복잡하게 느껴졌는가? (반성과 핵심 타격)
 
-서베이([`rir_survey_ko.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/rir_survey_ko.md) 표 2·표 4)와 주요 논문([`00_RESEARCH_REVIEW.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/00_RESEARCH_REVIEW.md) §2)에서 정의한 추론 유형을 **온디바이스 개인 기록 검색(메시지·캘린더·노트·갤러리)**으로 옮기면 다음 **5가지 진짜 추론(Level 3)**이 도출됩니다.
+사용자님 말씀대로 **"일정이 10/7에서 10/14로 취소·연기되었다"**거나 **"비행기 출발 2시간 전 시간 연산을 한다"**는 설정은:
+1. 설명할 조건이 많아져서 **발표 시나리오가 지저분해지고**,
+2. 청중 입장에서도 *"저건 임베딩이 아니라 LLM이나 규칙 필터가 날짜 계산한 거잖아?"*라고 느끼게 만듭니다.
 
-| # | RIR 추론 유형 | 관련 대표 논문 / 벤치마크 | 일반 Embedding이 실패하는 이유 (Hard Negative 함정) | Reasoning Embedding이 수행하는 중간 추론 (Latent Bridge) |
-|---|---|---|---|---|
-| **R1** | **상태·일정 변경 및 부정/예외 추론**<br>(State Update & Negation) | **LongMemEval** (ICLR 2025), **ReasonEmbed** ([`03_REASONEMBED.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/03_REASONEMBED.md)), **BetaE** ([`11_EMBEDDING_GEOMETRY.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/11_EMBEDDING_GEOMETRY.md)) | `"지은이네 집들이 날짜"`라는 단어가 그대로 들어 있는 **취소·연기 전 원래 약속 메시지**가 코사인 유사도 1등을 차지함 | 취소·연기된 기록(Negative)을 배제하고, **조건 변경 후 최종 성사된 일정 기록**(Positive)을 유효한 시간 앵커로 선택 |
-| **R2** | **역할·방향성·주체 구분 추론**<br>(Role & Perspective Disambiguation) | **ImpliRet / BESPOKE** ([`rir_survey_ko.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/reader/rir_survey_ko.md) §3.1.1), **ReasonIR** ([`02_REASONIR.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/02_REASONIR.md)) | `"집들이 와인"` 키워드가 다 들어 있는 **내가 호스트였던 작년 집들이**나 **내가 선물로 사 간 레드 와인** 대화를 1등으로 뽑음 | 질의의 주체·역할(`"친구네 집들이에서 호스트가 내놓은"`, `"내가 추천받은"`)과 문서 내 화자·행위 방향이 일치하는 기록만 연결 |
-| **R3** | **목적·상황·감각 제약 → 속성 연역/유추**<br>(Constraint-to-Property Deduction) | **LREM** (WWW 2026, [`04_LREM.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/04_LREM.md)), **BRIGHT** ([`01_BRIGHT.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/01_BRIGHT.md)), **R2MED** | 사용자는 **상황·제약·감각**(`"해산물 요리랑 어울렸던"`, `"술 약한 친구도 마신 가벼운"`, `"기내 반입 안 걸리는"`)으로 묻지만, 기록은 **구체 속성·성분·규격**(`"산도 높은 소비뇽 블랑"`, `"도수 5.5% 모스카토"`, `"80ml 앰플"`)으로 적혀 있음 | 질의의 암묵적 제약 조건을 만족하는 구체적 속성·해결 수단(`구멍 안 뚫는 선반 → 무타공 압축봉`, `해산물 페어링·산뜻함 → 시트러스 산도의 소비뇽 블랑`)을 잠재 공간에서 연결 |
-| **R4** | **암묵적 전제·원리 기반 인과 추론**<br>(Causal & Prerequisite Reasoning) | **BRIGHT**, **ReasonEmbed** (`ReMixer` 위상 정렬 예시, [`03_REASONEMBED.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/03_REASONEMBED.md) §2) | 표면적인 주제어만 겹치는 일반 후기나 단순 목록 문서를 가져오고, 문제 해결의 전제 조건이 담긴 문서를 놓침 | 현상·요청이 성립하기 위한 **선행 조건·원인**(`"식탁 배송 완료 후 모임"`, `"법무팀 독소조항 수정 완료본"`)을 담은 근거를 우선 회수 |
-| **R5** | **다중 홉 브릿지 유용성 추론**<br>(Multi-Hop Bridge Utility & Granularity) | **MDR** ([`11_EMBEDDING_GEOMETRY.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/11_EMBEDDING_GEOMETRY.md) §4), **Hi-Q** (NeurIPS 2026, [`21_HIQ.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/21_HIQ.md)), **LaSER** ([`05_LASER.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/05_LASER.md)) | 복합 질의(`"집들이 때 마신 화이트 와인"`)를 그대로 던지면 `"집들이"`만 맞거나 `"와인"`만 맞는 파편 문서(Distractor)에 점수가 분산됨 | 현재 질의에서 **당장 답을 주진 않더라도 다음 홉 검색을 가능하게 해주는 결정적 매개 변수(Bridge Variable: 날짜·장소·식당명·코드명)**를 가진 문서를 Hop 1에서 정확히 회수 |
+우리가 보여줘야 할 **진짜 Reasoning Embedding의 핵심 매력**은 복잡한 스토리가 아니라 **딱 하나**입니다:
+
+> ### 🎯 우리가 보여줄 단 하나의 핵심
+> **"동의어(유의어)도 안 쓰였고 표면 단어도 전혀 안 겹치는데, 사람이라면 '아, 저 질문에 답하려면 먼저 이 기록(중간 단서)을 봐야지!'라고 추론할 수 있는 연결을 임베딩 벡터 하나로 찾아낸다!"**
 
 ---
 
-## 2. 왜 현재 와인 시나리오(`A1`)가 "일반 임베딩도 할 수 있어 보이는가?" (냉정한 진단)
+## 3. 와인 시나리오(`A1`)를 가장 심플하면서도 "일반 임베딩은 절대 못 푸는" 추론으로 바꾸는 법
 
-현재 발표 자료의 와인 시나리오(`"지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?"`) 구성을 위 학술 기준으로 해부해 보면 다음과 같습니다.
+복잡한 '취소/연기' 함정 없이, **질문 1개 → 카톡 1개(Hop 1) → 갤러리 사진 1장(Hop 2)**의 **아주 깔끔한 직선 구조**를 그대로 유지하면서, **`'집들이 ↔ 이사 기념'`(단순 유의어)**만 **진짜 중간 추론(Implicit Bridge Reasoning)**으로 바꾸는 **3가지 심플한 옵션**입니다.
 
-| 구간 | 현재 시나리오의 연결 | 학술적 분류 | 청중의 의구심 (약점) |
+### 옵션 1 (상황·전형적 행동 추론 — ImpliRet 스타일 ⭐ 가장 직관적)
+- **질문**: `"지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?"`
+- **기존 카톡 (단순 유의어 — 아쉬움)**:
+  > *"지은: **이사 기념**으로 10월 14일에 우리 집에서 저녁 먹자!"* (`집들이 = 이사 기념`은 그냥 동의어/유의어라 일반 임베딩도 찾음)
+- **바꾼 카톡 (진짜 중간 추론 — 아주 심플함!)**:
+  > *"지은 (10월 14일): **양손 무겁게 휴지랑 세제 사 오지 말고 그냥 몸만 와~ 새로 산 6인용 식탁 세팅해 놓고 기다릴게!**"*
+- **왜 이게 진짜 Reasoning Embedding인가?**:
+  - 이 카톡에는 **`'집들이'`, `'이사'`, `'초대'`, `'와인'`이라는 단어도, 그 유의어도 단 하나도 없습니다.**
+  - 일반 임베딩(STS)은 `"집들이"`와 `"휴지·세제 / 새 식탁 세팅"`의 표면 의미가 다르기 때문에 연결하지 못합니다.
+  - 반면 **Reasoning Embedding**은 **"휴지·세제를 사 오지 말라고 하며 새 식탁을 세팅해 두고 부르는 모임 = 집들이"**라는 **일상 상식·상황 추론(Commonsense & Situational Bridge)**을 통해, 이 메시지가 바로 질문의 **첫 번째 중간 단서(`10월 14일`)**임을 단번에 찾아냅니다!
+
+---
+
+### 옵션 2 (페어링·원리 추론 — LREM / BRIGHT 스타일 ⭐ Hop 2까지 추론 강화)
+- **질문**: `"지은이네 집들이 때 해산물 요리랑 같이 마셨던 산뜻한 와인 이름이 뭐였지?"` (또는 `"지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?"`)
+- **Hop 1 카톡 (상황 추론)**:
+  > *"지은 (10월 14일): **박스는 어제 다 풀었어! 오면서 휴지 사 오지 말고 몸만 와~ 오늘 저녁은 광어 카르파초 해 둘게!**"*
+  - `'박스 다 풀었다 + 휴지 사 오지 마라'` → **집들이(`10/14`) 추론!**
+- **Hop 2 갤러리·노트 (속성·원리 추론)**:
+  - 사진/메모에는 `'화이트 와인'`이라는 한글 대신 라벨 텍스트 **`"Cloudy Bay Sauvignon Blanc — Crisp citrus acidity"`**만 있음.
+  - 단순히 `'블랑 = 화이트'` 번역이 아니라, **`"광어 카르파초(해산물)와 어울리는 산뜻한 와인"` → `"시트러스 산도(Crisp citrus)를 가진 소비뇽 블랑"`**이라는 **음식 페어링·품종 속성 추론(LREM 방식)**으로 연결!
+
+---
+
+### 옵션 3 (MDR 방식 — "복합 질문에서 지금 당장 필요한 Missing Bridge가 무엇인지 아는 임베딩")
+- 만약 카톡 문구를 크게 안 바꾸고 싶다면, **왜 일반 임베딩이 실패하고 Reasoning Embedding이 성공하는지의 '설명 논리(Mechanism)'**를 논문(**MDR / Hi-Q**)에 딱 맞게 날카롭게 다듬는 방법입니다:
+  - **일반 임베딩의 한계**: `"지은이네 집들이 때 마신 화이트 와인"`이라는 복합 질문을 넣으면, 벡터 하나에 `'집들이'`와 `'와인'`이 반반씩 섞여서 **와인 얘기가 전혀 없는 카톡(`10/14 저녁 초대`)**은 유사도가 낮아 탈락함 (전형적인 **Multi-hop Granularity Mismatch**, [`21_HIQ.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/21_HIQ.md) §1).
+  - **Reasoning Embedding의 핵심 역할**: 질문에는 최종 타겟(`와인`)이 적혀 있지만, **"와인을 찾으려면 먼저 와인 얘기가 없더라도 '언제 모였는지(날짜 Bridge)'를 알려주는 초대 메시지부터 찾아야 한다"**는 **Bridge Utility(중간 단서 유용성)**를 학습했기 때문에, 와인 단어가 전혀 없는 카톡을 1차 단서로 정확히 건져 올림!
+
+---
+
+## 4. 나머지 두 시나리오(`UX 1`, `UX 3`)도 복잡함 싹 빼고 "중간 단서 추론"만 남긴 심플 버전
+
+시간 연산이나 복잡한 조건을 전부 걷어내고, **3개 시나리오 모두 "단순 유의어가 아닌 진짜 중간 단서(Bridge)를 임베딩으로 짚어내는 핵심"**만 남기면 다음과 같이 아주 깔끔해집니다.
+
+| 구분 | 사용자 질문 | 일반 임베딩이 못 찾는 이유 | **Reasoning Embedding이 찾아내는 핵심 '중간 단서(Bridge)'** |
 |---|---|---|---|
-| **Hop 1**<br>(질의 → 카톡) | `"지은이네 집들이"` ↔ `"지은: 이사 기념으로 10월 14일 토요일에 우리 집에서 저녁 먹자!"` | **Level 2 (단순 의역/유의어)** | `"집들이"`와 `"이사 기념 우리 집 저녁"`은 일반 Dense Embedding(심지어 멀티링구얼 E5, BGE, 기존 Gemma Embedding)에서도 코사인 유사도가 매우 높게 나옴. **일반 임베딩이 왜 실패하는지 설득력이 약함.** |
-| **Hop 2**<br>(10/14 + 화이트 와인 → 갤러리 OCR) | `"화이트 와인"` ↔ `"Cloudy Bay Sauvignon Blanc"` | **Level 2 (다국어/도메인 유의어)** + 시간 필터(`10/14`) | 날짜(`10/14`)는 메타데이터 필터가 해주고, `"화이트 와인"` ↔ `"Sauvignon Blanc"`은 와인 도메인 단어 매칭처럼 보임. |
-
-즉, **현재 와인 시나리오는 Multi-Hop(카톡 → 갤러리) 구조와 On-Device 완결성은 완벽하지만, 정작 그 안의 Embedding이 수행하는 역할이 Level 2(의역 매칭)에 머물러 있어서 "Reasoning Embedding만의 차별성"이 약해 보이는 것**입니다.
-
----
-
-## 3. 와인 시나리오(`A1`)에 "진짜 Reasoning Embedding (Level 3)"을 이식하는 3가지 설계안
-
-와인 시나리오의 직관성(누구나 1초 만에 이해하는 일상성)과 12장 슬라이드 흐름(`fail` → `hybrid` → `hop1` → `pivot` → `hop2` → `ocr` → `result`)은 **그대로 유지**하면서, **일반 Embedding은 구조적으로 틀리고(Hard Negative에 속고), Reasoning Embedding만 맞히는 Level 3 추론**을 넣는 3가지 고도화 방향입니다.
+| **UX 1**<br>(비즈니스) | **"지난번 A사 미팅 때 요청받은 자료 파일 어디 있지?"** | `'A사'`, `'요청 자료'`라는 단어만 찾으려 해서, 정작 미팅 메모에 적힌 구체적 요구사항과 내부 파일명을 연결 못 함 | **[상황 → 해결 문서 추론 (ReasonEmbed 방식)]**<br>- **Hop 1 (미팅 메모)**: `'자료 요청'`이란 단어 대신 *"박 팀장님: 클라우드 망분리 보안 기준 어떻게 맞추는지 아키텍처 장표 하나 공유해 주세요"* → **요청의 실질 내용(`망분리 보안 아키텍처`) 추론**<br>- **Hop 2 (내 파일)**: 해당 아키텍처가 담긴 기술 문서(`Cloud_Security_Arch_v2.pptx`) 특정 |
+| **UX 2**<br>(일상/메인) | **"지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?"** | `'집들이'`, `'화이트 와인'` 단어만 찾으려 해서, 와인이나 집들이 단어가 없는 일상 카톡을 지나침 | **[일상 행동 → 모임 맥락 추론 (ImpliRet + MDR 방식)]**<br>- **Hop 1 (카톡)**: `'집들이'`나 `'이사'` 단어조차 없이 *"박스는 다 풀었어! 휴지·세제 사 오지 말고 몸만 와~"*(`10/14`) → **집들이 당일 초대장임을 추론해 `10/14` 날짜 단서 확보**<br>- **Hop 2 (갤러리 OCR)**: `10/14` 사진 속 라벨(`Cloudy Bay Sauvignon Blanc`) 특정 |
+| **UX 3**<br>(여행/쇼핑) | **"작년 출장 갈 때 면세점에서 산 갈색병 뭐였지?"** | `'출장'`, `'면세점'`, `'갈색병'`이 한 기록에 같이 없으며, `'갈색병'`은 정식 상품명이 아닌 외관/별명임 | **[일정 맥락 + 외관·속성 추론 (LREM 방식)]**<br>- **Hop 1 (캘린더/문자)**: `'출장'` → 캘린더의 출국 일정(`11/05 인천→샌프란시스코`)과 같은 날 찍힌 **공항 면세점 구매 영수증** 연결<br>- **Hop 2 (영수증/사진)**: 일상 별명(`'갈색병'`)을 갈색 유리 앰플 에센스인 정식 명칭(`Estée Lauder Advanced Night Repair`)으로 속성 추론 |
 
 ---
 
-### 설계안 W-1 (가장 추천 ⭐): **[R1 상태·일정 변경 추론 + R3 감각·페어링 제약 추론]** 결합형
+## 5. 한 줄 결론 및 선택 가이드
 
-> **핵심 아이디어**: 일상 카톡에서 가장 흔히 일어나는 **"원래 부르기로 한 날(취소/연기) vs 실제로 모인 날(변경 확정)"**의 함정(Hard Negative)을 Hop 1에 배치하고, Hop 2에서는 그날 찍힌 사진/기록 중 **"상황·음식 페어링·감각 조건"**을 만족하는 와인을 추론하게 만듭니다.
+사용자님이 말씀하신 **"중간 단서를 임베딩으로 찾는 가장 핵심적이고 직관적인 경우"**는 복잡한 취소/시간 계산이 아니라 바로 이것입니다:
 
-#### ① 사용자 질의 (그대로 직관적임)
-> **"지은이네 집들이 때 해산물 요리랑 같이 마셨던 산뜻한 와인 이름이 뭐였지?"**
-> *(또는 기존처럼 짧게 **"지은이네 집들이 때 다 같이 마신 화이트 와인 이름이 뭐였지?"**로 유지해도 됨!)*
-
-#### ② Hop 1 (카톡 대화 검색): 왜 일반 Embedding은 틀리고 Reasoning Embedding은 맞히는가?
-기기에 지은이와의 카톡 메시지가 **2개** 존재합니다:
-
-| 후보 메시지 | 카톡 본문 내용 | 어휘·단순 의미 유사도 (일반 Dense Embedding) | 추론적 관련성 (Reasoning Embedding) |
-|---|---|---|---|
-| **후보 A (Hard Negative — 함정)** | `지은 (10/02)`: *"얘들아 **10월 7일 토요일**에 우리 집 **집들이** 겸 **화이트 와인** 파티 하자! 기대돼 🍷"* → `지은 (10/05)`: *"미안 거실 식탁 배송이 밀려서 이번 주는 취소해야 할 듯 ㅠㅠ"* | **`"집들이"`, `"화이트 와인"` 단어가 정확히 일치하여 일반 Embedding 1위 (0.89)** → **잘못된 날짜(`10/07`) 추출!** | 뒷문맥에서 **일정이 취소(Negation/State Change)되었으므로 실제 모임 날짜가 아님**을 추론하여 배제 |
-| **후보 B (True Positive — 진짜 단서)** | `지은 (10/10)`: *"식탁 드디어 도착! 미뤄졌던 거 **10월 14일 토요일** 저녁에 우리 집에서 다시 모이자!"* | `"집들이"`, `"와인"` 단어가 없어서 일반 Embedding 순위 밀림 (0.61) | **선행 제약(식탁 도착)이 해결되어 실제로 성사된 모임 확정 일정(`10/14`)**임을 추론하여 **1위로 회수!** |
-
-- **발표 임팩트 (`fail` & `hop1` 슬라이드)**:
-  - 심사위원이 보자마자 **"아! 일반 임베딩이나 키워드 검색은 `'집들이'`, `'화이트 와인'`이 그대로 적힌 10월 7일(취소된 약속) 카톡을 1등으로 가져오겠구나! 반면 Reasoning Embedding은 '미뤄졌다가 실제로 성사된 날짜(10월 14일)'라는 상태 변화와 맥락을 추론해서 진짜 브릿지 단서를 찾는구나!"**라고 100% 납득하게 됩니다.
-  - 이는 [`00_RESEARCH_REVIEW.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/00_RESEARCH_REVIEW.md) §2와 [`03_REASONEMBED.md`](file:///home/jaeung/samsung/t3/Gauss-Embedding-V2/docs/reasoning_embed/03_REASONEMBED.md) §6에서 강조한 **"취소와 변경 구분, 조건 충족 근거 선택"**의 완벽한 실사례입니다!
-
-#### ③ Hop 2 (10월 14일 갤러리·노트 검색): 단순 번역(`화이트=Blanc`)을 넘어선 제약·속성 추론
-10월 14일 저녁에 찍힌 와인 라벨/테이스팅 기록도 **단순히 사진 1장만 있는 게 아니라 2개의 후보**가 있거나, 라벨의 속성 추론이 들어갑니다:
-- **후보 1 (Hard Negative)**: 호스트가 디저트 때 잠깐 꺼낸 달콤한 스파클링/레드 와인 (또는 선물용으로 사 갔으나 안 딴 와인)
-- **후보 2 (True Positive)**: `Cloudy Bay Sauvignon Blanc` (라벨/노트 정보: *"Crisp acidity, citrus & passionfruit notes, pairs with seafood"* — **산뜻한 산도와 시트러스 향, 해산물 요리와 페어링되는 드라이 화이트 와인**)
-- **Reasoning Embedding의 역할**: 단순히 `'블랑 = 화이트'`라는 단어 번역을 넘어, 사용자의 암묵적 조건(**"메인 해산물 요리와 곁들인 산뜻한 화이트 와인"**)을 라벨/노트의 **구체적 속성(Sauvignon Blanc, Crisp citrus acidity)**과 연역적(Deductive)으로 연결합니다 (**LREM / BRIGHT 방식**).
-
----
-
-### 설계안 W-2: **[R4 암묵적 상황·원인 추론 + R5 다중 홉 브릿지 유용성 추론]** 결합형
-
-> **핵심 아이디어**: 카톡에 `'이사'`나 `'집들이'`라는 유사어조차 직접 쓰이지 않고, **집들이를 구성하는 구체적 행동·사건(암묵적 추론 사슬)**으로만 적혀 있는 경우입니다 (ACL 2026 RIR Survey의 **ImpliRet / BESPOKE** 스타일).
-
-- **사용자 질의**: *"지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?"*
-- **함정 메시지 (Hard Negative)**:
-  - `카톡 A`: *"지은아 저번에 너네 **집들이** 때 마신 **와인** 너무 맛있더라 다음에 또 마시자!"* (날짜 정보 없이 사후에 감상만 말한 메시지 — 표면 유사도는 0.92로 1등이지만 **검색을 이어갈 날짜 브릿지(Bridge Utility)가 없음!**)
-- **진짜 단서 메시지 (True Positive)**:
-  - `카톡 B (10/14)`: *"지은: 새로 산 6인용 식탁 세팅 끝! 오면서 휴지랑 세제 사 오지 말고 그냥 몸만 와~ 저녁 7시에 보자"*
-- **왜 진짜 Reasoning Embedding인가?**:
-  1. **브릿지 유용성 추론 (Bridge Utility — MDR / Hi-Q)**: `카톡 A`는 `'집들이'`, `'와인'`이 다 들어 있어 일반 임베딩 점수가 가장 높지만, 정작 질의를 해결할 **시간 앵커(언제 모였는지)**가 없는 **무용한 문서(Uninformative Overlap)**입니다.
-  2. **암묵적 상황 추론 (ImpliRet)**: `카톡 B`는 `'집들이'`나 `'이사'`라는 단어가 전혀 없지만, **"새 식탁 세팅 + 휴지·세제(집들이 대표 선물) 사 오지 말라는 맥락"**으로부터 이것이 바로 **집들이 당일(`10/14`) 초대 메시지**임을 추론해 냅니다!
-
----
-
-### 설계안 W-3: **[R2 역할·방향성 구분 추론 + R1 조건 위반 배제]** 결합형
-
-> **핵심 아이디어**: 내 폰 안에 `'집들이'`와 `'와인'` 기록이 여러 개 섞여 있을 때, **주체·역할(내가 연 집들이 vs 지은이가 연 집들이, 내가 사 간 와인 vs 그날 다 같이 마신 와인)**을 구분하는 추론입니다.
-
-- **함정 기록 (Hard Negative)**:
-  - `메모/카톡 A`: *"우리 집 집들이 때 지은이가 사 온 레드 와인 리스트"* (`'지은'`, `'집들이'`, `'와인'` 어휘가 100% 겹쳐 BM25와 일반 임베딩 모두 1위로 오탐!)
-- **진짜 단서 기록 (True Positive)**:
-  - `카톡 B (10/14)`: *"지은: 우리 새집 첫 손님들이네! 오늘 저녁 메뉴가 광어 카르파초니까 내가 거기에 딱 맞는 칠링된 한 병 준비해 둘게"*
-
----
-
-## 4. 한눈에 비교: 기존 와인 시나리오 vs. 고도화된 와인 시나리오 (`W-1` + `W-2` 장점 결합 권장안)
-
-가장 설득력이 높은 방법은 **`W-1(취소된 일정 vs 성사된 일정)`**과 **`W-2(휴지·세제/새 식탁 등 진짜 집들이 맥락 추론 + 날짜 없는 사후 감상 카톡 배제)`**의 핵심을 결합하는 것입니다. 이렇게 하면 **"그냥 일반 임베딩으로도 되는 것 아니냐?"는 반론을 원천 차단**할 수 있습니다.
-
-| 비교 항목 | 기존 와인 시나리오 (수정 전) | **고도화된 와인 시나리오 (RIR 논문 반영안)** |
-|---|---|---|
-| **질의** | `"지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?"` | `"지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?"` *(질의는 그대로 짧고 직관적으로 유지!)* |
-| **일반 Embedding이 속는 함정 (Hard Negative)** | 명확한 함정 예시 없이 단순히 `"집들이 = 이사 기념"`을 못 찾는다고 설명함 (설득력 약함) | **함정 1 (취소된 원래 일정)**: *"10/7(토) 우리 집 **집들이** 겸 **화이트 와인** 파티 하자!" → "식탁 배송 밀려서 취소 ㅠㅠ"*<br>**함정 2 (브릿지 없는 사후 대화)**: *"지은이네 **집들이** 때 마신 **와인** 진짜 맛있었지"* (날짜 단서 없음)<br>👉 일반 임베딩은 단어(`집들이`, `화이트 와인`)가 겹치는 이 함정들을 1위로 뽑아 **오답 날짜(`10/7`)를 짚거나 검색이 끊김!** |
-| **Reasoning Embedding이 찾는 진짜 단서 (Hop 1 Positive)** | `"이사 기념으로 10월 14일 토요일에 우리 집에서 저녁 먹자!"` (단순 유의어 수준) | `10월 14일 카톡`: *"밀렸던 식탁 드디어 도착! 미뤄졌던 거 **10월 14일 토요일** 저녁에 우리 집에서 다시 모이자. 오면서 **휴지·세제** 사 오지 말고 몸만 와~"*<br>👉 `'집들이'`라는 단어가 없어도 **① 일정 연기 후 실제 성사된 상태(State Update)** + **② 휴지·세제/새 식탁이라는 암묵적 집들이 맥락(ImpliRet)** + **③ 다음 홉을 열 수 있는 날짜 브릿지(`10/14`) 보유 여부(Bridge Utility)**를 추론하여 정확히 1위로 회수! |
-| **Hop 2 (갤러리·노트 추론)** | `"화이트 와인"` ↔ `"Sauvignon Blanc"` (단순 불어/영어 단어 매칭처럼 보임) | `10월 14일` 저녁 촬영된 사진들 중, 선물로 들어온 위스키/레드와인 사진을 배제하고 **해산물 테이블 위 칠링 버킷에 담긴 `Cloudy Bay Sauvignon Blanc` (`Crisp citrus & white wine notes`)**을 **상황·속성 추론(LREM/BRIGHT)**으로 연결 |
-| **학술적 근거 대응** | Level 2 (STS / Paraphrase) | **Level 3 RIR 완벽 부합**:<br>- **ReasonEmbed / LongMemEval**: 취소·연기(Negation) vs 확정 일정 구분<br>- **ACL 2026 RIR Survey (ImpliRet)**: 어휘 중첩 없는 암묵적 일상 의도 추론<br>- **MDR / Hi-Q**: 다음 홉을 여는 유효 브릿지(Bridge Evidence) 선택 |
-
----
-
-## 5. Option A의 나머지 두 시나리오(`UX 1`, `UX 3`)에도 동일한 Level 3 RIR 기준 적용 점검
-
-사용자님이 선택하신 **포트폴리오 A (`UX 1: A사 미팅 요청 자료`, `UX 2: 집들이 화이트 와인`, `UX 3: 출장길 면세점 갈색병`)** 전체가 "일반 임베딩이 아닌 진짜 Reasoning Embedding"으로 일관되게 빛나도록, `UX 1`과 `UX 3`의 추론 포인트도 함께 고도화했습니다.
-
-| 구분 | 시나리오 | 일반 Embedding이 빠지는 함정 (Hard Negative) | Reasoning Embedding의 진짜 중간 추론 (Level 3 RIR) |
-|---|---|---|---|
-| **UX 1**<br>(비즈니스) | **A사 미팅 때 요청받은 자료 파일**<br>*("지난번 A사 미팅 때 그쪽에서 수정해서 보내달라고 한 자료 파일 어디 있지?")* | `"A사 미팅 발표자료_최종.pdf"`처럼 제목에 `'A사'`, `'미팅'`, `'자료'`가 그대로 들어간 **초기 발표용 자료**를 1위로 가져옴 | **역할·상태·약속 추론 (R1+R4)**:<br>- **Hop 1 (캘린더+음성메모)**: 내가 발표한 자료가 아니라 상대방(박 팀장)이 **"독소조항 문구 빼고 보안 아키텍처 장표 추가해서 금요일까지 재송부해 달라"**고 요청한 **미해결 후속 과제(Action Item)**를 추론<br>- **Hop 2 (내 파일/노트)**: 파일명에 `'A사'`가 없더라도 해당 **보안 아키텍처 개정 조건이 반영된 내부 코드명 문서(`Project_Titan_Sec_v2.4.pptx`)**를 연결 |
-| **UX 2**<br>(일상/메인) | **집들이 화이트 와인 (고도화판)**<br>*("지은이네 집들이 때 마신 화이트 와인 이름이 뭐였지?")* | `'집들이'`, `'화이트 와인'` 단어가 그대로 적힌 **취소된 10/7 카톡**이나 **날짜 없는 사후 안부 카톡**을 1위로 가져옴 | **일정 변경(취소→확정) + 암묵적 맥락 + 브릿지 유용성 추론 (R1+R3+R5)**:<br>- **Hop 1 (카톡)**: 식탁 배송 지연 후 **실제 성사된 10/14 모임 카톡(*"미뤄졌던 거 10/14에 보자, 휴지 사 오지 마"*)**에서 날짜(`10/14`) 앵커 획득<br>- **Hop 2 (갤러리 OCR)**: 10/14 촬영 사진 중 칠링된 화이트 와인 품종·속성(`Cloudy Bay Sauvignon Blanc`) 특정 |
-| **UX 3**<br>(여행/쇼핑) | **출장길 면세점 갈색병**<br>*("작년 출장 갈 때 면세점에서 산 갈색병 뭐였지?")* | `'면세점'`, `'갈색병'` 키워드가 들어간 **예전 쇼핑 위시리스트 캡처**나 **면세점 할인 쿠폰 문자**, 혹은 출장 때 산 **위스키 갈색병**을 가져옴 | **일정 전후 관계(Numerical/Temporal) + 용량·외관 속성 추론 (R3+R5)**:<br>- **Hop 1 (캘린더/문자)**: `'작년 출장'` → 캘린더의 **출국 비행편 출발 직전 2시간 이내(시간 연산 추론)** 인천공항 제2터미널 신라면세점 결제 알림(`$142`) 특정<br>- **Hop 2 (영수증/갤러리)**: 일상 별명(`'갈색병'`)을 기내 반입 규격·갈색 앰플 외관 및 정식 제품명(`Estée Lauder Advanced Night Repair 100ml`)으로 속성 연결 |
-
----
-
-## 6. 발표 슬라이드(How It Works 12장)에 반영할 핵심 수정 포인트 요약
-
-와인 시나리오의 **슬라이드 구조(12장)는 그대로 유지**하면서 텍스트·다이어그램의 디테일만 위 RIR 논리에 맞춰 업그레이드하면 발표 설득력이 극대화됩니다.
-
-1. **`fail` 슬라이드 (일반 검색·일반 임베딩의 한계)**:
-   - 기존: 단순히 `"집들이"`, `"화이트 와인"` 키워드가 흩어져 있어서 못 찾는다고만 설명.
-   - **고도화**: 일반 임베딩이 **표면 단어가 겹치는 함정 메시지(10/7 취소된 집들이 카톡, 또는 날짜 없는 사후 카톡)**를 고득점으로 잘못 가져와서 엉뚱한 날짜를 뒤지는 **구체적 실패 과정(Hard Negative 오탐)**을 명시.
-2. **`hop1` 슬라이드 (카톡에서 1차 단서 확보)**:
-   - 기존: `"이사 기념으로 10월 14일에 저녁 먹자"` (단순 유의어 매칭처럼 보임).
-   - **고도화**:
-     - ❌ **배제된 함정 카톡 (10/02)**: *"10/7 집들이 겸 화이트 와인 마시자 → 식탁 배송 밀려서 취소 ㅠㅠ"* (단어는 겹치지만 취소된 일정)
-     - ✅ **Reasoning Embedding이 선택한 진짜 단서 (10/10)**: *"식탁 도착! 미뤄졌던 거 **10월 14일 토요일**에 우리 집에서 다시 모이자! 오면서 휴지·세제 사 오지 말고 몸만 와~"* (**일정 재확정 상태 + 집들이 암묵적 맥락 + 날짜 브릿지 보유**)
-3. **`hop2` & `ocr` 슬라이드 (갤러리에서 2차 단서 및 와인명 확정)**:
-   - `10월 14일` 저녁 촬영 사진 중 단순 레드와인/위스키 선물 사진을 걸러내고, 해산물 식탁에 놓인 화이트 와인 라벨(`Cloudy Bay Sauvignon Blanc`)의 품종·속성을 추론하여 확정.
-4. **`scenarios` 슬라이드 (More Scenarios 3열 카드)**:
-   - **카드 1 (`UX 1`)**: A사 미팅 때 수정 요청받은 보안 아키텍처 자료 (발표본 vs 상대방 수정 요청사항 구분 추론)
-   - **카드 2 (`UX 2`)**: 지은이네 집들이 때 마신 화이트 와인 (취소된 일정 배제 및 성사된 모임 날짜·라벨 추론)
-   - **카드 3 (`UX 3`)**: 작년 출장길 면세점에서 산 갈색병 (출국 직전 시간 연산 + 별명↔정식 제품명 추론)
+1. **카톡에 `'집들이'`나 `'이사 기념'` 같은 직접적인 유의어를 빼고**, **`"박스는 어제 다 풀었어! 양손 무겁게 휴지랑 세제 사 오지 말고 그냥 몸만 와~ (10/14)"`**처럼 **누가 봐도 집들이지만 표면 단어는 전혀 안 겹치는 일상 맥락(ImpliRet 스타일)**으로 바꾼다.
+2. 그리고 설명할 때 **"1) `'휴지·세제 사 오지 마라 → 집들이'`라는 상황 추론과, 2) `'와인 질문이지만 와인 단어가 전혀 없는 이 카톡이 날짜(10/14)를 알려줄 핵심 중간 단서(Bridge)다'`라는 다중 홉 유용성 추론(MDR/ReasonIR)을 동시에 해내는 것이 바로 우리의 Reasoning Embedding이다!"**라고 한 방에 정리한다.
