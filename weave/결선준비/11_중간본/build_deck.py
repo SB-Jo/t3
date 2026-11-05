@@ -36,7 +36,7 @@ HIW = ROOT / '09_HowItWorks' / '장표5'
 SOL = ROOT / '07_소스' / 'slides' / 'p05_결선' / 'apply_solution.py'
 APX = ROOT / '07_소스' / 'slides' / 'appendix_결선' / 'apply_appendix.py'
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'
-INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_인포그래픽_82초.mp4'
+INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_인포그래픽_85초.mp4'
 VENV_PY = Path.home() / '.cache' / 'weave-tools' / 'venv' / 'bin' / 'python'
 
 sys.path.insert(0, str(HIW))
@@ -68,7 +68,7 @@ def text_slide(prs, layout, name, lines, notes):
     return s
 
 
-TEAMS = [('AI System Team', ['이재웅', '양서윤']), ('AI Core Team', ['장이준', '이지현']), ('오디오개발Lab', ['조성빈'])]
+TEAMS = [('Samsung Research', 'AI System Team', ['이재웅', '양서윤']), ('Samsung Research', 'AI Core Team', ['장이준', '이지현']), ('하만협력', '오디오개발Lab', ['조성빈'])]
 TITLE, TAGLINE = 'Weave Assist', '흩어진 기억을 엮어, 지금을 완성하다'     # 이전 표지와 같은 문구
 CX = 70                                         # 표지 글 왼쪽 끝. 영상의 왼쪽 빈 자리는 x < 564(1280 기준)
 MARK = 56                                       # 'Weave' 앞 아이콘(인트로 끝 화면의 보라 네모 + 흰 실타래)
@@ -113,29 +113,30 @@ def cover_text(slide, team_style='under'):
             continue
         old.addprevious(etree.fromstring(GRAD))
         rp.remove(old)
-    pa.prim(S.T('cover/sub', CX + 1, 306, 520, 40, TAGLINE, size=20, color=S.INK2, weight='m', anchor='ctr'))
+    pa.prim(S.T('cover/sub', CX + 1, 306, 520, 40, TAGLINE, size=20, color=S.INK2, weight='b', anchor='ctr'))
 
     x = CX + 1
     if team_style == 'under':
-        for k, (team, names) in enumerate(TEAMS):
+        for k, (dept, team, names) in enumerate(TEAMS):
             nw = [fw(n, 13, 'SamsungOneKorean-700.ttf') for n in names]
             gap = 14
             names_w = sum(nw) + gap * (len(names) - 1)
-            gw = max(names_w, fw(team, 9.5, 'SamsungOneKorean-400.ttf'))
+            gw = max(names_w, fw(team, 9.5, 'SamsungOneKorean-400.ttf'), fw(dept, 9.5, 'SamsungOneKorean-400.ttf'))
             nx = x
             for i, n in enumerate(names):
-                pa.prim(S.T('cover/n%d%d' % (k, i), nx, 584, nw[i] + 8, 22, n, size=13, color=S.INK, weight='b'))
+                pa.prim(S.T('cover/n%d%d' % (k, i), nx, 572, nw[i] + 8, 22, n, size=13, color=S.INK, weight='b'))
                 nx += nw[i] + gap
-            pa.prim(S.R('cover/line%d' % k, x, 611, gw, 1.3, fill='C3B6F7', line=None))
-            pa.prim(S.T('cover/team%d' % k, x, 617, gw + 12, 18, team, size=9.5, color=S.SUB))
+            pa.prim(S.R('cover/line%d' % k, x, 599, gw, 1.3, fill='C3B6F7', line=None))
+            pa.prim(S.T('cover/dept%d' % k, x, 605, gw + 12, 18, dept, size=9.5, color=S.SUB))
+            pa.prim(S.T('cover/team%d' % k, x, 622, gw + 12, 18, team, size=9.5, color=S.SUB))
             x += gw + 40
     else:
-        for k, (team, names) in enumerate(TEAMS):
+        for k, (dept, team, names) in enumerate(TEAMS):
             nw = max(fw(n, 13, 'SamsungOneKorean-700.ttf') for n in names)
             for i, n in enumerate(names):
                 pa.prim(S.T('cover/n%d%d' % (k, i), x, 578 + i * 26, nw + 8, 22, n, size=13, color=S.INK, weight='b'))
             lx = x + nw + 11
-            rows = team.rsplit(' ', 1) if len(names) > 1 and ' ' in team else [team]
+            rows = [dept, team]
             pa.prim(S.R('cover/line%d' % k, lx, 582, 1.3, 26 * len(names) - 8, fill='C3B6F7', line=None))
             tw_ = max(fw(r, 10, 'SamsungOneKorean-400.ttf') for r in rows)
             for i, r in enumerate(rows):
@@ -143,8 +144,12 @@ def cover_text(slide, team_style='under'):
             x = lx + 11 + tw_ + 36
 
 
-INFO_NOTES = ('인포그래픽 영상입니다(1분 22초, 자동 재생). Pain Points의 세 불편에 세 장면이 차례로 답합니다. '
-              '기록 통합 검색, 단서로 찾는 기억, 먼저 건네는 기억 순서로 나오고, 세 화면이 모인 뒤 Weave Assist 로고로 끝납니다. 영상이 끝나면 Solution으로 넘어갑니다.')
+INFO_NOTES = ('인포그래픽 영상입니다(1분 25초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
+              '마지막 로고가 뜨면 무대 중앙으로 돌아와 다음 장으로 넘어갑니다. '
+              '현장 음향이 작을 때만 장면 카드가 뜰 때 한 문장씩 얹습니다. '
+              '첫째, 급한 통화 중에도 앱을 뒤질 필요 없이, 아래에서 쓸어 올리면 끝납니다. '
+              '둘째, 정확한 이름이 생각나지 않아도, 카톡의 날짜 단서와 그날 찍은 사진을 스스로 이어 정답을 찾아냅니다. '
+              '셋째, 공항에 내리는 순간, 내 위치와 탑승권, 그리고 3주 전 아내의 카톡까지 엮어 잊고 있던 약속을 먼저 일깨워 줍니다.')
 
 
 def blank_slide(prs, layout, notes):
@@ -201,7 +206,8 @@ EDITS = {
     11: [(['기존 ', 'AI ', '서비스들과 달리, ', 'Weave', '는 단말 전체의 데이터를 유기적으로 연결하는 사용자 경험을 제공합니다.'],
           ['기존 ', 'AI ', '서비스들과 달리 ', 'Weave', '는 기기 전체의 기록을 이어 필요한 순간 건네는 경험을 제공합니다.']),
          (['문자 등 시스템 전반'], ['월렛 등 시스템 전반']),
-         (['키보드에 먼저 띄움'], ['키보드에 먼저 표시'])],
+         (['입력창 진입 시 연관 맥락을'], ['입력창 진입 시 연관 기억을']),
+         (['키보드에 먼저 띄움'], ['키보드에 먼저 제안'])],
     12: [(['"잠깐만 찾아볼게" 대신, 하던 일을 이어갑니다'], ['"잠깐만 찾아볼게" 대신 하던 일을 이어 갑니다']),
          (['찾는 시간은 줄이고', ' · 기억은 되살리고 · 기록은 자산으로'], ['찾는 시간은 줄이고', ', 기억은 되살리고, 기록은 자산으로']),
          (['정보를 찾는 데 허비'], ['정보를 찾는 데 씁니다']),
@@ -216,10 +222,6 @@ EDITS = {
     14: [(['쌓인 기록이, 갤럭시를 계속 쓰는 이유가 됩니다'], ['쌓인 기록이 갤럭시를 계속 쓰는 이유가 됩니다']),
          (['찾는 시간은 줄이고 · 기억은 되살리고 · ', '기록은 자산으로'], ['찾는 시간은 줄이고, 기억은 되살리고, ', '기록은 자산으로']),
          (['쌓아둔 대화·사진·메모가'], ['쌓아 둔 대화, 사진, 메모가'])],
-    16: [(['카카오톡 대화는'], ['어떤 기록을']),
-         (['어떻게 가져오나요?'], ['어떻게 읽나요?']),
-         (['사용자가 알림 접근을 허용하면, 새로 받은 메시지의 텍스트를 기기 안에 쌓아 활용합니다.'], ['삼성 기본 앱(갤러리, 노트, 캘린더, 메일, 월렛)은 허용받은 범위에서 기기 안에서 읽습니다.']),
-         (['알림에 남지 않는 ', '내가 보낸 메시지와 이전 대화', '는 ‘대화 내용 내보내기’로 가져옵니다.'], ['카카오톡은 알림 접근을 허용하면 ', '새로 받은 메시지의 글자', '를 쌓고, 사진은 저장한 것만 읽습니다.'])],
     18: [(['개발 ', 'T/F'], ['AI System Team', '']),
          (['채용 T/F'], ['AI Core Team']),
          (['읽어주셔서 감사합니다!'], ['경청해 주셔서 감사합니다.']),
@@ -228,20 +230,22 @@ EDITS = {
 LABEL = {2: 'Motivation', 3: 'Pain Points', 9: 'Why Samsung', 10: 'Why Now', 11: '차별화', 12: '기대 효과 1', 13: '기대 효과 2', 14: '기대 효과 3', 15: 'App Demo', 16: 'Q&A 데이터 접근', 18: 'END'}
 NOTES = {
     2: '세상 모든 지식은 AI에게 물으면서, 정작 내 기억은 아직도 직접 찾아 헤맵니다. 어제 간 이자카야 이름을 검색해도 결과가 없습니다. 내 휴대폰에는 이미 내 기억이 다 들어 있습니다. 흩어져 있을 뿐, 사라진 것은 아닙니다.',
-    3: '막막한 순간은 세 가지입니다. 첫째, 찾을 내용은 알지만 어느 앱에 있는지 모릅니다. 신입사원 성빈 씨는 회의 내용을 찾느라 노트와 메일, 대화 내역을 하나씩 확인합니다. 둘째, 정확한 이름이 떠오르지 않아 검색부터 막힙니다. 셋째, 필요한 순간에도 그런 기억이 있었는지 떠오르지 않습니다. 직장인 지현 씨는 가족과 친구가 흘린 말 한마디를 놓치지 않고 챙겨 주고 싶어 합니다. 이 세 순간을 Weave Assist가 어떻게 바꾸는지 영상으로 보겠습니다.',
+    3: '막막한 순간은 세 가지입니다. 첫째, 찾을 내용은 알지만 어느 앱에 있는지 모릅니다. 신입사원 성빈 씨는 회의 내용을 찾느라 노트와 메일, 대화 내역을 하나씩 확인합니다. 둘째, 정확한 이름이 떠오르지 않아 검색부터 막힙니다. 셋째, 필요한 순간에도 그런 기억이 있었는지 떠오르지 않습니다. 직장인 지현 씨는 가족과 친구가 흘린 말 한마디를 놓치지 않고 챙겨 주고 싶어 합니다. (톤을 한 단계 높여) 어느 앱에 있는지 몰라 헤매는 순간, 이름이 떠오르지 않아 검색창 앞에서 멈칫하는 순간, 그리고 소중한 사람의 스쳐 간 말을 깜빡하는 순간까지. 기억은 분명 내 휴대폰 안에 다 있는데, 왜 매번 내가 직접 찾아 헤매야 할까요? 만약 내 기기가 흩어진 기억의 조각들을 하나의 실처럼 엮어, 지금 필요한 순간에 먼저 건네준다면 어떨까요? Weave Assist가 바꾸어 놓을 우리의 세 가지 일상, 지금 바로 만나 보시죠. (0.5초 쉬고 클릭)',
     9: '왜 삼성일까요? 특정 플랫폼의 앱은 자사 서비스 안의 데이터만 볼 수 있습니다. 삼성은 갤러리, 삼성노트, 캘린더, 월렛처럼 기록이 쌓이는 기본 앱과 이를 다시 꺼내 쓰는 삼성 키보드를 하나의 제품 경험으로 설계할 수 있습니다. 앱 사이의 벽을 넘어 기기 전체에 흩어진 단서를 하나의 실처럼 엮으면, 사용자는 별도의 앱을 켜지 않고 매일 쓰는 키보드에서 필요한 기억을 바로 씁니다. 데이터는 Personal Data Engine과 연계해 기기 안에서 처리하고, KEEP과 Knox Vault로 보호합니다.',
     10: '왜 지금일까요? 기기 안에서 기록을 이해하고 실제 사용으로 연결할 온디바이스 AI 인프라가 갖춰지고 있습니다. 갤러리, 삼성노트, 캘린더, 월렛에 남은 기록을 온디바이스 API인 Android AICore, 모바일용 경량 LLM, 그리고 AI 연산 특화 하드웨어인 NPU가 기기 안에서 이해합니다. Weave는 기록을 더 많이 저장하는 것보다, 이미 남아 있는 기록을 필요한 순간 꺼내 쓰는 과정에 집중합니다.',
-    11: '경쟁 서비스와 비교하겠습니다. Samsung Writing Assist는 입력 중인 문장을 생성하고 교정합니다. Now Nudge는 상황을 인지해 정보를 안내합니다. Kanana는 카카오톡이라는 단일 앱 안에서 동작합니다. Weave는 갤러리, 삼성노트, 캘린더, 월렛 등 기기 전체에 흩어진 기록을 찾아 앱을 넘나들며 이어 가고, 데이터를 온디바이스로 처리하며, 입력창에 들어가는 순간 연관 맥락을 키보드에 먼저 표시합니다.',
+    11: '경쟁 서비스와 비교하겠습니다. Samsung Writing Assist는 입력 중인 문장을 생성하고 교정합니다. Now Nudge는 상황을 인지해 정보를 안내합니다. Kanana는 카카오톡이라는 단일 앱 안에서 동작합니다. Weave는 갤러리, 삼성노트, 캘린더, 월렛 등 기기 전체에 흩어진 기록을 찾아 앱을 넘나들며 이어 가고, 데이터를 온디바이스로 처리하며, 대화와 입력 맥락에 맞는 기억을 키보드에 먼저 띄워 줍니다.',
     12: '첫 번째 기대 효과입니다. 사람들은 하루 평균 59분을 여러 앱에 흩어진 정보를 찾는 데 씁니다. Weave는 어느 앱에 기록했는지 찾고, 오래된 대화와 갤러리를 넘기던 과정을 줄입니다. 키보드에서 필요한 내용을 제안받고 여러 앱의 기록을 한 번에 찾으니, 찾는 시간이 줄고 앱을 오가는 일이 줄고 대화와 업무의 흐름이 이어집니다.',
     13: '두 번째 기대 효과입니다. 사용자의 33%가 언젠가 필요할까 봐 캡처나 메모를 해 두지만 한 번도 열어 보지 않습니다. Weave와 함께라면 아내가 지나가듯 말한 면세점 갈색병, 친구 집들이에서 마신 소비뇽 블랑이 필요한 순간에 떠오릅니다. 잊었던 약속을 다시 찾고, 디테일이 감동을 만듭니다. 갤럭시는 저장 도구를 넘어 놓쳤던 기억까지 챙겨 주는 일상의 조력자가 됩니다.',
     14: '세 번째 기대 효과입니다. 스마트폰 사용자는 월평균 41개의 앱을 쓰고, 69%는 기기 내 데이터를 지우지 않고 그대로 씁니다. Weave는 쌓아 둔 대화, 사진, 메모를 오늘의 검색과 답장에 쓰이는 자산으로 바꿉니다. 사용자는 내 기록을 잘 활용해 주는 갤럭시의 가치를 경험하고, 기록이 쌓일수록 갤럭시를 계속 쓸 이유가 생깁니다.',
     15: '참고: 예선 때 만든 앱 데모입니다. 이전 시나리오(A사 시연, 무화과시루, 캘린더 집들이)를 담고 있어 결선 발표에서는 쓰지 않습니다.',
+    16: 'Q1 데이터 접근: 삼성 기본 앱은 사용자 동의하에 기기 내부에서 직접 연동합니다. 카카오톡 등 외부 메신저는 Android 공식 API로 사용자가 허용한 앱이 새 알림을 받습니다. Google Gemini도 같은 허용 아래 알림 속 메시지를 읽고 답장합니다. 사진은 갤러리에 저장된 이미지를 활용합니다. 이전 대화는 카카오톡 채팅방 설정의 대화 내용 내보내기로 가져올 수 있습니다. Weave는 통화 내용을 듣지 않습니다. 통화 화면에서는 사용자가 위로 밀어 검색어를 직접 적습니다. 잠금 화면과 홈 화면의 위로 밀기는 지금처럼 삼성 월렛이 씁니다.\n'
+        'Q2 속도와 배터리: 무거운 색인은 충전 중, 기기 유휴 같은 조건으로 미리 처리하고, 사용 중에는 필요한 기록만 찾아 읽습니다. 검색은 가벼운 임베딩이 맡고, 언어 모델에는 추려 낸 근거만 전달합니다.\n'
+        'Q3 사생활: 허용한 기록만 기기 안에서 처리하고, 언제든 끄거나 색인을 지울 수 있습니다. 기록 저장소의 암호화 키는 Android Keystore로 보호합니다. 근거가 부족하면 후보와 원문을 먼저 보여 주고, 최종 판단은 사용자가 내립니다.',
     18: '경청해 주셔서 감사합니다. 흩어진 기억을 엮어 지금을 완성하는 Weave Assist였습니다.',
 }
-Q1_NOTE = ' 보탬: Weave는 통화 내용을 듣지 않습니다. 통화 화면에서는 사용자가 위로 밀어 검색어를 직접 적습니다. 카카오톡 사진은 알림에 글자만 남으므로 갤러리에 저장한 경우에 읽습니다.'
-LINKS = [((80, 276, 210, 34), 3), ((304, 276, 210, 34), 4), ((528, 276, 300, 34), 5), ((664, 350, 200, 54), 2), ((458, 350, 160, 54), 1),
-         ((930, 350, 270, 54), 1), ((80, 350, 190, 54), 6)]        # A1 칸 → 해당 Appendix 장(appx 번호)
-HYBRID_NOTE = '* 논문 분류로는 Analytical Reasoning에 가장 가깝습니다. 출처: Wei et al., "A Survey of Reasoning-Intensive Retrieval", ACL 2026'
+LINKS = [((84, 287, 180, 42), 3), ((84, 340, 180, 42), 4), ((84, 393, 180, 42), 5), ((329, 290, 222, 56), 6), ((329, 346, 222, 100), 1),
+         ((618, 303, 300, 103), 2), ((311, 507, 628, 29), 2)]        # 파이프라인 장의 칸 → 해당 Appendix 장(appx 번호)
+HYBRID_NOTE = '* 추론 유형: Analytical Reasoning (Wei et al., "A Survey of Reasoning-Intensive Retrieval", ACL 2026)'
 
 
 def iter_paras(shapes):
@@ -277,8 +281,6 @@ def apply_edits(orig):
         if old.strip() != t.strip():
             log.append((LABEL[i] + ' 노트', old, t))
         set_notes(orig[i], t)
-    set_notes(orig[16], orig[16].notes_slide.notes_text_frame.text.rstrip() + Q1_NOTE)
-    log.append(('Q&A 데이터 접근 노트', '(끝에 추가)', Q1_NOTE.strip()))
     return log
 
 
@@ -303,7 +305,7 @@ $pres = $app.Presentations.Open($Pptx, 0, 0, 0)
 try {
   $W = $pres.PageSetup.SlideWidth; $H = $pres.PageSetup.SlideHeight
   $log = @()
-  foreach ($job in @(@($CoverIdx, $CoverMp4, "Cover loop video", -1, $CoverPoster), @($IntroIdx, $IntroMp4, "Infographic video 82s", 0, $IntroPoster))) {
+  foreach ($job in @(@($CoverIdx, $CoverMp4, "Cover loop video", -1, $CoverPoster), @($IntroIdx, $IntroMp4, "Infographic video 85s", 0, $IntroPoster))) {
     if (-not $job[1]) { continue }
     $s = $pres.Slides.Item($job[0])
     $v = $s.Shapes.AddMediaObject2($job[1], 0, -1, 0, 0, $W, $H)
@@ -355,8 +357,8 @@ def add_media(pptx, cover_idx, intro_idx, embed_fonts=False):
     else:
         print('   ! 표지 영상이 아직 없음:', COVER_MP4)
     shutil.copyfile(INTRO_MP4, tmpd / 'intro.mp4')
-    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 인포그래픽 미리보기 그림 = 오프닝 로고(3.9초)
-    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '3.9', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
+    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 인포그래픽 미리보기 그림 = 오프닝 로고(2.2초)
+    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '2.2', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
                    check=True)
     args += ['-IntroMp4', render2.winpath(tmpd / 'intro.mp4'), '-IntroPoster', render2.winpath(tmpd / 'intro.png')]
     code, log = render2.ps(tmpd / 'media.ps1', *args)

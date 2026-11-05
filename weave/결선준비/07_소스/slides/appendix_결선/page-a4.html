@@ -2,135 +2,218 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>Appendix · UX 1 상세 — UX 1 기록 통합 검색: 단계별 모델과 근거</title>
+<title>Appendix · UX 1 상세</title>
 <link rel="stylesheet" href="../../pages/theme.css">
 <style>
   .t-label { top: 30px; } .t-title { top: 62px; } .t-sub { top: 116px; font-size: 16.5px; }
-  .panel { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 16px; box-shadow: 0 8px 24px rgba(107,78,255,.06); }
-  .tx { position: absolute; font-size: 12px; line-height: 17px; color: var(--ink-2); white-space: nowrap; }
-  .tx b { font-weight: 700; color: var(--ink); }
-  .tx em { font-style: normal; font-weight: 700; color: #6B4EFF; }
-  .th { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #6B4EFF; white-space: nowrap; }
-  .st { position: absolute; font-size: 12px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-  .rule { position: absolute; height: 1px; background: #EEE9FA; }
-  .src { position: absolute; left: 62px; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
-  .note { position: absolute; font-size: 12.5px; line-height: 19px; color: var(--ink-2); white-space: nowrap; }
-  .note b { font-weight: 700; color: var(--ink); }
-  .note em { font-style: normal; font-weight: 700; color: #6B4EFF; }
-  .box { position: absolute; border-radius: 11px; background: #fff; border: 1.6px solid #DCD6EA; }
-  .box.em { border-color: #2F7BF6; background: #F3F8FF; }
-  .box.ll { border-color: #6B4EFF; background: #F5F1FF; }
-  .box.ru { border-color: #6F7690; border-style: dashed; background: #F8F8FB; }
-  .box.ok { border-color: #6B4EFF; background: #F5F1FF; }
-  .box.no { border-color: #E4DFEF; background: #FAF9FC; }
-  .bt { position: absolute; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap; }
-  .bs { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; text-align: center; white-space: nowrap; }
-  .lane { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #8E88A0; white-space: nowrap; }
-  .chipt { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; white-space: nowrap; }
-  .chipb { position: absolute; font-size: 11px; line-height: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-  .tag { position: absolute; font-size: 10px; line-height: 14px; font-weight: 700; white-space: nowrap; }
-  .tag.on { color: #6B4EFF; } .tag.off { color: #A29DB2; }
+  .card { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 18.59px; box-shadow: 0 10px 28px rgba(107,78,255,.07); }
+  .card.on { border: 1.8px solid #8B6BFF; box-shadow: 0 10px 28px rgba(107,78,255,.16); }
+  .card.soft { background: rgba(255,255,255,.86); }
+  .loopbox { position: absolute; border: 1.5px dashed #B7A6FF; border-radius: 24.78px; background: rgba(241,236,255,.38); }
+  .abs { position: absolute; }
+  .no { position: absolute; width: 24px; height: 24px; border-radius: 12px; background: var(--purple); }
+  .no.w { background: #fff; border: 1.5px solid var(--purple); }
+  .no-t { position: absolute; width: 24px; height: 24px; line-height: 24px; text-align: center; font-size: 12.5px; font-weight: 700; color: #fff; }
+  .no-t.w { color: var(--purple); }
+  .nm { position: absolute; font-size: 18.7px; line-height: 24.9px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .en { position: absolute; font-size: 13px; line-height: 24.9px; font-weight: 600; color: var(--purple-2); letter-spacing: .01em; white-space: nowrap; }
+  .q { position: absolute; font-family: 'Nanum Pen Script'; font-size: 22.66px; line-height: 26.94px; color: var(--purple); white-space: nowrap; }
+  .desc { position: absolute; font-size: 14px; line-height: 20.7px; color: var(--body); white-space: nowrap; }
+  .desc b { color: var(--ink); font-weight: 700; }
+  .chip { position: absolute; height: 23.8px; border-radius: 12.4px; background: #fff; border: 1px solid var(--purple-line); }
+  .chip.fill { background: var(--purple); border-color: var(--purple); }
+  .chip.soft { background: var(--tile); border-color: var(--tile); }
+  .chip.dash { background: #F7F4FF; border: 1.3px dashed #8B6BFF; }
+  .ct { position: absolute; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .ct.fill { color: #fff; }
+  .ct.gray { color: var(--body); font-weight: 600; }
+  .mini { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 12.4px; }
+  .mini.on { border: 1.6px solid #8B6BFF; box-shadow: 0 4px 12px rgba(107,78,255,.14); }
+  .mini.off { background: #FAF9FC; border-color: #ECE8F4; }
+  .pill { position: absolute; background: var(--soft); border: 1px solid var(--soft-line); border-radius: 12.4px; }
+  .lav { position: absolute; background: #F4F0FF; border: 1px solid #E3D9FF; border-radius: 11px; }
+  .tile { position: absolute; border-radius: 8.3px; background: var(--tile); }
+  .ico { position: absolute; color: var(--purple); }
   .app { position: absolute; }
-  .wrap { position: absolute; left: 0; top: 10px; width: 1280px; height: 720px; }
-  svg.fxl { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 2; }
+  .photo { position: absolute; border-radius: 9px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .btn { position: absolute; background: var(--purple); border-radius: 10px; }
+  .bar { position: absolute; background: #EEE9FA; }
+  .t10 { position: absolute; font-size: 10.5px; line-height: 14px; color: var(--muted); white-space: nowrap; }
+  .t10m { position: absolute; font-size: 10.5px; line-height: 14px; color: var(--muted-2); white-space: nowrap; }
+  .t10b { position: absolute; font-size: 10.5px; line-height: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t10p { position: absolute; font-size: 10.5px; line-height: 14px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t11 { position: absolute; font-size: 11.5px; line-height: 16px; color: var(--body); white-space: nowrap; }
+  .t11 b { color: var(--ink); font-weight: 700; }
+  .t11 em { font-style: normal; font-weight: 700; color: var(--purple); }
+  .t11m { position: absolute; font-size: 11.5px; line-height: 16px; color: var(--muted-2); white-space: nowrap; }
+  .t11b { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t11p { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t12 { position: absolute; font-size: 12.7px; line-height: 18px; color: var(--body); white-space: nowrap; }
+  .t12 b { color: var(--ink); font-weight: 700; }
+  .t12 em { font-style: normal; font-weight: 700; color: var(--purple); }
+  .t12b { position: absolute; font-size: 12.7px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t12p { position: absolute; font-size: 12.7px; line-height: 17px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t14b { position: absolute; font-size: 14.5px; line-height: 20px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t15b { position: absolute; font-size: 16px; line-height: 22px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t18b { position: absolute; font-size: 17px; line-height: 24px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .src { position: absolute; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
+  svg.links { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 3; }
+  .app, .ico, .photo { z-index: 4; }
 </style>
 </head>
 <body>
+<script src="../../pages/icons.js"></script>
 <div class="slide" id="slide">
   <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
   <div class="t-label" data-x>Appendix · UX 1 상세</div>
-  <div class="t-title" data-x>UX 1 기록 통합 검색: 단계별 모델과 근거</div>
-  <div class="t-sub" data-x>재웅 선배: "프로님, 지금 보고 드려야 하는데 우리 팀이 맡은 삼성기술전 시연 최종적으로 어떻게 됐죠?"</div>
-  <div class="wrap">
-  <div class="box no" style="left:60px; top:150px; width:157px; height:54px;"></div>
-  <img class="app" src="../../assets/icons/app-notes.png" alt="" style="left:68px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
-  <div class="chipb" data-x style="left:88px; top:156px; color:#8E88A0;">11/3 준비 회의</div>
-  <div class="chipt" data-x style="left:68px; top:174px; color:#A29DB2;">제품 소개 → 데모 → Q&amp;A</div>
-  <div class="tag off" data-x style="left:68px; top:186px;">이전 안</div>
-  <div class="box no" style="left:225px; top:150px; width:157px; height:54px;"></div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:233px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
-  <div class="chipb" data-x style="left:253px; top:156px; color:#8E88A0;">11/5 민수 메일</div>
-  <div class="chipt" data-x style="left:233px; top:174px; color:#A29DB2;">기술전_시연자료_v1</div>
-  <div class="tag off" data-x style="left:233px; top:186px;">날짜로 탈락</div>
-  <div class="box no" style="left:390px; top:150px; width:157px; height:54px;"></div>
-  <img class="app" src="../../assets/icons/app-notes.png" alt="" style="left:398px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
-  <div class="chipb" data-x style="left:418px; top:156px; color:#8E88A0;">11/6 오류 목록</div>
-  <div class="chipt" data-x style="left:398px; top:174px; color:#A29DB2;">라이브 데모 오류 정리</div>
-  <div class="tag off" data-x style="left:398px; top:186px;">뜻으로 탈락</div>
-  <div class="box ok" style="left:555px; top:150px; width:157px; height:54px;"></div>
-  <img class="app" src="../../assets/icons/app-notes.png" alt="" style="left:563px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
-  <div class="chipb" data-x style="left:583px; top:156px;">11/10 주간 회의</div>
-  <div class="chipt" data-x style="left:563px; top:174px;">문제 상황 → 데모 → 체험</div>
-  <div class="tag on" data-x style="left:563px; top:186px;">최신 결정</div>
-  <div class="box ok" style="left:720px; top:150px; width:157px; height:54px;"></div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:728px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
-  <div class="chipb" data-x style="left:748px; top:156px;">11/12 민수 메일</div>
-  <div class="chipt" data-x style="left:728px; top:174px;">Demo_Final.pptx</div>
-  <div class="tag on" data-x style="left:728px; top:186px;">최종 파일</div>
-  <div class="box no" style="left:885px; top:150px; width:157px; height:54px;"></div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:893px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
-  <div class="chipb" data-x style="left:913px; top:156px; color:#8E88A0;">11/13 민수 메일</div>
-  <div class="chipt" data-x style="left:893px; top:174px; color:#A29DB2;">리허설 회의실 예약</div>
-  <div class="tag off" data-x style="left:893px; top:186px;">뜻으로 탈락</div>
-  <div class="box ok" style="left:1050px; top:150px; width:157px; height:54px;"></div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:1058px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
-  <div class="chipb" data-x style="left:1078px; top:156px;">11/19 캘린더</div>
-  <div class="chipt" data-x style="left:1058px; top:174px;">오후 2시, 3번 부스</div>
-  <div class="tag on" data-x style="left:1058px; top:186px;">일정</div>
-  <div class="panel" style="left:60px; top:210px; width:1160px; height:380px;"></div>
-  <div class="th" data-x style="left:76px; top:219px;">단계</div>
-  <div class="th" data-x style="left:176px; top:219px;">일어나는 일</div>
-  <div class="th" data-x style="left:650px; top:219px;">모델과 절차</div>
-  <div class="th" data-x style="left:952px; top:219px;">논문 근거</div>
-  <div class="rule" style="left:76px; top:239px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:245px;">01 순간 감지</div>
-  <div class="tx" data-x style="left:176px; top:245px;">통화 화면에서 위로 밀고 '삼성기술전 시연 최종'을 직접 적습니다.<br>통화 내용은 듣지 않습니다. 키보드가 없는 화면의 입구입니다.</div>
-  <div class="tx" data-x style="left:650px; top:245px;">사용자 호출</div>
-  <div class="tx" data-x style="left:952px; top:245px; color:#6A6474;">논문 없음(설계)</div>
-  <div class="rule" style="left:76px; top:282px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:288px;">① 한 번 찾기</div>
-  <div class="tx" data-x style="left:176px; top:288px;">11/3 회의록과 v1 파일이 올라옵니다. 답처럼 보이지만 옛 내용입니다.<br>이대로 보고하면 틀립니다.</div>
-  <div class="tx" data-x style="left:650px; top:288px;">BM25 + Reasoning Embedding</div>
-  <div class="tx" data-x style="left:952px; top:288px; color:#6A6474;">IRCoT (ACL 2023), BRIGHT (ICLR 2025)</div>
-  <div class="rule" style="left:76px; top:325px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:331px;">② 나누기</div>
-  <div class="tx" data-x style="left:176px; top:331px;">1. 언제 어디서 하지?  2. 무엇을 어떤 순서로 하지?</div>
-  <div class="tx" data-x style="left:650px; top:331px;">sLLM 1~2B</div>
-  <div class="tx" data-x style="left:952px; top:331px; color:#6A6474;">Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025)</div>
-  <div class="rule" style="left:76px; top:368px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:374px;">③ 1홉</div>
-  <div class="tx" data-x style="left:176px; top:374px;">1번은 캘린더에서, 2번은 11/3 회의록에서 찾습니다.</div>
-  <div class="tx" data-x style="left:650px; top:374px;">Reasoning Embedding</div>
-  <div class="tx" data-x style="left:952px; top:374px; color:#6A6474;">ReasonIR, ReasonEmbed (ACL 2026)</div>
-  <div class="rule" style="left:76px; top:411px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:417px;">④ 잇기</div>
-  <div class="tx" data-x style="left:176px; top:417px;">[그 순서]를 넣어 '그 뒤에 바뀌었나?'로 다시 쓰고 11/3 이후로 거릅니다.</div>
-  <div class="tx" data-x style="left:650px; top:417px;">기록에서 복사, 날짜 필터<br>(날짜 비교 = Numerical Reasoning)</div>
-  <div class="tx" data-x style="left:952px; top:417px; color:#6A6474;">Hi-Q, IRCoT, RIR Survey (ACL 2026)</div>
-  <div class="rule" style="left:76px; top:454px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:460px;">③ 2홉</div>
-  <div class="tx" data-x style="left:176px; top:460px;">오류 목록 말고 11/10 주간 회의를 찾습니다.<br>'기술전'도 '시연'도 없는 메모입니다.</div>
-  <div class="tx" data-x style="left:650px; top:460px;">Reasoning Embedding</div>
-  <div class="tx" data-x style="left:952px; top:460px; color:#6A6474;">LongMemEval (ICLR 2025)<br>Knowledge Update</div>
-  <div class="rule" style="left:76px; top:497px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:503px;">④③ 3홉</div>
-  <div class="tx" data-x style="left:176px; top:503px;">'민수 님이 다시 정리'로 다시 쓰고, 민수 메일 11/10 이후에서<br>회의실 메일 말고 최종본을 찾습니다.</div>
-  <div class="tx" data-x style="left:650px; top:503px;">보낸 사람과 날짜 필터 + Reasoning Embedding</div>
-  <div class="tx" data-x style="left:952px; top:503px; color:#6A6474;">DER-RAG, MDR (ICLR 2021)</div>
-  <div class="rule" style="left:76px; top:540px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:546px;">⑤ 요약</div>
-  <div class="tx" data-x style="left:176px; top:546px;">날짜순으로 세워 마지막 결정을 세 줄로 요약하고 파일을 붙입니다.<br>사용자는 요약을 읽어 주고, 파일은 직접 보냅니다.</div>
-  <div class="tx" data-x style="left:650px; top:546px;">sLLM, 이름과 날짜 복사 검사<br>전송은 사용자</div>
-  <div class="tx" data-x style="left:952px; top:546px; color:#6A6474;">LongMemEval (시간순 제공, Chain-of-Note)<br>Hi-Q (NeurIPS 2026)</div>
-  <div class="note" data-x style="left:62px; top:596px; font-size:12px; line-height:17px;"><b>순서는 임베딩이 맞추지 않습니다.</b> 임베딩이 같은 일의 기록을 찾고, 메타데이터 날짜가 앞뒤를 가리고, sLLM이 마지막 결정을 읽습니다. 시간을 고려하지 않는 설계는 시간 추론 질문에서 약하다는 보고가 있습니다(LongMemEval).</div>
-  <div class="note" data-x style="left:62px; top:614px; font-size:12px; line-height:17px;">이 조합 전체를 시험한 논문은 없습니다. 요약 속도는 입력 500토큰, 출력 100토큰 가정으로 Qwen3-1.7B 약 2.5초, 4B 약 4.9초입니다(S26 Snapdragon 공개 측정값으로 계산, 실측 전).</div>
-  <div class="src" data-x style="left:62px; top:636px;">* 출처: Wu et al., "LongMemEval", ICLR 2025 · Kim et al., "Hi-Q", NeurIPS 2026 · Trivedi et al., "IRCoT", ACL 2023 · Su et al., "BRIGHT", ICLR 2025 · Shao et al., "ReasonIR", COLM 2025 · Wei et al., "RIR Survey", ACL 2026</div>
+  <div class="t-title" data-x>UX 1 <span class="hl">기록 통합 검색</span>: 단계별 모델과 근거</div>
+  <div class="t-sub" data-x>재웅 선배: “프로님, 우리 팀이 맡은 삼성기술전 시연 어떻게 진행하기로 했었죠?”</div>
+  <div class="card" style="left:64.0px; top:158px; width:278px; height:216px;"></div>
+  <div class="no" style="left:76.0px; top:170px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:76.0px; top:170px;">01</div>
+  <div class="t12b" data-x style="left:107.0px; top:167px; font-size:13.2px; line-height:17px;">순간 감지</div>
+  <div class="t10p" data-x style="left:107.0px; top:184px; color:#8B6BFF; font-weight:600;">Trigger</div>
+  <div class="t10b" data-x style="left:78.0px; top:206px;">재웅 선배</div>
+  <div class="chip soft" style="left:134.0px; top:204px; width:48px; height:18px; border-radius:9px; background:#E9F7EE; border-color:#E9F7EE;"></div>
+  <div class="ct" data-x style="left:134.0px; top:204px; width:48px; height:18px; line-height:18px; font-size:10px; color:#1E9E55;">통화 중</div>
+  <div class="chip" style="left:76.0px; top:232px; width:254px; height:32px; border-radius:16px; border-color:#CFC3FF;"></div>
+  <img class="app" src="../assets/weave-spool-6B4EFF.png" alt="" style="left:85.0px; top:239px; width:18px; height:18px;">
+  <div class="t11b" data-x style="left:108.0px; top:240px;">삼성기술전 시연 내용</div>
+  <svg class="app" viewBox="0 0 24 24" style="left:303.0px; top:237px; width:22px; height:22px;"><circle cx="12" cy="12" r="12" fill="#6B4EFF"/><path d="M12 18V7M7 11.5 12 6.5l5 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="t11" data-x style="left:78.0px; top:286px; line-height:16px; font-size:11.3px;">통화 화면에서 위로 밀어 직접 입력합니다.<br>키보드가 없는 화면의 입구입니다.</div>
+  <div class="bar" style="left:78.0px; top:324px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:78.0px; top:330px;">모델</div>
+  <div class="t10" data-x style="left:106.0px; top:330px;">사용자 호출</div>
+  <div class="t10p" data-x style="left:78.0px; top:347px;">근거</div>
+  <div class="t10" data-x style="left:106.0px; top:347px;">Weave 온디바이스 UX 설계</div>
+  <div class="card" style="left:355.3px; top:158px; width:278px; height:216px;"></div>
+  <div class="no" style="left:367.3px; top:170px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:367.3px; top:170px;">1</div>
+  <div class="t12b" data-x style="left:398.3px; top:167px; font-size:13.2px; line-height:17px;">1차 통합 검색</div>
+  <div class="t10p" data-x style="left:398.3px; top:184px; color:#8B6BFF; font-weight:600;">Single-Hop</div>
+  <div class="mini off" style="left:367.3px; top:204px; width:254px; height:60px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" alt="" style="left:375.3px; top:212px; width:21px; height:21px; border-radius:5px; opacity:.5;">
+  <div class="t10b" data-x style="left:402.3px; top:209px; color:#8E88A0;">삼성기술전 준비 회의</div>
+  <div class="t10m" data-x style="left:402.3px; top:223px;">삼성노트 · 11월 3일 (화)</div>
+  <div class="t10" data-x style="left:377.3px; top:243px; color:#A8A3B5;">제품 소개 → 라이브 데모 → Q&amp;A</div>
+  <div class="chip soft" style="left:572.6698437499999px; top:212px; width:41.63015625px; height:17px; border-radius:8.5px;"></div>
+  <div class="ct" data-x style="left:572.6698437499999px; top:212px; width:41.63015625px; height:17px; line-height:17px; font-size:9.5px;">이전 안</div>
+  <div class="t11" data-x style="left:369.3px; top:286px; line-height:16px; font-size:11.3px;">11/3 회의록과 v1 파일이 먼저 올라옵니다.<br>답처럼 보이지만 옛 내용입니다.</div>
+  <div class="bar" style="left:369.3px; top:324px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:369.3px; top:330px;">모델</div>
+  <div class="t10" data-x style="left:397.3px; top:330px;">BM25 + Reasoning Embedding</div>
+  <div class="t10p" data-x style="left:369.3px; top:347px;">근거</div>
+  <div class="t10" data-x style="left:397.3px; top:347px;">IRCoT (ACL 2023), BRIGHT (ICLR 2025)</div>
+  <div class="card" style="left:646.6px; top:158px; width:278px; height:216px;"></div>
+  <div class="no" style="left:658.6px; top:170px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:658.6px; top:170px;">2</div>
+  <div class="t12b" data-x style="left:689.6px; top:167px; font-size:13.2px; line-height:17px;">하위 질문 분해</div>
+  <div class="t10p" data-x style="left:689.6px; top:184px; color:#8B6BFF; font-weight:600;">Decomposition</div>
+  <div class="pill" style="left:658.6px; top:204px; width:254px; height:30px; border-radius:10px; background:#F4F0FF; border-color:#E3D9FF;"></div>
+  <div class="no" style="left:665.6px; top:210px; width:18px; height:18px; border-radius:9px;"></div>
+  <div class="no-t" data-x style="left:665.6px; top:210px; width:18px; height:18px; line-height:18px; font-size:10.5px;">1</div>
+  <div class="t11b" data-x style="left:689.6px; top:211px;">언제 어디서 하지?</div>
+  <div class="pill" style="left:658.6px; top:240px; width:254px; height:30px; border-radius:10px;"></div>
+  <div class="no" style="left:665.6px; top:246px; width:18px; height:18px; border-radius:9px;"></div>
+  <div class="no-t" data-x style="left:665.6px; top:246px; width:18px; height:18px; line-height:18px; font-size:10.5px;">2</div>
+  <div class="t11b" data-x style="left:689.6px; top:247px;">무엇을 어떤 순서로 하지?</div>
+  <div class="t11" data-x style="left:660.6px; top:286px; line-height:16px; font-size:11.3px;">일정과 순서를 따로 찾도록<br>두 개의 하위 질문으로 나눕니다.</div>
+  <div class="bar" style="left:660.6px; top:324px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:660.6px; top:330px;">모델</div>
+  <div class="t10" data-x style="left:688.6px; top:330px;">sLLM 1~2B</div>
+  <div class="t10p" data-x style="left:660.6px; top:347px;">근거</div>
+  <div class="t10" data-x style="left:688.6px; top:347px;">Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025)</div>
+  <div class="card" style="left:937.9000000000001px; top:158px; width:278px; height:216px;"></div>
+  <div class="no" style="left:949.9000000000001px; top:170px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:949.9000000000001px; top:170px;">3</div>
+  <div class="t12b" data-x style="left:980.9000000000001px; top:167px; font-size:13.2px; line-height:17px;">1홉 추론 검색</div>
+  <div class="t10p" data-x style="left:980.9000000000001px; top:184px; color:#8B6BFF; font-weight:600;">Hop Retrieval</div>
+  <div class="mini on" style="left:949.9000000000001px; top:204px; width:254px; height:60px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:957.9000000000001px; top:212px; width:21px; height:21px; border-radius:5px;">
+  <div class="t10b" data-x style="left:984.9000000000001px; top:209px;">삼성기술전 시연</div>
+  <div class="t10m" data-x style="left:984.9000000000001px; top:223px;">캘린더 · 11월 19일 (목)</div>
+  <div class="t10" data-x style="left:959.9000000000001px; top:243px;">오후 2시, 수원 디지털시티 3번 부스</div>
+  <div class="t11" data-x style="left:951.9000000000001px; top:286px; line-height:16px; font-size:11.3px;">1번은 캘린더에서 찾고,<br>2번은 11/3 회의록에서 찾습니다.</div>
+  <div class="bar" style="left:951.9000000000001px; top:324px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:951.9000000000001px; top:330px;">모델</div>
+  <div class="t10" data-x style="left:979.9000000000001px; top:330px;">Reasoning Embedding</div>
+  <div class="t10p" data-x style="left:951.9000000000001px; top:347px;">근거</div>
+  <div class="t10" data-x style="left:979.9000000000001px; top:347px;">ReasonIR, ReasonEmbed (ACL 2026)</div>
+  <div class="card" style="left:64.0px; top:386px; width:278px; height:216px;"></div>
+  <div class="no" style="left:76.0px; top:398px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:76.0px; top:398px;">4</div>
+  <div class="t12b" data-x style="left:107.0px; top:395px; font-size:13.2px; line-height:17px;">단서 결합·질의 재작성</div>
+  <div class="t10p" data-x style="left:107.0px; top:412px; color:#8B6BFF; font-weight:600;">Query Rewriting</div>
+  <div class="mini on" style="left:76.0px; top:432px; width:254px; height:36px;"></div>
+  <div class="chip fill" style="left:84.0px; top:440px; width:49.9928125px; height:20px; border-radius:10px;"></div>
+  <div class="ct fill" data-x style="left:84.0px; top:440px; width:49.9928125px; height:20px; line-height:20px; font-size:11px;">그 순서</div>
+  <div class="t11b" data-x style="left:137.9928125px; top:442px;">그 뒤에 바뀌었나?</div>
+  <div class="chip dash" style="left:76.0px; top:478px; width:125.502109375px; height:22px; border-radius:11px;"></div>
+  <div class="ct" data-x style="left:76.0px; top:478px; width:125.502109375px; height:22px; line-height:22px; font-size:10.5px;">필터 date > 2026-11-03</div>
+  <div class="t11" data-x style="left:78.0px; top:514px; line-height:16px; font-size:11.3px;">찾은 회의 날짜로 질문을 다시 쓰고,<br>더 나중 기록으로 좁힙니다.</div>
+  <div class="bar" style="left:78.0px; top:552px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:78.0px; top:558px;">모델</div>
+  <div class="t10" data-x style="left:106.0px; top:558px;">기록 복사, 날짜 필터 (Numerical)</div>
+  <div class="t10p" data-x style="left:78.0px; top:575px;">근거</div>
+  <div class="t10" data-x style="left:106.0px; top:575px;">Hi-Q, IRCoT, RIR Survey (ACL 2026)</div>
+  <div class="card" style="left:355.3px; top:386px; width:278px; height:216px;"></div>
+  <div class="no" style="left:367.3px; top:398px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:367.3px; top:398px;">3</div>
+  <div class="t12b" data-x style="left:398.3px; top:395px; font-size:13.2px; line-height:17px;">2홉 추론 검색</div>
+  <div class="t10p" data-x style="left:398.3px; top:412px; color:#8B6BFF; font-weight:600;">Hop Retrieval</div>
+  <div class="mini on" style="left:367.3px; top:432px; width:254px; height:60px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" alt="" style="left:375.3px; top:440px; width:21px; height:21px; border-radius:5px;">
+  <div class="t10b" data-x style="left:402.3px; top:437px;">주간 회의</div>
+  <div class="t10m" data-x style="left:402.3px; top:451px;">삼성노트 · 11월 10일 (화)</div>
+  <div class="t10" data-x style="left:377.3px; top:471px;">문제 상황 → 라이브 데모 → 관람객 체험</div>
+  <div class="t11" data-x style="left:369.3px; top:514px; line-height:16px; font-size:11.3px;">‘기술전’도 ‘시연’도 없는 주간 회의에서<br>바뀐 순서를 찾습니다.</div>
+  <div class="bar" style="left:369.3px; top:552px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:369.3px; top:558px;">모델</div>
+  <div class="t10" data-x style="left:397.3px; top:558px;">Reasoning Embedding</div>
+  <div class="t10p" data-x style="left:369.3px; top:575px;">근거</div>
+  <div class="t10" data-x style="left:397.3px; top:575px;">LongMemEval (ICLR 2025)</div>
+  <div class="card" style="left:646.6px; top:386px; width:278px; height:216px;"></div>
+  <div class="no" style="left:658.6px; top:398px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:658.6px; top:398px;">3</div>
+  <div class="t12b" data-x style="left:689.6px; top:395px; font-size:13.2px; line-height:17px;">3홉 추론 검색</div>
+  <div class="t10p" data-x style="left:689.6px; top:412px; color:#8B6BFF; font-weight:600;">Hop Retrieval</div>
+  <div class="mini on" style="left:658.6px; top:432px; width:254px; height:60px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:666.6px; top:440px; width:21px; height:21px; border-radius:5px;">
+  <div class="t10b" data-x style="left:693.6px; top:437px;">최종본 공유드려요</div>
+  <div class="t10m" data-x style="left:693.6px; top:451px;">메일 · 민수 · 11월 12일 (목)</div>
+  <div class="t10" data-x style="left:668.6px; top:471px;">첨부: Demo_Final.pptx</div>
+  <div class="t11" data-x style="left:660.6px; top:514px; line-height:16px; font-size:11.3px;">‘민수 님이 다시 정리’를 단서로<br>민수 메일에서 최종본을 찾습니다.</div>
+  <div class="bar" style="left:660.6px; top:552px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:660.6px; top:558px;">모델</div>
+  <div class="t10" data-x style="left:688.6px; top:558px;">보낸 사람·날짜 필터 + Embedding</div>
+  <div class="t10p" data-x style="left:660.6px; top:575px;">근거</div>
+  <div class="t10" data-x style="left:688.6px; top:575px;">DER-RAG, MDR (ICLR 2021)</div>
+  <div class="card on" style="left:937.9000000000001px; top:386px; width:278px; height:216px;"></div>
+  <div class="no" style="left:949.9000000000001px; top:398px; width:24px; height:24px;"></div>
+  <div class="no-t" data-x style="left:949.9000000000001px; top:398px;">5</div>
+  <div class="t12b" data-x style="left:980.9000000000001px; top:395px; font-size:13.2px; line-height:17px;">근거 기반 응답 생성</div>
+  <div class="t10p" data-x style="left:980.9000000000001px; top:412px; color:#8B6BFF; font-weight:600;">Grounded Synthesis</div>
+  <div class="lav" style="left:949.9000000000001px; top:430px; width:254px; height:51.0px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:956.9000000000001px; top:435px; width:11px; height:11px;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="t10p" data-x style="left:970.9000000000001px; top:433px;">요약</div>
+  <div class="t10b" data-x style="left:957.9000000000001px; top:449px; font-size:11px; line-height:14.5px;">11월 19일(목) 오후 2시, 수원 3번 부스<br>시연 순서: 문제 상황 → 라이브 데모 → 관람객 체험</div>
+  <div class="btn" style="left:949.9000000000001px; top:485.0px; width:254px; height:22px; border-radius:11px;"></div>
+  <div class="ct fill" data-x style="left:949.9000000000001px; top:485.0px; width:254px; height:22px; line-height:22px; font-size:11px;">Demo_Final.pptx 메일로 보내기</div>
+  <div class="t11" data-x style="left:951.9000000000001px; top:514px; line-height:16px; font-size:11.3px;">날짜순으로 세워 마지막 결정을 요약합니다.<br>전송은 사용자가 합니다.</div>
+  <div class="bar" style="left:951.9000000000001px; top:552px; width:250px; height:1px;"></div>
+  <div class="t10p" data-x style="left:951.9000000000001px; top:558px;">모델</div>
+  <div class="t10" data-x style="left:979.9000000000001px; top:558px;">sLLM, 이름·날짜 복사 검사</div>
+  <div class="t10p" data-x style="left:951.9000000000001px; top:575px;">근거</div>
+  <div class="t10" data-x style="left:979.9000000000001px; top:575px;">LongMemEval (Chain-of-Note), Hi-Q</div>
+  <div class="src" data-x style="left:64px; top:610px;">* 출처: </div>
+  <div class="src" data-x style="left:96.5px; top:610px;">Wu et al., "LongMemEval", ICLR 2025 · Kim et al., "Hi-Q", NeurIPS 2026 · Trivedi et al., "IRCoT", ACL 2023 · Su et al., "BRIGHT", ICLR 2025 · Shao et al., "ReasonIR", COLM 2025 · Wei et al., "RIR Survey", ACL 2026</div>
+  <div class="src" data-x style="left:96.5px; top:625px;">Chen et al., "ReasonEmbed", ACL 2026 · Lee & Lim, "DER-RAG", arXiv 2609.06065 · Xiong et al., "MDR", ICLR 2021</div>
 
-  <svg class="fxl" viewBox="0 0 1280 720"><defs>
-    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#8B6BFF"/></marker>
-    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#A29DB2"/></marker>
-  </defs></svg>
-  </div>
+  <svg class="links" viewBox="0 0 1280 720"><defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#6B4EFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ah2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#8B6BFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs><path d="M344.5 182 l8.3 0" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round"/><path d="M635.8 182 l8.3 0" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round"/><path d="M927.1 182 l8.3 0" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round"/><path d="M344.5 410 l8.3 0" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round"/><path d="M635.8 410 l8.3 0" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round"/><path d="M927.1 410 l8.3 0" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round"/><path d="M1076.9 375 L1076.9 380 L203.0 380 L203.0 383" fill="none" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round" marker-end="url(#ah)"/></svg>
 </div>
 <script>document.fonts.ready.then(() => { window.pageReady = true; });</script>
 </body>

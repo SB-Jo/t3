@@ -2,99 +2,126 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>Appendix · 비교 — 기존 검색, 삼성 기술과 무엇이 다른가요?</title>
+<title>Appendix · 비교</title>
 <link rel="stylesheet" href="../../pages/theme.css">
 <style>
   .t-label { top: 30px; } .t-title { top: 62px; } .t-sub { top: 116px; font-size: 16.5px; }
-  .panel { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 16px; box-shadow: 0 8px 24px rgba(107,78,255,.06); }
-  .tx { position: absolute; font-size: 12px; line-height: 17px; color: var(--ink-2); white-space: nowrap; }
-  .tx b { font-weight: 700; color: var(--ink); }
-  .tx em { font-style: normal; font-weight: 700; color: #6B4EFF; }
-  .th { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #6B4EFF; white-space: nowrap; }
-  .st { position: absolute; font-size: 12px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-  .rule { position: absolute; height: 1px; background: #EEE9FA; }
-  .src { position: absolute; left: 62px; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
-  .note { position: absolute; font-size: 12.5px; line-height: 19px; color: var(--ink-2); white-space: nowrap; }
-  .note b { font-weight: 700; color: var(--ink); }
-  .note em { font-style: normal; font-weight: 700; color: #6B4EFF; }
-  .box { position: absolute; border-radius: 11px; background: #fff; border: 1.6px solid #DCD6EA; }
-  .box.em { border-color: #2F7BF6; background: #F3F8FF; }
-  .box.ll { border-color: #6B4EFF; background: #F5F1FF; }
-  .box.ru { border-color: #6F7690; border-style: dashed; background: #F8F8FB; }
-  .box.ok { border-color: #6B4EFF; background: #F5F1FF; }
-  .box.no { border-color: #E4DFEF; background: #FAF9FC; }
-  .bt { position: absolute; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap; }
-  .bs { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; text-align: center; white-space: nowrap; }
-  .lane { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #8E88A0; white-space: nowrap; }
-  .chipt { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; white-space: nowrap; }
-  .chipb { position: absolute; font-size: 11px; line-height: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-  .tag { position: absolute; font-size: 10px; line-height: 14px; font-weight: 700; white-space: nowrap; }
-  .tag.on { color: #6B4EFF; } .tag.off { color: #A29DB2; }
+  .card { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 18.59px; box-shadow: 0 10px 28px rgba(107,78,255,.07); }
+  .card.on { border: 1.8px solid #8B6BFF; box-shadow: 0 10px 28px rgba(107,78,255,.16); }
+  .card.soft { background: rgba(255,255,255,.86); }
+  .loopbox { position: absolute; border: 1.5px dashed #B7A6FF; border-radius: 24.78px; background: rgba(241,236,255,.38); }
+  .abs { position: absolute; }
+  .no { position: absolute; width: 24px; height: 24px; border-radius: 12px; background: var(--purple); }
+  .no.w { background: #fff; border: 1.5px solid var(--purple); }
+  .no-t { position: absolute; width: 24px; height: 24px; line-height: 24px; text-align: center; font-size: 12.5px; font-weight: 700; color: #fff; }
+  .no-t.w { color: var(--purple); }
+  .nm { position: absolute; font-size: 18.7px; line-height: 24.9px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .en { position: absolute; font-size: 13px; line-height: 24.9px; font-weight: 600; color: var(--purple-2); letter-spacing: .01em; white-space: nowrap; }
+  .q { position: absolute; font-family: 'Nanum Pen Script'; font-size: 22.66px; line-height: 26.94px; color: var(--purple); white-space: nowrap; }
+  .desc { position: absolute; font-size: 14px; line-height: 20.7px; color: var(--body); white-space: nowrap; }
+  .desc b { color: var(--ink); font-weight: 700; }
+  .chip { position: absolute; height: 23.8px; border-radius: 12.4px; background: #fff; border: 1px solid var(--purple-line); }
+  .chip.fill { background: var(--purple); border-color: var(--purple); }
+  .chip.soft { background: var(--tile); border-color: var(--tile); }
+  .chip.dash { background: #F7F4FF; border: 1.3px dashed #8B6BFF; }
+  .ct { position: absolute; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .ct.fill { color: #fff; }
+  .ct.gray { color: var(--body); font-weight: 600; }
+  .mini { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 12.4px; }
+  .mini.on { border: 1.6px solid #8B6BFF; box-shadow: 0 4px 12px rgba(107,78,255,.14); }
+  .mini.off { background: #FAF9FC; border-color: #ECE8F4; }
+  .pill { position: absolute; background: var(--soft); border: 1px solid var(--soft-line); border-radius: 12.4px; }
+  .lav { position: absolute; background: #F4F0FF; border: 1px solid #E3D9FF; border-radius: 11px; }
+  .tile { position: absolute; border-radius: 8.3px; background: var(--tile); }
+  .ico { position: absolute; color: var(--purple); }
   .app { position: absolute; }
-  .wrap { position: absolute; left: 0; top: 10px; width: 1280px; height: 720px; }
-  svg.fxl { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 2; }
+  .photo { position: absolute; border-radius: 9px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .btn { position: absolute; background: var(--purple); border-radius: 10px; }
+  .bar { position: absolute; background: #EEE9FA; }
+  .t10 { position: absolute; font-size: 10.5px; line-height: 14px; color: var(--muted); white-space: nowrap; }
+  .t10m { position: absolute; font-size: 10.5px; line-height: 14px; color: var(--muted-2); white-space: nowrap; }
+  .t10b { position: absolute; font-size: 10.5px; line-height: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t10p { position: absolute; font-size: 10.5px; line-height: 14px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t11 { position: absolute; font-size: 11.5px; line-height: 16px; color: var(--body); white-space: nowrap; }
+  .t11 b { color: var(--ink); font-weight: 700; }
+  .t11 em { font-style: normal; font-weight: 700; color: var(--purple); }
+  .t11m { position: absolute; font-size: 11.5px; line-height: 16px; color: var(--muted-2); white-space: nowrap; }
+  .t11b { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t11p { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t12 { position: absolute; font-size: 12.7px; line-height: 18px; color: var(--body); white-space: nowrap; }
+  .t12 b { color: var(--ink); font-weight: 700; }
+  .t12 em { font-style: normal; font-weight: 700; color: var(--purple); }
+  .t12b { position: absolute; font-size: 12.7px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t12p { position: absolute; font-size: 12.7px; line-height: 17px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t14b { position: absolute; font-size: 14.5px; line-height: 20px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t15b { position: absolute; font-size: 16px; line-height: 22px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t18b { position: absolute; font-size: 17px; line-height: 24px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .src { position: absolute; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
+  svg.links { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 3; }
+  .app, .ico, .photo { z-index: 4; }
 </style>
 </head>
 <body>
+<script src="../../pages/icons.js"></script>
 <div class="slide" id="slide">
   <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
   <div class="t-label" data-x>Appendix · 비교</div>
-  <div class="t-title" data-x>기존 검색, 삼성 기술과 무엇이 다른가요?</div>
-  <div class="t-sub" data-x>같은 질문을 방식마다 어디까지 찾는지 비교했습니다.</div>
-  <div class="wrap">
-  <div class="panel" style="left:60px; top:150px; width:1160px; height:362px;"></div>
-  <div class="th" data-x style="left:76px; top:160px;">방식</div>
-  <div class="th" data-x style="left:236px; top:160px;">무엇으로 찾나</div>
-  <div class="th" data-x style="left:436px; top:160px;">잘하는 것</div>
-  <div class="th" data-x style="left:640px; top:160px;">'지은이네 집들이 때 마셨던 와인'에서 막히는 곳</div>
-  <div class="th" data-x style="left:1000px; top:160px;">미리 해 둘 일</div>
-  <div class="rule" style="left:76px; top:181px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:200px;">키워드 검색 (BM25)</div>
-  <div class="tx" data-x style="left:236px; top:200px;">같은 단어</div>
-  <div class="tx" data-x style="left:436px; top:200px;">이름, 숫자, 파일명</div>
-  <div class="tx" data-x style="left:640px; top:200px;">'집들이'가 없는 초대 카톡, '집들이'가 없는 와인 사진</div>
-  <div class="tx" data-x style="left:1000px; top:200px;">단어 색인</div>
-  <div class="rule" style="left:76px; top:235px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:254px;">일반 임베딩</div>
-  <div class="tx" data-x style="left:236px; top:254px;">가까운 뜻</div>
-  <div class="tx" data-x style="left:436px; top:254px;">표현이 다른 같은 내용</div>
-  <div class="tx" data-x style="left:640px; top:254px;">1위에 오른 다른 날 와인 사진</div>
-  <div class="tx" data-x style="left:1000px; top:254px;">기록 벡터</div>
-  <div class="rule" style="left:76px; top:289px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:308px;">하이브리드</div>
-  <div class="tx" data-x style="left:236px; top:308px;">두 순위를 합친 한 번 검색</div>
-  <div class="tx" data-x style="left:436px; top:308px;">두 방식의 장점</div>
-  <div class="tx" data-x style="left:640px; top:308px;">처음 질문에 없는 집들이 날짜</div>
-  <div class="tx" data-x style="left:1000px; top:308px;">단어 색인과 벡터</div>
-  <div class="rule" style="left:76px; top:343px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:362px;">지식 그래프 (PDE 방식)</div>
-  <div class="tx" data-x style="left:236px; top:362px;">미리 뽑아 둔 관계</div>
-  <div class="tx" data-x style="left:436px; top:362px;">정해 둔 관계의 여러 단계 연결</div>
-  <div class="tx" data-x style="left:640px; top:362px;">그래프에 없는 '휴지 안 사 와도 돼 = 집들이'</div>
-  <div class="tx" data-x style="left:1000px; top:362px;">기록의 관계 추출</div>
-  <div class="rule" style="left:76px; top:397px; width:1128px;"></div>
-  <div class="st" data-x style="left:76px; top:416px;">Finder, Now Nudge</div>
-  <div class="tx" data-x style="left:236px; top:416px;">앱별 자연어 검색, 화면 맥락 제안</div>
-  <div class="tx" data-x style="left:436px; top:416px;">앱 안의 사진과 메모, 화면 속 요청</div>
-  <div class="tx" data-x style="left:640px; top:416px;">카톡 초대와 그날 사진을 잇는 단계</div>
-  <div class="tx" data-x style="left:1000px; top:416px;">앱별 색인</div>
-  <div class="box ll" style="left:66px; top:454px; width:1148px; height:50px;"></div>
-  <div class="st" data-x style="left:76px; top:470px; color:#6B4EFF;">Weave</div>
-  <div class="tx" data-x style="left:236px; top:470px;"><b>찾은 단서로 다시 쓴 질문</b></div>
-  <div class="tx" data-x style="left:436px; top:470px;"><b>단어가 다르고 단계가 빠진 질문</b></div>
-  <div class="tx" data-x style="left:640px; top:470px;"><b>막히지 않고 배비치 소비뇽 블랑까지</b></div>
-  <div class="tx" data-x style="left:1000px; top:470px;"><b>기록 벡터와 메타데이터</b></div>
-  <div class="note" data-x style="left:62px; top:520px;"><b>기존 방식을 대체하지 않습니다.</b> Weave도 BM25와 임베딩, 메타데이터를 함께 쓰고, 날짜와 사람처럼 같은 값으로 잇는 일은 메타데이터와 PDE가 잘합니다. Weave는 기록 내용 속의 연결을 질문할 때 잇습니다.</div>
-  <div class="note" data-x style="left:62px; top:542px;"><b>지식 그래프:</b> 여러 단계 연결은 오히려 강점입니다. 막히는 곳은 그래프에 없는 사실입니다. PDE의 내부 구조는 공개되지 않아, 여기서는 지식 그래프 방식의 일반 특성으로 설명합니다.</div>
-  <div class="note" data-x style="left:62px; top:564px;"><b>Finder:</b> One UI 8.5부터 자연어 검색을 지원합니다. 공식 대상은 음성 녹음, 통화 녹음, 캘린더, 노트, 리마인더, 내 파일입니다. 여기 적은 내용은 공개 자료 기준입니다.</div>
-  <div class="src" data-x style="left:62px; top:594px;">* 출처: Robertson & Zaragoza, "BM25 and Beyond", 2009 · Karpukhin et al., "DPR", EMNLP 2020 · Cormack et al., "Reciprocal Rank Fusion", SIGIR 2009 · Oxford Semantic Technologies, RDFox 문서</div>
-  <div class="src" data-x style="left:62px; top:609px;">   삼성전자 뉴스룸, "[갤럭시 언팩 2025] ①" (2025. 01) · Samsung 지원, "Understanding Finder on Galaxy phones" · Samsung Newsroom, "Galaxy S26 Series" (2026. 02)</div>
+  <div class="t-title" data-x>기존 검색 및 온디바이스 AI 대비 <span class="hl">Weave의 차별점</span></div>
+  <div class="t-sub" data-x>같은 멀티홉 질문 ‘지은이네 집들이 때 마셨던 와인’을 방식마다 비교했습니다.</div>
+  <div class="card" style="left:64px; top:158px; width:1152px; height:366px;"></div>
+  <div class="abs" style="left:1040px; top:162px; width:172px; height:358px; background:#F4F0FF; border-radius:14px;"></div>
+  <div class="abs" style="left:1040px; top:162px; width:172px; height:54px; background:#6B4EFF; border-radius:14px 14px 0 0;"></div>
+  <div class="t12" data-x style="left:82px; top:178px; font-weight:700; color:#8E88A0; font-size:13px;">검색 방식</div>
+  <div class="t12b" data-x style="left:200px; top:169px; width:168px; text-align:center; line-height:17px; font-size:13.5px;">키워드 검색<br>(BM25)</div>
+  <div class="t12b" data-x style="left:368px; top:178px; width:168px; text-align:center; line-height:17px; font-size:13.5px;">일반 임베딩</div>
+  <div class="t12b" data-x style="left:536px; top:178px; width:168px; text-align:center; line-height:17px; font-size:13.5px;">하이브리드 검색</div>
+  <div class="t12b" data-x style="left:704px; top:169px; width:168px; text-align:center; line-height:17px; font-size:13.5px;">지식 그래프<br>(PDE 방식)</div>
+  <div class="t12b" data-x style="left:872px; top:169px; width:168px; text-align:center; line-height:17px; font-size:13.5px;">Samsung Finder<br>Now Nudge</div>
+  <div class="t18b" data-x style="left:1040px; top:174px; width:172px; text-align:center; color:#fff; line-height:24px;">Weave Assist</div>
+  <div class="bar" style="left:76px; top:216px; width:1128px; height:1px;"></div>
+  <div class="t12b" data-x style="left:82px; top:243.0px; font-size:13px;">핵심 탐색 기준</div>
+  <div class="t12" data-x style="left:200px; top:243.0px; width:168px; text-align:center; font-size:12.3px;">같은 단어</div>
+  <div class="t12" data-x style="left:368px; top:243.0px; width:168px; text-align:center; font-size:12.3px;">가까운 뜻</div>
+  <div class="t12" data-x style="left:536px; top:234.0px; width:168px; text-align:center; font-size:12.3px;">두 순위를 합친<br>한 번 검색</div>
+  <div class="t12" data-x style="left:704px; top:243.0px; width:168px; text-align:center; font-size:12.3px;">미리 뽑아 둔 관계</div>
+  <div class="t12" data-x style="left:872px; top:234.0px; width:168px; text-align:center; font-size:12.3px;">앱별 자연어 검색,<br>화면 맥락 제안</div>
+  <div class="t12b" data-x style="left:1040px; top:234.0px; width:172px; text-align:center; line-height:18px; font-size:12.8px;">찾은 단서로<br>다시 쓴 질문</div>
+  <div class="bar" style="left:76px; top:288px; width:1128px; height:1px;"></div>
+  <div class="t12b" data-x style="left:82px; top:315.0px; font-size:13px;">강점</div>
+  <div class="t12" data-x style="left:200px; top:315.0px; width:168px; text-align:center; font-size:12.3px;">이름, 숫자, 파일명</div>
+  <div class="t12" data-x style="left:368px; top:306.0px; width:168px; text-align:center; font-size:12.3px;">표현이 다른<br>같은 내용</div>
+  <div class="t12" data-x style="left:536px; top:315.0px; width:168px; text-align:center; font-size:12.3px;">두 방식의 장점</div>
+  <div class="t12" data-x style="left:704px; top:306.0px; width:168px; text-align:center; font-size:12.3px;">정해 둔 관계의<br>여러 단계 연결</div>
+  <div class="t12" data-x style="left:872px; top:306.0px; width:168px; text-align:center; font-size:12.3px;">앱 안의 사진과 메모,<br>화면 속 요청</div>
+  <div class="t12b" data-x style="left:1040px; top:306.0px; width:172px; text-align:center; line-height:18px; font-size:12.8px;">단어가 다르고<br>단계가 빠진 질문</div>
+  <div class="bar" style="left:76px; top:360px; width:1128px; height:1px;"></div>
+  <div class="t12b" data-x style="left:82px; top:387.0px; font-size:13px;">사전 색인 구조</div>
+  <div class="t12" data-x style="left:200px; top:387.0px; width:168px; text-align:center; font-size:12.3px;">단어 색인</div>
+  <div class="t12" data-x style="left:368px; top:387.0px; width:168px; text-align:center; font-size:12.3px;">기록 벡터</div>
+  <div class="t12" data-x style="left:536px; top:387.0px; width:168px; text-align:center; font-size:12.3px;">단어 색인과 벡터</div>
+  <div class="t12" data-x style="left:704px; top:387.0px; width:168px; text-align:center; font-size:12.3px;">기록의 관계 추출</div>
+  <div class="t12" data-x style="left:872px; top:387.0px; width:168px; text-align:center; font-size:12.3px;">앱별 색인</div>
+  <div class="t12b" data-x style="left:1040px; top:378.0px; width:172px; text-align:center; line-height:18px; font-size:12.8px;">기록 벡터와<br>메타데이터</div>
+  <div class="bar" style="left:76px; top:432px; width:1128px; height:1px;"></div>
+  <div class="t12b" data-x style="left:82px; top:456.0px; font-size:13px; line-height:18px;">멀티홉 질문<br>‘집들이 와인’</div>
+  <div class="t12" data-x style="left:200px; top:465px; width:168px; text-align:center; line-height:17px; font-size:11.8px;">‘집들이’가 없는<br>초대 카톡, 와인 사진</div>
+  <div class="t12" data-x style="left:368px; top:465px; width:168px; text-align:center; line-height:17px; font-size:11.8px;">1위에 오른<br>다른 날 와인 사진</div>
+  <div class="t12" data-x style="left:536px; top:465px; width:168px; text-align:center; line-height:17px; font-size:11.8px;">처음 질문에 없는<br>집들이 날짜</div>
+  <div class="t12" data-x style="left:704px; top:465px; width:168px; text-align:center; line-height:17px; font-size:11.8px;">그래프에 없는<br>‘휴지 = 집들이’</div>
+  <div class="t12" data-x style="left:872px; top:465px; width:168px; text-align:center; line-height:17px; font-size:11.8px;">카톡 초대와 그날 사진을<br>잇는 단계</div>
+  <div class="t12b" data-x style="left:1040px; top:465px; width:172px; text-align:center; line-height:17px; font-size:12.3px; color:#6B4EFF;">배비치 소비뇽 블랑까지<br>찾아냅니다</div>
+  <div class="lav" style="left:64px; top:534px; width:1152px; height:44px; border-radius:14px;"></div>
+  <img class="app" src="../assets/weave-spool-6B4EFF.png" alt="" style="left:78px; top:545px; width:22px; height:22px;">
+  <div class="t12" data-x style="left:110px; top:546px; font-size:13px;"><b>기존 방식을 대체하지 않습니다.</b> Weave도 BM25와 임베딩, 메타데이터를 함께 쓰고, 정확한 값은 메타데이터와 PDE로 잇고, 기록 내용 속 연결은 질문할 때 잇습니다.</div>
+  <div class="src" data-x style="left:64px; top:588px;">* 출처: </div>
+  <div class="src" data-x style="left:96.5px; top:588px;">Robertson & Zaragoza, "BM25 and Beyond", 2009 · Karpukhin et al., "DPR", EMNLP 2020 · Cormack et al., "Reciprocal Rank Fusion", SIGIR 2009 · Oxford Semantic Technologies, RDFox 문서</div>
+  <div class="src" data-x style="left:96.5px; top:603px;">삼성전자 뉴스룸, "[갤럭시 언팩 2025] ①" (2025. 01) · Samsung 지원, "Understanding Finder on Galaxy phones" · Samsung Newsroom, "Galaxy S26 Series" (2026. 02)</div>
 
-  <svg class="fxl" viewBox="0 0 1280 720"><defs>
-    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#8B6BFF"/></marker>
-    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#A29DB2"/></marker>
-  </defs></svg>
-  </div>
+  <svg class="links" viewBox="0 0 1280 720"><defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#6B4EFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ah2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#8B6BFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs><path d="M277.0 444 L291.0 458 M291.0 444 L277.0 458" stroke="#E5484D" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M445.0 444 L459.0 458 M459.0 444 L445.0 458" stroke="#E5484D" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M613.0 444 L627.0 458 M627.0 444 L613.0 458" stroke="#E5484D" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M788.0 443 L797.0 458 L779.0 458 Z" stroke="#E08A2E" stroke-width="2.4" stroke-linejoin="round" fill="none"/><path d="M956.0 443 L965.0 458 L947.0 458 Z" stroke="#E08A2E" stroke-width="2.4" stroke-linejoin="round" fill="none"/><circle cx="1126.0" cy="451" r="8.5" stroke="#1E9E55" stroke-width="2.4" fill="none"/></svg>
 </div>
 <script>document.fonts.ready.then(() => { window.pageReady = true; });</script>
 </body>

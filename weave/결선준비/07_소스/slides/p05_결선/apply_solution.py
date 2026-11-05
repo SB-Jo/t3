@@ -48,7 +48,7 @@ from pptx import Presentation  # noqa: E402
 
 NAME = 'page-05-solution'
 CHIP = 'SOLUTION: WEAVE ASSIST'
-TITLE_RUNS = [('Weave', '6666FF'), ('의 ', None), ('핵심 UX 3가지', '6666FF'), ('를 소개합니다!', None)]
+TITLE_RUNS = [('흩어진 기억을 이어 주는 ', None), ('Weave', '6666FF'), ('의 ', None), ('핵심 UX 3가지', '6666FF')]
 
 
 def find_slide(prs):
