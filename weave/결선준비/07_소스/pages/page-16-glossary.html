@@ -64,7 +64,7 @@
     <circle cx="16" cy="86" r="4.2" fill="#C9C1DC"/>
   </svg>
   <div class="t12b" data-x style="left:1000px; top:228px; width:80px; text-align:center; color:var(--purple); font-size:11.5px;">질문(Query)</div>
-  <div class="t11" data-x style="left:1020px; top:187px; color:var(--ink); font-weight:600;">지은 집들이 일정</div>
+  <div class="t11" data-x style="left:1020px; top:187px; color:var(--ink); font-weight:600;">지은 초대 카톡</div>
   <div class="t11" data-x style="left:1082px; top:201px; color:var(--ink); font-weight:600;">와인 라벨 사진</div>
   <div class="t11" data-x style="left:964px; top:237px; color:#A39CB5;">회의록</div>
   <div class="t11" data-x style="left:1100px; top:237px; color:#A39CB5;">택배 문자</div>
@@ -119,17 +119,17 @@
   <div class="qn" data-x style="left:112px; top:527px;">Q4</div>
   <div class="qq" data-x style="left:112px; top:555px;">임베딩으로 어떻게<br>‘연쇄 탐색’을 하나요?</div>
   <div class="al" data-x style="left:300px; top:527px;">A.</div>
-  <div class="aa" data-x style="left:322px; top:527px;">찾은 기록의 단서를 탐색 메모에 더하고, 탐색 메모의 <b>찾을 것 · 확인한 단서 · 아직 필요한 정보</b>로<br>다음 근거를 찾습니다. <b>새 단서가 없으면 멈춥니다.</b></div>
+  <div class="aa" data-x style="left:322px; top:527px;">찾은 단서를 빈칸에 넣어 <b>질문을 다시 쓰고</b>, 다시 쓴 질문을 임베딩으로 찾습니다.<br>임베딩은 앞 기록을 기억하지 않습니다. <b>새 단서가 없으면 멈춥니다.</b></div>
   <div class="sl" data-x style="left:322px; top:575px;">보충</div>
-  <div class="ss" data-x style="left:358px; top:575px;">질문과 앞서 찾은 기록을 함께 벡터로 바꿔 다음 기록을 찾는 방식<span class="sup">3</span>을 적용하고,<br>학습 데이터도 ‘질문 + 확인한 단서 → 다음 근거’와 헷갈리기 쉬운 오답으로 구성합니다<span class="sup">2</span>.</div>
+  <div class="ss" data-x style="left:358px; top:575px;">질문과 앞서 찾은 기록을 함께 벡터로 바꿔 다음 기록을 찾는 방식<span class="sup">3</span>은 보조 경로로 검토하고,<br>학습 데이터는 ‘질문 + 확인한 단서 → 다음 근거’와 헷갈리기 쉬운 오답으로 구성합니다<span class="sup">2</span>.</div>
   <!-- 그림: 두 번의 검색 -->
   <div class="box" data-s style="left:940px; top:521px; width:230px; height:97px;"></div>
   <div class="t11p" data-x style="left:948px; top:533px;">1회차</div>
   <div class="chipw" id="r1q" data-s style="left:980px; top:529px; width:38px;"></div>
   <div class="t11" data-x style="left:980px; top:533px; width:38px; text-align:center; color:var(--ink); font-weight:600;">질문</div>
   <div class="chipp" id="r1a" data-s style="left:1050px; top:529px; width:112px;"></div>
-  <img class="app" src="../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:1055px; top:533px; width:14px; height:14px;">
-  <div class="t11" data-x style="left:1072px; top:533px; font-size:10.5px; color:var(--ink); font-weight:700;">지은 집들이 · 3/15</div>
+  <img class="app" src="../assets/icons/app-kakao.png" alt="" style="left:1055px; top:533px; width:14px; height:14px; border-radius:3px;">
+  <div class="t11" data-x style="left:1072px; top:533px; font-size:10.5px; color:var(--ink); font-weight:700;">지은 카톡 · 3/15</div>
   <div class="t11p" data-x style="left:948px; top:573px;">2회차</div>
   <div class="chipw" id="r2q" data-s style="left:980px; top:569px; width:60px; border-color:#B7A6FF;"></div>
   <div class="t11" data-x style="left:980px; top:573px; width:60px; text-align:center; color:var(--ink); font-weight:600; font-size:10.5px;">질문+3/15</div>
@@ -154,7 +154,7 @@
   const q1 = R('r1q'), a1 = R('r1a'), q2 = R('r2q'), a2 = R('r2a');
   path(`M${q1.r + 4} ${q1.t + q1.h / 2} L${a1.l - 5} ${a1.t + a1.h / 2}`, { mk: 'ahs' });
   path(`M${q2.r + 4} ${q2.t + q2.h / 2} L${a2.l - 5} ${a2.t + a2.h / 2}`, { mk: 'ahs' });
-  // 캘린더 칩 아래에서 내려와, 2회차 질문 칩의 오른쪽 위로 비스듬히 들어가도록 (끝 방향이 곡선과 자연스럽게 이어짐)
+  // 카톡 칩 아래에서 내려와, 2회차 질문 칩의 오른쪽 위로 비스듬히 들어가도록 (끝 방향이 곡선과 자연스럽게 이어짐)
   path(`M${a1.l + 20} ${a1.b + 1} C ${a1.l + 20} ${a1.b + 9}, ${q2.r + 2} ${q2.t - 9}, ${q2.r - 8} ${q2.t - 2}`, { c: '#8B6BFF', dash: '3 3', mk: 'ah2' });
   window.pageReady = true;
 })();

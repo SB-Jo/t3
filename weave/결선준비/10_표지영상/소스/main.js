@@ -2,15 +2,15 @@
    모든 상태는 시간 t의 순수 함수(render(t)). 떠다니는 움직임은 주기가 18초(또는 9초)인 사인파.
    window.__seek(t), window.__DURATION, window.__ready, window.__probe(t)
    이야기는 How it Works A1(장표5/a1.py)과 같고, v1(14초)보다 앞뒤가 늘었다:
-   빈 구글 검색창에 '지은이네 집들이 때 마신 화이트 와인'을 침 → 실타래 버튼 → 지은 카톡(3/12 목 '이번 일요일 6시, 이사 기념으로…')
-   → 단서 '3/15 (일) 저녁'이 그날 사진(3/15 20:14)으로 → 라벨 'SAUVIGNON BLANC' → 추천 '배비치 소비뇽 블랑'
+   빈 구글 검색창에 '지은이네 집들이 때 마셨던 와인'을 침 → 실타래 버튼 → 지은 카톡(3/15 일 '박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼. 몸만 와')
+   → 단서 '3/15 (일)'가 그날 사진(3/15 20:14)으로 → 라벨 'SAUVIGNON BLANC' → 추천 '배비치 소비뇽 블랑'
    → 입력하기 → 검색어가 '배비치 소비뇽 블랑'으로 바뀜 → 검색 키 → 쇼핑 결과 → 처음 화면(빈 검색창)으로
    v3: 빠르기는 v1과 v2의 중간(실 0.65~0.7초, 버튼 → 추천 카드 5.35초), 오른쪽 장면 전체를 0.93배로(위·아래·오른쪽 여백) */
 const LOOP = 18.0;
 // 오른쪽 장면(#world)은 (846, 540)을 기준으로 줄임. 안쪽 계산은 모두 줄이기 전 좌표(1920×1080)로 하고, 검사용 값만 화면 좌표로 바꿈
 const WS = 0.93, WO = { x: 846, y: 540 };
 const toScreen = p => ({ x: WO.x + (p.x - WO.x) * WS, y: WO.y + (p.y - WO.y) * WS });
-const QTEXT = '지은이네 집들이 때 마신 화이트 와인';   // v1 '집들이 때 마신 화이트 와인' 앞에 '지은이네'만 더함(README)
+const QTEXT = '지은이네 집들이 때 마셨던 와인';   // 2026-11-05 최종 시나리오(화이트/레드 구분 없음)
 const ANS = '배비치 소비뇽 블랑';
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -66,8 +66,8 @@ const CHIPS = [
   ['app-map', '저장한 장소', '성수 카페'],
   ['samsung-phone', '부재중 전화', '어제 오후 3:12'],
   ['app-notes', '집들이 선물', '디퓨저로 결정!'],
-  ['samsung-gallery', '스크린샷', '화이트 와인 고르는 법'],
-  ['samsung-gallery', 'IMG_2475.jpg', '3월 15일 19:52', 'photo-red.jpg'],
+  ['samsung-gallery', '스크린샷', '와인 고르는 법'],
+  ['samsung-gallery', 'IMG_2475.jpg', '3월 15일 19:52', 'photo-table.jpg'],
   ['samsung-gallery', 'IMG_2510.jpg', '3월 20일 21:10', 'photo-bar.jpg'],
   ['samsung-wallet', '멤버십', '적립 1,200P'],
   ['samsung-calendar', '헬스', '화, 목 오전 7:00'],
@@ -287,6 +287,7 @@ function render(t) {
   // 형광펜(같은 단서) — 켜질 때 왼쪽에서 오른쪽으로, 걷힐 때 반대로
   const hl = (el, v) => { el.style.setProperty('--w', `${(100 * v).toFixed(1)}%`); el.style.color = v > 0.02 ? '#5B3FE6' : ''; };
   hl($('#hlJ'), pulse(t, T.hlJ, 0.48, T.reset, 0.45, e2io, e2io));
+  hl($('#hlK'), pulse(t, T.hlJ + 0.34, 0.4, T.reset, 0.45, e2io, e2io));
   hl($('#hlD'), pulse(t, T.hlD, 0.46, T.reset + 0.05, 0.45, e2io, e2io));
   hl($('#hlL'), pulse(t, T.hlL, 0.48, T.reset + 0.1, 0.45, e2io, e2io));
 
@@ -306,7 +307,7 @@ function render(t) {
     $(id).style.opacity = p > 0.002 ? fade.toFixed(3) : '0';
   });
 
-  // 단서 표 '3/15 (일) 저녁': 지은 카톡의 '이번 일요일 6시'에서 나와 실을 타고 그날 사진의 날짜로
+  // 단서 표 '3/15 (일)': 지은 카톡에서 나와 실을 타고 그날 사진의 날짜로
   {
     const tok = $('#tok');
     const a = clamp(eBack(seg(t, T.tokIn, 0.28))), out = e2i(seg(t, T.tokRide + T.tokDur - 0.05, 0.24));

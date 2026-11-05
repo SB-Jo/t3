@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>SOLUTION: WEAVE ASSIST — 핵심 UX 3가지 (결선: 요청 자료 · 집들이 와인 · 갈색병)</title>
+<title>SOLUTION: WEAVE ASSIST — 핵심 UX 3가지 (결선: 삼성기술전 · 집들이 와인 · 갈색병)</title>
 <link rel="stylesheet" href="../p68/scenario.css">
 <style>
   /* 번호: 보라 원 (그래픽 레이어), 숫자는 글자 상자 */
@@ -41,6 +41,10 @@
   .btn-t { position: absolute; z-index: 20; font-size: 13px; line-height: 20px; font-weight: 700; color: #fff; }
   .photo { position: absolute; z-index: 6; border-radius: 8px; overflow: hidden; }
   .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lav { position: absolute; z-index: 6; background: #F4F0FF; border: 1px solid #E3D9FF; border-radius: 11px; }
+  .ttl2 { position: absolute; z-index: 20; font-size: 11.5px; line-height: 15px; font-weight: 700; color: var(--ink); }
+  .ui-sum { position: absolute; z-index: 20; font-size: 10px; line-height: 15px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .ui-sum b { color: #6B4EFF; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -59,107 +63,115 @@
   <!-- ───────── 1. 기록 통합 검색 ───────── -->
   <div class="no3" style="left:48px; top:174px;"></div><div class="no3-t" data-x style="left:48px; top:174px;">1</div>
   <div class="nm" data-x style="left:92px; top:174px;">기록 통합 검색</div>
-  <div class="one" data-x style="left:48px; top:214px;">앱마다 흩어진 같은 일의 기록을, 하나로 엮어 보여줍니다.</div>
+  <div class="one" data-x style="left:48px; top:214px;">앱마다 흩어진 같은 일의 기록을 찾아 한 번에 요약합니다.</div>
 
-  <!-- 흩어진 기록: 미팅 메모(내용 보임) + 메일·캘린더 아이콘. 메모의 '민수 님'이 민수 메일로 이어짐(두 번째 홉) -->
-  <div class="card" id="note" style="left:40px; top:262px; width:246px; height:140px;"></div>
-  <img class="app" src="../../assets/icons/app-notes.png" style="left:54px; top:275px; width:20px; height:20px; border-radius:5px; z-index:6;">
-  <div class="t-app" data-x style="left:81px; top:276px;">삼성노트</div>
-  <div class="t-meta" data-x style="left:141px; top:277px;">10월 28일 (수)</div>
-  <div class="t-ttl" data-x style="left:54px; top:303px;">A사 미팅 메모</div>
-  <div class="inset" style="left:54px; top:332px; width:218px; height:56px; z-index:6;"></div>
-  <div class="t12" data-x style="left:66px; top:339px;">A사: <b style="color:#6B4EFF">3분기 반품 현황</b> 요청</div>
-  <div class="t12" data-x style="left:66px; top:362px;">→ <b style="color:#6B4EFF" id="minsu">민수 님</b>이 정리하기로</div>
-  <img class="app" id="ic-mail" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:128px; top:448px; width:48px; height:48px; transform:rotate(7deg); z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
-  <img class="app" id="ic-cal" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:70px; top:560px; width:48px; height:48px; transform:rotate(-6deg); z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
+  <!-- 흩어진 기록: 이전 회의록(흐리게) → 바뀐 회의록 → 메일 · 캘린더. 회의록의 '민수 님'이 민수 메일로 이어짐(다음 홉) -->
+  <div class="card" id="note0" style="left:40px; top:258px; width:246px; height:82px; opacity:.6;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" style="left:54px; top:267px; width:18px; height:18px; border-radius:5px; z-index:6; opacity:.55;">
+  <div class="t-meta" data-x style="left:79px; top:268px; color:#A8A3B5;">삼성노트 · 11월 3일 (화)</div>
+  <div class="t-meta" data-x style="left:232px; top:268px; color:#8E88A0; font-weight:700;">이전 안</div>
+  <div class="t12" data-x style="left:54px; top:290px; font-weight:700; color:#8E88A0;">삼성기술전 준비 회의</div>
+  <div class="t115" data-x style="left:54px; top:312px; color:#A8A3B5;">제품 소개 → 라이브 데모 → Q&amp;A</div>
+  <div class="card" id="note" style="left:40px; top:350px; width:246px; height:136px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" style="left:54px; top:360px; width:20px; height:20px; border-radius:5px; z-index:6;">
+  <div class="t-app" data-x style="left:81px; top:361px;">삼성노트</div>
+  <div class="t-meta" data-x style="left:141px; top:362px;">11월 10일 (화)</div>
+  <div class="t-ttl" data-x style="left:54px; top:384px;">주간 회의</div>
+  <div class="inset" style="left:54px; top:410px; width:218px; height:64px; z-index:6;"></div>
+  <div class="t12" data-x style="left:66px; top:415px;">제품 소개 빼고 <b style="color:#6B4EFF">문제 상황부터</b></div>
+  <div class="t12" data-x style="left:66px; top:434px;"><b style="color:#6B4EFF">→ 라이브 데모 → 관람객 체험</b></div>
+  <div class="t12" data-x style="left:66px; top:453px;">자료는 <b style="color:#6B4EFF" id="minsu">민수 님</b>이 다시 정리</div>
+  <img class="app" id="ic-mail" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:128px; top:512px; width:48px; height:48px; transform:rotate(7deg); z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
+  <img class="app" id="ic-cal" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:70px; top:612px; width:48px; height:48px; transform:rotate(-6deg); z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
 
-  <!-- 휴대폰: 통화 중 화면 + 아래에서 밀어 올린 Weave 검색 -->
+  <!-- 휴대폰: 통화 중 화면 + 아래에서 밀어 올린 Weave 검색. 요약 카드에는 글만, 그 아래 버튼과 연결된 기억 -->
   <div class="phone" id="phone1" style="left:318px; top:252px; width:272px; height:456px; padding:0;"></div>
   <div class="scr" style="left:327px; top:261px; width:254px; height:438px;"></div>
   <div class="ui-s" data-x style="left:343px; top:268px; font-weight:700; color:#2B2640;">13:00</div>
   <div class="ui-s" data-x id="calltime" style="left:442px; top:284px;">00:48</div>
-  <div class="sheet" id="sheet" style="left:334px; top:308px; width:240px; height:268px;"></div>
-  <div class="sbar" id="sbar1" style="left:343px; top:324px; width:222px; height:34px;"></div>
-  <img class="app" src="../assets/weave-spool-6B4EFF.png" style="left:352px; top:332px; width:18px; height:18px; z-index:7;">
-  <div class="ui-q" data-x id="q1" style="left:376px; top:332px;">지난주 A사 요청 자료</div>
-  <div class="ui-lbl" data-x style="left:345px; top:368px;">연결된 기억</div>
-  <div class="row" id="r1" style="left:343px; top:388px; width:222px; height:52px;"></div>
-  <img class="app" src="../../assets/icons/app-notes.png" style="left:352px; top:400px; width:26px; height:26px; border-radius:7px; z-index:7;">
-  <div class="ui-t" data-x style="left:386px; top:397px;">A사 미팅 메모</div>
-  <div class="ui-m" data-x style="left:386px; top:415px;">삼성노트 · 10월 28일 (수)</div>
-  <div class="row" id="r2" style="left:343px; top:446px; width:222px; height:52px;"></div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:352px; top:458px; width:26px; height:26px; z-index:7;">
-  <div class="ui-t" data-x style="left:386px; top:455px;">3분기_반품현황.xlsx</div>
-  <div class="ui-m" data-x style="left:386px; top:473px;">메일 · 민수 · 10월 30일 (금)</div>
-  <div class="row" id="r3" style="left:343px; top:504px; width:222px; height:52px;"></div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:352px; top:516px; width:26px; height:26px; z-index:7;">
-  <div class="ui-t" data-x style="left:386px; top:513px;">A사 미팅</div>
-  <div class="ui-m" data-x style="left:386px; top:531px;">캘린더 · 10월 28일 오후 2:00</div>
-  <img class="app" id="redbtn" src="assets/call-weave-button.png" style="left:434px; top:590px; width:40px; height:40px; z-index:6;">
-  <div class="red-t" data-x id="redlbl" style="left:394px; top:642px; width:120px;">위로 올려 기억 검색</div>
+  <div class="sheet" id="sheet" style="left:334px; top:300px; width:240px; height:278px;"></div>
+  <div class="sbar" id="sbar1" style="left:343px; top:312px; width:222px; height:30px;"></div>
+  <img class="app" src="../assets/weave-spool-6B4EFF.png" style="left:351px; top:318px; width:18px; height:18px; z-index:7;">
+  <div class="ui-q" data-x id="q1" style="left:375px; top:318px; font-size:12px;">삼성기술전 시연 최종</div>
+  <div class="lav" id="sum1" style="left:343px; top:348px; width:222px; height:76px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:351px; top:354px; width:11px; height:11px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="lab" data-x style="left:365px; top:351px; font-size:11px; line-height:15px;">요약</div>
+  <div class="ui-sum" data-x style="left:351px; top:369px;">11월 19일 (목) 오후 2시, 3번 부스입니다.<br>순서는 <b>문제 상황, 라이브 데모,</b><br><b>관람객 체험</b>으로 바뀌었습니다.</div>
+  <div class="pbtn" id="send1" style="left:343px; top:429px; width:222px; height:24px; z-index:7;"></div>
+  <div class="btn-t" data-x style="left:343px; top:431px; width:222px; text-align:center; font-size:10.5px; line-height:20px;">Demo_Final.pptx 보내기</div>
+  <div class="ttl2" data-x style="left:345px; top:457px; font-size:10.5px;">연결된 기억</div>
+  <div class="row" id="r1" style="left:343px; top:474px; width:222px; height:30px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" style="left:350px; top:480px; width:18px; height:18px; border-radius:5px; z-index:7;">
+  <div class="ui-t" data-x style="left:375px; top:475px; font-size:10.5px; line-height:14px;">주간 회의</div>
+  <div class="ui-m" data-x style="left:375px; top:488px; font-size:8.5px; line-height:12px;">삼성노트 · 11월 10일 (화)</div>
+  <div class="row" id="r2" style="left:343px; top:507px; width:222px; height:30px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:350px; top:513px; width:18px; height:18px; z-index:7;">
+  <div class="ui-t" data-x style="left:375px; top:508px; font-size:10.5px; line-height:14px;">최종본 공유드려요</div>
+  <div class="ui-m" data-x style="left:375px; top:521px; font-size:8.5px; line-height:12px;">메일 · 민수 · 11월 12일 (목)</div>
+  <div class="row" id="r3" style="left:343px; top:540px; width:222px; height:30px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:350px; top:546px; width:18px; height:18px; z-index:7;">
+  <div class="ui-t" data-x style="left:375px; top:541px; font-size:10.5px; line-height:14px;">삼성기술전 시연</div>
+  <div class="ui-m" data-x style="left:375px; top:554px; font-size:8.5px; line-height:12px;">캘린더 · 11월 19일 (목) · 수원 디지털시티</div>
+  <img class="app" id="redbtn" src="assets/call-weave-button.png" style="left:434px; top:588px; width:40px; height:40px; z-index:6;">
+  <div class="red-t" data-x id="redlbl" style="left:394px; top:650px; width:120px;">위로 올려 기억 검색</div>
   <div class="pen" data-x id="pen1" style="left:506px; top:570px;">쓱!</div>
 
   <!-- ───────── 2. 단서로 찾는 기억 ───────── -->
   <div class="no3" style="left:636px; top:174px;"></div><div class="no3-t" data-x style="left:636px; top:174px;">2</div>
   <div class="nm" data-x style="left:680px; top:174px;">단서로 찾는 기억</div>
-  <div class="one" data-x style="left:636px; top:214px;">정확한 이름 대신, 기억나는 상황만으로 찾아줍니다.</div>
+  <div class="one" data-x style="left:636px; top:214px;">정확한 이름이 떠오르지 않아도 기억나는 상황으로 찾아 줍니다.</div>
 
   <div class="inbar" style="left:640px; top:252px; width:238px; height:34px;"></div>
   <svg class="app" viewBox="0 0 24 24" style="left:652px; top:261px; width:16px; height:16px; z-index:7;"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#5F6368" stroke-width="2.2"/><path d="m15.5 15.5 5 5" stroke="#5F6368" stroke-width="2.2" stroke-linecap="round"/></svg>
-  <div class="t13" data-x id="q2" style="left:674px; top:260px;">집들이 때 마신 화이트 와인</div>
+  <div class="t13" data-x id="q2" style="left:674px; top:260px;">지은이네 집들이 때 마셨던 와인</div>
   <div class="abs" id="kb2" style="left:640px; top:294px; width:238px; height:132px;"></div>
   <div class="pen" data-x id="pen2" style="left:0px; top:0px;">톡!</div>
 
   <div class="card" id="card2" style="left:938px; top:252px; width:300px; height:182px;"></div>
-  <svg class="app" viewBox="0 0 24 24" style="left:955px; top:266px; width:14px; height:14px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
-  <div class="lab" data-x style="left:974px; top:264px;">자동 완성 추천</div>
-  <div class="big" data-x style="left:955px; top:284px;">배비치 소비뇽 블랑</div>
-  <div class="srcbox" style="left:953px; top:318px; width:270px; height:56px;"></div>
-  <img class="app" src="../../assets/icons/app-kakao.png" alt="" style="left:963px; top:325px; width:17px; height:17px; border-radius:5px; z-index:7;">
-  <div class="t115" data-x style="left:987px; top:326px;">카카오톡 · <b>지은</b> ‘이번 일요일 6시’ 3월 12일</div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:963px; top:349px; width:17px; height:17px; z-index:7;">
-  <div class="t115" data-x style="left:987px; top:350px;">갤러리 · <b>와인 라벨 사진</b> 3월 15일 20:14</div>
-  <div class="pbtn" id="ok2" style="left:953px; top:386px; width:270px; height:34px; z-index:7;"></div>
-  <svg class="app" viewBox="0 0 24 24" style="left:1054px; top:396px; width:14px; height:14px; z-index:8;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  <div class="btn-t" data-x style="left:1073px; top:393px;">입력하기</div>
+  <div class="lav" style="left:950px; top:260px; width:276px; height:60px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:960px; top:267px; width:13px; height:13px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="lab" data-x style="left:977px; top:264px;">자동 완성 추천</div>
+  <div class="big" data-x style="left:960px; top:284px;">배비치 소비뇽 블랑</div>
+  <div class="pbtn" id="ok2" style="left:950px; top:326px; width:276px; height:30px; z-index:7;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:1054px; top:334px; width:14px; height:14px; z-index:8;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="btn-t" data-x style="left:1073px; top:331px;">입력하기</div>
+  <div class="ttl2" data-x style="left:952px; top:361px;">연결된 기억</div>
+  <img class="app" src="../../assets/icons/app-kakao.png" alt="" style="left:952px; top:380px; width:17px; height:17px; border-radius:5px; z-index:7;">
+  <div class="t115" data-x style="left:976px; top:381px;"><b>지은</b> ‘휴지 안 사 와도 돼’ 3월 15일</div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:952px; top:404px; width:17px; height:17px; z-index:7;">
+  <div class="t115" data-x style="left:976px; top:405px;"><b>와인 라벨 사진</b> 3월 15일 20:14</div>
 
   <!-- ───────── 3. 먼저 건네는 기억 ───────── -->
   <div class="no3" style="left:636px; top:464px;"></div><div class="no3-t" data-x style="left:636px; top:464px;">3</div>
   <div class="nm" data-x style="left:680px; top:464px;">먼저 건네는 기억</div>
-  <div class="one" data-x style="left:636px; top:504px;">지금 도움이 될 기억을, 먼저 알려줍니다.</div>
+  <div class="one" data-x style="left:636px; top:504px;">지금 도움이 될 기억을 먼저 건넵니다.</div>
 
-  <div class="ctx" id="ctx3" style="left:640px; top:540px; width:200px; height:26px;"></div>
+  <div class="ctx" id="ctx3" style="left:640px; top:540px; width:90px; height:26px;"></div>
   <svg class="app" viewBox="0 0 24 24" style="left:650px; top:545px; width:15px; height:15px; color:#2F7BF6; z-index:7;"><use href="#i-pin"/></svg>
-  <div class="t11b" data-x id="ctx3t" style="left:670px; top:545px;">현재 위치 · 인천공항 면세 구역</div>
+  <div class="t11b" data-x id="ctx3t" style="left:670px; top:545px;">인천공항</div>
+  <div class="ctx" id="ctx4" style="left:738px; top:540px; width:140px; height:26px;"></div>
+  <img class="app" id="ctx4i" src="../../../09_HowItWorks/장표5/assets/samsung-wallet.png" alt="" style="left:746px; top:545px; width:16px; height:16px; z-index:7;">
+  <div class="t11b" data-x id="ctx4t" style="left:767px; top:545px;">싱가포르 → 인천</div>
   <div class="abs" id="kb3" style="left:640px; top:574px; width:238px; height:132px;"></div>
   <div class="pen" data-x id="pen3" style="left:0px; top:0px;">반짝!</div>
 
-  <!-- (3) 추천 카드 (결선): 출처가 세 줄(아내 카톡 · 캡처 · 지금 위치)이라 카드를 위로 22px 늘림. 오른쪽 위엔 갈색 유리병 그림(실제 제품 사진 아님) -->
+  <!-- (3) 추천 카드: 카드에는 보낼 말만, 그 아래 버튼과 연결된 기억. 병 사진은 아내가 카톡으로 보낸 사진 -->
   <div class="card" id="card3" style="left:938px; top:506px; width:300px; height:206px;"></div>
-  <svg class="app" viewBox="0 0 24 24" style="left:955px; top:519px; width:14px; height:14px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
-  <div class="lab" data-x style="left:974px; top:517px;">자동 완성 추천</div>
-  <div class="big2" data-x style="left:955px; top:537px;">“면세점이야! 그 갈색병<br>50ml로 사 갈까?”</div>
-  <svg class="app" id="bottle" viewBox="0 0 66 68" style="left:1162px; top:516px; width:66px; height:68px; z-index:6;">
-    <rect x="0" y="0" width="66" height="68" rx="8" fill="#F3EEE8"/>
-    <ellipse cx="33" cy="60.4" rx="15.2" ry="2" fill="#D9D0C6"/>
-    <rect x="20.46" y="27.4" width="25.08" height="33" rx="3.96" fill="#6E3417"/>
-    <rect x="27.98" y="23.44" width="10.03" height="4.62" fill="#4A230F"/>
-    <rect x="25.48" y="9.58" width="15.05" height="14.52" rx="2.64" fill="#1C1A24"/>
-    <rect x="23.47" y="37.3" width="19.06" height="11.88" fill="#F3EBDD"/>
-    <rect x="26.48" y="40.6" width="13.04" height="1.65" fill="#5A3A22"/>
-    <rect x="27.98" y="44.56" width="10.03" height="1.32" fill="#8A6A50"/>
-    <rect x="22.97" y="30.04" width="2.26" height="25.74" rx="1.1" fill="#FFFFFF" fill-opacity=".22"/>
-  </svg>
-  <div class="srcbox" style="left:953px; top:588px; width:270px; height:72px;"></div>
-  <img class="app" src="../../assets/icons/app-kakao.png" style="left:963px; top:594px; width:17px; height:17px; border-radius:5px; z-index:7;">
-  <div class="t115" data-x style="left:987px; top:595px; font-size:11px;">카카오톡 · <b>아내</b> ‘동생이 갈색병 써 봤는데’</div>
-  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:963px; top:616px; width:17px; height:17px; z-index:7;">
-  <div class="t115" data-x style="left:987px; top:617px; font-size:11px;">스크린샷 · <b>에스티 로더 나이트 리페어</b> 50ml</div>
-  <svg class="app" viewBox="0 0 24 24" style="left:963px; top:638px; width:17px; height:17px; z-index:7;"><rect width="24" height="24" rx="6" fill="#2F7BF6"/><path d="M17 10.2c0 3.7-5 8.3-5 8.3s-5-4.6-5-8.3a5 5 0 0 1 10 0z" fill="#fff"/><circle cx="12" cy="10.2" r="1.9" fill="#2F7BF6"/></svg>
-  <div class="t115" data-x style="left:987px; top:639px; font-size:11px;">현재 위치 · <b>인천공항 면세 구역</b></div>
-  <div class="pbtn" id="ok3" style="left:953px; top:670px; width:270px; height:32px; z-index:7;"></div>
-  <svg class="app" viewBox="0 0 24 24" style="left:1054px; top:679px; width:14px; height:14px; z-index:8;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  <div class="btn-t" data-x style="left:1073px; top:676px;">입력하기</div>
+  <div class="lav" style="left:950px; top:514px; width:276px; height:70px;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:960px; top:520px; width:13px; height:13px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
+  <div class="lab" data-x style="left:977px; top:517px;">자동 완성 추천</div>
+  <div class="big2" data-x style="left:960px; top:535px;">“여보, 전에 말한 그 갈색병<br>면세점에서 사 갈까?”</div>
+  <div class="pbtn" id="ok3" style="left:950px; top:590px; width:276px; height:28px; z-index:7;"></div>
+  <svg class="app" viewBox="0 0 24 24" style="left:1054px; top:597px; width:14px; height:14px; z-index:8;"><path d="M20 6 9 17l-5-5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="btn-t" data-x style="left:1073px; top:594px;">입력하기</div>
+  <div class="ttl2" data-x style="left:952px; top:622px;">연결된 기억</div>
+  <img class="app" src="../../assets/icons/app-kakao.png" alt="" style="left:952px; top:640px; width:16px; height:16px; border-radius:5px; z-index:7;">
+  <div class="t115" data-x style="left:975px; top:640px; font-size:11px;"><b>아내</b> ‘동생이 이 갈색병 좋대’</div>
+  <img class="app" src="../../../09_HowItWorks/장표5/assets/samsung-wallet.png" alt="" style="left:952px; top:661px; width:16px; height:16px; z-index:7;">
+  <div class="t115" data-x style="left:975px; top:661px; font-size:11px;"><b>탑승권</b> 싱가포르 → 인천</div>
+  <svg class="app" viewBox="0 0 24 24" style="left:952px; top:682px; width:16px; height:16px; z-index:7;"><rect width="24" height="24" rx="6" fill="#2F7BF6"/><path d="M17 10.2c0 3.7-5 8.3-5 8.3s-5-4.6-5-8.3a5 5 0 0 1 10 0z" fill="#fff"/><circle cx="12" cy="10.2" r="1.9" fill="#2F7BF6"/></svg>
+  <div class="t115" data-x style="left:975px; top:682px; font-size:11px;"><b>현재 위치</b> 인천공항</div>
+  <div class="photo" id="bottle" style="left:1164px; top:640px; width:62px; height:58px; z-index:7;"><img src="assets/wife-bottle.jpg" alt=""></div>
 </div>
 
 <script src="../p68/scenario.js"></script>
@@ -167,8 +179,13 @@
 SC.run(async (sc) => {
   const { R, el, thread, spark, hand, back, front } = sc;
   const slide = document.getElementById('slide');
-  // (3) 위치 칩 폭을 글자에 맞춤(인천공항 면세 구역)
-  { const t = R('ctx3t'); document.getElementById('ctx3').style.width = (t.r - 640 + 11) + 'px'; }
+  // (3) 위치·탑승권 칩 폭을 글자에 맞춤
+  { const t = R('ctx3t'); document.getElementById('ctx3').style.width = (t.r - 640 + 11) + 'px';
+    const x4 = t.r + 19, sh = x4 - 738;
+    document.getElementById('ctx4').style.left = x4 + 'px';
+    document.getElementById('ctx4i').style.left = (746 + sh) + 'px';
+    document.getElementById('ctx4t').style.left = (767 + sh) + 'px';
+    const t4 = R('ctx4t'); document.getElementById('ctx4').style.width = (t4.r - x4 + 11) + 'px'; }
   const img = (src, x, y, w, h, z = 27) => { const i = document.createElement('img'); i.src = src; i.className = 'app';
     Object.assign(i.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px', zIndex: z }); slide.appendChild(i); return i; };
 
@@ -183,25 +200,23 @@ SC.run(async (sc) => {
   ct.style.left = (gx + 13) + 'px';
   el(front, 'path', { d: 'M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z',
     fill: '#6A6474', transform: `translate(${gx} 285) scale(${10 / 24})` });
-  el(front, 'rect', { x: 440, y: 313, width: 28, height: 3, rx: 1.5, fill: '#D4CEDF' });
+  el(front, 'rect', { x: 440, y: 304, width: 28, height: 3, rx: 1.5, fill: '#D4CEDF' });
   el(front, 'circle', { cx: 454, cy: 271.5, r: 4.2, fill: '#1E1E26' });   // 카메라 구멍
   const sb = R('sbar1');
-  el(front, 'circle', { cx: sb.r - 17, cy: sb.cy, r: 12, fill: '#6B4EFF' });
-  el(front, 'path', { d: `M${sb.r - 17} ${sb.cy + 6}V${sb.cy - 5.5}M${sb.r - 21.5} ${sb.cy - 1.5}l4.5-4.5 4.5 4.5`, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  el(front, 'circle', { cx: sb.r - 15, cy: sb.cy, r: 11, fill: '#6B4EFF' });
+  el(front, 'path', { d: `M${sb.r - 15} ${sb.cy + 5.5}V${sb.cy - 5}M${sb.r - 19.5} ${sb.cy - 1}l4.5-4.5 4.5 4.5`, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
   const q1 = R('q1');
-  const c1 = document.createElement('div'); c1.className = 'cursor'; Object.assign(c1.style, { left: (q1.r + 2) + 'px', top: (q1.t + 2) + 'px', height: '14px', zIndex: 21 }); slide.appendChild(c1);
   ['r1', 'r2', 'r3'].forEach((id) => { const r = R(id); el(front, 'path', { d: `M${r.r - 17} ${r.cy - 5}l5 5-5 5`, fill: 'none', stroke: '#B3ADC4', 'stroke-width': 1.7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }); });
-  // 보내기 버튼을 누르는 손
-  spark(front, [sb.r - 17, sb.cy], 12 + 3, [213, 258, 303], [4.4, 5.4, 4.4]);
-  hand([sb.r - 14, sb.cy + 3], -12, .95);
+  // 파일 보내기 버튼을 누르는 손
+  { const sd = R('send1'); spark(front, [sd.r - 30, sd.cy], 12 + 3, [213, 258, 303], [4.4, 5.4, 4.4]); hand([sd.r - 27, sd.cy + 3], -12, .95); }
   // 내비게이션 줄
   const ny = 680; const gn = el(front, 'g', { fill: 'none', stroke: '#7D8499', 'stroke-width': 1.6, 'stroke-linecap': 'round' });
   el(gn, 'path', { d: `M397 ${ny - 5}v10M401 ${ny - 5}v10M405 ${ny - 5}v10` }); el(gn, 'rect', { x: 448, y: ny - 5, width: 11, height: 10, rx: 3 }); el(gn, 'path', { d: `M510 ${ny - 5}l-5 5 5 5` });
 
   // 밀어 올리기: 빨간 버튼 아래(보라 막대)에서 위로 — 손끝은 버튼 아래, 화살표는 몸통과 머리가 붙은 하나의 모양
   const rb = R('redbtn');
-  el(front, 'rect', { x: rb.cx - 16, y: rb.b + 5, width: 32, height: 3.5, rx: 1.75, fill: '#6B4EFF' });
-  const ax = rb.r + 35, ay0 = rb.b + 6, ay1 = rb.t - 8;
+  el(front, 'rect', { x: rb.cx - 16, y: rb.b + 13, width: 32, height: 3.5, rx: 1.75, fill: '#6B4EFF' });   // 종료 버튼에서 떼어 둠
+  const ax = rb.r + 35, ay0 = rb.b + 14, ay1 = rb.t - 8;
   const tip = [ax, ay0 + 3];
   spark(front, [tip[0], tip[1] + 4.2], 5.6, [192, 348], [4.8, 4.8]);
   hand(tip, 0, .95);
@@ -209,6 +224,9 @@ SC.run(async (sc) => {
     fill: 'url(#up-front)', 'stroke-linejoin': 'round' });
   const p1 = R('pen1'); document.getElementById('pen1').style.left = (ax + 8) + 'px'; document.getElementById('pen1').style.top = (ay1 - 4) + 'px';
 
+  // 이전 회의록 → 바뀐 회의록 (같은 일, 날짜순)
+  { const n0 = R('note0'), n1 = R('note');
+    el(back, 'path', { d: `M${n0.cx} ${n0.b + 1} L${n1.cx} ${n1.t - 3}`, stroke: '#8B6BFF', 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none', 'marker-end': 'url(#ah-back)' }); }
   // 흩어진 기록 → 휴대폰 속 결과 줄 (점선 실)
   const phoneL = R('phone1').l;
   thread(back, [R('note').r + 2, R('note').cy], [phoneL - 1, R('r1').cy], { dash: '4 4' });

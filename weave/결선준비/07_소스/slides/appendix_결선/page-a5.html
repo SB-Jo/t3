@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Appendix · UX 2 상세 — UX 2 단서로 찾는 기억: 단계별 모델과 근거</title>
+<link rel="stylesheet" href="../../pages/theme.css">
+<style>
+  .t-label { top: 30px; } .t-title { top: 62px; } .t-sub { top: 116px; font-size: 16.5px; }
+  .panel { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 16px; box-shadow: 0 8px 24px rgba(107,78,255,.06); }
+  .tx { position: absolute; font-size: 12px; line-height: 17px; color: var(--ink-2); white-space: nowrap; }
+  .tx b { font-weight: 700; color: var(--ink); }
+  .tx em { font-style: normal; font-weight: 700; color: #6B4EFF; }
+  .th { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #6B4EFF; white-space: nowrap; }
+  .st { position: absolute; font-size: 12px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .rule { position: absolute; height: 1px; background: #EEE9FA; }
+  .src { position: absolute; left: 62px; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
+  .note { position: absolute; font-size: 12.5px; line-height: 19px; color: var(--ink-2); white-space: nowrap; }
+  .note b { font-weight: 700; color: var(--ink); }
+  .note em { font-style: normal; font-weight: 700; color: #6B4EFF; }
+  .box { position: absolute; border-radius: 11px; background: #fff; border: 1.6px solid #DCD6EA; }
+  .box.em { border-color: #2F7BF6; background: #F3F8FF; }
+  .box.ll { border-color: #6B4EFF; background: #F5F1FF; }
+  .box.ru { border-color: #6F7690; border-style: dashed; background: #F8F8FB; }
+  .box.ok { border-color: #6B4EFF; background: #F5F1FF; }
+  .box.no { border-color: #E4DFEF; background: #FAF9FC; }
+  .bt { position: absolute; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap; }
+  .bs { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; text-align: center; white-space: nowrap; }
+  .lane { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #8E88A0; white-space: nowrap; }
+  .chipt { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; white-space: nowrap; }
+  .chipb { position: absolute; font-size: 11px; line-height: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .tag { position: absolute; font-size: 10px; line-height: 14px; font-weight: 700; white-space: nowrap; }
+  .tag.on { color: #6B4EFF; } .tag.off { color: #A29DB2; }
+  .app { position: absolute; }
+  .wrap { position: absolute; left: 0; top: 10px; width: 1280px; height: 720px; }
+  svg.fxl { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 2; }
+</style>
+</head>
+<body>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+  <div class="t-label" data-x>Appendix · UX 2 상세</div>
+  <div class="t-title" data-x>UX 2 단서로 찾는 기억: 단계별 모델과 근거</div>
+  <div class="t-sub" data-x>구글 검색창: "지은이네 집들이 때 마셨던 와인"</div>
+  <div class="wrap">
+  <div class="box ok" style="left:60px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/app-kakao.png" alt="" style="left:68px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:88px; top:156px;">3/15 지은 카톡</div>
+  <div class="chipt" data-x style="left:68px; top:174px;">박스 정리 다 했어! 휴지 안 사 와도 돼</div>
+  <div class="tag on" data-x style="left:68px; top:186px;">날짜 단서</div>
+  <div class="box no" style="left:252px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" alt="" style="left:260px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:280px; top:156px; color:#8E88A0;">3/14 집들이 선물</div>
+  <div class="chipt" data-x style="left:260px; top:174px; color:#A29DB2;">디퓨저로 결정!</div>
+  <div class="tag off" data-x style="left:260px; top:186px;">와인 얘기 없음</div>
+  <div class="box no" style="left:444px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:452px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:472px; top:156px; color:#8E88A0;">3/10 스크린샷</div>
+  <div class="chipt" data-x style="left:452px; top:174px; color:#A29DB2;">와인 고르는 법</div>
+  <div class="tag off" data-x style="left:452px; top:186px;">일반 정보 글</div>
+  <div class="box no" style="left:636px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:644px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:664px; top:156px; color:#8E88A0;">3/15 19:52 사진</div>
+  <div class="chipt" data-x style="left:644px; top:174px; color:#A29DB2;">식탁 사진</div>
+  <div class="tag off" data-x style="left:644px; top:186px;">뜻으로 탈락</div>
+  <div class="box ok" style="left:828px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:836px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:856px; top:156px;">3/15 20:14 사진</div>
+  <div class="chipt" data-x style="left:836px; top:174px;">BABICH SAUVIGNON BLANC</div>
+  <div class="tag on" data-x style="left:836px; top:186px;">답</div>
+  <div class="box no" style="left:1020px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:1028px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:1048px; top:156px; color:#8E88A0;">3/20 21:10 사진</div>
+  <div class="chipt" data-x style="left:1028px; top:174px; color:#A29DB2;">와인바, 다른 와인</div>
+  <div class="tag off" data-x style="left:1028px; top:186px;">날짜로 탈락</div>
+  <div class="panel" style="left:60px; top:210px; width:1160px; height:380px;"></div>
+  <div class="th" data-x style="left:76px; top:219px;">단계</div>
+  <div class="th" data-x style="left:176px; top:219px;">일어나는 일</div>
+  <div class="th" data-x style="left:650px; top:219px;">모델과 절차</div>
+  <div class="th" data-x style="left:952px; top:219px;">논문 근거</div>
+  <div class="rule" style="left:76px; top:239px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:245px;">00 사전 준비</div>
+  <div class="tx" data-x style="left:176px; top:245px;">카톡 글자와 사진을 벡터, 키워드, { date, app }로 저장합니다.</div>
+  <div class="tx" data-x style="left:650px; top:245px;">Reasoning Embedding, BM25, OCR</div>
+  <div class="tx" data-x style="left:952px; top:245px; color:#6A6474;">LongMemEval (ICLR 2025): 타임스탬프 색인</div>
+  <div class="rule" style="left:76px; top:282px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:288px;">01 순간 감지</div>
+  <div class="tx" data-x style="left:176px; top:288px;">구글 창에 '지은이네 집들이 때 마셨던 와인'을 적고 실타래 버튼을 누릅니다.</div>
+  <div class="tx" data-x style="left:650px; top:288px;">사용자 호출</div>
+  <div class="tx" data-x style="left:952px; top:288px; color:#6A6474;">논문 없음(설계)</div>
+  <div class="rule" style="left:76px; top:325px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:331px;">① 한 번 찾기</div>
+  <div class="tx" data-x style="left:176px; top:331px;">선물 메모, 와인 고르는 법, 3/20 와인바 사진이 올라옵니다.</div>
+  <div class="tx" data-x style="left:650px; top:331px;">BM25 + Reasoning Embedding</div>
+  <div class="tx" data-x style="left:952px; top:331px; color:#6A6474;">IRCoT (ACL 2023), BRIGHT (ICLR 2025)</div>
+  <div class="rule" style="left:76px; top:368px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:374px;">② 나누기</div>
+  <div class="tx" data-x style="left:176px; top:374px;">1. 지은이네 집들이는 언제였지?  2. [그날] 마셨던 와인은?</div>
+  <div class="tx" data-x style="left:650px; top:374px;">sLLM 1~2B</div>
+  <div class="tx" data-x style="left:952px; top:374px; color:#6A6474;">Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025)</div>
+  <div class="rule" style="left:76px; top:411px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:417px;">③ 1홉</div>
+  <div class="tx" data-x style="left:176px; top:417px;">지은이 보낸 기록 중에서 '휴지 안 사 와도 돼. 몸만 와'를 집들이 초대로 찾습니다.</div>
+  <div class="tx" data-x style="left:650px; top:417px;">보낸 사람 필터 + Reasoning Embedding<br>(개방형 영역, World Knowledge)</div>
+  <div class="tx" data-x style="left:952px; top:417px; color:#6A6474;">ImpliRet (EMNLP 2025), RIR Survey (ACL 2026)</div>
+  <div class="rule" style="left:76px; top:454px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:460px;">④ 잇기</div>
+  <div class="tx" data-x style="left:176px; top:460px;">[그날 → 3/15 (일)]. 카톡에 저장된 날짜를 그대로 씁니다.</div>
+  <div class="tx" data-x style="left:650px; top:460px;">메타데이터 복사, 날짜 필터</div>
+  <div class="tx" data-x style="left:952px; top:460px; color:#6A6474;">Hi-Q, LongMemEval</div>
+  <div class="rule" style="left:76px; top:497px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:503px;">③ 2홉</div>
+  <div class="tx" data-x style="left:176px; top:503px;">그날 사진 둘 중 식탁 사진 말고 와인 사진을 찾고 라벨을 읽습니다.</div>
+  <div class="tx" data-x style="left:650px; top:503px;">Reasoning Embedding + OCR</div>
+  <div class="tx" data-x style="left:952px; top:503px; color:#6A6474;">DocHop-QA (EMNLP 2026): 글 + 이미지</div>
+  <div class="rule" style="left:76px; top:540px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:546px;">⑤ 전달</div>
+  <div class="tx" data-x style="left:176px; top:546px;">배비치 소비뇽 블랑을 출처와 함께 건넵니다. 입력은 사용자가 합니다.</div>
+  <div class="tx" data-x style="left:650px; top:546px;">sLLM, 이름 복사 검사</div>
+  <div class="tx" data-x style="left:952px; top:546px; color:#6A6474;">Hi-Q</div>
+  <div class="note" data-x style="left:62px; top:596px; font-size:12px; line-height:17px;"><b>왜 이 장면이 멀티홉인가요?</b> 질문에 없는 날짜를 먼저 찾아야 사진을 고를 수 있습니다. 첫 단계를 모르면 둘째 근거는 질문과 단어도 뜻도 겹치지 않아 찾기 어렵다는 지적이 있습니다(IRCoT).</div>
+  <div class="note" data-x style="left:62px; top:614px; font-size:12px; line-height:17px;"><b>넘어가는 단서가 날짜입니다.</b> 이번 단서는 날짜지만, 별칭이나 맡은 일 같은 내용도 같은 방식으로 잇습니다(UX 1, UX 3).</div>
+  <div class="src" data-x style="left:62px; top:636px;">* 출처: Trivedi et al., "IRCoT", ACL 2023 · Kim et al., "Hi-Q", NeurIPS 2026 · Taghavi et al., "ImpliRet", EMNLP 2025 · Wei et al., "RIR Survey", ACL 2026 · Wu et al., "LongMemEval", ICLR 2025 · Park et al., "DocHop-QA", EMNLP 2026</div>
+
+  <svg class="fxl" viewBox="0 0 1280 720"><defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#8B6BFF"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#A29DB2"/></marker>
+  </defs></svg>
+  </div>
+</div>
+<script>document.fonts.ready.then(() => { window.pageReady = true; });</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+Appendix · 관련 연구. Multi-hop Retrieval에는 정해진 표준이 없습니다. 논문들은 위의 뼈대를 공유하고, 갈래는 크게 넷입니다. Weave는 둘째 갈래인 찾으면서 다시 쓰는 쪽에 속하고, 셋째 갈래인 임베딩 연결을 보조 경로 후보로 둡니다.
+숫자 출처: Hi-Q 표 8(LLM 호출: 전체 5.7회, 비용 맞춤 2.93회, IRCoT 2.92회), DER-RAG(9.63/8.00/9.11회), GRITHopper(MuSiQue open retrieval Hits@1 2홉 76.13, GPT4o + GRITLM 분해 48.53), Hi-Q 표 3(Clean n=279, Root@5 7.9 → Leaf@5 42.7), 표 6(always-decompose 57.3 vs 60.7, N=100, dependency-aware 제거 47.1 vs 57.9).
+예상 질문: Hi-Q를 그대로 쓰나요? 아닙니다. 질문당 LLM 5.7회를 그대로 쓸 수 없어서 이름 복사와 날짜 규칙으로 호출을 줄입니다.

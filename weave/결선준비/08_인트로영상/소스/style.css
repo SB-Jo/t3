@@ -366,7 +366,7 @@ mark.rm { color: inherit; padding: 0 1px; }
 #callA .q { margin-top: 10px; font-size: 33px; font-weight: 500; line-height: 1.42; letter-spacing: -0.03em; white-space: nowrap; color: var(--ink); }
 #callA u { text-decoration: none; font-weight: 700; color: var(--purple); padding: 0 2px; }
 
-/* 03: 문장·플로팅을 오른쪽으로, 위치 카드는 작게, 가족 단체방에 엄마가 보낸 사진 */
+/* 03: 문장·플로팅을 오른쪽으로, 위치 카드는 작게, 아내 카톡의 병 사진 */
 #hdC { left: 1080px; }
 #fg { left: 1080px; top: 318px; width: auto; padding-right: 36px; }
 #fg .t, #fk .t { white-space: nowrap; }
@@ -416,6 +416,63 @@ mark.rm { color: inherit; padding: 0 1px; }
 .bigf .mini .mm.r { margin-top: 2px; }
 
 /* ── v8 ─────────────────────────────────────────── */
-/* 03: 가족 단체방의 '성심당 무화과시루', Weave 추천 문장의 '먹고 싶다던 무화과시루'도 같은 형광펜 */
+/* 03: 아내 카톡의 '이 갈색병', Weave 추천 문장의 '전에 말한 그 갈색병'도 같은 형광펜 */
 #kkSs { background: linear-gradient(transparent 52%, rgba(107,78,255,.30) 52%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
 #sgK { background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 1px; }
+
+
+/* ── v9 (2026-11-05): 세 시나리오 소개 영상 ── */
+#opThreads { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+#op { position: absolute; left: 0; right: 0; top: 340px; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+#op .oprow { display: flex; justify-content: center; align-items: center; gap: 30px; }
+#op .mark { width: 132px; height: 132px; border-radius: 36px; background: linear-gradient(145deg, #8D6BFF, #6B4EFF 55%, #5A3FE0); display: grid; place-items: center; box-shadow: 0 30px 60px rgba(107,78,255,.35); }
+#op .mark img { width: 88px; height: 88px; }
+#op .word { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 116px; letter-spacing: -0.02em; line-height: 1; color: var(--ink); }
+#op .word .wv { color: var(--purple); }
+#opSub { margin-top: 44px; font-size: 56px; font-weight: 700; letter-spacing: -0.035em; color: var(--ink); }
+
+#hdB { top: 56px; }
+#hdB h3 { font-size: 44px; line-height: 1.26; }
+#fl1, #fl2, #fl3, #fl4 { left: 150px; width: 600px; grid-template-columns: 56px 1fr; column-gap: 18px; padding: 16px 24px 16px 20px; }
+#fl1 > img, #fl2 > img, #fl3 > img, #fl4 > img { width: 56px; height: 56px; border-radius: 15px; }
+#fl1 .t, #fl2 .t, #fl3 .t, #fl4 .t { font-size: 26px; }
+#fl1 .m, #fl2 .m, #fl3 .m, #fl4 .m { font-size: 17px; margin-top: 3px; }
+#fl1 .sn, #fl2 .sn, #fl3 .sn, #fl4 .sn { font-size: 20px; margin-top: 9px; padding: 8px 14px; }
+#flChip { font-size: 17px; padding: 4px 13px; background: #8E88A0; box-shadow: none; }
+#callQ { left: 800px; right: auto; top: 44px; width: 470px; padding: 20px 26px 24px; }
+#callQ .q { margin-top: 14px; font-size: 32px; }
+#callA { left: 800px; right: auto; top: 356px; width: 470px; padding: 16px 22px 20px; }
+#callA .q { font-size: 25px; line-height: 1.46; }
+#wB .sg { margin-top: 12px; padding: 11px 13px 12px; }
+#wB .sg .l { font-size: 12.5px; }
+.sumv { position: relative; margin-top: 6px; height: 72px; font-size: 15.5px; font-weight: 600; line-height: 24px; letter-spacing: -0.025em; color: var(--ink); white-space: nowrap; }
+.sumv .ln { position: absolute; left: 0; }
+#sl1 { top: 0; } #sl2 { top: 24px; } #sl3 { top: 48px; }
+.sumv .skel { position: absolute; left: 0; height: 12px; border-radius: 6px; background: #E4DCFA; }
+.sumv .skel:nth-child(1) { top: 6px; width: 92%; } .sumv .skel:nth-child(2) { top: 30px; width: 78%; } .sumv .skel:nth-child(3) { top: 54px; width: 60%; }
+#wB .pbtn { gap: 6px; }
+#wB .mc { padding: 8px 13px; margin-top: 7px; grid-template-columns: 34px 1fr; align-items: center; }
+#wB .mc img { width: 34px; height: 34px; border-radius: 9px; }
+#wB .mc .a { font-size: 15px; } #wB .mc .b { font-size: 11.5px; margin-top: 1px; }
+#fg { left: 1080px; top: 262px; width: 350px; padding: 18px 18px 20px; }
+#fw { left: 1446px; top: 262px; width: 440px; padding: 18px 18px 20px; }
+#fw .t { white-space: nowrap; }
+#fw .t .m2 { font-size: 19px; font-weight: 500; color: var(--gray2); margin-left: 8px; letter-spacing: -0.01em; }
+#fg .loc, #fw .loc { margin-top: 6px; font-size: 36px; font-weight: 700; letter-spacing: -0.03em; color: var(--purple); line-height: 1.2; }
+#fg .m, #fw .m { margin-top: 2px; font-size: 20px; color: var(--ink2); }
+#fk { left: 1080px; top: 456px; width: 640px; }
+#kkDj, #kkSs { padding: 0 2px; }
+#kkDj { background: linear-gradient(transparent 52%, rgba(107,78,255,.30) 52%) no-repeat 0 0 / 0% 100%; border-radius: 3px; }
+#wC .sg { margin-top: 10px; }
+#wC .sg .v { font-size: 18px; }
+#wC .ttlc { font-size: 13.5px; font-weight: 700; margin: 14px 2px 0; letter-spacing: -0.02em; }
+#wC .mc { padding: 9px 12px; margin-top: 7px; }
+#wC .mc > img { align-self: start; }
+#wC .mc .c.cph { display: flex; gap: 8px; align-items: center; }
+#wC .mc .c.cph img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; flex: none; }
+#sgK { background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
+#trio { position: absolute; left: 0; right: 0; top: 96px; display: flex; justify-content: center; gap: 76px; pointer-events: none; }
+#trio .tp { display: flex; flex-direction: column; align-items: center; width: 400px; }
+#trio .tp img { width: 356px; height: auto; display: block; }
+#trio .tc { margin-top: 18px; display: flex; align-items: center; gap: 12px; font-size: 36px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; }
+#trio .tc b { width: 46px; height: 46px; border-radius: 50%; background: var(--purple); color: #fff; font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-size: 26px; display: grid; place-items: center; }

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Appendix · 관련 연구 — Multi-hop Retrieval 관련 연구 지도</title>
+<link rel="stylesheet" href="../../pages/theme.css">
+<style>
+  .t-label { top: 30px; } .t-title { top: 62px; } .t-sub { top: 116px; font-size: 16.5px; }
+  .panel { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 16px; box-shadow: 0 8px 24px rgba(107,78,255,.06); }
+  .tx { position: absolute; font-size: 12px; line-height: 17px; color: var(--ink-2); white-space: nowrap; }
+  .tx b { font-weight: 700; color: var(--ink); }
+  .tx em { font-style: normal; font-weight: 700; color: #6B4EFF; }
+  .th { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #6B4EFF; white-space: nowrap; }
+  .st { position: absolute; font-size: 12px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .rule { position: absolute; height: 1px; background: #EEE9FA; }
+  .src { position: absolute; left: 62px; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
+  .note { position: absolute; font-size: 12.5px; line-height: 19px; color: var(--ink-2); white-space: nowrap; }
+  .note b { font-weight: 700; color: var(--ink); }
+  .note em { font-style: normal; font-weight: 700; color: #6B4EFF; }
+  .box { position: absolute; border-radius: 11px; background: #fff; border: 1.6px solid #DCD6EA; }
+  .box.em { border-color: #2F7BF6; background: #F3F8FF; }
+  .box.ll { border-color: #6B4EFF; background: #F5F1FF; }
+  .box.ru { border-color: #6F7690; border-style: dashed; background: #F8F8FB; }
+  .box.ok { border-color: #6B4EFF; background: #F5F1FF; }
+  .box.no { border-color: #E4DFEF; background: #FAF9FC; }
+  .bt { position: absolute; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap; }
+  .bs { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; text-align: center; white-space: nowrap; }
+  .lane { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #8E88A0; white-space: nowrap; }
+  .chipt { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; white-space: nowrap; }
+  .chipb { position: absolute; font-size: 11px; line-height: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .tag { position: absolute; font-size: 10px; line-height: 14px; font-weight: 700; white-space: nowrap; }
+  .tag.on { color: #6B4EFF; } .tag.off { color: #A29DB2; }
+  .app { position: absolute; }
+  .wrap { position: absolute; left: 0; top: 10px; width: 1280px; height: 720px; }
+  svg.fxl { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 2; }
+</style>
+</head>
+<body>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+  <div class="t-label" data-x>Appendix · 관련 연구</div>
+  <div class="t-title" data-x>Multi-hop Retrieval 관련 연구 지도</div>
+  <div class="t-sub" data-x>표준 파이프라인은 없고 공통 뼈대가 있습니다. 갈래는 크게 넷이고, Weave는 둘째 갈래에 속합니다.</div>
+  <div class="wrap">
+  <div class="box em" style="left:92px; top:150px; width:156px; height:30px;"></div>
+  <div class="bt" data-x style="left:92px; top:157.0px; width:156px;">① 한 번 찾아 보기</div>
+  <div class="box ll" style="left:278px; top:150px; width:156px; height:30px;"></div>
+  <div class="bt" data-x style="left:278px; top:157.0px; width:156px;">② 모자라면 나누기</div>
+  <div class="box em" style="left:464px; top:150px; width:156px; height:30px;"></div>
+  <div class="bt" data-x style="left:464px; top:157.0px; width:156px;">③ 1홉 찾기</div>
+  <div class="box ru" style="left:650px; top:150px; width:156px; height:30px;"></div>
+  <div class="bt" data-x style="left:650px; top:157.0px; width:156px;">④ 단서로 다시 쓰기</div>
+  <div class="box em" style="left:836px; top:150px; width:156px; height:30px;"></div>
+  <div class="bt" data-x style="left:836px; top:157.0px; width:156px;">③ 2홉 찾기</div>
+  <div class="box ll" style="left:1022px; top:150px; width:156px; height:30px;"></div>
+  <div class="bt" data-x style="left:1022px; top:157.0px; width:156px;">⑤ 답과 근거</div>
+  <div class="panel" style="left:60px; top:192px; width:280px; height:316px; "></div>
+  <div class="st" data-x style="left:76px; top:202px; font-size:14.5px; line-height:20px;">미리 그래프를 만드는 쪽</div>
+  <div class="tx" data-x style="left:76px; top:228px; font-size:10.5px; color:#6A6474;">HippoRAG 2 (ICML 2025), PropRAG, GRASP</div>
+  <div class="th" data-x style="left:76px; top:254px;">홉을 잇는 방법</div>
+  <div class="tx" data-x style="left:76px; top:272px;">색인할 때 LLM으로 관계를 뽑아<br>그래프를 만들고 그래프를 따라 찾습니다.</div>
+  <div class="th" data-x style="left:76px; top:338px;">잘하는 것</div>
+  <div class="tx" data-x style="left:76px; top:356px;">정해 둔 관계를 여러 단계로 정확히 잇고<br>근거를 설명하기 쉽습니다.</div>
+  <div class="th" data-x style="left:76px; top:422px;">기기 안에서 걸리는 것</div>
+  <div class="tx" data-x style="left:76px; top:440px;">기록이 들어올 때마다<br>LLM으로 관계를 뽑아야 합니다.</div>
+  <div class="panel" style="left:353px; top:192px; width:280px; height:316px; border:2px solid #6B4EFF; background:#FBFAFF;"></div>
+  <div class="st" data-x style="left:369px; top:202px; font-size:14.5px; line-height:20px;">찾으면서 다시 쓰는 쪽</div>
+  <div class="box ll" style="left:561px; top:202px; width:58px; height:20px; border-radius:10px; background:#6B4EFF;"></div>
+  <div class="tag" data-x style="left:561px; top:205px; width:58px; color:#fff; text-align:center;">Weave</div>
+  <div class="tx" data-x style="left:369px; top:228px; font-size:10.5px; color:#6A6474;">IRCoT (ACL 2023), Hi-Q (NeurIPS 2026), DER-RAG</div>
+  <div class="th" data-x style="left:369px; top:254px;">홉을 잇는 방법</div>
+  <div class="tx" data-x style="left:369px; top:272px;">찾은 단서를 넣어 질문을 다시 쓰고<br>한 번 더 찾습니다.</div>
+  <div class="th" data-x style="left:369px; top:338px;">잘하는 것</div>
+  <div class="tx" data-x style="left:369px; top:356px;">그래프와 학습이 필요 없고<br>임베딩을 갈아 끼울 수 있습니다.</div>
+  <div class="th" data-x style="left:369px; top:422px;">기기 안에서 걸리는 것</div>
+  <div class="tx" data-x style="left:369px; top:440px;">질문당 LLM 호출: IRCoT 2.92회, Hi-Q 5.7회<br>(비용 맞춤 2.93회), DER-RAG 8.00~9.63회</div>
+  <div class="panel" style="left:646px; top:192px; width:280px; height:316px; "></div>
+  <div class="st" data-x style="left:662px; top:202px; font-size:14.5px; line-height:20px;">임베딩이 직접 잇는 쪽</div>
+  <div class="tx" data-x style="left:662px; top:228px; font-size:10.5px; color:#6A6474;">MDR (ICLR 2021), GRITHopper (EACL 2026)</div>
+  <div class="th" data-x style="left:662px; top:254px;">홉을 잇는 방법</div>
+  <div class="tx" data-x style="left:662px; top:272px;">질문과 찾은 기록을 함께 인코더에 넣어<br>다음 기록을 찾습니다.</div>
+  <div class="th" data-x style="left:662px; top:338px;">잘하는 것</div>
+  <div class="tx" data-x style="left:662px; top:356px;">글을 생성하지 않습니다. MuSiQue 2번째 홉<br>Hits@1 76.13 (GPT-4o 분해 48.53)</div>
+  <div class="th" data-x style="left:662px; top:422px;">기기 안에서 걸리는 것</div>
+  <div class="tx" data-x style="left:662px; top:440px;">대화형 데이터는 시험 전입니다.<br>Weave에서는 보조 경로 후보입니다.</div>
+  <div class="panel" style="left:939px; top:192px; width:280px; height:316px; "></div>
+  <div class="st" data-x style="left:955px; top:202px; font-size:14.5px; line-height:20px;">코드를 실행하는 에이전트 쪽</div>
+  <div class="tx" data-x style="left:955px; top:228px; font-size:10.5px; color:#6A6474;">코딩 에이전트, RLM, PyRAG</div>
+  <div class="th" data-x style="left:955px; top:254px;">홉을 잇는 방법</div>
+  <div class="tx" data-x style="left:955px; top:272px;">LLM이 코퍼스를 프로그램처럼 탐색하고<br>하위 호출을 반복합니다.</div>
+  <div class="th" data-x style="left:955px; top:338px;">잘하는 것</div>
+  <div class="tx" data-x style="left:955px; top:356px;">중간 상태를 명시적으로 드러내고<br>실행 결과를 그대로 씁니다.</div>
+  <div class="th" data-x style="left:955px; top:422px;">기기 안에서 걸리는 것</div>
+  <div class="tx" data-x style="left:955px; top:440px;">코드를 짜고 실행할 LLM이 필요해<br>소형 모델에는 부담이 큽니다.</div>
+  <div class="note" data-x style="left:62px; top:518px;"><b>왜 Hi-Q를 출발 뼈대로 보나요?</b> 그래프 없이 임베딩만 갈아 끼우고, 안 풀릴 때만 나누는 구조가 Weave 설계와 같습니다. 다만 저자 자체 비교이고 영어 위키, 서버 LLM 결과이며,</div>
+  <div class="note" data-x style="left:62px; top:538px;">시험한 공개 모델 중 가장 작은 것도 27B입니다. 1등이라는 증거가 아니라 출발점으로 봅니다. <b>점수 비교 주의:</b> 논문마다 모델이 달라 MuSiQue 단일 검색도 Hi-Q 표는 32.8, GRASP 표는 37.2 EM입니다.</div>
+  <div class="note" data-x style="left:62px; top:564px;"><b>나누기와 잇기의 근거 (Hi-Q):</b> 막힌 사례 279문항에서 같은 top-5로 필요한 문단을 다 찾는 비율 <em>7.9% → 42.7%</em>, 늘 나누면 <em>60.7 → 57.3 EM</em>(100문항), 다시 쓰기 순서를 빼면 <em>57.9 → 47.1 EM</em></div>
+  <div class="src" data-x style="left:62px; top:596px;">* 출처: Gutiérrez et al., "HippoRAG 2", ICML 2025 · Jenkins et al., "GRASP", arXiv 2605.16598 · Trivedi et al., "IRCoT", ACL 2023 · Kim et al., "Hi-Q", NeurIPS 2026 · Lee & Lim, "DER-RAG", arXiv 2609.06065</div>
+  <div class="src" data-x style="left:62px; top:612px;">   Xiong et al., "MDR", ICLR 2021 · Erker et al., "GRITHopper", EACL 2026 · 숫자는 모두 영어 공개 벤치마크(위키백과)에서 잰 값으로 Weave 성능이 아닙니다</div>
+
+  <svg class="fxl" viewBox="0 0 1280 720"><defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#8B6BFF"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#A29DB2"/></marker>
+  </defs><path d="M248 165 L272 165" stroke="#8B6BFF" stroke-width="1.8" fill="none" marker-end="url(#ah)"/><path d="M434 165 L458 165" stroke="#8B6BFF" stroke-width="1.8" fill="none" marker-end="url(#ah)"/><path d="M620 165 L644 165" stroke="#8B6BFF" stroke-width="1.8" fill="none" marker-end="url(#ah)"/><path d="M806 165 L830 165" stroke="#8B6BFF" stroke-width="1.8" fill="none" marker-end="url(#ah)"/><path d="M992 165 L1016 165" stroke="#8B6BFF" stroke-width="1.8" fill="none" marker-end="url(#ah)"/></svg>
+  </div>
+</div>
+<script>document.fonts.ready.then(() => { window.pageReady = true; });</script>
+</body>
+</html>
