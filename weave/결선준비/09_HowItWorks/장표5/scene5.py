@@ -346,6 +346,39 @@ class Scene:
 PX, PY, PW, PH = 60, 104, 300, 580
 
 
+def deliver_sheet(sc, a, groups, n_src, x, w, kind, ky, msg_end):
+    """전달 카드(layout='sheet'): 실제 데모 UI와 같은 구조. ✦ 카드에는 글만, 그 아래 버튼, 그 아래 '연결된 기억'."""
+    ml = wrap(a['main'], 13.5, w - 72, 'b') if '\n' not in a['main'] else a['main'].split('\n')
+    lav_h = 12 + 18 + 22 * len(ml) + 8
+    rows_h = 22 * n_src + 6 * max(0, len(groups) - 1)
+    ch = 12 + lav_h + 8 + 34 + 10 + 18 + rows_h + 10
+    ay = (sc.ui['sheet_y'] + 112) if kind == 'sheet' else ky - ch - 12
+    sc.ui['ans_overlaps_msg'] = kind != 'sheet' and ay < msg_end + 6
+    lx, lw = x + 22, w - 44
+    ly = ay + 12
+    card = [R('ans/bg', x + 14, ay, w - 28, ch, prst='roundRect', radius=16, fill='FFFFFF', line=RING, line_w=1.8,
+              shadow=S.L.SHADOW_LIFT, glow=(9, RING, 24)),
+            R('ans/lav', lx, ly, lw, lav_h, prst='roundRect', radius=11, fill='F4F0FF', line='E3D9FF', line_w=1.0),
+            R('ans/star', lx + 10, ly + 12, 11, 11, prst='star4', fill=PURPLE, line=None),
+            T('ans/lab', lx + 25, ly + 7, lw - 34, 20, a.get('label', '찾은 답'), size=9.5, color=PURPLE2, weight='b', anchor='ctr'),
+            T('ans/main', lx + 10, ly + 29, lw - 20, 22 * len(ml), ml, size=13.5, color=INK, weight='b', lnspc=17)]
+    by = ly + lav_h + 8
+    btn = a.get('button', '✓  입력하기')
+    card += [R('ans/btn', lx, by, lw, 34, prst='roundRect', fill=PURPLE, line=None),
+             T('ans/btn_t', lx, by, lw, 34, btn, size=10.5, color='FFFFFF', weight='b', align='c', anchor='ctr'),
+             T('ans/ttl', lx + 2, by + 34 + 10, lw, 18, '연결된 기억', size=9.5, color=INK, weight='b', anchor='ctr')]
+    ry = by + 34 + 10 + 18
+    for gi, (ic, lns) in enumerate(groups):
+        card.append(P('ans/si%d' % gi, S.ICON[ic], lx + 2, ry + 3, 16, 16))
+        for li, txt in enumerate(lns):
+            card.append(T('ans/st%d_%d' % (gi, li), lx + 24, ry, lw - 26, 22, txt, size=fit_pt(txt, lw - 28, 9, 'r', 7.5), color=SUB,
+                          anchor='ctr'))
+            ry += 22
+        ry += 6
+    sc.put('ans', card)
+    sc.put('ui.tap2', [P('ui.tap2/h', 'touch-tap.png', x + w - 78, by + 18, 28, 40)])
+
+
 def bubble_prims(name, by, msg, tm, mine, pt=10.5):
     x, w = PX, PW
     ml = wrap(msg, pt, w - 120)
@@ -379,11 +412,12 @@ def phone_items(sc):
             txt = ui['answer_q'] if style == 'done' else ui['query']
             tl = wrap(txt, 11, w - 92, 'r')[:2]
             hh = 46 if len(tl) == 1 else 62
-            return [R('ui.sbox/bg', x + 18, y + 106, w - 36, hh, prst='roundRect', radius=23, fill='FFFFFF', line='DADCE0', line_w=1.2,
+            by = y + (72 if style == 'up' else 106)      # 'up' = 전달 카드가 올라올 때 검색창이 가려지지 않게 위로
+            return [R('ui.sbox/bg', x + 18, by, w - 36, hh, prst='roundRect', radius=23, fill='FFFFFF', line='DADCE0', line_w=1.2,
                       shadow=S.L.SHADOW_SOFT),
-                    R('ui.sbox/lens', x + 34, y + 106 + hh / 2 - 8, 13, 13, prst='ellipse', fill=None, line='9AA0A6', line_w=1.8),
-                    R('ui.sbox/lens2', x + 44, y + 106 + hh / 2 + 3, 6, 2, fill='9AA0A6', line=None),
-                    T('ui.sbox/t', x + 58, y + 106, w - 92, hh, tl, size=11, color=INK, anchor='ctr', lnspc=12)]
+                    R('ui.sbox/lens', x + 34, by + hh / 2 - 8, 13, 13, prst='ellipse', fill=None, line='9AA0A6', line_w=1.8),
+                    R('ui.sbox/lens2', x + 44, by + hh / 2 + 3, 6, 2, fill='9AA0A6', line=None),
+                    T('ui.sbox/t', x + 58, by, w - 92, hh, tl, size=11, color=INK, anchor='ctr', lnspc=12)]
         sc.put('ui.sbox', sbox)
         res = []
         ry = y + 196
@@ -490,39 +524,44 @@ def phone_items(sc):
         else:
             groups.append((ic, lns))
     n_src = sum(len(g[1]) for g in groups)
-    ml = wrap(a['main'], 13.5, w - 64, 'b') if '\n' not in a['main'] else a['main'].split('\n')
-    for ln in ml:
+    if a.get('layout') == 'sheet':
+        deliver_sheet(sc, a, groups, n_src, x, w, kind, ky, msg_end)
+        ml = None
+    else:
+        ml = wrap(a['main'], 13.5, w - 64, 'b') if '\n' not in a['main'] else a['main'].split('\n')
+    for ln in ml or []:
         if tw(ln, 13.5, 'b') > w - 60:
             print('   ! 건네기 카드 글이 넘침: %s (%.0f > %.0f)' % (ln, tw(ln, 13.5, 'b'), w - 60))
-    ch = 40 + 22 * len(ml) + 10 + 22 * n_src + 6 * max(0, len(groups) - 1) + 8 + 36 + 14 + (34 if a.get('attach') else 0)
-    ay = (sc.ui['sheet_y'] + 112) if kind == 'sheet' else ky - ch - 12
-    sc.ui['ans_overlaps_msg'] = kind != 'sheet' and ay < msg_end + 6
-    card = [R('ans/bg', x + 14, ay, w - 28, ch, prst='roundRect', radius=16, fill='FFFFFF', line=RING, line_w=1.8,
-              shadow=S.L.SHADOW_LIFT, glow=(9, RING, 24)),
-            P('ans/ic', S.ICON['spool'], x + 28, ay + 13, 18, 18),
-            T('ans/lab', x + 52, ay + 11, 220, 22, a.get('label', '찾은 답'), size=9.5, color=PURPLE2, weight='b', anchor='ctr'),
-            T('ans/main', x + 28, ay + 40, w - 56, 22 * len(ml), ml, size=13.5, color=INK, weight='b', lnspc=17)]
-    ry = ay + 40 + 22 * len(ml) + 10
-    for gi, (ic, lns) in enumerate(groups):
-        card.append(P('ans/si%d' % gi, S.ICON[ic], x + 28, ry + 3, 16, 16))
-        for li, txt in enumerate(lns):
-            card.append(T('ans/st%d_%d' % (gi, li), x + 50, ry, w - 80, 22, txt, size=fit_pt(txt, w - 82, 9, 'r', 7.5), color=SUB,
-                          anchor='ctr'))
-            ry += 22
-        ry += 6
-    ry -= 6 if groups else 0
-    if a.get('attach'):
-        card += [R('ans/att', x + 28, ry + 2, w - 56, 28, prst='roundRect', fill='F7F5FC', line=LINE2, line_w=1.0),
-                 R('ans/att_d', x + 37, ry + 7, 13, 16, prst='snip1Rect', fill='FFFFFF', line=PURPLE2, line_w=1.2),
-                 R('ans/att_l1', x + 40, ry + 13, 7, 1.4, fill=PURPLE2, line=None),
-                 R('ans/att_l2', x + 40, ry + 17, 7, 1.4, fill=PURPLE2, line=None),
-                 T('ans/att_t', x + 56, ry + 2, w - 92, 28, a['attach'], size=9.5, color=INK2, weight='sb', anchor='ctr')]
-        ry += 34
-    btn = a.get('button', '✓  입력하기')
-    card += [R('ans/btn', x + 28, ry + 8, w - 56, 36, prst='roundRect', fill=PURPLE, line=None),
-             T('ans/btn_t', x + 28, ry + 8, w - 56, 36, btn, size=10.5, color='FFFFFF', weight='b', align='c', anchor='ctr')]
-    sc.put('ans', card)
-    sc.put('ui.tap2', [P('ui.tap2/h', 'touch-tap.png', x + w - 78, ry + 26, 28, 40)])
+    ch = 0 if ml is None else 40 + 22 * len(ml) + 10 + 22 * n_src + 6 * max(0, len(groups) - 1) + 8 + 36 + 14 + (34 if a.get('attach') else 0)
+    if ml is not None:
+        ay = (sc.ui['sheet_y'] + 112) if kind == 'sheet' else ky - ch - 12
+        sc.ui['ans_overlaps_msg'] = kind != 'sheet' and ay < msg_end + 6
+        card = [R('ans/bg', x + 14, ay, w - 28, ch, prst='roundRect', radius=16, fill='FFFFFF', line=RING, line_w=1.8,
+                  shadow=S.L.SHADOW_LIFT, glow=(9, RING, 24)),
+                P('ans/ic', S.ICON['spool'], x + 28, ay + 13, 18, 18),
+                T('ans/lab', x + 52, ay + 11, 220, 22, a.get('label', '찾은 답'), size=9.5, color=PURPLE2, weight='b', anchor='ctr'),
+                T('ans/main', x + 28, ay + 40, w - 56, 22 * len(ml), ml, size=13.5, color=INK, weight='b', lnspc=17)]
+        ry = ay + 40 + 22 * len(ml) + 10
+        for gi, (ic, lns) in enumerate(groups):
+            card.append(P('ans/si%d' % gi, S.ICON[ic], x + 28, ry + 3, 16, 16))
+            for li, txt in enumerate(lns):
+                card.append(T('ans/st%d_%d' % (gi, li), x + 50, ry, w - 80, 22, txt, size=fit_pt(txt, w - 82, 9, 'r', 7.5), color=SUB,
+                              anchor='ctr'))
+                ry += 22
+            ry += 6
+        ry -= 6 if groups else 0
+        if a.get('attach'):
+            card += [R('ans/att', x + 28, ry + 2, w - 56, 28, prst='roundRect', fill='F7F5FC', line=LINE2, line_w=1.0),
+                     R('ans/att_d', x + 37, ry + 7, 13, 16, prst='snip1Rect', fill='FFFFFF', line=PURPLE2, line_w=1.2),
+                     R('ans/att_l1', x + 40, ry + 13, 7, 1.4, fill=PURPLE2, line=None),
+                     R('ans/att_l2', x + 40, ry + 17, 7, 1.4, fill=PURPLE2, line=None),
+                     T('ans/att_t', x + 56, ry + 2, w - 92, 28, a['attach'], size=9.5, color=INK2, weight='sb', anchor='ctr')]
+            ry += 34
+        btn = a.get('button', '✓  입력하기')
+        card += [R('ans/btn', x + 28, ry + 8, w - 56, 36, prst='roundRect', fill=PURPLE, line=None),
+                 T('ans/btn_t', x + 28, ry + 8, w - 56, 36, btn, size=10.5, color='FFFFFF', weight='b', align='c', anchor='ctr')]
+        sc.put('ans', card)
+        sc.put('ui.tap2', [P('ui.tap2/h', 'touch-tap.png', x + w - 78, ry + 26, 28, 40)])
     # 결과: 대화에 들어간 말 + 답장
     r = sp.get('result')
     if kind != 'google' and r:
@@ -1681,6 +1720,28 @@ def build(spec):
         shot('open', [], 'right', set(ui_base), {}, 2.1, frame_box=ob, morph=1500)
         hide(*ui_base)
 
+    phone_now = []
+
+    def trig_step():
+        nonlocal phone_now
+        # 01 순간 감지: 버튼은 클릭에
+        show(*ui_base)
+        trig = {'google': ['ui.on', 'ui.tap'], 'sheet': ['ui.on', 'ui.tap', 'ui.sheet'], 'gps': ['ui.loc', 'ui.on']}[kind]
+        show(*trig)
+        if kind == 'google':
+            tb_ = union([sc.box['ui.glogo'], sc.box['ui.kbd']])
+        elif kind == 'sheet':
+            tb_ = union([sc.box['ui.head'], sc.box['ui.msg'], sc.box['ui.sheet.top'], sc.box['ui.kbd']])
+        else:
+            tb_ = union([sc.box['ui.head'], sc.box['ui.msg'], sc.box['ui.loc'], sc.box['ui.kbd']])
+        tb_ = (PX + 4, tb_[1], PW - 8, tb_[3])
+        shot('trig', [], 'right', set(ui_base + trig), dict(cur='01'), 2.0, frame_box=tb_, cap_y=sc.ui['ky'] + 22, morph=1500,
+             beats=[{k: dict(kind='rise' if k == 'ui.sheet' else 'zoom_in', delay=(250 if k == 'ui.sheet' else 120 * j), dur=220)
+                     for j, k in enumerate(trig)}])
+        hide('ui.tap')
+        phone_now = [x for x in cur if x == 'ui' or x.startswith('ui.')]
+        hide(*phone_now)
+
     if IXD:
         # 1 기록 더미가 먼저: 매일 쌓이는 기록들
         show(*all_cloud)
@@ -1706,12 +1767,14 @@ def build(spec):
              alpha={k: CLOUD_ALPHA for k in all_cloud},
              anim=dict(float_in, **{x: dict(kind='zoom_in', delay=t_end + 150 * j, dur=220) for j, x in enumerate(lits)}))
         hide(*lits, *all_cloud)
+    if spec.get('trig_first'):
+        trig_step()
     # 실패: 키워드 검색(왼쪽, 클릭마다) → 임베딩 검색(오른쪽, 클릭마다) → 둘을 나란히
     prev = []
     if PAIR:      # 키워드(왼쪽)와 임베딩(오른쪽)을 한 장에. 맺음 설명은 마지막 클릭에
         show_under(PAIR['div'])
         show(*PAIR['kw'], *PAIR['emb'])
-        shot('fail', [], 'top', set(PAIR['kw'] + PAIR['emb'] + [PAIR['div']]), {}, PAIR['zmax'], frame_box=PAIR['box'], morph=1500,
+        shot('fail', [], 'top', set(PAIR['kw'] + PAIR['emb'] + [PAIR['div']]), dict(done={'01'}) if spec.get('trig_first') else {}, PAIR['zmax'], frame_box=PAIR['box'], morph=1500,
              beats=PAIR['beats'] + [{}], cap_beat=len(PAIR['beats']))
         prev = PAIR['kw'] + PAIR['emb'] + [PAIR['div']]
     for j, P_ in enumerate(passes):
@@ -1738,28 +1801,13 @@ def build(spec):
         styles[HYB['mid']] = 'weave'
         show_under('hy.dash', 'hth1', 'hth2', 'hth3')
         show('hy.gap', 'hy.q', 'hy.ans', HYB['mid'], 'hy.mk1', 'hy.l1', 'htok', 'hy.l2', 'hy.mk2', 'hy.l3', 'hans')
-        shot('hybrid', [], 'top', set(HYB['static'] + HYB['built']), {}, HYB['zmax'], frame_box=HYB['box'], morph=1500, beats=HYB['beats'])
+        shot('hybrid', [], 'top', set(HYB['static'] + HYB['built']), dict(done={'01'}) if spec.get('trig_first') else {}, HYB['zmax'], frame_box=HYB['box'], morph=1500, beats=HYB['beats'])
         hide('hy.dash', 'hth1', 'hth2', 'hth3', 'hy.gap', 'hy.q', 'hy.ans', HYB['mid'], 'hy.mk1', 'hy.l1', 'htok', 'hy.l2', 'hy.mk2', 'hy.l3',
              'hans')
         styles.pop(HYB['mid'], None)
     hide(*prev, *all_cloud)
-    # 01 순간 감지: 버튼은 클릭에
-    show(*ui_base)
-    trig = {'google': ['ui.on', 'ui.tap'], 'sheet': ['ui.on', 'ui.tap', 'ui.sheet'], 'gps': ['ui.loc', 'ui.on']}[kind]
-    show(*trig)
-    if kind == 'google':
-        tb_ = union([sc.box['ui.glogo'], sc.box['ui.kbd']])
-    elif kind == 'sheet':
-        tb_ = union([sc.box['ui.head'], sc.box['ui.msg'], sc.box['ui.sheet.top'], sc.box['ui.kbd']])
-    else:
-        tb_ = union([sc.box['ui.head'], sc.box['ui.msg'], sc.box['ui.loc'], sc.box['ui.kbd']])
-    tb_ = (PX + 4, tb_[1], PW - 8, tb_[3])
-    shot('trig', [], 'right', set(ui_base + trig), dict(cur='01'), 2.0, frame_box=tb_, cap_y=sc.ui['ky'] + 22, morph=1500,
-         beats=[{k: dict(kind='rise' if k == 'ui.sheet' else 'zoom_in', delay=(250 if k == 'ui.sheet' else 120 * j), dur=220)
-                 for j, k in enumerate(trig)}])
-    hide('ui.tap')
-    phone_now = [x for x in cur if x == 'ui' or x.startswith('ui.')]
-    hide(*phone_now)
+    if not spec.get('trig_first'):
+        trig_step()
     # 02 Query Rewriting: 처음 질문(정적) → 첫 질문(클릭) → 빈칸이 있는 둘째 질문(클릭)
     qrows = ['q%d' % i for i in range(1, nh + 1)]
     qkeys = ['qp', 'qp.head', 'qorig'] + qrows + ['qans', 'qans.slot']
@@ -1914,7 +1962,12 @@ def build(spec):
         db = union([sc.box['ans'], sc.box['ui.sheet.big']])
         dfocus = ['ui', 'ui.head', 'ui.sheet', 'ans', 'ui.tap2']
     elif kind == 'google':
-        db = union([sc.box['ui.sbox'], sc.box['ans'], sc.box['ui.kbd']])
+        sb = sc.box['ui.sbox']
+        if sc.box['ans'][1] < sb[1] + sb[3] + 8:      # 카드가 검색창에 닿으면 검색창을 올림(구글 로고 자리)
+            styles['ui.sbox'] = 'up'
+            sb = bbox(sc.items['ui.sbox']('up'))
+            hide('ui.glogo')
+        db = union([sb, sc.box['ans'], sc.box['ui.kbd']])
         dfocus = ui_base + ['ans', 'ui.tap2', 'ui.on']
     else:
         db = union([sc.box['ans'], sc.box['ui.kbd']])

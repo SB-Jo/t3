@@ -1,0 +1,167 @@
+/* Weave 결선 표지 루프 — 08_인트로영상(v8)의 글꼴·휴대폰·구글 화면·키보드·실·손 모양을 그대로 옮겨 씀 */
+@font-face { font-family: 'SamsungOneKorean'; font-weight: 400; src: url('assets/fonts/SamsungOneKorean-400.woff2'); }
+@font-face { font-family: 'SamsungOneKorean'; font-weight: 500; src: url('assets/fonts/SamsungOneKorean-500.woff'); }
+@font-face { font-family: 'SamsungOneKorean'; font-weight: 700; src: url('assets/fonts/SamsungOneKorean-700.woff'); }
+@font-face { font-family: 'SamsungOne'; font-weight: 400; src: url('assets/fonts/SamsungOneLatin-400.woff2'); }
+@font-face { font-family: 'SamsungOne'; font-weight: 500; src: url('assets/fonts/SamsungOneLatin-500.woff2'); }
+@font-face { font-family: 'SamsungOne'; font-weight: 700; src: url('assets/fonts/SamsungOneLatin-700.woff2'); }
+@font-face { font-family: 'Samsung Sharp Sans'; font-weight: 700; src: url('assets/fonts/SamsungSharpSans-Bold.woff2'); }
+
+:root {
+  --purple: #6B4EFF; --violet: #7B4BD8; --lilac: #A67CF2;
+  --ink: #1E1B2E; --ink2: #3A3650; --gray: #5B5866; --gray2: #8E88A0;
+  --lav: #F3EFFF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #FBFAFF; }
+body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+.kr { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+/* 배경: 보라만(노란 빛 없음) */
+#bg { position: absolute; inset: 0; background: linear-gradient(170deg, #FDFCFF 0%, #F6F3FF 55%, #EEE9FF 100%); }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+.g1 { width: 1300px; height: 1100px; left: 1080px; top: -560px; background: radial-gradient(closest-side, rgba(166,124,242,.26), rgba(166,124,242,0)); }
+.g2 { width: 1400px; height: 1150px; right: -480px; bottom: -600px; background: radial-gradient(closest-side, rgba(123,92,255,.20), rgba(123,92,255,0)); }
+.g3 { width: 1100px; height: 900px; left: 900px; top: 120px; background: radial-gradient(closest-side, rgba(150,120,255,.12), rgba(150,120,255,0)); }
+#vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 46%, rgba(255,255,255,0) 58%, rgba(92,72,160,.07) 100%); pointer-events: none; }
+
+/* 누른 뒤 퍼지는 물결 */
+#wave { position: absolute; inset: 0; pointer-events: none; }
+#wave circle { fill: none; stroke: #8B68F5; stroke-width: 2.4; opacity: 0; }
+
+/* 흩어진 기록 조각(인트로 도입부 조각을 작게) */
+#chips { position: absolute; inset: 0; }
+.chip { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 13px; padding: 13px 22px 13px 13px; background: rgba(255,255,255,.97);
+  border-radius: 18px; box-shadow: 0 14px 32px rgba(64,40,140,.12), 0 2px 5px rgba(64,40,140,.05); white-space: nowrap; transform-origin: 0 0; }
+.chip img.ic { width: 42px; height: 42px; border-radius: 11px; flex: none; }
+.chip .t { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); line-height: 1.25; }
+.chip .m { font-size: 14.5px; color: var(--gray2); margin-top: 2px; letter-spacing: -0.01em; line-height: 1.25; }
+.chip .ph { width: 66px; height: 44px; border-radius: 9px; object-fit: cover; flex: none; }
+
+/* 보라 실: 모두 같은 모양(그라데이션 곡선 + 흰 테두리) */
+#threads { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+#threads path { fill: none; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.thr-halo { stroke: #fff; stroke-width: 13; opacity: .95; }
+.thr { stroke: url(#tg); stroke-width: 6; }
+
+/* 이어지는 두 기록 */
+.card2 { position: absolute; background: #fff; border-radius: 24px; padding: 16px; transform-origin: 50% 50%;
+  box-shadow: 0 26px 60px rgba(64,40,140,.16), 0 3px 10px rgba(64,40,140,.06); }
+.card2 .ring { position: absolute; inset: -6px; border-radius: 29px; border: 3px solid #8B68F5; box-shadow: 0 0 26px rgba(139,104,245,.55); opacity: 0; pointer-events: none; }
+.card2 .hd { display: flex; align-items: center; gap: 12px; }
+.card2 .hd img { width: 46px; height: 46px; border-radius: 13px; flex: none; }
+.card2 .t { font-size: 23px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); line-height: 1.2; }
+.card2 .m { font-size: 16.5px; color: var(--gray2); margin-top: 3px; letter-spacing: -0.01em; white-space: nowrap; }
+#cJ { left: 958px; top: 706px; }
+#cJ .bub { margin-top: 12px; padding: 11px 16px 12px; background: #F6F5FA; border-radius: 14px; font-size: 20px; font-weight: 500; line-height: 1.45; letter-spacing: -0.02em; color: var(--ink2); white-space: nowrap; }
+#cP { left: 1004px; top: 112px; }
+#cP .ph { position: relative; width: 268px; height: 158px; border-radius: 16px; overflow: hidden; }
+#cP .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#cP .scan { position: absolute; left: 0; right: 0; top: 0; height: 64px; background: linear-gradient(180deg, rgba(166,124,242,0), rgba(166,124,242,.55) 85%, rgba(255,255,255,.95)); mix-blend-mode: screen; opacity: 0; }
+#cP .ocrbox { position: absolute; left: 88px; top: 83px; width: 96px; height: 51px; border: 3px solid #fff; border-radius: 10px; box-shadow: 0 0 0 3px rgba(123,75,216,.85), 0 0 22px rgba(166,124,242,.8); opacity: 0; }
+#cP .ocr { margin-top: 10px; display: inline-block; padding: 6px 12px 7px; background: var(--lav); border-radius: 11px; font-family: 'SamsungOne', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.05em; color: var(--violet); white-space: nowrap; }
+#cP .hd { margin-top: 10px; }
+#cP .hd img { width: 42px; height: 42px; border-radius: 12px; }
+
+/* 같은 단서를 표시하는 형광펜(너비 0 → 100%) */
+.hl { background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / var(--w, 0%) 100%; border-radius: 3px; padding: 0 2px; }
+#ocr .hl { padding: 0 1px; }
+.tok { position: absolute; left: 0; top: 0; padding: 5px 14px 7px; border-radius: 16px; background: var(--purple); color: #fff; font-size: 22px; font-weight: 700;
+  letter-spacing: -0.02em; white-space: nowrap; box-shadow: 0 10px 22px rgba(107,78,255,.35); z-index: 60; opacity: 0; }
+
+
+/* 휴대폰(인트로와 같은 틀, 0.84배, 오른쪽) */
+#phone { position: absolute; left: 1424px; top: 90px; width: 452px; height: 940px; transform: scale(.84); transform-origin: 50% 50%; }
+#phone .frame { position: absolute; inset: 0; border-radius: 70px; padding: 4px; background: linear-gradient(150deg, #E9E6F2 0%, #A9A4B9 38%, #D9D5E4 62%, #8F8AA0 100%);
+  box-shadow: 0 60px 110px rgba(52,30,130,.26), 0 18px 34px rgba(52,30,130,.14); }
+#phone .bezel { width: 100%; height: 100%; border-radius: 66px; background: #0C0C10; padding: 12px; }
+#phone .screen { position: relative; width: 100%; height: 100%; border-radius: 54px; overflow: hidden; background: #fff; }
+.punch { position: absolute; top: 15px; left: 50%; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%; background: #0A0A0E; box-shadow: 0 0 0 2px #1d1d24; z-index: 60; }
+.sb { position: absolute; left: 0; right: 0; top: 0; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0; font-family: 'SamsungOne'; font-size: 15px; font-weight: 700; z-index: 55; }
+.sb .ics { display: flex; gap: 6px; align-items: center; }
+.sb svg { height: 14px; }
+.nav { position: absolute; left: 0; right: 0; bottom: 0; height: 46px; display: flex; justify-content: space-around; align-items: center; z-index: 55; color: #4b4b55; background: #EEEFF3; }
+.nav svg { width: 22px; height: 22px; }
+.chrome { position: absolute; left: 0; right: 0; top: 44px; height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 16px; color: #3c4043; }
+.chrome > svg { width: 22px; height: 22px; flex: none; }
+.chrome .url { flex: 1; height: 38px; border-radius: 19px; background: #EEF0F4; display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 14.5px; color: #3c4043; font-family: 'SamsungOne'; }
+.chrome .url svg { width: 17px; height: 17px; flex: none; } .chrome .url span { flex: 1; } .chrome .url .rl { width: 16px; height: 16px; }
+.chrome .tabn { width: 22px; height: 22px; border: 2px solid #3c4043; border-radius: 6px; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; font-family: 'SamsungOne'; }
+.gtop { position: absolute; left: 0; right: 0; top: 100px; height: 40px; display: flex; align-items: center; gap: 18px; padding: 0 18px; font-size: 14px; font-weight: 500; color: #5f6368; }
+.gtop .on { color: #1a73e8; border-bottom: 2.5px solid #1a73e8; padding: 8px 2px 6px; }
+.gtop .sp { flex: 1; } .gtop svg { width: 21px; height: 21px; color: #5f6368; }
+.gtop .av { width: 30px; height: 30px; border-radius: 50%; background: #3c4043; color: #fff; font-style: normal; font-size: 14px; font-weight: 700; display: grid; place-items: center; font-family: 'SamsungOne'; }
+.glogo { position: absolute; left: 50%; top: 200px; width: 160px; margin-left: -80px; }
+.gbox { position: absolute; left: 18px; right: 18px; top: 282px; height: 56px; border-radius: 28px; background: #fff; box-shadow: 0 1px 6px rgba(32,33,36,.28); display: flex; align-items: center; gap: 10px; padding: 0 14px 0 16px; }
+.gbox .mg { width: 21px; height: 21px; color: #5f6368; flex: none; }
+.gbox .tx { flex: 1; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; display: flex; align-items: center; color: #202124; }
+.gbox .gi { width: 22px; height: 22px; flex: none; }
+.caret { display: inline-block; width: 2px; height: 22px; background: var(--purple); margin-left: 2px; border-radius: 1px; }
+
+/* 추천 카드(휴대폰 안, 키보드 위) */
+#sug { position: absolute; left: 16px; right: 16px; top: 354px; padding: 14px 16px 14px; background: linear-gradient(180deg, #FFFFFF, #F7F3FF); border-radius: 20px;
+  box-shadow: 0 16px 34px rgba(84,56,190,.20), 0 0 0 1.5px #D9CBFF inset; opacity: 0; transform-origin: 50% 0; z-index: 8; }
+#sug .l { font-size: 15px; font-weight: 700; color: var(--purple); display: flex; align-items: center; gap: 6px; }
+#sug .l svg { width: 16px; height: 16px; color: var(--purple); }
+#sug .v { margin-top: 5px; font-size: 32px; font-weight: 700; letter-spacing: -0.04em; color: var(--ink); line-height: 1.25; white-space: nowrap; }
+#sug .s { margin-top: 6px; display: flex; align-items: center; gap: 7px; font-size: 14px; color: #6E6A7C; letter-spacing: -0.01em; white-space: nowrap; }
+#sug .s img { width: 18px; height: 18px; border-radius: 5px; flex: none; }
+#sug .b { margin-top: 11px; height: 42px; border-radius: 13px; background: var(--purple); color: #fff; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }
+#sug .b svg { width: 18px; height: 18px; color: #fff; }
+
+/* 삼성 키보드 + 실타래 버튼 */
+.kb { position: absolute; left: 0; right: 0; bottom: 46px; height: 284px; background: #EEEFF3; padding: 8px 6px 0; isolation: isolate; }
+.kb .tb { position: relative; display: flex; align-items: center; gap: 18px; height: 36px; padding: 0 12px; color: #6a6676; font-size: 13px; overflow: visible; }
+.kb .tb svg { width: 20px; height: 20px; }
+.kb .tb .clip { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.kb .tb .shim { position: absolute; top: 0; bottom: 0; width: 160px; left: 0; background: linear-gradient(90deg, rgba(166,124,242,0), rgba(166,124,242,.55), rgba(166,124,242,0)); opacity: 0; pointer-events: none; }
+.kb .tb .wv { position: relative; z-index: 2; width: 32px; height: 32px; border-radius: 50%; background: #E6DEFF; display: grid; place-items: center; flex: none; }
+.kb .tb .wv img { width: 21px; height: 21px; }
+.kb .tb .wv img.lit { position: absolute; left: 50%; top: 50%; width: 21px; height: 21px; margin: -10.5px 0 0 -10.5px; opacity: 0; }
+.krow { display: flex; gap: 5px; justify-content: center; margin-top: 7px; }
+.k { flex: none; width: 34px; height: 44px; border-radius: 8px; background: #fff; display: grid; place-items: center; font-size: 15px; color: #2a2733; box-shadow: 0 1px 0 rgba(0,0,0,.12); }
+.k.g { background: #DCDDE3; }
+.k.w2 { width: 50px; } .k.sp { width: 150px; font-size: 12px; color: #6a6676; }
+.k.snd { background: #2F6BFF; }
+.wvfx { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 1; }
+.wvfx .glow { position: absolute; left: -75px; top: -75px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(closest-side, rgba(139,104,245,.7), rgba(139,104,245,.25) 55%, rgba(139,104,245,0)); opacity: 0; }
+.wvfx .rg { position: absolute; left: -20px; top: -20px; width: 40px; height: 40px; border-radius: 50%; border: 3.5px solid rgba(107,78,255,.9); opacity: 0; }
+
+
+/* 손 · 반짝임 */
+#hand { position: absolute; left: 0; top: 0; width: 100px; height: 128px; transform-origin: 39px 5px; z-index: 90; opacity: 0; }
+#hand svg { width: 100px; height: 128px; filter: drop-shadow(0 10px 14px rgba(60,30,120,.22)); }
+#spark { position: absolute; left: 0; top: 0; width: 120px; height: 120px; margin: -60px 0 0 -60px; z-index: 89; opacity: 0; }
+#spark path { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+#dbg { position: absolute; inset: 0; z-index: 200; pointer-events: none; }
+#dbg i { position: absolute; border: 2px solid #ff2d55; }
+
+/* ── v2 (2026-11-02): 타자 → 입력하기 → 검색 결과까지 ─────────────── */
+.gbox .tx { position: relative; }
+#q .sel { background: rgba(26,115,232,.22); border-radius: 3px; }
+#gsweep { position: absolute; left: 47px; bottom: 9px; width: 120px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, #A67CF2, #6B4EFF);
+  transform-origin: 0 50%; transform: scaleX(0); opacity: 0; }
+.glogo, .gtop, .gbox { will-change: opacity, transform; }
+.gload { position: absolute; left: 0; top: 96px; width: 100%; height: 3px; background: linear-gradient(90deg, #1a73e8, #5aa2ff); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; z-index: 6; }
+#gres { position: absolute; left: 0; right: 0; top: 168px; padding: 0 16px; opacity: 0; }
+#gres > * { opacity: 0; }
+.gchips { display: flex; gap: 8px; margin-bottom: 12px; }
+.gchips span { padding: 7px 14px; border-radius: 16px; border: 1px solid #DADCE0; font-size: 13px; font-weight: 500; color: #3c4043; }
+.gchips .on { background: #E8F0FE; border-color: #E8F0FE; color: #1967D2; }
+.res { position: relative; display: flex; gap: 14px; padding: 14px; margin-bottom: 10px; border-radius: 18px; border: 1px solid #EEEBF5; background: #fff; }
+.res .bt { width: 62px; height: 82px; border-radius: 12px; background: #F3F2F7; display: grid; place-items: center; flex: none; }
+.res .n { font-size: 14.5px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; color: var(--ink); }
+.res .p { font-size: 13px; color: #8E88A0; margin-top: 4px; }
+.res .pr { font-size: 16px; font-weight: 700; margin-top: 6px; color: var(--ink); font-family: 'SamsungOne', 'SamsungOneKorean', sans-serif; }
+.res .pr i { font-style: normal; color: #E5484D; margin-right: 6px; }
+.res .hl { padding: 0 1px; }
+#sug .b { transform-origin: 50% 50%; }
+.k.snd { transition: none; }
+.rel { margin-top: 4px; }
+.rel .rh { font-size: 15px; font-weight: 700; color: var(--ink); margin: 2px 2px 9px; }
+.rel .rc { display: flex; flex-wrap: wrap; gap: 8px; }
+.rel .rc span { display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 18px; background: #F1F3F4; font-size: 13px; color: #3c4043; white-space: nowrap; }
+
+/* ── v3: 오른쪽 장면을 한 판(#world)에 담아 (846, 540)을 기준으로 살짝 줄임 → 위·아래·오른쪽 여백. 배경·비네트는 화면 전체 ── */
+#world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 846px 540px; }

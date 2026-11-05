@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Appendix · UX 3 상세 — UX 3 먼저 건네는 기억: 단계별 모델과 근거</title>
+<link rel="stylesheet" href="../../pages/theme.css">
+<style>
+  .t-label { top: 30px; } .t-title { top: 62px; } .t-sub { top: 116px; font-size: 16.5px; }
+  .panel { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 16px; box-shadow: 0 8px 24px rgba(107,78,255,.06); }
+  .tx { position: absolute; font-size: 12px; line-height: 17px; color: var(--ink-2); white-space: nowrap; }
+  .tx b { font-weight: 700; color: var(--ink); }
+  .tx em { font-style: normal; font-weight: 700; color: #6B4EFF; }
+  .th { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #6B4EFF; white-space: nowrap; }
+  .st { position: absolute; font-size: 12px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .rule { position: absolute; height: 1px; background: #EEE9FA; }
+  .src { position: absolute; left: 62px; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
+  .note { position: absolute; font-size: 12.5px; line-height: 19px; color: var(--ink-2); white-space: nowrap; }
+  .note b { font-weight: 700; color: var(--ink); }
+  .note em { font-style: normal; font-weight: 700; color: #6B4EFF; }
+  .box { position: absolute; border-radius: 11px; background: #fff; border: 1.6px solid #DCD6EA; }
+  .box.em { border-color: #2F7BF6; background: #F3F8FF; }
+  .box.ll { border-color: #6B4EFF; background: #F5F1FF; }
+  .box.ru { border-color: #6F7690; border-style: dashed; background: #F8F8FB; }
+  .box.ok { border-color: #6B4EFF; background: #F5F1FF; }
+  .box.no { border-color: #E4DFEF; background: #FAF9FC; }
+  .bt { position: absolute; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap; }
+  .bs { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; text-align: center; white-space: nowrap; }
+  .lane { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #8E88A0; white-space: nowrap; }
+  .chipt { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; white-space: nowrap; }
+  .chipb { position: absolute; font-size: 11px; line-height: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .tag { position: absolute; font-size: 10px; line-height: 14px; font-weight: 700; white-space: nowrap; }
+  .tag.on { color: #6B4EFF; } .tag.off { color: #A29DB2; }
+  .app { position: absolute; }
+  .wrap { position: absolute; left: 0; top: 10px; width: 1280px; height: 720px; }
+  svg.fxl { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 2; }
+</style>
+</head>
+<body>
+<div class="slide" id="slide">
+  <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
+  <div class="t-label" data-x>Appendix · UX 3 상세</div>
+  <div class="t-title" data-x>UX 3 먼저 건네는 기억: 단계별 모델과 근거</div>
+  <div class="t-sub" data-x>아내 "출장 고생했어! 한국 도착했어?" → 나 "응, 방금 내렸어" → 아내 "그래, 조심히 들어와~" → 실타래 버튼이 반짝</div>
+  <div class="wrap">
+  <div class="box ok" style="left:60px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../../09_HowItWorks/장표5/assets/app-map.png" alt="" style="left:68px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:88px; top:156px;">현재 위치</div>
+  <div class="chipt" data-x style="left:68px; top:174px;">인천공항</div>
+  <div class="tag on" data-x style="left:68px; top:186px;">지금 상황</div>
+  <div class="box ok" style="left:252px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../../09_HowItWorks/장표5/assets/samsung-wallet.png" alt="" style="left:260px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:280px; top:156px;">삼성 월렛 탑승권</div>
+  <div class="chipt" data-x style="left:260px; top:174px;">싱가포르 → 인천, 오늘 도착</div>
+  <div class="tag on" data-x style="left:260px; top:186px;">귀국 중</div>
+  <div class="box no" style="left:444px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/app-notes.png" alt="" style="left:452px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:472px; top:156px; color:#8E88A0;">10/31 면세점 살 것</div>
+  <div class="chipt" data-x style="left:452px; top:174px; color:#A29DB2;">선크림, 립밤</div>
+  <div class="tag off" data-x style="left:452px; top:186px;">내 쇼핑 목록</div>
+  <div class="box ok" style="left:636px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/app-kakao.png" alt="" style="left:644px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:664px; top:156px;">10/14 아내 카톡</div>
+  <div class="chipt" data-x style="left:644px; top:174px;">동생이 이 갈색병 좋대. 면세점에서</div>
+  <div class="tag on" data-x style="left:644px; top:186px;">숨은 부탁</div>
+  <div class="box ok" style="left:828px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:836px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:856px; top:156px;">10/14 저장한 사진</div>
+  <div class="chipt" data-x style="left:836px; top:174px;">아내가 보낸 병 사진</div>
+  <div class="tag on" data-x style="left:836px; top:186px;">답</div>
+  <div class="box no" style="left:1020px; top:150px; width:184px; height:54px;"></div>
+  <img class="app" src="../../assets/icons/galaxy/samsung-gallery.png" alt="" style="left:1028px; top:158px; width:15px; height:15px; border-radius:4px; z-index:6;">
+  <div class="chipb" data-x style="left:1048px; top:156px; color:#8E88A0;">10/14 스크린샷</div>
+  <div class="chipt" data-x style="left:1028px; top:174px; color:#A29DB2;">면세점 화장품 쿠폰</div>
+  <div class="tag off" data-x style="left:1028px; top:186px;">뜻으로 탈락</div>
+  <div class="panel" style="left:60px; top:210px; width:1160px; height:380px;"></div>
+  <div class="th" data-x style="left:76px; top:219px;">단계</div>
+  <div class="th" data-x style="left:176px; top:219px;">일어나는 일</div>
+  <div class="th" data-x style="left:650px; top:219px;">모델과 절차</div>
+  <div class="th" data-x style="left:952px; top:219px;">논문 근거</div>
+  <div class="rule" style="left:76px; top:239px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:245px;">00 사전 준비</div>
+  <div class="tx" data-x style="left:176px; top:245px;">알림의 글자, 갤러리 사진, 월렛 탑승권을 벡터와 메타데이터로 저장합니다.</div>
+  <div class="tx" data-x style="left:650px; top:245px;">Reasoning Embedding, BM25, 이미지 임베딩</div>
+  <div class="tx" data-x style="left:952px; top:245px; color:#6A6474;">DocHop-QA (EMNLP 2026)</div>
+  <div class="rule" style="left:76px; top:282px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:288px;">01 순간 감지</div>
+  <div class="tx" data-x style="left:176px; top:288px;">아내와 카톡 중, 위치와 탑승권이 귀국을 가리키면 실타래 버튼이 반짝입니다.<br>세 신호가 맞을 때만 반짝이고, 누르지 않으면 아무것도 입력되지 않습니다.</div>
+  <div class="tx" data-x style="left:650px; top:288px;">규칙 판단 (위치 + 탑승권 + 대화 상대)<br>통화와 녹음은 쓰지 않음</div>
+  <div class="tx" data-x style="left:952px; top:288px; color:#6A6474;">논문 없음(설계)<br>삼성 S26 Now Brief의 월렛 회상이 선례</div>
+  <div class="rule" style="left:76px; top:325px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:331px;">첫 질문</div>
+  <div class="tx" data-x style="left:176px; top:331px;">'면세점에서 아내에게 사 갈 것은?'을 Weave가 스스로 만듭니다.</div>
+  <div class="tx" data-x style="left:650px; top:331px;">상황별 틀 + sLLM</div>
+  <div class="tx" data-x style="left:952px; top:331px; color:#6A6474;">논문 없음(설계)</div>
+  <div class="rule" style="left:76px; top:368px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:374px;">② 나누기</div>
+  <div class="tx" data-x style="left:176px; top:374px;">1. 아내가 면세점에서 사 오길 바란 건?  2. [그것]의 사진은?</div>
+  <div class="tx" data-x style="left:650px; top:374px;">sLLM 1~2B</div>
+  <div class="tx" data-x style="left:952px; top:374px; color:#6A6474;">Hi-Q (NeurIPS 2026)</div>
+  <div class="rule" style="left:76px; top:411px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:417px;">③ 1홉</div>
+  <div class="tx" data-x style="left:176px; top:417px;">보낸 사람이 아내인 기록에서 '이 갈색병 좋대. 면세점에서 판다더라'를 찾습니다.<br>직접 부탁하지 않은 말에서 숨은 부탁을 읽습니다.</div>
+  <div class="tx" data-x style="left:650px; top:417px;">보낸 사람 필터 + Reasoning Embedding<br>(개방형 영역: 숨은 의도)</div>
+  <div class="tx" data-x style="left:952px; top:417px; color:#6A6474;">RIR Survey (ACL 2026), BESPOKE, ImpliRet</div>
+  <div class="rule" style="left:76px; top:454px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:460px;">④ 잇기</div>
+  <div class="tx" data-x style="left:176px; top:460px;">[그것 → 이 갈색병], 같은 날 저장한 사진으로 좁힙니다.</div>
+  <div class="tx" data-x style="left:650px; top:460px;">기록에서 복사, 날짜 필터</div>
+  <div class="tx" data-x style="left:952px; top:460px; color:#6A6474;">Hi-Q, IRCoT (ACL 2023)</div>
+  <div class="rule" style="left:76px; top:497px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:503px;">③ 2홉</div>
+  <div class="tx" data-x style="left:176px; top:503px;">쿠폰 캡처 말고 병 사진을 찾습니다. 라벨을 읽지 않아도 사진을 건넬 수 있습니다.</div>
+  <div class="tx" data-x style="left:650px; top:503px;">멀티모달 임베딩</div>
+  <div class="tx" data-x style="left:952px; top:503px; color:#6A6474;">DocHop-QA: 글 + 이미지</div>
+  <div class="rule" style="left:76px; top:540px; width:1128px;"></div>
+  <div class="st" data-x style="left:76px; top:546px;">⑤ 전달</div>
+  <div class="tx" data-x style="left:176px; top:546px;">아내 말투 그대로 보낼 말을 추천하고, 연결된 기억에 사진을 함께 둡니다.</div>
+  <div class="tx" data-x style="left:650px; top:546px;">sLLM, 입력과 전송은 사용자</div>
+  <div class="tx" data-x style="left:952px; top:546px; color:#6A6474;">Hi-Q</div>
+  <div class="note" data-x style="left:62px; top:596px; font-size:12px; line-height:17px;"><b>UX 2와 다른 점:</b> UX 2는 라벨 글자를 읽어 정확한 이름을 찾고, UX 3은 지금 상황과 3주 전 부탁을 잇습니다. 강점은 찾기보다 묻기 전에 건네는 순간 감지입니다.</div>
+  <div class="note" data-x style="left:62px; top:614px; font-size:12px; line-height:17px;"><b>기록 범위:</b> 카카오톡 알림에서는 글자만 읽습니다. 사진은 갤러리에 저장한 경우에 읽습니다. 위치만으로는 출국, 입국, 마중을 가릴 수 없어서 탑승권을 함께 봅니다.</div>
+  <div class="src" data-x style="left:62px; top:636px;">* 출처: Wei et al., "RIR Survey", ACL 2026 · Taghavi et al., "ImpliRet", EMNLP 2025 · Kim et al., "BESPOKE", 2025 · Kim et al., "Hi-Q", NeurIPS 2026</div>
+  <div class="src" data-x style="left:62px; top:651px;">   Park et al., "DocHop-QA", EMNLP 2026 · Samsung Newsroom, "Galaxy S26 Series" (2026. 02)</div>
+
+  <svg class="fxl" viewBox="0 0 1280 720"><defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#8B6BFF"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#A29DB2"/></marker>
+  </defs></svg>
+  </div>
+</div>
+<script>document.fonts.ready.then(() => { window.pageReady = true; });</script>
+</body>
+</html>

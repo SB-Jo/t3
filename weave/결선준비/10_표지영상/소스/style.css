@@ -100,11 +100,13 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 .caret { display: inline-block; width: 2px; height: 22px; background: var(--purple); margin-left: 2px; border-radius: 1px; }
 
 /* 추천 카드(휴대폰 안, 키보드 위) */
-#sug { position: absolute; left: 16px; right: 16px; top: 354px; padding: 14px 16px 14px; background: linear-gradient(180deg, #FFFFFF, #F7F3FF); border-radius: 20px;
+#sug { position: absolute; left: 16px; right: 16px; top: 322px; padding: 14px 16px 14px; background: linear-gradient(180deg, #FFFFFF, #F7F3FF); border-radius: 20px;
   box-shadow: 0 16px 34px rgba(84,56,190,.20), 0 0 0 1.5px #D9CBFF inset; opacity: 0; transform-origin: 50% 0; z-index: 8; }
 #sug .l { font-size: 15px; font-weight: 700; color: var(--purple); display: flex; align-items: center; gap: 6px; }
 #sug .l svg { width: 16px; height: 16px; color: var(--purple); }
 #sug .v { margin-top: 5px; font-size: 32px; font-weight: 700; letter-spacing: -0.04em; color: var(--ink); line-height: 1.25; white-space: nowrap; }
+#sug .lav { background: #F4F0FF; border: 1px solid #E3D9FF; border-radius: 14px; padding: 10px 13px 11px; }
+#sug .ttl { margin-top: 11px; font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
 #sug .s { margin-top: 6px; display: flex; align-items: center; gap: 7px; font-size: 14px; color: #6E6A7C; letter-spacing: -0.01em; white-space: nowrap; }
 #sug .s img { width: 18px; height: 18px; border-radius: 5px; flex: none; }
 #sug .b { margin-top: 11px; height: 42px; border-radius: 13px; background: var(--purple); color: #fff; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }

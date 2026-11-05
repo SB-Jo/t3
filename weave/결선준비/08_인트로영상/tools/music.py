@@ -29,22 +29,22 @@ EVJ = json.loads((OUT / 'events.json').read_text())
 DUR = float(EVJ['duration'])
 N = int(round(DUR * SR))
 LOGO = next(e['t'] for e in EVJ['events'] if e['type'] == 'logo')
-D1 = 11.7                                                  # 01 장면에서 기본 곡이 터지는 순간(main.js의 D1)
+D1 = 5.1                                                   # 01 장면에서 기본 곡이 터지는 순간(main.js의 D1)
 
 # ── 곡 정보: 마디 길이(bar)와 첫 마디 시작(g0)은 박 검출로 잰 값. segs = [(영상 시작초, 그때 곡의 마디 번호), ...]
 #    drop = 곡이 터지는 영상 시각, hit = 로고 자리가 곡의 마지막 한 방인지(아니면 로고에 작은 반짝임 효과음), hall = 마지막 한 방 뒤 울림 ──
 TRACKS = {
     '1087': dict(name='A Special Feeling', artist='Michael Ramir C.', bpm=100.0, g0=0.0, key='C# 장조',
-                 # 도입은 곡의 7~11마디(가볍게) → 11.7초에 12마디(킥·베이스), 27마디 끝(50.1초)에서 32마디(마지막 구간)로 건너뜀
-                 # → 03 장면이 새 구간과 함께 시작. 34마디 끝(57.3초)에서 33마디로 한 번 되돌아가 두 마디를 더함
-                 # (33·35마디가 거의 같아서 이음매가 안 들림: 화음 0.98, 리듬 1.00) → 40마디(곡의 마지막 한 방)가 로고(74.1초)에
-                 segs=lambda T: [(0.0, 12 - D1 / T['bar']), (D1 + 16 * T['bar'], 32), (D1 + 19 * T['bar'], 33)], drop=lambda T: D1, hit=True, hall=0.22, hitbar=40),
+                 # v9: 도입은 곡의 약 10~11마디(오프닝) → 5.1초에 12마디(킥·베이스, 첫 장면 카드). 끊지 않고 이어 가다가
+                 # 34마디 끝(60.3초)에서 33마디로 한 번 되돌아가 두 마디를 더함
+                 # (33·35마디가 거의 같아서 이음매가 안 들림: 화음 0.98, 리듬 1.00) → 40마디(곡의 마지막 한 방)가 로고(77.1초)에
+                 segs=lambda T: [(0.0, 12 - D1 / T['bar']), (D1 + 23 * T['bar'], 33)], drop=lambda T: D1, hit=True, hall=0.22, hitbar=40),
     '35': dict(name='Uplift Me', artist='Ahjay Stelino', bpm=120.0, g0=0.25, key='D 장조',
-               # 박 없는 도입(0~3마디, D–F#m–E–G)을 처음부터 한 번 듣고 3마디(G)를 한 번 더 → 10.1초에 4마디(베이스·킥)
-               # → 15마디 끝에서 28마디로, 31마디(빌드업) → 32마디부터 큰 후렴 → 48마디(마지막 한 방)가 로고에
+               # v9: 박 없는 도입(2~3마디)을 듣고 3마디(G)를 한 번 더 → 5.1초에 4마디(베이스·킥, 첫 장면 카드)
+               # → 19마디 끝에서 28마디로, 31마디(빌드업) → 32마디부터 큰 후렴 → 48마디(마지막 한 방)가 로고에
                # (0마디 첫머리 0.25초는 비어 있어서 영상 첫머리(소리가 천천히 들어오는 곳)에만 둠. 2마디 단위로 자르면 화음이 어긋나 4마디 단위만 씀)
-               segs=lambda T: [(0.0, 4 - (T['drop'](T) - T['bar']) / T['bar']), (T['drop'](T) - T['bar'], 3), (T['drop'](T) + 12 * T['bar'], 28)],
-               drop=lambda T: LOGO - 32 * T['bar'], hit=True, hall=0.0, hitbar=48),
+               segs=lambda T: [(0.0, 4 - (T['drop'](T) - T['bar']) / T['bar']), (T['drop'](T) - T['bar'], 3), (T['drop'](T) + 16 * T['bar'], 28)],
+               drop=lambda T: LOGO - 36 * T['bar'], hit=True, hall=0.0, hitbar=48),
 }
 MAIN = '1087'
 for T in TRACKS.values():
