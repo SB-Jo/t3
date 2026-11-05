@@ -1,48 +1,99 @@
 #!/usr/bin/env python3
-"""결선 Appendix 새 장 7개를 HTML로 만든다(2026-11-05). render.cjs → out/*.art.png, *.layout.json → apply_appendix.py.
+"""결선 Appendix 새 장 7개를 HTML로 만든다(2026-11-05 2차). render.cjs → out/*.art.png, *.layout.json → apply_appendix.py.
 
-  python make_pages.py   → page-a1 ~ page-a7 .html, notes-a1 ~ a7 .txt
-숫자와 인용은 모두 원문에서 확인한 값이다. 시험 조건을 함께 적고, Weave 성능처럼 읽히지 않게 한다.
+  python make_pages.py   → page-a1 ~ page-a7 .html, notes-page-a1 ~ a7 .txt
+
+이전 파이프라인 장(07_소스/pages/page-07-pipeline.html)과 같은 카드, 번호 원, 칩, 앱 아이콘, 손글씨를 쓴다.
+글은 줄바꿈을 직접 넣고, 폭은 덱 글꼴(SamsungOneKorean)로 잰다.
 """
 from pathlib import Path
 
+from PIL import ImageFont
+
 HERE = Path(__file__).resolve().parent
-ICON = {'cal': '../../assets/icons/galaxy/samsung-calendar.png', 'note': '../../assets/icons/app-notes.png',
-        'mail': '../../assets/icons/galaxy/samsung-email-blue.png', 'talk': '../../assets/icons/app-kakao.png',
-        'gal': '../../assets/icons/galaxy/samsung-gallery.png', 'wal': '../../../09_HowItWorks/장표5/assets/samsung-wallet.png',
-        'map': '../../../09_HowItWorks/장표5/assets/app-map.png'}
-BLUE, PURPLE, GRAY = '#2F7BF6', '#6B4EFF', '#6F7690'
+FONTS = Path.home() / '.cache' / 'weave-tools' / 'fonts'
+A = '../../assets'
+HIW = '../../../09_HowItWorks/장표5/assets'
+ICON = {'cal': f'{A}/icons/galaxy/samsung-calendar.png', 'note': f'{A}/icons/app-notes.png', 'mail': f'{A}/icons/galaxy/samsung-email-blue.png',
+        'talk': f'{A}/icons/app-kakao.png', 'gal': f'{A}/icons/galaxy/samsung-gallery.png', 'wal': f'{HIW}/samsung-wallet.png',
+        'map': f'{A}/icons/app-map.png', 'spool': '../assets/weave-spool-6B4EFF.png', 'spoolw': '../assets/weave-spool-white.png'}
+WINE, LABEL = f'{A}/crops/ux2-wine-photo.png', f'{A}/crops/ux2-label-text.png'
+BOTTLE, TABLE = '../p05_결선/assets/wife-bottle.jpg', f'{HIW}/photo-table.jpg'
+STAR = 'M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z'
+
+_F = {}
+
+
+def tw(text, px, bold=False):
+    """덱 글꼴로 잰 글자 폭(px)."""
+    k = 'SamsungOneKorean-700.ttf' if bold else 'SamsungOneKorean-400.ttf'
+    if k not in _F:
+        _F[k] = ImageFont.truetype(str(FONTS / k), 100)
+    return _F[k].getlength(text) / 100 * px
+
 
 CSS = """
   .t-label { top: 30px; } .t-title { top: 62px; } .t-sub { top: 116px; font-size: 16.5px; }
-  .panel { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 16px; box-shadow: 0 8px 24px rgba(107,78,255,.06); }
-  .tx { position: absolute; font-size: 12px; line-height: 17px; color: var(--ink-2); white-space: nowrap; }
-  .tx b { font-weight: 700; color: var(--ink); }
-  .tx em { font-style: normal; font-weight: 700; color: #6B4EFF; }
-  .th { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #6B4EFF; white-space: nowrap; }
-  .st { position: absolute; font-size: 12px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-  .rule { position: absolute; height: 1px; background: #EEE9FA; }
-  .src { position: absolute; left: 62px; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
-  .note { position: absolute; font-size: 12.5px; line-height: 19px; color: var(--ink-2); white-space: nowrap; }
-  .note b { font-weight: 700; color: var(--ink); }
-  .note em { font-style: normal; font-weight: 700; color: #6B4EFF; }
-  .box { position: absolute; border-radius: 11px; background: #fff; border: 1.6px solid #DCD6EA; }
-  .box.em { border-color: #2F7BF6; background: #F3F8FF; }
-  .box.ll { border-color: #6B4EFF; background: #F5F1FF; }
-  .box.ru { border-color: #6F7690; border-style: dashed; background: #F8F8FB; }
-  .box.ok { border-color: #6B4EFF; background: #F5F1FF; }
-  .box.no { border-color: #E4DFEF; background: #FAF9FC; }
-  .bt { position: absolute; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--ink); text-align: center; white-space: nowrap; }
-  .bs { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; text-align: center; white-space: nowrap; }
-  .lane { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: #8E88A0; white-space: nowrap; }
-  .chipt { position: absolute; font-size: 10.5px; line-height: 14px; color: #6A6474; white-space: nowrap; }
-  .chipb { position: absolute; font-size: 11px; line-height: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-  .tag { position: absolute; font-size: 10px; line-height: 14px; font-weight: 700; white-space: nowrap; }
-  .tag.on { color: #6B4EFF; } .tag.off { color: #A29DB2; }
+  .card { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 18.59px; box-shadow: 0 10px 28px rgba(107,78,255,.07); }
+  .card.on { border: 1.8px solid #8B6BFF; box-shadow: 0 10px 28px rgba(107,78,255,.16); }
+  .card.soft { background: rgba(255,255,255,.86); }
+  .loopbox { position: absolute; border: 1.5px dashed #B7A6FF; border-radius: 24.78px; background: rgba(241,236,255,.38); }
+  .abs { position: absolute; }
+  .no { position: absolute; width: 24px; height: 24px; border-radius: 12px; background: var(--purple); }
+  .no.w { background: #fff; border: 1.5px solid var(--purple); }
+  .no-t { position: absolute; width: 24px; height: 24px; line-height: 24px; text-align: center; font-size: 12.5px; font-weight: 700; color: #fff; }
+  .no-t.w { color: var(--purple); }
+  .nm { position: absolute; font-size: 18.7px; line-height: 24.9px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .en { position: absolute; font-size: 13px; line-height: 24.9px; font-weight: 600; color: var(--purple-2); letter-spacing: .01em; white-space: nowrap; }
+  .q { position: absolute; font-family: 'Nanum Pen Script'; font-size: 22.66px; line-height: 26.94px; color: var(--purple); white-space: nowrap; }
+  .desc { position: absolute; font-size: 14px; line-height: 20.7px; color: var(--body); white-space: nowrap; }
+  .desc b { color: var(--ink); font-weight: 700; }
+  .chip { position: absolute; height: 23.8px; border-radius: 12.4px; background: #fff; border: 1px solid var(--purple-line); }
+  .chip.fill { background: var(--purple); border-color: var(--purple); }
+  .chip.soft { background: var(--tile); border-color: var(--tile); }
+  .chip.dash { background: #F7F4FF; border: 1.3px dashed #8B6BFF; }
+  .ct { position: absolute; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .ct.fill { color: #fff; }
+  .ct.gray { color: var(--body); font-weight: 600; }
+  .mini { position: absolute; background: #fff; border: 1px solid var(--card-line); border-radius: 12.4px; }
+  .mini.on { border: 1.6px solid #8B6BFF; box-shadow: 0 4px 12px rgba(107,78,255,.14); }
+  .mini.off { background: #FAF9FC; border-color: #ECE8F4; }
+  .pill { position: absolute; background: var(--soft); border: 1px solid var(--soft-line); border-radius: 12.4px; }
+  .lav { position: absolute; background: #F4F0FF; border: 1px solid #E3D9FF; border-radius: 11px; }
+  .tile { position: absolute; border-radius: 8.3px; background: var(--tile); }
+  .ico { position: absolute; color: var(--purple); }
   .app { position: absolute; }
-  .wrap { position: absolute; left: 0; top: 10px; width: 1280px; height: 720px; }
-  svg.fxl { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 2; }
+  .photo { position: absolute; border-radius: 9px; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .btn { position: absolute; background: var(--purple); border-radius: 10px; }
+  .bar { position: absolute; background: #EEE9FA; }
+  .t10 { position: absolute; font-size: 10.5px; line-height: 14px; color: var(--muted); white-space: nowrap; }
+  .t10m { position: absolute; font-size: 10.5px; line-height: 14px; color: var(--muted-2); white-space: nowrap; }
+  .t10b { position: absolute; font-size: 10.5px; line-height: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t10p { position: absolute; font-size: 10.5px; line-height: 14px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t11 { position: absolute; font-size: 11.5px; line-height: 16px; color: var(--body); white-space: nowrap; }
+  .t11 b { color: var(--ink); font-weight: 700; }
+  .t11 em { font-style: normal; font-weight: 700; color: var(--purple); }
+  .t11m { position: absolute; font-size: 11.5px; line-height: 16px; color: var(--muted-2); white-space: nowrap; }
+  .t11b { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t11p { position: absolute; font-size: 11.5px; line-height: 16px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t12 { position: absolute; font-size: 12.7px; line-height: 18px; color: var(--body); white-space: nowrap; }
+  .t12 b { color: var(--ink); font-weight: 700; }
+  .t12 em { font-style: normal; font-weight: 700; color: var(--purple); }
+  .t12b { position: absolute; font-size: 12.7px; line-height: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t12p { position: absolute; font-size: 12.7px; line-height: 17px; font-weight: 700; color: var(--purple); white-space: nowrap; }
+  .t14b { position: absolute; font-size: 14.5px; line-height: 20px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t15b { position: absolute; font-size: 16px; line-height: 22px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .t18b { position: absolute; font-size: 17px; line-height: 24px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .src { position: absolute; font-size: 11px; line-height: 15px; color: #8E88A0; white-space: nowrap; }
+  svg.links { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; overflow: visible; z-index: 3; }
+  .app, .ico, .photo { z-index: 4; }
 """
+
+DEFS = """<defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#6B4EFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ah2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.2 8.5 5 1 8.8" fill="none" stroke="#8B6BFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>"""
 
 
 def page(name, chip, title, sub, body, svg='', notes=''):
@@ -50,23 +101,19 @@ def page(name, chip, title, sub, body, svg='', notes=''):
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>{chip} — {title}</title>
+<title>{chip}</title>
 <link rel="stylesheet" href="../../pages/theme.css">
 <style>{CSS}</style>
 </head>
 <body>
+<script src="../../pages/icons.js"></script>
 <div class="slide" id="slide">
   <div class="bg bg-base"></div><div class="bg bg-peach"></div><div class="bg bg-lav"></div>
   <div class="t-label" data-x>{chip}</div>
   <div class="t-title" data-x>{title}</div>
   <div class="t-sub" data-x>{sub}</div>
-  <div class="wrap">
 {body}
-  <svg class="fxl" viewBox="0 0 1280 720"><defs>
-    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#8B6BFF"/></marker>
-    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="#A29DB2"/></marker>
-  </defs>{svg}</svg>
-  </div>
+  <svg class="links" viewBox="0 0 1280 720">{DEFS}{svg}</svg>
 </div>
 <script>document.fonts.ready.then(() => {{ window.pageReady = true; }});</script>
 </body>
@@ -81,370 +128,648 @@ def T(cls, x, y, html, w=None, extra=''):
     return f'  <div class="{cls}" data-x style="left:{x}px; top:{y}px;{wd}{extra}">{html}</div>\n'
 
 
-def BOX(cls, x, y, w, h):
-    return f'  <div class="box {cls}" style="left:{x}px; top:{y}px; width:{w}px; height:{h}px;"></div>\n'
+def BOX(cls, x, y, w, h, extra=''):
+    return f'  <div class="{cls}" style="left:{x}px; top:{y}px; width:{w}px; height:{h}px;{extra}"></div>\n'
 
 
-def NODE(cls, x, y, w, h, title, sub=None):
-    o = BOX(cls, x, y, w, h)
-    if sub:
-        o += T('bt', x, y + 8, title, w) + T('bs', x, y + 26, sub, w)
-    else:
-        o += T('bt', x, y + (h - 16) / 2, title, w)
-    return o
+def IMG(key, x, y, s, r=0, extra=''):
+    rr = f' border-radius:{r}px;' if r else ''
+    return f'  <img class="app" src="{ICON[key]}" alt="" style="left:{x}px; top:{y}px; width:{s}px; height:{s}px;{rr}{extra}">\n'
 
 
-def ARROW(x1, y1, x2, y2, c='#8B6BFF', m='ah', dash=''):
-    d = f' stroke-dasharray="{dash}"' if dash else ''
-    return f'<path d="M{x1} {y1} L{x2} {y2}" stroke="{c}" stroke-width="1.8" fill="none" marker-end="url(#{m})"{d}/>'
+def USE(sym, x, y, s, color=None):
+    c = f' color:{color};' if color else ''
+    return f'  <svg class="ico" style="left:{x}px; top:{y}px; width:{s}px; height:{s}px;{c}"><use href="#{sym}"/></svg>\n'
 
 
-def IMG(key, x, y, s=16):
-    return f'  <img class="app" src="{ICON[key]}" alt="" style="left:{x}px; top:{y}px; width:{s}px; height:{s}px; border-radius:4px; z-index:6;">\n'
+def SPARK(x, y, s, fill='#6B4EFF'):
+    return f'  <svg class="app" viewBox="0 0 24 24" style="left:{x}px; top:{y}px; width:{s}px; height:{s}px;"><path d="{STAR}" fill="{fill}"/></svg>\n'
 
 
-# ──────────────────────────────────────────── A1 파이프라인 전체
+def PHOTO(src, x, y, w, h, r=9, pos=None):
+    p = f' style="object-position:{pos};"' if pos else ''
+    return f'  <div class="photo" style="left:{x}px; top:{y}px; width:{w}px; height:{h}px; border-radius:{r}px;"><img src="{src}" alt=""{p}></div>\n'
+
+
+def CHIP(cls, x, y, w, text, h=23.8, tcls='', size=None):
+    fs = f' font-size:{size}px;' if size else ''
+    return BOX(f'chip {cls}', x, y, w, h, f' border-radius:{h / 2}px;') + T(f'ct {tcls or cls}', x, y, text, w, f' height:{h}px; line-height:{h}px;{fs}')
+
+
+def LINE(d, c='#6B4EFF', w=2, mk='ah', dash=''):
+    ds = f' stroke-dasharray="{dash}"' if dash else ''
+    m = f' marker-end="url(#{mk})"' if mk else ''
+    return f'<path d="{d}" fill="none" stroke="{c}" stroke-width="{w}" stroke-linecap="round"{ds}{m}/>'
+
+
+def STEP(no, x, y, name, en, white=False):
+    w = ' w' if white else ''
+    return BOX(f'no{w}', x, y, 24, 24) + T(f'no-t{w}', x, y, no) + T('nm', x + 33, y - 0.4, name) + T('en', x + 33 + tw(name, 18.7, True) + 8, y - 0.4, en)
+
+
+def sources(cits, y, x=64, max_w=1150, size=11):
+    """각주: 논문 하나가 두 줄로 갈리지 않게 항목 사이에서만 줄을 바꾸고, 둘째 줄은 첫 논문과 왼쪽을 맞춘다."""
+    pre = '* 출처: '
+    px = tw(pre, size)
+    lines, cur = [], ''
+    for c in cits:
+        t = (cur + ' · ' + c) if cur else c
+        if tw(t, size) > max_w - px and cur:
+            lines.append(cur)
+            cur = c
+        else:
+            cur = t
+    lines.append(cur)
+    out = T('src', x, y, pre)
+    for i, ln in enumerate(lines):
+        out += T('src', round(x + px, 1), y + i * 15, ln)
+    return out
+
+
+# ───────────────────────────────── A1 파이프라인 (이전 How it Works 장과 같은 구성)
 def a1():
     b = ''
-    b += '  <div class="panel" style="left:60px; top:148px; width:1160px; height:476px;"></div>\n'
-    # 00
-    b += T('lane', 80, 162, '00 사전 준비 (충전 중, 유휴 시간)')
-    b += NODE('', 80, 184, 150, 44, '허용한 기록', '노트, 메일, 사진, 알림 글자')
-    b += NODE('em', 290, 184, 230, 44, '벡터 색인', 'Reasoning Embedding')
-    b += NODE('em', 540, 184, 200, 44, '키워드 색인', 'BM25')
-    b += NODE('ru', 760, 184, 250, 44, '메타데이터', '{ date, app, from }')
+    # 연쇄 탐색 루프
+    b += BOX('loopbox', 300.5, 181.4, 648.2, 339.9)
+    b += BOX('chip', 319, 169, 234.6, 25.9, ' border-radius:13.4px; border-color:#B7A6FF;')
+    b += USE('i-refresh', 330.3, 174.2, 15.5)
+    b += T('t12p', 349.9, 173.1, '필요한 정보가 채워질 때까지 반복')
     # 01
-    b += T('lane', 80, 244, '01 순간 감지')
-    b += NODE('', 80, 266, 210, 34, '위로 밀기 (UX 1)')
-    b += NODE('', 304, 266, 210, 34, '실타래 버튼 (UX 2)')
-    b += NODE('ru', 528, 266, 300, 34, '위치 + 탑승권 + 대화 상대 (UX 3)')
-    # 02, 03
-    b += T('lane', 80, 316, '02 질문 다시 쓰기, 03 연쇄 탐색')
-    y = 340
-    b += NODE('em', 80, y, 190, 54, '① 한 번 찾아 보기', 'BM25 + Reasoning Embedding')
-    b += NODE('', 316, y + 8, 96, 38, '충분한가?')
-    b += NODE('ll', 458, y, 160, 54, '② 모자라면 나누기', 'sLLM 1~2B')
-    b += NODE('em', 664, y, 200, 54, '③ 홉마다 찾기', 'Reasoning Embedding + 필터')
-    b += NODE('ru', 930, y, 270, 54, '④ 단서로 다시 쓰기', '이름은 기록에서 복사, 날짜는 규칙 계산')
-    b += T('bs', 664, y + 60, '반복은 2~3홉까지. 새 단서가 없으면 멈춥니다', 536)
-    b += T('tag on', 417, y + 12, '아니요')
+    b += BOX('card', 70, 200, 207.8, 308.8)
+    b += STEP('01', 84.4, 214.6, '순간 감지', 'Trigger')
+    b += T('q', 84.4, 247.8, '“지금, 도와줄 순간일까?”')
+    rows = [(287.1, 'up', '위로 밀기', '통화 화면 · UX 1'), (340, 'spool', '실타래 버튼', '키보드 · UX 2'), (392.9, 'ctx', '먼저 반짝', '위치 · 탑승권 · 대화 · UX 3')]
+    for y, ic, t1, t2 in rows:
+        b += BOX('pill', 84.4, y, 179, 41.5)
+        b += BOX('tile', 90.6, y + 6.2, 28.9, 28.9)
+        if ic == 'up':
+            b += f'  <svg class="ico" viewBox="0 0 24 24" style="left:96.8px; top:{y + 12.4}px; width:16.5px; height:16.5px;"><path d="M12 20V5M5.5 11.5 12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>\n'
+        elif ic == 'spool':
+            b += IMG('spool', 95.7, y + 11.3, 18.6)
+        else:
+            b += USE('i-msg', 94.7, y + 10.3, 12.4) + USE('i-pin', 102.9, y + 18.6, 12.4)
+        b += T('t12b', 127.6, y + 3.1, t1)
+        b += T('t10', 127.6, y + 22, t2)
+    b += T('desc', 84.4, 453, '<b>사용자가 직접</b> 부르거나,<br><b>맥락 파악</b> 후 조건을 감지합니다')
+    # 02
+    b += BOX('card', 314.9, 200, 250, 308.8)
+    b += BOX('no', 329.3, 214.6, 24, 24) + T('no-t', 329.3, 214.6, '02') + T('nm', 362.2, 214.2, '질문 다시 쓰기', extra=' font-size:17px;')
+    b += T('en', 362 + tw('질문 다시 쓰기', 17, True) + 7, 214.2, 'Query Rewriting', extra=' font-size:11.5px;')
+    b += T('q', 329.3, 247.8, '“한 번에 찾을 수 있을까?”')
+    x0, y0 = 329.3, 283
+    b += BOX('mini', x0, y0, 222, 164)
+    bx = x0 + 10
+    b += T('t10p', bx, y0 + 7, '① 1차 통합 검색') + T('t10m', bx + tw('① 1차 통합 검색', 10.5, True) + 14, y0 + 7, 'Single-Hop')
+    b += BOX('pill', bx, y0 + 24, 202, 22, ' border-radius:11px;') + T('t10', bx + 9, y0 + 28, '지은이네 집들이 때 마셨던 와인')
+    b += BOX('bar', bx, y0 + 52, 202, 1)
+    b += T('t10p', bx, y0 + 57, '② 하위 질문 분해') + T('t10m', bx + tw('② 하위 질문 분해', 10.5, True) + 14, y0 + 57, 'Decomposition')
+    b += T('t10', bx, y0 + 74, '1. 지은이네 집들이는 언제였지?')
+    b += BOX('chip dash', bx + 12, y0 + 90, 34, 17, ' border-radius:8.5px;') + T('ct', bx + 12, y0 + 90, '그날', 34, ' height:17px; line-height:17px; font-size:10px;')
+    b += T('t10', bx, y0 + 91.5, '2.') + T('t10', bx + 50, y0 + 91.5, '마셨던 와인은?')
+    b += BOX('bar', bx, y0 + 112, 202, 1)
+    b += T('t10p', bx, y0 + 117, '④ 단서 결합·질의 재작성')
+    b += BOX('chip fill', bx, y0 + 136, 58, 18, ' border-radius:9px;') + T('ct fill', bx, y0 + 136, '3/15 (일)', 58, ' height:18px; line-height:18px; font-size:10.5px;')
+    b += T('t10b', bx + 62, y0 + 138, '에 마셨던 와인은?')
+    b += T('desc', 329.3, 453, '막히면 <b>하위 질문으로 나누고</b>,<br>찾은 단서로 <b>질문을 다시 씁니다</b>')
+    # 03
+    b += BOX('card', 604, 200, 330, 308.8)
+    b += STEP('03', 618, 214.6, '연쇄 탐색', 'Multi-hop Search')
+    b += T('q', 618, 247.8, '“찾은 기록에, 다음 단서가 있을까?”')
+    b += T('t10p', 618, 284, '③ 멀티홉 추론 검색') + T('t10m', 618 + tw('③ 멀티홉 추론 검색', 10.5, True) + 14, 284, 'Hop Retrieval')
+    hx = [618, 722, 826]
+    b += BOX('mini on', hx[0], 303, 92, 76)
+    b += IMG('talk', hx[0] + 8, 311, 20, 5) + T('t10b', hx[0] + 33, 314, '지은')
+    b += T('t10', hx[0] + 8, 335, '휴지 안 사 와도 돼') + T('t10p', hx[0] + 8, 355, '3/15 (일)')
+    b += PHOTO(WINE, hx[1], 303, 92, 76, 10)
+    b += BOX('abs', hx[1] + 6, 355, 60, 18, ' border-radius:9px; background:rgba(255,255,255,.92); z-index:5;')
+    b += T('t10b', hx[1] + 6, 357, '3/15 20:14', 60, ' text-align:center; z-index:6;')
+    b += IMG('gal', hx[1] + 70, 308, 17, 0, ' z-index:6;')
+    b += BOX('mini', hx[2], 303, 92, 76)
+    b += PHOTO(LABEL, hx[2] + 5, 310, 82, 41, 7)
+    b += USE('i-scan', hx[2] + 7, 356, 13) + T('t10', hx[2] + 23, 355.5, '사진 속 글자')
+    for x, t, c in [(hx[0], '추론 검색', 'fill'), (hx[1], '시간 필터', 'soft'), (hx[2], 'OCR', 'soft')]:
+        b += BOX(f'chip {c}', x, 386, 92, 19.7, ' border-radius:10px;') + T(f'ct {"fill" if c == "fill" else ""}', x, 386, t, 92, ' height:19.7px; line-height:19.7px; font-size:11.5px;')
+    b += T('t10m', 618, 413, '같은 방식으로')
+    b += BOX('pill', 618, 430, 148, 25, ' border-radius:12.5px;')
+    b += IMG('note', 624, 434, 16, 4) + IMG('mail', 643, 434, 16) + T('t10', 664, 435, '바뀐 회의록 → 최종본')
+    b += BOX('pill', 772, 430, 148, 25, ' border-radius:12.5px;')
+    b += IMG('talk', 778, 434, 16, 4) + IMG('gal', 797, 434, 16) + T('t10', 818, 435, '갈색병 → 에스티 로더')
+    b += T('desc', 618, 467, '<b>찾은 단서가 다음 검색의 조건</b>이 됩니다')
     # 04
-    b += T('lane', 80, 426, '04 전달')
-    y2 = 448
-    b += NODE('ll', 80, y2, 160, 44, '요약 (UX 1)', '바뀐 내용 반영, 파일 첨부')
-    b += NODE('ll', 252, y2, 160, 44, '정확한 이름 (UX 2)', '라벨을 읽은 이름')
-    b += NODE('ll', 424, y2, 160, 44, '보낼 말 (UX 3)', '상대의 말투 그대로')
-    b += NODE('ru', 596, y2, 300, 44, '못 찾으면 찾은 단서까지만 보여 줍니다', '단정하지 않고 원문과 출처를 함께 보여 줍니다')
-    b += NODE('', 908, y2, 292, 44, '입력과 전송은 사용자가 합니다', '기기 안에서 처리, 외부 전송 없음')
-    # 범례
-    for i, (c, t) in enumerate([('em', '기록을 찾는 일 (임베딩, 키워드)'), ('ll', '글을 쓰는 일 (sLLM)'), ('ru', '규칙과 메타데이터')]):
-        x = 80 + i * 250
-        b += f'  <div class="box {c}" style="left:{x}px; top:510px; width:18px; height:12px; border-radius:4px;"></div>\n'
-        b += T('chipt', x + 24, 509, t)
-    # 두 줄
-    b += T('note', 80, 538, '<b>1. 우리는 Multi-hop Retrieval 파이프라인을 씁니다.</b> 표준은 없고, 논문들이 공유하는 뼈대를 따릅니다.')
-    b += T('note', 80, 562, '<b>2. 홉 사이는 질문 다시 쓰기가 잇고, 각 홉의 기록은 Reasoning Embedding이 찾습니다.</b> 임베딩은 앞 기록을 기억하지 않습니다.')
-    b += T('note', 80, 590, '설계안이며 실측 전입니다. 2홉 지연은 S26 Snapdragon 공개 측정값으로 계산하면 생성 약 0.8~1.7초에 검색 시간을 더한 값입니다(Exynos 측정값 없음).', extra=' font-size:11.5px; color:#8E88A0;')
-    b += T('src', 62, 636, '* 출처: Wei et al., "A Survey of Reasoning-Intensive Retrieval", ACL 2026 · Kim et al., "Hi-Q", NeurIPS 2026 · Trivedi et al., "IRCoT", ACL 2023 · Qualcomm AI Hub, Qwen3-1.7B 성능 측정값')
+    b += BOX('card', 975.4, 200, 234.6, 308.8)
+    b += STEP('04', 989.8, 214.6, '전달', 'Delivery')
+    b += T('q', 989.8, 247.8, '“골라서, 직접 완성해 볼까?”')
+    b += BOX('mini', 989.8, 283, 205.8, 112, ' border-color:#D9CEFF; background:#FBFAFF;')
+    b += SPARK(999, 291, 12) + T('t10p', 1015, 290, '자동 완성 추천')
+    b += T('t12b', 999, 308, '배비치 소비뇽 블랑', extra=' font-size:15.5px; line-height:21px;')
+    b += IMG('talk', 999, 335, 15, 4) + IMG('gal', 1017, 335, 15) + T('t10', 1038, 335.5, '연결된 기억 · 카톡, 갤러리')
+    b += BOX('btn', 999, 358, 187, 26, ' border-radius:13px;')
+    b += USE('i-check', 1063, 365, 12, '#fff')
+    b += T('ct fill', 1079, 358, '입력하기', 60, ' height:26px; line-height:26px; font-size:11.5px; text-align:left;')
+    b += T('t10p', 989.8, 403, '⑤ 근거 기반 응답 생성') + T('t10m', 989.8, 418, 'Grounded Synthesis')
+    for x, w, t in [(989.8, 60, '요약'), (1054, 80, '정확한 이름'), (1138, 57.6, '보낼 말')]:
+        b += BOX('pill', x, 436, w, 24, ' border-radius:12px;') + T('ct gray', x, 436, t, w, ' height:24px; line-height:24px; font-size:11.5px;')
+    b += T('desc', 989.8, 467, '<b>출처와 함께</b> 건넵니다', extra=' font-size:13.5px;')
+    # 핵심 엔진
+    b += BOX('chip', 310.8, 506.8, 627.6, 29, ' border-radius:14.5px; border-color:#8B6BFF; box-shadow:0 6px 16px rgba(107,78,255,.14);')
+    b += USE('i-nodes', 329.3, 513.1, 16.5)
+    b += T('t12p', 351.9, 513, '핵심 엔진 · 온디바이스 Reasoning Embedding', extra=' font-size:13.2px;')
+    b += T('t12', 650.3, 512.5, '지금 단서로부터 <b>‘이어지는’</b> 기록을 찾는 경량 모델', extra=' font-size:13.2px;')
+    # 00
+    b += BOX('card soft', 70, 550.4, 1140, 103.6)
+    b += STEP('00', 86.5, 564.9, '사전 준비', 'Indexing', white=True)
+    b += T('q', 86.5, 597, '“어디에 뭐가 있는지,<br>미리 정리해 둘까?”', extra=' font-size:21.6px; line-height:22.8px;')
+    b += BOX('pill', 290.2, 562.8, 179, 78.8, ' background:#fff;')
+    for i, k in enumerate(['talk', 'note', 'mail', 'cal', 'gal']):
+        b += IMG(k, 302.5 + i * 31.9, 575.2, 26.9, 7.2 if k in ('talk', 'note') else 0)
+    b += T('t12', 302.5, 613, '허용한 기록만 가져오기', extra=' font-weight:600;')
+    b += BOX('pill', 496, 562.8, 222.2, 78.8, ' background:#fff;')
+    for i, k in enumerate(['i-user', 'i-clock', 'i-pin', 'i-scan']):
+        x = 508.3 + i * 30.9
+        b += BOX('tile', x, 574.2, 26.9, 26.9) + USE(k, x + 5.2, 579.4, 16.5)
+    b += T('t12', 508.3, 613, '사람·시간·장소와 사진 속 글자 정리', extra=' font-weight:600;')
+    b += BOX('pill', 745, 562.8, 222.2, 78.8, ' background:#fff; border-color:#D9CEFF;')
+    b += BOX('tile', 754, 578.4, 30, 47.7, ' border-radius:9.3px;') + USE('i-db', 758, 591.5, 22)
+    b += T('t12p', 792, 565.5, '기억 색인')
+    b += T('t11', 792, 582, '<b>키워드 색인</b> · BM25')
+    b += T('t11', 792, 599, '<b>벡터 색인</b> · Reasoning Embedding')
+    b += T('t11', 792, 616, '<b>메타데이터</b> · date, app, from')
+    b += BOX('pill', 993.9, 562.8, 201.7, 78.8, ' background:#fff;')
+    for y, k, t in [(574.2, 'i-refresh', '바뀐 기록만 갱신'), (596, 'i-battery', '충전·유휴 시간에'), (617.7, 'i-lock', '기기 밖으로 보내지 않음')]:
+        b += USE(k, 1006.3, y, 15.5) + T('t12', 1026.9, y - 1.5, t, extra=' font-weight:600;')
+    b += sources(['Wei et al., "A Survey of Reasoning-Intensive Retrieval", ACL 2026', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Trivedi et al., "IRCoT", ACL 2023'], 662, x=72)
     svg = ''
-    svg += ARROW(230, 206, 288, 206)
-    svg += ARROW(270, 367, 314, 367) + ARROW(412, 367, 456, 367) + ARROW(618, 367, 662, 367)
-    svg += ARROW(864, 360, 928, 360) + ARROW(930, 376, 866, 376)
-    # 충분하면 바로, 홉을 돌아 찾으면 그때 04 전달로
-    svg += '<path d="M764 394 L764 434 L126 434" stroke="#8B6BFF" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>'
-    svg += '<path d="M364 386 L364 434" stroke="#8B6BFF" stroke-width="1.8" fill="none"/>'
-    b += T('tag on', 370, 402, '네, 바로 전달')
-    b += T('tag on', 704, 412, '답을 찾으면')
-    notes = """Appendix · 파이프라인. Weave의 전체 구조입니다. 기술 질문이 오면 이 장을 먼저 띄웁니다.
-Weave는 평소에 허용한 기록을 벡터, 키워드 색인, 메타데이터로 저장합니다. 사용자가 부르거나 상황이 맞으면 처음 질문 그대로 한 번 찾아 봅니다. 여기서 답이 나오면 바로 끝납니다. 답이 모자라면 sLLM이 질문을 나누고, 각 질문을 Reasoning Embedding으로 찾습니다. 찾은 단서를 빈칸에 넣어 질문을 다시 쓰고 다음 기록을 찾습니다. 이름은 기록에서 복사하고 날짜는 규칙으로 계산해서 지어낼 여지를 줄입니다. 마지막으로 sLLM이 화면에 맞게 요약, 이름, 보낼 말을 만듭니다.
-주의: 설계안입니다. 지연 수치는 S26 Snapdragon의 Qwen3-1.7B 공개 측정값(prefill 3,288.5 tok/s, decode 42.4 tok/s)으로 계산한 값이고 실측이 아닙니다."""
-    page('page-a1', 'Appendix · 파이프라인', 'Weave 파이프라인 전체 구조', '여러 멀티홉 연구가 공유하는 뼈대 위에 온디바이스 제약을 더한 설계입니다.', b, svg, notes)
+    mid = 349
+    svg += LINE(f'M282.8 {mid} L308 {mid}', w=2.4) + f'<circle cx="282.8" cy="{mid}" r="3" fill="#6B4EFF"/>'
+    svg += LINE(f'M569.8 {mid} L598 {mid}', w=2.4) + f'<circle cx="569.8" cy="{mid}" r="3" fill="#6B4EFF"/>'
+    svg += LINE(f'M939 {mid} L969 {mid}', w=2.4) + f'<circle cx="939" cy="{mid}" r="3" fill="#6B4EFF"/>'
+    svg += LINE('M710.5 341 L720 341') + LINE('M814.5 341 L824 341')
+    for x in (475, 724, 973.5):
+        svg += LINE(f'M{x - 3} 602 L{x + 12} 602', c='#8B6BFF', mk='ah2')
+    notes = """Appendix · 파이프라인. Weave의 전체 구조입니다. 기술 질문이 오면 이 장을 먼저 띄웁니다. 칸을 누르면 관련 장으로 넘어갑니다.
+우리는 Multi-hop Retrieval 파이프라인을 씁니다. 홉 사이는 질문 다시 쓰기가 잇고, 각 홉의 기록은 Reasoning Embedding이 찾습니다.
+평소에는 허용한 기록을 키워드 색인, 벡터 색인, 메타데이터로 정리해 둡니다. 사용자가 부르거나 상황이 맞으면 먼저 1차 통합 검색을 합니다. 여기서 답이 나오면 바로 전달하고, 막히면 하위 질문으로 나눕니다. 찾은 단서를 결합해 질의를 재작성하고, 다음 기록을 찾습니다. 이름은 기록에서 복사하고 날짜는 규칙으로 계산합니다. 2~3홉 안에서 답을 찾으면 sLLM이 요약, 정확한 이름, 보낼 말 가운데 상황에 맞는 모양으로 근거와 함께 건넵니다. 입력과 전송은 사용자가 합니다."""
+    page('page-a1', 'Appendix · 파이프라인', '<span class="hl">Weave</span> 파이프라인 전체 구조', '홉 사이는 질문 다시 쓰기가 잇고, 각 홉의 기록은 Reasoning Embedding이 찾습니다.', b, svg, notes)
 
 
-# ──────────────────────────────────────────── A2 관련 연구 지도
+# ───────────────────────────────── A2 관련 연구 지도
+def diagram(kind, x, y):
+    """갈래마다 홉을 잇는 모양을 그린 작은 그림(폭 250, 높이 60)."""
+    s = f'<g transform="translate({x} {y})">'
+    P, L = '#6B4EFF', '#CFC3FF'
+    if kind == 'graph':
+        pts = [(26, 30), (72, 12), (72, 48), (122, 30), (172, 12), (172, 48), (222, 30)]
+        for a, c in [(0, 1), (0, 2), (1, 3), (2, 3), (3, 4), (3, 5), (4, 6), (5, 6)]:
+            s += f'<line x1="{pts[a][0]}" y1="{pts[a][1]}" x2="{pts[c][0]}" y2="{pts[c][1]}" stroke="{L}" stroke-width="2"/>'
+        for i, (px, py) in enumerate(pts):
+            s += f'<circle cx="{px}" cy="{py}" r="{8 if i in (0, 6) else 6}" fill="{P if i in (0, 3, 6) else "#fff"}" stroke="{P if i in (0, 3, 6) else L}" stroke-width="2"/>'
+    elif kind == 'rewrite':
+        s += f'<rect x="6" y="14" width="62" height="24" rx="12" fill="#F1ECFF" stroke="{L}"/><rect x="94" y="14" width="62" height="24" rx="8" fill="#fff" stroke="{L}"/><rect x="182" y="14" width="62" height="24" rx="12" fill="{P}"/>'
+        s += f'<path d="M70 26H90" stroke="{P}" stroke-width="2" marker-end="url(#ah)"/><path d="M158 26H178" stroke="{P}" stroke-width="2" marker-end="url(#ah)"/>'
+        s += f'<path d="M125 40C125 58 37 58 37 42" fill="none" stroke="#8B6BFF" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ah2)"/>'
+    elif kind == 'dense':
+        for i in range(3):
+            xx = 12 + i * 84
+            s += f'<rect x="{xx}" y="16" width="56" height="28" rx="8" fill="{"#F1ECFF" if i < 2 else P}" stroke="{L if i < 2 else P}"/>'
+            for j in range(4):
+                s += f'<rect x="{xx + 8 + j * 10}" y="{26 - j % 2 * 3}" width="6" height="{8 + j % 2 * 6}" rx="1.5" fill="{"#8B6BFF" if i < 2 else "#fff"}"/>'
+            if i < 2:
+                s += f'<path d="M{xx + 58} 30H{xx + 80}" stroke="{P}" stroke-width="2" marker-end="url(#ah)"/>'
+    else:
+        s += f'<rect x="8" y="10" width="72" height="40" rx="8" fill="#2B2640"/><path d="M26 22l-8 8 8 8M62 22l8 8-8 8M49 20l-10 20" fill="none" stroke="#CFC3FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+        for yy in (8, 30, 52):
+            s += f'<path d="M84 30C108 30 108 {yy} 132 {yy}" fill="none" stroke="{L}" stroke-width="2"/><circle cx="140" cy="{yy}" r="7" fill="#fff" stroke="{P}" stroke-width="2"/>'
+        s += f'<path d="M150 30H186" stroke="{P}" stroke-width="2" marker-end="url(#ah)"/><circle cx="204" cy="30" r="10" fill="{P}"/>'
+    return s + '</g>'
+
+
 def a2():
-    b = ''
-    steps = ['① 한 번 찾아 보기', '② 모자라면 나누기', '③ 1홉 찾기', '④ 단서로 다시 쓰기', '③ 2홉 찾기', '⑤ 답과 근거']
-    x, svg = 92, ''
-    cls = ['em', 'll', 'em', 'ru', 'em', 'll']
-    for i, s in enumerate(steps):
-        b += NODE(cls[i], x, 150, 156, 30, s)
-        if i < 5:
-            svg += ARROW(x + 156, 165, x + 180, 165)
-        x += 186
-    cards = [
-        ('미리 그래프를 만드는 쪽', False, 'HippoRAG 2 (ICML 2025), PropRAG, GRASP',
-         ['색인할 때 LLM으로 관계를 뽑아', '그래프를 만들고 그래프를 따라 찾습니다.'],
-         ['정해 둔 관계를 여러 단계로 정확히 잇고', '근거를 설명하기 쉽습니다.'],
-         ['기록이 들어올 때마다', 'LLM으로 관계를 뽑아야 합니다.']),
-        ('찾으면서 다시 쓰는 쪽', True, 'IRCoT (ACL 2023), Hi-Q (NeurIPS 2026), DER-RAG',
-         ['찾은 단서를 넣어 질문을 다시 쓰고', '한 번 더 찾습니다.'],
-         ['그래프와 학습이 필요 없고', '임베딩을 갈아 끼울 수 있습니다.'],
-         ['질문당 LLM 호출: IRCoT 2.92회, Hi-Q 5.7회', '(비용 맞춤 2.93회), DER-RAG 8.00~9.63회']),
-        ('임베딩이 직접 잇는 쪽', False, 'MDR (ICLR 2021), GRITHopper (EACL 2026)',
-         ['질문과 찾은 기록을 함께 인코더에 넣어', '다음 기록을 찾습니다.'],
-         ['글을 생성하지 않습니다. MuSiQue 2번째 홉', 'Hits@1 76.13 (GPT-4o 분해 48.53)'],
-         ['대화형 데이터는 시험 전입니다.', 'Weave에서는 보조 경로 후보입니다.']),
-        ('코드를 실행하는 에이전트 쪽', False, '코딩 에이전트, RLM, PyRAG',
-         ['LLM이 코퍼스를 프로그램처럼 탐색하고', '하위 호출을 반복합니다.'],
-         ['중간 상태를 명시적으로 드러내고', '실행 결과를 그대로 씁니다.'],
-         ['코드를 짜고 실행할 LLM이 필요해', '소형 모델에는 부담이 큽니다.']),
-    ]
-    cw, gap, x0 = 280, 13, 60
-    for i, (name, me, reps, how, good, lim) in enumerate(cards):
-        x = x0 + i * (cw + gap)
-        st = 'border:2px solid #6B4EFF; background:#FBFAFF;' if me else ''
-        b += f'  <div class="panel" style="left:{x}px; top:192px; width:{cw}px; height:316px; {st}"></div>\n'
-        b += T('st', x + 16, 202, name, extra=' font-size:14.5px; line-height:20px;')
-        if me:
-            b += f'  <div class="box ll" style="left:{x + cw - 72}px; top:202px; width:58px; height:20px; border-radius:10px; background:#6B4EFF;"></div>\n'
-            b += T('tag', x + cw - 72, 205, 'Weave', 58, ' color:#fff; text-align:center;')
-        b += T('tx', x + 16, 228, reps, extra=' font-size:10.5px; color:#6A6474;')
-        y = 254
-        for head, lines in (('홉을 잇는 방법', how), ('잘하는 것', good), ('기기 안에서 걸리는 것', lim)):
-            b += T('th', x + 16, y, head)
-            b += T('tx', x + 16, y + 18, '<br>'.join(lines))
-            y += 84
-    b += T('note', 62, 518, '<b>왜 Hi-Q를 출발 뼈대로 보나요?</b> 그래프 없이 임베딩만 갈아 끼우고, 안 풀릴 때만 나누는 구조가 Weave 설계와 같습니다. 다만 저자 자체 비교이고 영어 위키, 서버 LLM 결과이며,')
-    b += T('note', 62, 538, '시험한 공개 모델 중 가장 작은 것도 27B입니다. 1등이라는 증거가 아니라 출발점으로 봅니다. <b>점수 비교 주의:</b> 논문마다 모델이 달라 MuSiQue 단일 검색도 Hi-Q 표는 32.8, GRASP 표는 37.2 EM입니다.')
-    b += T('note', 62, 564, '<b>나누기와 잇기의 근거 (Hi-Q):</b> 막힌 사례 279문항에서 같은 top-5로 필요한 문단을 다 찾는 비율 <em>7.9% → 42.7%</em>, 늘 나누면 <em>60.7 → 57.3 EM</em>(100문항), 다시 쓰기 순서를 빼면 <em>57.9 → 47.1 EM</em>')
-    b += T('src', 62, 596, '* 출처: Gutiérrez et al., "HippoRAG 2", ICML 2025 · Jenkins et al., "GRASP", arXiv 2605.16598 · Trivedi et al., "IRCoT", ACL 2023 · Kim et al., "Hi-Q", NeurIPS 2026 · Lee & Lim, "DER-RAG", arXiv 2609.06065')
-    b += T('src', 62, 612, '   Xiong et al., "MDR", ICLR 2021 · Erker et al., "GRITHopper", EACL 2026 · 숫자는 모두 영어 공개 벤치마크(위키백과)에서 잰 값으로 Weave 성능이 아닙니다')
-    notes = """Appendix · 관련 연구. Multi-hop Retrieval에는 정해진 표준이 없습니다. 논문들은 위의 뼈대를 공유하고, 갈래는 크게 넷입니다. Weave는 둘째 갈래인 찾으면서 다시 쓰는 쪽에 속하고, 셋째 갈래인 임베딩 연결을 보조 경로 후보로 둡니다.
-숫자 출처: Hi-Q 표 8(LLM 호출: 전체 5.7회, 비용 맞춤 2.93회, IRCoT 2.92회), DER-RAG(9.63/8.00/9.11회), GRITHopper(MuSiQue open retrieval Hits@1 2홉 76.13, GPT4o + GRITLM 분해 48.53), Hi-Q 표 3(Clean n=279, Root@5 7.9 → Leaf@5 42.7), 표 6(always-decompose 57.3 vs 60.7, N=100, dependency-aware 제거 47.1 vs 57.9).
-예상 질문: Hi-Q를 그대로 쓰나요? 아닙니다. 질문당 LLM 5.7회를 그대로 쓸 수 없어서 이름 복사와 날짜 규칙으로 호출을 줄입니다."""
-    page('page-a2', 'Appendix · 관련 연구', 'Multi-hop Retrieval 관련 연구 지도', '표준 파이프라인은 없고 공통 뼈대가 있습니다. 갈래는 크게 넷이고, Weave는 둘째 갈래에 속합니다.', b, svg, notes)
-
-
-# ──────────────────────────────────────────── A3 Reasoning Embedding의 역할과 추론 유형
-def a3():
-    b = ''
-    b += '  <div class="panel" style="left:60px; top:148px; width:520px; height:462px;"></div>\n'
-    b += T('st', 78, 160, '임베딩이 하는 일과 하지 않는 일', extra=' font-size:14.5px; line-height:20px;')
-    svg = ''
-    rows = [('Hop 1 입력', '지은이네 집들이는 언제였지?', '지은 카톡', 'talk', 190), ('Hop 2 입력', '[3/15 (일)]에 마셨던 와인은?', '와인 사진', 'gal', 258)]
-    for lab, q, res, ic, y in rows:
-        b += T('lane', 78, y + 10, lab)
-        b += NODE('ll', 146, y, 200, 36, q)
-        b += NODE('em', 372, y, 74, 36, '임베딩')
-        b += BOX('', 470, y, 94, 36) + IMG(ic, 478, y + 10) + T('bt', 496, y + 10, res, 66)
-        svg += ARROW(346, y + 18, 370, y + 18) + ARROW(446, y + 18, 468, y + 18)
-    svg += '<path d="M516 226 L516 240 L246 240 L246 256" stroke="#8B6BFF" stroke-width="1.6" stroke-dasharray="4 3" fill="none" marker-end="url(#ah)"/>'
-    b += T('tag on', 300, 243, '찾은 날짜를 넣어 질문을 다시 씁니다')
-    b += T('note', 78, 302, '임베딩의 입력은 <b>질문뿐</b>입니다. 앞 기록을 기억하지 않고, 단서를 넣어 다시 쓴 질문을 받습니다.')
-    b += T('note', 78, 322, '그래서 <b>튜닝한 임베딩과 질문 다시 쓰기의 이득은 더해집니다.</b>')
-    b += T('th', 78, 350, '임베딩을 바꿔도 다시 쓰기의 이득은 남습니다 (Hi-Q 표 13, R@5)')
-    tb = [('임베딩', '한 번 검색', 'Hi-Q를 얹으면'), ('Qwen3-Embedding-8B', '68.7', '79.0'), ('text-embedding-3-large', '74.5', '83.9'), ('NV-Embed-v2', '80.2', '88.4')]
-    for i, r in enumerate(tb):
-        y = 370 + i * 21
-        cl = 'th' if i == 0 else 'tx'
-        b += T(cl, 78, y, r[0]) + T(cl, 280, y, r[1]) + T(cl, 380, y, ('<em>%s</em>' % r[2]) if i else r[2])
-    b += T('th', 78, 462, '다시 쓴 질문도 튜닝한 임베딩으로 찾습니다 (ReasonIR, BRIGHT nDCG@10)')
-    b += T('tx', 78, 480, '원래 질문 <b>24.4</b> → GPT-4로 다시 쓴 질문 <em>29.9</em> → 재정렬까지 <b>36.9</b>')
-    b += T('th', 78, 508, '임베딩 안에서 추론하는 연구도 입력은 질문입니다 (LaSER)')
-    b += T('tx', 78, 526, '0.6B 모델 BRIGHT nDCG@10 <em>23.1</em>, 다시 쓰기 후 검색 22.4. 글을 생성하지 않습니다.')
-    b += T('tx', 78, 554, '질문과 기록을 함께 넣는 MDR, GRITHopper에서는 임베딩이 직접 홉을 잇습니다.<br>Weave는 다시 쓴 질문을 화면에 보여 주는 쪽을 택했습니다.', extra=' color:#6A6474; font-size:11.5px;')
-
-    b += '  <div class="panel" style="left:596px; top:148px; width:624px; height:462px;"></div>\n'
-    b += T('st', 614, 160, '우리 시나리오의 추론 유형', extra=' font-size:14.5px; line-height:20px;')
-    b += T('tx', 790, 162, 'RIR Survey 부록 B의 다섯 유형 기준', extra=' color:#6A6474; font-size:11px;')
-    head = [(614, '유형'), (742, '정의 (요약)'), (1000, 'Weave에서')]
-    for x, t in head:
-        b += T('th', x, 188, t)
-    b += '  <div class="rule" style="left:614px; top:206px; width:588px;"></div>\n'
-    rows2 = [
-        ('Analytical', '문서가 다단계 추론 사슬의 빈칸을 채웁니다.<br>문제를 서로 이어지는 하위 질문으로 나눕니다.', '세 시나리오의 전체 흐름<br>(개인 기록이라 가장 가까운 유형)', True),
-        ('Numerical', '수치 사실과 규칙으로 값이나 결정을 정합니다.<br>시간 비교를 포함합니다.', 'UX 1의 11/3과 11/10 비교<br>임베딩이 아니라 규칙이 맡습니다', True),
-        ('Deductive', '일반 원리를 적용해 특정 상황을 설명합니다.', '쓰지 않습니다', False),
-        ('Analogical', '같은 풀이 전략이나 공통 기반을 공유합니다.', '쓰지 않습니다', False),
-        ('Causal', '증상에서 원인으로 인과 사슬을 따라갑니다.', '쓰지 않습니다', False),
-    ]
-    y = 214
-    for n, d, w, on in rows2:
-        h = 46 if on else 28
-        b += T('st', 614, y, n, extra=(' color:#6B4EFF;' if on else ' color:#A29DB2;'))
-        b += T('tx', 742, y, d, extra=('' if on else ' color:#A29DB2;'))
-        b += T('tx', 1000, y, w, extra=('' if on else ' color:#A29DB2;'))
-        y += h
-    b += '  <div class="rule" style="left:614px; top:%dpx; width:588px;"></div>\n' % (y - 2)
-    y += 6
-    b += T('th', 614, y, '다섯 유형에 없는 한 걸음: \'휴지 안 사 와도 돼\' → 집들이')
-    b += T('tx', 614, y + 20, '글에 없는 사실을 일반 지식과 상식으로 잇습니다. 서베이의 <b>개방형 영역</b>(일반 지식과 상식, 숨은 의도 해석)에 해당하고,<br>ImpliRet의 <b>World Knowledge</b> 유형(글 속 표현을 바깥 사실과 연결)과 같은 구조입니다.<br>갈색병과 나이트 리페어의 연결도 같습니다.')
-    b += T('tx', 614, y + 80, '쉬운 유형이 아닙니다. ImpliRet에서 가장 좋은 nDCG@10은 <b>14.91%</b>입니다.<br>그래서 Weave는 보낸 사람 같은 필터로 후보를 줄인 뒤 찾도록 설계합니다. 우리 모델로는 측정 전입니다.', extra=' color:#6A6474;')
-    b += T('src', 62, 622, '* 출처: Wei et al., "A Survey of Reasoning-Intensive Retrieval", ACL 2026 (부록 B, §3.1.1) · Su et al., "BRIGHT", ICLR 2025 · Taghavi et al., "ImpliRet", EMNLP 2025 · Shao et al., "ReasonIR", COLM 2025')
-    b += T('src', 62, 638, '   Kim et al., "Hi-Q", NeurIPS 2026 (표 13) · LaSER, SIGIR 2026 · Xiong et al., "MDR", ICLR 2021 · Erker et al., "GRITHopper", EACL 2026')
-    notes = """Appendix · Reasoning Embedding. 예상 질문은 "임베딩이 앞 기록을 어떻게 기억하나요?"입니다. 답은 "임베딩은 기억하지 않습니다. 찾은 단서를 넣어 다시 쓴 질문을 받습니다."입니다.
-튜닝한 임베딩과 질문 다시 쓰기는 경쟁이 아니라 더해집니다. Hi-Q 표 13에서 임베딩을 바꿔도 Hi-Q를 얹으면 R@5가 오르고 임베딩 순위는 그대로입니다.
-추론 유형은 RIR 서베이 부록 B의 다섯 유형을 썼습니다. 정의는 원문을 줄인 것입니다. Analytical의 원문은 분야 지식을 말하므로 개인 기록과 완전히 같지는 않아서 "가장 가깝다"고 말합니다. BRIGHT 부록에도 Analytical 유형이 있습니다. '휴지 안 사 와도 돼'에서 집들이를 알아보는 한 걸음은 다섯 유형에 정확히 맞는 것이 없고, 서베이의 개방형 영역과 ImpliRet의 World Knowledge가 가장 가깝습니다. 이 문장 자체는 논문 예문이 아니라 우리가 만든 시나리오입니다."""
-    page('page-a3', 'Appendix · Reasoning Embedding', 'Reasoning Embedding의 역할과 추론 유형', '찾는 일은 임베딩이, 잇는 일은 질문 다시 쓰기가 맡습니다.', b, svg, notes)
-
-
-# ──────────────────────────────────────────── UX 상세(공통 틀)
-def ux_page(name, chip, title, sub, strip, rows, foot, srcs, notes):
     b, svg = '', ''
-    # 위 띠: 기록
-    w = strip['w']
-    x = 60
-    for i, c in enumerate(strip['items']):
-        ic, t1, t2, tg, on = c
-        cls = 'ok' if on else 'no'
-        b += BOX(cls, x, 150, w, 54)
-        b += IMG(ic, x + 8, 158, 15)
-        b += T('chipb', x + 28, 156, t1, extra='' if on else ' color:#8E88A0;')
-        b += T('chipt', x + 8, 174, t2, extra='' if on else ' color:#A29DB2;')
-        b += T('tag ' + ('on' if on else 'off'), x + 8, 186, tg)
-        x += w + strip.get('gap', 8)
-    # 표
-    cols = [(60 + 16, '단계'), (176, '일어나는 일'), (650, '모델과 절차'), (952, '논문 근거')]
-    top = 210
-    rh = 43
-    b += f'  <div class="panel" style="left:60px; top:{top}px; width:1160px; height:{30 + rh * len(rows) + 6}px;"></div>\n'
-    for cx, t in cols:
-        b += T('th', cx, top + 9, t)
-    y = top + 30
-    for i, (st, what, how, ev) in enumerate(rows):
-        b += f'  <div class="rule" style="left:76px; top:{y - 1}px; width:1128px;"></div>\n'
-        b += T('st', cols[0][0], y + 5, st.replace('\n', '<br>'))
-        b += T('tx', cols[1][0], y + 5, what.replace('\n', '<br>'))
-        b += T('tx', cols[2][0], y + 5, how.replace('\n', '<br>'))
-        b += T('tx', cols[3][0], y + 5, ev.replace('\n', '<br>'), extra=' color:#6A6474;')
-        y += rh
-    y += 12
-    for ln in foot:
-        b += T('note', 62, y, ln, extra=' font-size:12px; line-height:17px;')
-        y += 18
-    y += 4
-    for ln in srcs:
-        b += T('src', 62, y, ln)
-        y += 15
+    stages = ['① 1차 통합 검색', '② 하위 질문 분해', '③ 멀티홉 추론 검색', '④ 단서 결합·질의 재작성', '⑤ 근거 기반 응답 생성']
+    w, gap, x0 = 200, 20, 80
+    for i, t in enumerate(stages):
+        x = x0 + i * (w + gap)
+        b += CHIP('', x, 160, w, t, h=28, size=12.5)
+        if i < 4:
+            svg += LINE(f'M{x + w + 3} 174 L{x + w + gap - 4} 174')
+    cards = [
+        ('graph', '사전 그래프 구축형', 'Graph-based', 'HippoRAG 2 · PropRAG · GRASP',
+         '색인할 때 LLM으로 관계를 뽑아<br>그래프를 만들고 그래프를 따라 탐색',
+         '정해 둔 관계를 여러 단계로 연결하고<br>근거를 설명하기 쉬움',
+         '기록이 들어올 때마다 관계 추출 필요', None),
+        ('rewrite', '반복 질의 재작성형', 'Iterative Rewriting', 'IRCoT · Hi-Q · DER-RAG',
+         '찾은 단서를 넣어 질문을 다시 쓰고<br>한 번 더 검색',
+         '그래프와 추가 학습 없이<br>임베딩을 갈아 끼울 수 있음',
+         '홉마다 LLM 호출 필요<br>1~2B sLLM으로 경량화', 'Weave 기본 경로'),
+        ('dense', '다중홉 밀집 임베딩형', 'Multi-Hop Dense', 'MDR · GRITHopper',
+         '질문과 찾은 기록을 함께 인코딩해<br>다음 기록을 탐색',
+         '글을 생성하지 않아<br>탐색이 빠름',
+         '개인 대화 데이터로 학습 필요', 'Weave 보조 경로'),
+        ('code', '코드 에이전트 탐색형', 'Agentic Search', '코딩 에이전트 · RLM · PyRAG',
+         'LLM이 코퍼스를 프로그램처럼 탐색하고<br>하위 호출을 반복',
+         '중간 상태를 명시하고<br>실행 결과를 그대로 활용',
+         '코드를 짜고 실행할 LLM 필요', None),
+    ]
+    cw, cg, cx0, cy, ch = 278, 13.3, 64, 200, 342
+    for i, (k, nm, en, pp, m1, m2, m3, tag) in enumerate(cards):
+        x = cx0 + i * (cw + cg)
+        on = tag == 'Weave 기본 경로'
+        b += BOX('card on' if on else 'card', x, cy, cw, ch)
+        svg += diagram(k, x + 14, cy + 12)
+        tx = x + 16
+        b += T('t15b', tx, cy + 80, nm)
+        b += T('t11p', tx, cy + 103, en)
+        b += T('t10m', tx, cy + 121, pp)
+        if tag:
+            tw_ = tw(tag, 10.5, True) + 30
+            b += BOX('chip fill' if on else 'chip soft', x + cw - tw_ - 10, cy + 100, tw_, 20, ' border-radius:10px;')
+            b += IMG('spoolw' if on else 'spool', x + cw - tw_ - 4, cy + 103, 14)
+            b += T('ct fill' if on else 'ct', x + cw - tw_ + 12, cy + 100, tag, tw_ - 20, ' height:20px; line-height:20px; font-size:10.5px; text-align:left;')
+        b += BOX('bar', tx, cy + 142, cw - 32, 1)
+        for j, (lab, txt) in enumerate([('핵심 연결 메커니즘', m1), ('강점', m2), ('온디바이스 적용 시 한계', m3)]):
+            yy = cy + 150 + j * 64
+            b += T('t10p', tx, yy, lab)
+            b += T('t12', tx, yy + 17, txt, extra=' font-size:12.3px; line-height:17.5px;')
+    # Hi-Q 한 줄
+    b += BOX('lav', 64, 552, 1152, 54, ' border-radius:14px;')
+    b += IMG('spool', 78, 567, 24)
+    b += T('t12', 112, 560, '<b>Hi-Q(NeurIPS 2026)</b>는 막힌 질문만 계층적으로 나눠, IRCoT와 같은 LLM 호출 수에서 입력 토큰을 <em>9.4배</em> 줄이면서 멀티홉 정확도를 높였습니다.<br><b>Weave는 이 구조를 1~2B 온디바이스 sLLM에 맞게 경량화하여 적용합니다.</b>', extra=' font-size:13px; line-height:19px;')
+    b += sources(['Gutiérrez et al., "HippoRAG 2", ICML 2025', 'Jenkins et al., "GRASP", arXiv 2605.16598', 'Trivedi et al., "IRCoT", ACL 2023', 'Kim et al., "Hi-Q", NeurIPS 2026',
+                  'Lee & Lim, "DER-RAG", arXiv 2609.06065', 'Xiong et al., "MDR", ICLR 2021', 'Erker et al., "GRITHopper", EACL 2026'], 616)
+    notes = """Appendix · 관련 연구. Multi-hop Retrieval에는 정해진 표준이 없고, 논문들이 공유하는 뼈대가 있습니다. 위의 다섯 단계입니다. 홉을 잇는 방법에 따라 갈래는 넷입니다.
+Weave는 반복 질의 재작성형을 기본 경로로 택했습니다. 그래프를 미리 만들지 않고 임베딩을 바꿔 쓸 수 있어 온디바이스에 맞기 때문입니다. 다중홉 밀집 임베딩형은 보조 경로로 둡니다.
+출발점으로 삼은 Hi-Q는 막힌 질문만 나누는 구조로, IRCoT와 같은 LLM 호출 수(2.93회와 2.92회)에서 입력 토큰을 9.4배 줄이고 EM을 10.4점 높였습니다."""
+    page('page-a2', 'Appendix · 관련 연구', '<span class="hl">Multi-hop Retrieval</span> 관련 연구 지도', '표준 파이프라인은 없고 공통 뼈대가 있습니다. Weave는 반복 질의 재작성형을 기본으로 합니다.', b, svg, notes)
+
+
+# ───────────────────────────────── A3 Reasoning Embedding
+def a3():
+    b, svg = '', ''
+    # 왼쪽: 역할
+    b += BOX('card', 64, 160, 540, 446)
+    b += T('t15b', 84, 174, 'Reasoning Embedding의 역할')
+    qx, ex, rx = 84, 306, 424
+    for label, y in (('Hop 1', 206), ('Hop 2', 310)):
+        b += T('t11p', 84, y, label)
+    # Hop 1
+    y1 = 226
+    b += BOX('mini on', qx, y1, 196, 40) + T('t11b', qx + 12, y1 + 12, '지은이네 집들이는 언제였지?')
+    b += BOX('lav', ex, y1, 92, 40) + T('t10p', ex, y1 + 6, 'Reasoning<br>Embedding', 92, ' text-align:center; line-height:14px;')
+    b += BOX('mini', rx, y1 - 8, 162, 56)
+    b += IMG('talk', rx + 9, y1 - 1, 20, 5) + T('t10b', rx + 35, y1 + 2, '지은')
+    b += T('t10', rx + 9, y1 + 26, '휴지 안 사 와도 돼') + T('t10p', rx + 108, y1 + 2, '3/15 (일)')
+    svg += LINE(f'M{qx + 199} {y1 + 20} L{ex - 4} {y1 + 20}') + LINE(f'M{ex + 95} {y1 + 20} L{rx - 4} {y1 + 20}')
+    # 다시 쓰기
+    svg += LINE(f'M{rx + 81} {y1 + 50} C{rx + 81} {y1 + 84} {qx + 98} {y1 + 60} {qx + 98} {y1 + 98}', c='#8B6BFF', mk='ah2', dash='4 4')
+    b += T('t10p', 286, y1 + 80, '찾은 날짜로 질문 재작성')
+    # Hop 2
+    y2 = 330
+    b += BOX('mini on', qx, y2, 196, 40)
+    b += BOX('chip fill', qx + 8, y2 + 10, 58, 20, ' border-radius:10px;') + T('ct fill', qx + 8, y2 + 10, '3/15 (일)', 58, ' height:20px; line-height:20px; font-size:10.5px;')
+    b += T('t11b', qx + 70, y2 + 12, '에 마셨던 와인은?')
+    b += BOX('lav', ex, y2, 92, 40) + T('t10p', ex, y2 + 6, 'Reasoning<br>Embedding', 92, ' text-align:center; line-height:14px;')
+    b += PHOTO(WINE, rx, y2 - 14, 162, 68, 11)
+    b += IMG('gal', rx + 8, y2 - 8, 18, 0, ' z-index:6;')
+    svg += LINE(f'M{qx + 199} {y2 + 20} L{ex - 4} {y2 + 20}') + LINE(f'M{ex + 95} {y2 + 20} L{rx - 4} {y2 + 20}')
+    b += T('t12', 84, 396, '임베딩 모델은 이전 홉의 상태를 무겁게 유지하는 대신, 1차 검색에서 찾은 단서가 결합된<br><b>재작성 질의(Rewritten Query)를 매 홉마다 독립적으로 인코딩</b>합니다.', extra=' font-size:13px; line-height:20px;')
+    # 튜닝 세 가지
+    items = [('i-nodes', '추론형 데이터로 튜닝', '단서와 다음 근거를<br>잇도록 학습'), ('i-cards', '헷갈리는 오답으로 학습', '같은 주제의 오답을<br>구분하도록 학습'), ('i-cpu', '온디바이스 경량', '기록 벡터는 미리 저장,<br>질문만 계산')]
+    for i, (ic, t1, t2) in enumerate(items):
+        x = 84 + i * 168
+        b += BOX('pill', x, 450, 160, 140)
+        b += BOX('tile', x + 12, 462, 30, 30) + USE(ic, x + 19, 469, 16)
+        b += T('t11b', x + 12, 504, t1)
+        b += T('t11', x + 12, 528, t2, extra=' line-height:17px;')
+    # 오른쪽: 추론 유형
+    b += BOX('card', 618, 160, 598, 446)
+    b += T('t15b', 638, 174, '우리 시나리오의 추론 유형')
+    b += T('t10m', 638 + tw('우리 시나리오의 추론 유형', 16, True) + 10, 180, 'RIR Survey 다섯 유형 기준')
+    for i, (nm, kr, d, weave) in enumerate([
+        ('Analytical', '분석 추론', '기록이 추론 사슬의 빈칸을 채웁니다.<br>문제를 이어지는 하위 질문으로 나눕니다.', '세 시나리오의 전체 흐름'),
+        ('Numerical', '수치 추론', '수치 사실과 규칙으로 값이나 결정을<br>정합니다. 시간 비교를 포함합니다.', 'UX 1: 11/3과 11/10 회의 비교'),
+    ]):
+        x = 638 + i * 284
+        b += BOX('mini on', x, 206, 274, 122)
+        b += T('t14b', x + 14, 216, nm) + T('t10p', x + 14 + tw(nm, 14.5, True) + 8, 221, kr)
+        b += T('t11', x + 14, 241, d, extra=' line-height:17px;')
+        b += BOX('bar', x + 14, 282, 246, 1)
+        b += IMG('spool', x + 14, 292, 18) + T('t11b', x + 38, 293, weave)
+    b += BOX('pill', 638, 338, 558, 62)
+    b += T('t11b', 652, 347, '향후 확장 가능 영역')
+    for i, (en, kr) in enumerate([('Deductive', '규칙 적용'), ('Analogical', '유사 사례'), ('Causal', '원인 추적')]):
+        x = 652 + i * 180
+        b += T('t11p', x, 370, en) + T('t11', x + tw(en, 11.5, True) + 7, 370, kr)
+    # 상식 추론
+    b += BOX('lav', 638, 410, 558, 180, ' border-radius:14px;')
+    b += T('t12b', 652, 420, '일상 상식 추론: 글에 없는 사실을 잇습니다')
+    for i, (ic, a, c) in enumerate([('talk', '휴지 안 사 와도 돼', '집들이 초대'), ('talk', '이 갈색병 좋대', '에스티 로더 나이트 리페어')]):
+        y = 446 + i * 42
+        b += BOX('mini', 652, y, 196, 34)
+        b += IMG(ic, 660, y + 8, 18, 5) + T('t11', 684, y + 9, a)
+        svg += LINE(f'M852 {y + 17} L880 {y + 17}')
+        w_ = tw(c, 12, True) + 26
+        b += CHIP('fill', 886, y + 5, w_, c, h=24, size=12)
+    b += T('t11', 652, 534, '서베이의 개방형 영역(일반 지식과 상식, 숨은 의도)이고, ImpliRet의 World Knowledge 유형과 같은 구조입니다.')
+    b += T('t11', 652, 554, '<b>Weave는 보낸 사람 같은 필터로 후보를 줄인 뒤 추론합니다.</b>')
+    b += sources(['Wei et al., "A Survey of Reasoning-Intensive Retrieval", ACL 2026', 'Taghavi et al., "ImpliRet", EMNLP 2025', 'Su et al., "BRIGHT", ICLR 2025', 'Shao et al., "ReasonIR", COLM 2025'], 616)
+    notes = """Appendix · Reasoning Embedding. 찾는 일은 임베딩이, 잇는 일은 질문 다시 쓰기가 맡습니다.
+임베딩 모델은 이전 홉의 상태를 무겁게 유지하는 대신, 1차 검색에서 찾은 단서가 결합된 재작성 질의를 매 홉마다 독립적으로 인코딩합니다. 그래서 일반 임베딩과 같은 구조를 유지하면서, 추론형 데이터와 헷갈리는 오답으로 튜닝합니다.
+추론 유형으로는 세 시나리오의 전체 흐름이 Analytical이고, UX 1에서 회의 날짜를 비교하는 단계가 Numerical입니다. 휴지 안 사 와도 돼를 집들이 초대로 읽는 단계는 서베이의 개방형 영역, ImpliRet의 World Knowledge 유형과 같은 구조입니다."""
+    page('page-a3', 'Appendix · Reasoning Embedding', '<span class="hl">Reasoning Embedding</span>의 역할과 추론 유형', '찾는 일은 임베딩이, 잇는 일은 질문 다시 쓰기가 맡습니다.', b, svg, notes)
+
+
+# ───────────────────────────────── A4~A6 시나리오 상세: 단계 카드 8개
+def rec(x, y, w, ic, title, meta, body=None, on=False, off=False, tag=None, r=5):
+    """앱 기록 한 줄(데모 앱의 연결된 기억과 같은 모양)."""
+    h = 60 if body else 38
+    s = BOX('mini ' + ('on' if on else 'off' if off else ''), x, y, w, h)
+    op = ' opacity:.5;' if off else ''
+    s += IMG(ic, x + 8, y + 8, 21, r, op)
+    s += T('t10b', x + 35, y + 5, title, extra=' color:#8E88A0;' if off else '')
+    s += T('t10m', x + 35, y + 19, meta)
+    if body:
+        s += T('t10', x + 10, y + 39, body, extra=' color:#A8A3B5;' if off else '')
+    if tag:
+        tw_ = tw(tag, 9.5, True) + 14
+        s += BOX('chip soft', x + w - tw_ - 7, y + 8, tw_, 17, ' border-radius:8.5px;') + T('ct', x + w - tw_ - 7, y + 8, tag, tw_, ' height:17px; line-height:17px; font-size:9.5px;')
+    return s
+
+
+def qbar(x, y, w, text):
+    """Weave 검색창: 실타래 아이콘 + 검색어 + 보라 버튼."""
+    s = BOX('chip', x, y, w, 32, ' border-radius:16px; border-color:#CFC3FF;')
+    s += IMG('spool', x + 9, y + 7, 18) + T('t11b', x + 32, y + 8, text)
+    s += f'  <svg class="app" viewBox="0 0 24 24" style="left:{x + w - 27}px; top:{y + 5}px; width:22px; height:22px;"><circle cx="12" cy="12" r="12" fill="#6B4EFF"/><path d="M12 18V7M7 11.5 12 6.5l5 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>\n'
+    return s
+
+
+def subq(x, y, w, items):
+    """하위 질문 판: 번호 + 질문, 모르는 말은 점선 칩."""
+    s = ''
+    for i, it in enumerate(items):
+        yy = y + i * 36
+        s += BOX('pill', x, yy, w, 30, ' border-radius:10px;' + (' background:#F4F0FF; border-color:#E3D9FF;' if i == 0 else ''))
+        s += BOX('no', x + 7, yy + 6, 18, 18, ' border-radius:9px;') + T('no-t', x + 7, yy + 6, str(i + 1), extra=' width:18px; height:18px; line-height:18px; font-size:10.5px;')
+        tx = x + 31
+        if isinstance(it, tuple):
+            cw_ = tw(it[0], 10.5, True) + 16
+            s += BOX('chip dash', tx, yy + 6, cw_, 18, ' border-radius:9px;') + T('ct', tx, yy + 6, it[0], cw_, ' height:18px; line-height:18px; font-size:10.5px;')
+            s += T('t11b', tx + cw_ + 4, yy + 7, it[1], extra=' color:#8E88A0;')
+        else:
+            s += T('t11b', tx, yy + 7, it)
+    return s
+
+
+def rewrite(x, y, w, chip, rest, flt):
+    """다시 쓴 질문 + 메타데이터 필터."""
+    cw_ = tw(chip, 11, True) + 18
+    s = BOX('mini on', x, y, w, 36)
+    s += BOX('chip fill', x + 8, y + 8, cw_, 20, ' border-radius:10px;') + T('ct fill', x + 8, y + 8, chip, cw_, ' height:20px; line-height:20px; font-size:11px;')
+    s += T('t11b', x + 12 + cw_, y + 10, rest)
+    fw_ = tw('필터 ' + flt, 10.5, True) + 22
+    s += BOX('chip dash', x, y + 46, fw_, 22, ' border-radius:11px;') + T('ct', x, y + 46, '필터 ' + flt, fw_, ' height:22px; line-height:22px; font-size:10.5px;')
+    return s
+
+
+def answer(x, y, w, label, lines, btn):
+    """✦ 라벨 카드 + 보라 버튼. 카드에는 글만."""
+    n = len(lines)
+    h = 22 + n * 14.5
+    s = BOX('lav', x, y - 2, w, h)
+    s += SPARK(x + 7, y + 3, 11) + T('t10p', x + 21, y + 1, label)
+    s += T('t10b', x + 8, y + 17, '<br>'.join(lines), extra=' font-size:11px; line-height:14.5px;')
+    s += BOX('btn', x, y + h + 2, w, 22, ' border-radius:11px;')
+    s += T('ct fill', x, y + h + 2, btn, w, ' height:22px; line-height:22px; font-size:11px;')
+    return s
+
+
+def ux_page(name, chip, title, sub, steps, srcs, notes):
+    b, svg = '', ''
+    cw, gx, x0, ys, ch = 278, 13.3, 64, (158, 386), 216
+    for i, st in enumerate(steps):
+        col, row = i % 4, i // 4
+        x, y = x0 + col * (cw + gx), ys[row]
+        on = st.get('on')
+        b += BOX('card on' if on else 'card', x, y, cw, ch)
+        b += BOX('no', x + 12, y + 12, 24, 24) + T('no-t', x + 12, y + 12, st['no'])
+        b += T('t12b', x + 43, y + 9, st['name'], extra=' font-size:13.2px; line-height:17px;')
+        b += T('t10p', x + 43, y + 26, st['en'], extra=' color:#8B6BFF; font-weight:600;')
+        b += st['ui'](x + 12, y + 46, cw - 24)
+        b += T('t11', x + 14, y + 128, st['do'], extra=' line-height:16px; font-size:11.3px;')
+        b += BOX('bar', x + 14, y + 166, cw - 28, 1)
+        b += T('t10p', x + 14, y + 172, '모델') + T('t10', x + 42, y + 172, st['model'])
+        b += T('t10p', x + 14, y + 189, '근거') + T('t10', x + 42, y + 189, st['ref'])
+        for v in (st['model'], st['ref']):
+            if tw(v, 10.5) > cw - 54:
+                print('  ! 칸보다 김:', name, st['no'], v)
+        for ln in st['do'].split('<br>'):
+            if tw(ln, 11.3) > cw - 26:
+                print('  ! 칸보다 김:', name, st['no'], ln)
+        if col < 3 and i + 1 < len(steps) and (i + 1) // 4 == row:
+            svg += f'<path d="M{x + cw + 2.5} {y + 24} l{gx - 5} 0" stroke="#6B4EFF" stroke-width="2" stroke-linecap="round"/>'
+    # 윗줄 끝 → 아랫줄 처음
+    xr = x0 + 3 * (cw + gx) + cw / 2
+    xl = x0 + cw / 2
+    svg += LINE(f'M{xr} {ys[0] + ch + 1} L{xr} {ys[0] + ch + 6} L{xl} {ys[0] + ch + 6} L{xl} {ys[1] - 3}', w=2)
+    b += sources(srcs, 610)
     page(name, chip, title, sub, b, svg, notes)
 
 
 def a4():
-    strip = dict(w=157, items=[
-        ('note', '11/3 준비 회의', '제품 소개 → 데모 → Q&amp;A', '이전 안', False),
-        ('mail', '11/5 민수 메일', '기술전_시연자료_v1', '날짜로 탈락', False),
-        ('note', '11/6 오류 목록', '라이브 데모 오류 정리', '뜻으로 탈락', False),
-        ('note', '11/10 주간 회의', '문제 상황 → 데모 → 체험', '최신 결정', True),
-        ('mail', '11/12 민수 메일', 'Demo_Final.pptx', '최종 파일', True),
-        ('mail', '11/13 민수 메일', '리허설 회의실 예약', '뜻으로 탈락', False),
-        ('cal', '11/19 캘린더', '오후 2시, 3번 부스', '일정', True)])
-    rows = [
-        ('01 순간 감지', '통화 화면에서 위로 밀고 \'삼성기술전 시연 최종\'을 직접 적습니다.\n통화 내용은 듣지 않습니다. 키보드가 없는 화면의 입구입니다.', '사용자 호출', '논문 없음(설계)'),
-        ('① 한 번 찾기', '11/3 회의록과 v1 파일이 올라옵니다. 답처럼 보이지만 옛 내용입니다.\n이대로 보고하면 틀립니다.', 'BM25 + Reasoning Embedding', 'IRCoT (ACL 2023), BRIGHT (ICLR 2025)'),
-        ('② 나누기', '1. 언제 어디서 하지?  2. 무엇을 어떤 순서로 하지?', 'sLLM 1~2B', 'Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025)'),
-        ('③ 1홉', '1번은 캘린더에서, 2번은 11/3 회의록에서 찾습니다.', 'Reasoning Embedding', 'ReasonIR, ReasonEmbed (ACL 2026)'),
-        ('④ 잇기', '[그 순서]를 넣어 \'그 뒤에 바뀌었나?\'로 다시 쓰고 11/3 이후로 거릅니다.', '기록에서 복사, 날짜 필터\n(날짜 비교 = Numerical Reasoning)', 'Hi-Q, IRCoT, RIR Survey (ACL 2026)'),
-        ('③ 2홉', '오류 목록 말고 11/10 주간 회의를 찾습니다.\n\'기술전\'도 \'시연\'도 없는 메모입니다.', 'Reasoning Embedding', 'LongMemEval (ICLR 2025)\nKnowledge Update'),
-        ('④③ 3홉', '\'민수 님이 다시 정리\'로 다시 쓰고, 민수 메일 11/10 이후에서\n회의실 메일 말고 최종본을 찾습니다.', '보낸 사람과 날짜 필터 + Reasoning Embedding', 'DER-RAG, MDR (ICLR 2021)'),
-        ('⑤ 요약', '날짜순으로 세워 마지막 결정을 세 줄로 요약하고 파일을 붙입니다.\n사용자는 요약을 읽어 주고, 파일은 직접 보냅니다.', 'sLLM, 이름과 날짜 복사 검사\n전송은 사용자', 'LongMemEval (시간순 제공, Chain-of-Note)\nHi-Q (NeurIPS 2026)'),
+    S = '삼성기술전 시연 내용'
+    steps = [
+        dict(no='01', name='순간 감지', en='Trigger',
+             ui=lambda x, y, w: T('t10b', x + 2, y + 2, '재웅 선배') + BOX('chip soft', x + 58, y, 48, 18, ' border-radius:9px; background:#E9F7EE; border-color:#E9F7EE;') + T('ct', x + 58, y, '통화 중', 48, ' height:18px; line-height:18px; font-size:10px; color:#1E9E55;') + qbar(x, y + 28, w, S),
+             do='통화 화면에서 위로 밀어 직접 입력합니다.<br>키보드가 없는 화면의 입구입니다.', model='사용자 호출', ref='Weave 온디바이스 UX 설계'),
+        dict(no='1', name='1차 통합 검색', en='Single-Hop',
+             ui=lambda x, y, w: rec(x, y, w, 'note', '삼성기술전 준비 회의', '삼성노트 · 11월 3일 (화)', '제품 소개 → 라이브 데모 → Q&amp;A', off=True, tag='이전 안'),
+             do='11/3 회의록과 v1 파일이 먼저 올라옵니다.<br>답처럼 보이지만 옛 내용입니다.', model='BM25 + Reasoning Embedding', ref='IRCoT (ACL 2023), BRIGHT (ICLR 2025)'),
+        dict(no='2', name='하위 질문 분해', en='Decomposition',
+             ui=lambda x, y, w: subq(x, y, w, ['언제 어디서 하지?', '무엇을 어떤 순서로 하지?']),
+             do='일정과 순서를 따로 찾도록<br>두 개의 하위 질문으로 나눕니다.', model='sLLM 1~2B', ref='Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025)'),
+        dict(no='3', name='1홉 추론 검색', en='Hop Retrieval',
+             ui=lambda x, y, w: rec(x, y, w, 'cal', '삼성기술전 시연', '캘린더 · 11월 19일 (목)', '오후 2시, 수원 디지털시티 3번 부스', on=True),
+             do='1번은 캘린더에서 찾고,<br>2번은 11/3 회의록에서 찾습니다.', model='Reasoning Embedding', ref='ReasonIR, ReasonEmbed (ACL 2026)'),
+        dict(no='4', name='단서 결합·질의 재작성', en='Query Rewriting',
+             ui=lambda x, y, w: rewrite(x, y, w, '그 순서', '그 뒤에 바뀌었나?', 'date > 2026-11-03'),
+             do='찾은 회의 날짜로 질문을 다시 쓰고,<br>더 나중 기록으로 좁힙니다.', model='기록 복사, 날짜 필터 (Numerical)', ref='Hi-Q, IRCoT, RIR Survey (ACL 2026)'),
+        dict(no='3', name='2홉 추론 검색', en='Hop Retrieval',
+             ui=lambda x, y, w: rec(x, y, w, 'note', '주간 회의', '삼성노트 · 11월 10일 (화)', '문제 상황 → 라이브 데모 → 관람객 체험', on=True),
+             do='‘기술전’도 ‘시연’도 없는 주간 회의에서<br>바뀐 순서를 찾습니다.', model='Reasoning Embedding', ref='LongMemEval (ICLR 2025)'),
+        dict(no='3', name='3홉 추론 검색', en='Hop Retrieval',
+             ui=lambda x, y, w: rec(x, y, w, 'mail', '최종본 공유드려요', '메일 · 민수 · 11월 12일 (목)', '첨부: Demo_Final.pptx', on=True),
+             do='‘민수 님이 다시 정리’를 단서로<br>민수 메일에서 최종본을 찾습니다.', model='보낸 사람·날짜 필터 + Embedding', ref='DER-RAG, MDR (ICLR 2021)'),
+        dict(no='5', name='근거 기반 응답 생성', en='Grounded Synthesis', on=True,
+             ui=lambda x, y, w: answer(x, y, w, '요약', ['11월 19일(목) 오후 2시, 수원 3번 부스', '시연 순서: 문제 상황 → 라이브 데모 → 관람객 체험'], 'Demo_Final.pptx 메일로 보내기'),
+             do='날짜순으로 세워 마지막 결정을 요약합니다.<br>전송은 사용자가 합니다.', model='sLLM, 이름·날짜 복사 검사', ref='LongMemEval (Chain-of-Note), Hi-Q'),
     ]
-    foot = ['<b>순서는 임베딩이 맞추지 않습니다.</b> 임베딩이 같은 일의 기록을 찾고, 메타데이터 날짜가 앞뒤를 가리고, sLLM이 마지막 결정을 읽습니다. 시간을 고려하지 않는 설계는 시간 추론 질문에서 약하다는 보고가 있습니다(LongMemEval).',
-            '이 조합 전체를 시험한 논문은 없습니다. 요약 속도는 입력 500토큰, 출력 100토큰 가정으로 Qwen3-1.7B 약 2.5초, 4B 약 4.9초입니다(S26 Snapdragon 공개 측정값으로 계산, 실측 전).']
-    srcs = ['* 출처: Wu et al., "LongMemEval", ICLR 2025 · Kim et al., "Hi-Q", NeurIPS 2026 · Trivedi et al., "IRCoT", ACL 2023 · Su et al., "BRIGHT", ICLR 2025 · Shao et al., "ReasonIR", COLM 2025 · Wei et al., "RIR Survey", ACL 2026']
-    notes = """Appendix · UX 1 상세. 통화 중 삼성기술전 시연을 묻는 장면의 전체 절차입니다. 인포그래픽에서는 나누기를 보여 주지 않았고, 실제로는 이 표처럼 동작합니다.
-핵심은 한 번 검색이 옛 회의록을 답처럼 내놓는다는 점입니다. Weave는 계획이나 결정을 찾으면 그 날짜 이후를 한 번 더 찾습니다.
-LongMemEval 인용: "Naive time-agnostic memory designs perform poorly on temporal reasoning questions". 시간 인식 색인과 질의 확장으로 시간 추론 문항의 recall이 평균 11.3%(라운드 단위), 6.8%(세션 단위) 올랐습니다. 읽기 전략이 나쁘면 완벽한 검색에서도 GPT-4o 기준 최대 10포인트 떨어진다는 결과도 있어서 기록을 날짜와 함께 구조화해 넘깁니다.
-시연 내용과 장소는 시나리오용 예시입니다."""
-    ux_page('page-a4', 'Appendix · UX 1 상세', 'UX 1 기록 통합 검색: 단계별 모델과 근거', '재웅 선배: "프로님, 지금 보고 드려야 하는데 우리 팀이 맡은 삼성기술전 시연 최종적으로 어떻게 됐죠?"', strip, rows, foot, srcs, notes)
+    srcs = ['Wu et al., "LongMemEval", ICLR 2025', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Trivedi et al., "IRCoT", ACL 2023', 'Su et al., "BRIGHT", ICLR 2025', 'Shao et al., "ReasonIR", COLM 2025',
+            'Wei et al., "RIR Survey", ACL 2026', 'Chen et al., "ReasonEmbed", ACL 2026', 'Lee & Lim, "DER-RAG", arXiv 2609.06065', 'Xiong et al., "MDR", ICLR 2021']
+    notes = """Appendix · UX 1 상세. 통화 중 재웅 선배의 질문에 답하는 절차입니다.
+처음 검색에는 11월 3일 회의록과 v1 파일이 올라옵니다. Weave는 일정과 순서를 하위 질문으로 나눠 찾고, 찾은 날짜보다 나중 기록으로 좁혀 11월 10일 주간 회의를 찾습니다. 주간 회의의 민수 님이 다시 정리라는 말을 단서로 민수의 메일에서 최종본을 찾습니다.
+순서는 임베딩이 맞추지 않습니다. 임베딩이 같은 일의 기록을 찾고, 메타데이터 날짜가 앞뒤를 가리고, sLLM이 마지막 결정을 읽습니다. 관련 연구로는 LongMemEval의 Knowledge Update가 같은 문제를 다룹니다."""
+    ux_page('page-a4', 'Appendix · UX 1 상세', 'UX 1 <span class="hl">기록 통합 검색</span>: 단계별 모델과 근거', '재웅 선배: “프로님, 우리 팀이 맡은 삼성기술전 시연 어떻게 진행하기로 했었죠?”', steps, srcs, notes)
 
 
 def a5():
-    strip = dict(w=184, items=[
-        ('talk', '3/15 지은 카톡', '박스 정리 다 했어! 휴지 안 사 와도 돼', '날짜 단서', True),
-        ('note', '3/14 집들이 선물', '디퓨저로 결정!', '와인 얘기 없음', False),
-        ('gal', '3/10 스크린샷', '와인 고르는 법', '일반 정보 글', False),
-        ('gal', '3/15 19:52 사진', '식탁 사진', '뜻으로 탈락', False),
-        ('gal', '3/15 20:14 사진', 'BABICH SAUVIGNON BLANC', '답', True),
-        ('gal', '3/20 21:10 사진', '와인바, 다른 와인', '날짜로 탈락', False)])
-    rows = [
-        ('00 사전 준비', '카톡 글자와 사진을 벡터, 키워드, { date, app }로 저장합니다.', 'Reasoning Embedding, BM25, OCR', 'LongMemEval (ICLR 2025): 타임스탬프 색인'),
-        ('01 순간 감지', '구글 창에 \'지은이네 집들이 때 마셨던 와인\'을 적고 실타래 버튼을 누릅니다.', '사용자 호출', '논문 없음(설계)'),
-        ('① 한 번 찾기', '선물 메모, 와인 고르는 법, 3/20 와인바 사진이 올라옵니다.', 'BM25 + Reasoning Embedding', 'IRCoT (ACL 2023), BRIGHT (ICLR 2025)'),
-        ('② 나누기', '1. 지은이네 집들이는 언제였지?  2. [그날] 마셨던 와인은?', 'sLLM 1~2B', 'Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025)'),
-        ('③ 1홉', '지은이 보낸 기록 중에서 \'휴지 안 사 와도 돼. 몸만 와\'를 집들이 초대로 찾습니다.', '보낸 사람 필터 + Reasoning Embedding\n(개방형 영역, World Knowledge)', 'ImpliRet (EMNLP 2025), RIR Survey (ACL 2026)'),
-        ('④ 잇기', '[그날 → 3/15 (일)]. 카톡에 저장된 날짜를 그대로 씁니다.', '메타데이터 복사, 날짜 필터', 'Hi-Q, LongMemEval'),
-        ('③ 2홉', '그날 사진 둘 중 식탁 사진 말고 와인 사진을 찾고 라벨을 읽습니다.', 'Reasoning Embedding + OCR', 'DocHop-QA (EMNLP 2026): 글 + 이미지'),
-        ('⑤ 전달', '배비치 소비뇽 블랑을 출처와 함께 건넵니다. 입력은 사용자가 합니다.', 'sLLM, 이름 복사 검사', 'Hi-Q'),
+    Q = '지은이네 집들이 때 마셨던 와인'
+
+    def index(x, y, w):
+        s = ''
+        for i, k in enumerate(['talk', 'gal']):
+            s += IMG(k, x + 2 + i * 26, y + 2, 21, 5 if k == 'talk' else 0)
+        s += T('t10', x + 58, y + 6, '카톡 글자, 사진')
+        s += BOX('mini', x, y + 32, w, 36) + T('t10', x + 10, y + 36, '벡터 [-0.69, -0.60, 0.77, …]') + T('t10b', x + 10, y + 51, '{ date: "2026-03-15", app: "kakaotalk" }')
+        return s
+
+    def photo(x, y, w):
+        s = PHOTO(WINE, x, y, 96, 72, 10)
+        s += BOX('mini on', x + 104, y + 6, w - 104, 34) + T('t10p', x + 112, y + 16, 'BABICH SAUVIGNON')
+        s += PHOTO(TABLE, x + 104, y + 46, 40, 26, 6) + T('t10m', x + 150, y + 52, '식탁 사진 탈락')
+        return s
+
+    def first(x, y, w):
+        return rec(x, y - 2, w, 'note', '집들이 선물', '삼성노트 · 3월 14일', off=True, tag='날짜 없음') + rec(x, y + 38, w, 'gal', '3/20 와인바 사진', '갤러리 · 다른 날', off=True, tag='다른 날')
+
+    steps = [
+        dict(no='00', name='사전 준비', en='Indexing', ui=index,
+             do='허용한 기록을 벡터, 키워드, 메타데이터로<br>미리 저장합니다.', model='Reasoning Embedding, BM25, OCR', ref='LongMemEval (ICLR 2025)'),
+        dict(no='01', name='순간 감지', en='Trigger',
+             ui=lambda x, y, w: qbar(x, y + 4, w, Q) + T('t10', x + 4, y + 46, '구글 검색창 + 키보드 실타래 버튼'),
+             do='이름이 떠오르지 않을 때<br>실타래 버튼을 직접 누릅니다.', model='사용자 호출', ref='Weave 온디바이스 UX 설계'),
+        dict(no='1', name='1차 통합 검색', en='Single-Hop', ui=first,
+             do='선물 메모, 다른 날 와인 사진이 올라옵니다.<br>집들이 날짜를 찾지 못합니다.', model='BM25 + Reasoning Embedding', ref='IRCoT (ACL 2023), BRIGHT (ICLR 2025)'),
+        dict(no='2', name='하위 질문 분해', en='Decomposition',
+             ui=lambda x, y, w: subq(x, y, w, ['지은이네 집들이는 언제였지?', ('그날', '마셨던 와인은?')]),
+             do='먼저 풀 질문과<br>빈칸이 있는 질문으로 나눕니다.', model='sLLM 1~2B', ref='Hi-Q (NeurIPS 2026), ReasonIR (COLM 2025)'),
+        dict(no='3', name='1홉 추론 검색', en='Hop Retrieval',
+             ui=lambda x, y, w: rec(x, y, w, 'talk', '지은', '카카오톡 · 3월 15일 (일)', '박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼', on=True),
+             do='‘휴지 안 사 와도 돼’를<br>집들이 초대로 추론합니다.', model='보낸 사람 필터 + Reasoning Embedding', ref='ImpliRet (EMNLP 2025), RIR Survey'),
+        dict(no='4', name='단서 결합·질의 재작성', en='Query Rewriting',
+             ui=lambda x, y, w: rewrite(x, y, w, '3/15 (일)', '에 마셨던 와인은?', 'date: "2026-03-15"'),
+             do='카톡에 저장된 날짜를 그대로 넣고<br>그날 기록만 남깁니다.', model='메타데이터 복사, 날짜 필터', ref='Hi-Q, LongMemEval'),
+        dict(no='3', name='2홉 추론 검색', en='Hop Retrieval', ui=photo,
+             do='그날 사진 중 와인 사진을 찾고<br>라벨을 읽어 이름을 복원합니다.', model='Reasoning Embedding + OCR', ref='DocHop-QA (EMNLP 2026)'),
+        dict(no='5', name='근거 기반 응답 생성', en='Grounded Synthesis', on=True,
+             ui=lambda x, y, w: answer(x, y, w, '자동 완성 추천', ['배비치 소비뇽 블랑'], '입력하기'),
+             do='정확한 이름을 출처와 함께 건넵니다.<br>입력은 사용자가 합니다.', model='sLLM, 이름 복사 검사', ref='Hi-Q (NeurIPS 2026)'),
     ]
-    foot = ['<b>왜 이 장면이 멀티홉인가요?</b> 질문에 없는 날짜를 먼저 찾아야 사진을 고를 수 있습니다. 첫 단계를 모르면 둘째 근거는 질문과 단어도 뜻도 겹치지 않아 찾기 어렵다는 지적이 있습니다(IRCoT).',
-            '<b>넘어가는 단서가 날짜입니다.</b> 이번 단서는 날짜지만, 별칭이나 맡은 일 같은 내용도 같은 방식으로 잇습니다(UX 1, UX 3).']
-    srcs = ['* 출처: Trivedi et al., "IRCoT", ACL 2023 · Kim et al., "Hi-Q", NeurIPS 2026 · Taghavi et al., "ImpliRet", EMNLP 2025 · Wei et al., "RIR Survey", ACL 2026 · Wu et al., "LongMemEval", ICLR 2025 · Park et al., "DocHop-QA", EMNLP 2026']
-    notes = """Appendix · UX 2 상세. How it Works에서 본 와인 장면의 모델과 근거입니다.
-DocHop-QA 표 7(Qwen3-VL-8B, BLEU)에서 글과 이미지를 함께 줄 때 29.7, OCR 글자만 26.0, 이미지만 18.2입니다. 위키가 아니라 PubMed 데이터이고 Weave 성능이 아닙니다.
-예상 질문: 지은 카톡을 보낸 사람으로 바로 찾으면 되지 않나요? 지은의 카톡은 많고 집들이라는 말이 없습니다. 보낸 사람은 후보를 줄이는 거름망이고, 초대를 알아보는 일은 임베딩이 맡습니다."""
-    ux_page('page-a5', 'Appendix · UX 2 상세', 'UX 2 단서로 찾는 기억: 단계별 모델과 근거', '구글 검색창: "지은이네 집들이 때 마셨던 와인"', strip, rows, foot, srcs, notes)
+    srcs = ['Trivedi et al., "IRCoT", ACL 2023', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Taghavi et al., "ImpliRet", EMNLP 2025', 'Wei et al., "RIR Survey", ACL 2026', 'Wu et al., "LongMemEval", ICLR 2025',
+            'Su et al., "BRIGHT", ICLR 2025', 'Shao et al., "ReasonIR", COLM 2025', 'Park et al., "DocHop-QA", EMNLP 2026']
+    notes = """Appendix · UX 2 상세. How it Works에서 본 절차를 모델과 근거까지 적은 장입니다.
+1홉에서 카톡 문맥 추론으로 집들이 날짜 3월 15일을 알아내고, 그 날짜 필터로 다른 날 마신 와인바 사진을 걸러냅니다. 2홉에서는 그날 저녁 사진 가운데 와인 사진을 찾아 라벨을 읽고 정확한 이름을 복원합니다.
+이번 단서는 날짜지만, 별칭이나 맡은 일 같은 내용도 같은 방식으로 잇습니다. UX 1과 UX 3이 그 예입니다."""
+    ux_page('page-a5', 'Appendix · UX 2 상세', 'UX 2 <span class="hl">단서로 찾는 기억</span>: 단계별 모델과 근거', '구글 검색창: “지은이네 집들이 때 마셨던 와인”', steps, srcs, notes)
 
 
 def a6():
-    strip = dict(w=184, items=[
-        ('map', '현재 위치', '인천공항', '지금 상황', True),
-        ('wal', '삼성 월렛 탑승권', '싱가포르 → 인천, 오늘 도착', '귀국 중', True),
-        ('note', '10/31 면세점 살 것', '선크림, 립밤', '내 쇼핑 목록', False),
-        ('talk', '10/14 아내 카톡', '동생이 이 갈색병 좋대. 면세점에서', '숨은 부탁', True),
-        ('gal', '10/14 저장한 사진', '아내가 보낸 병 사진', '답', True),
-        ('gal', '10/14 스크린샷', '면세점 화장품 쿠폰', '뜻으로 탈락', False)])
-    rows = [
-        ('00 사전 준비', '알림의 글자, 갤러리 사진, 월렛 탑승권을 벡터와 메타데이터로 저장합니다.', 'Reasoning Embedding, BM25, 이미지 임베딩', 'DocHop-QA (EMNLP 2026)'),
-        ('01 순간 감지', '아내와 카톡 중, 위치와 탑승권이 귀국을 가리키면 실타래 버튼이 반짝입니다.\n세 신호가 맞을 때만 반짝이고, 누르지 않으면 아무것도 입력되지 않습니다.', '규칙 판단 (위치 + 탑승권 + 대화 상대)\n통화와 녹음은 쓰지 않음', '논문 없음(설계)\n삼성 S26 Now Brief의 월렛 회상이 선례'),
-        ('첫 질문', '\'면세점에서 아내에게 사 갈 것은?\'을 Weave가 스스로 만듭니다.', '상황별 틀 + sLLM', '논문 없음(설계)'),
-        ('② 나누기', '1. 아내가 면세점에서 사 오길 바란 건?  2. [그것]의 사진은?', 'sLLM 1~2B', 'Hi-Q (NeurIPS 2026)'),
-        ('③ 1홉', '보낸 사람이 아내인 기록에서 \'이 갈색병 좋대. 면세점에서 판다더라\'를 찾습니다.\n직접 부탁하지 않은 말에서 숨은 부탁을 읽습니다.', '보낸 사람 필터 + Reasoning Embedding\n(개방형 영역: 숨은 의도)', 'RIR Survey (ACL 2026), BESPOKE, ImpliRet'),
-        ('④ 잇기', '[그것 → 이 갈색병], 같은 날 저장한 사진으로 좁힙니다.', '기록에서 복사, 날짜 필터', 'Hi-Q, IRCoT (ACL 2023)'),
-        ('③ 2홉', '쿠폰 캡처 말고 병 사진을 찾습니다. 라벨을 읽지 않아도 사진을 건넬 수 있습니다.', '멀티모달 임베딩', 'DocHop-QA: 글 + 이미지'),
-        ('⑤ 전달', '아내 말투 그대로 보낼 말을 추천하고, 연결된 기억에 사진을 함께 둡니다.', 'sLLM, 입력과 전송은 사용자', 'Hi-Q'),
+    def signals(x, y, w):
+        s = BOX('chip', x, y, 84, 24, ' border-radius:12px;') + USE('i-pin', x + 7, y + 5, 14, '#2F7BF6') + T('t10b', x + 24, y + 5, '인천공항')
+        s += BOX('chip', x + 90, y, w - 90, 24, ' border-radius:12px;') + IMG('wal', x + 97, y + 4, 16) + T('t10b', x + 118, y + 5, '싱가포르 → 인천')
+        s += BOX('chip', x, y + 30, 112, 24, ' border-radius:12px;') + IMG('talk', x + 7, y + 34, 16, 4) + T('t10b', x + 28, y + 35, '아내와 대화 중')
+        s += f'  <svg class="app" viewBox="0 0 40 40" style="left:{x + 128}px; top:{y + 26}px; width:36px; height:36px;"><circle cx="20" cy="20" r="20" fill="#6B4EFF" opacity=".18"/><circle cx="20" cy="20" r="14" fill="#6B4EFF"/></svg>\n'
+        s += IMG('spoolw', x + 137, y + 35, 18, 0, ' z-index:6;')
+        s += T('t10p', x + 170, y + 37, '먼저 반짝')
+        return s
+
+    def label(x, y, w):
+        s = PHOTO(BOTTLE, x, y, 96, 72, 10, '50% 62%')
+        s += BOX('mini on', x + 104, y + 6, w - 104, 34) + T('t10p', x + 112, y + 16, 'ESTEE LAUDER')
+        s += T('t10', x + 106, y + 48, '에스티 로더 나이트 리페어')
+        return s
+
+    def first(x, y, w):
+        return T('t10m', x + 2, y + 2, 'Weave가 지금 상황에서 만든 질문') + qbar(x, y + 22, w, '면세점에서 아내에게 사 갈 것은?')
+
+    steps = [
+        dict(no='00', name='사전 준비', en='Indexing',
+             ui=lambda x, y, w: ''.join(IMG(k, x + 2 + i * 26, y + 2, 21, 5 if k == 'talk' else 0) for i, k in enumerate(['talk', 'gal', 'wal'])) + T('t10', x + 84, y + 6, '알림 글자, 사진, 탑승권') + BOX('mini', x, y + 32, w, 36) + T('t10', x + 10, y + 36, '벡터와 메타데이터로 색인') + T('t10b', x + 10, y + 51, '{ date, app, from }'),
+             do='알림의 글자, 갤러리 사진, 월렛 탑승권을<br>미리 색인합니다.', model='Reasoning Embedding, 이미지 임베딩', ref='DocHop-QA (EMNLP 2026)'),
+        dict(no='01', name='순간 감지', en='Trigger', ui=signals,
+             do='위치, 탑승권, 대화 상대가 귀국을 가리키면<br>실타래 버튼이 먼저 반짝입니다.', model='멀티시그널 컨텍스트 트리거', ref='Samsung Wallet·GPS 연동, Now Brief'),
+        dict(no='1', name='첫 질문 생성', en='Proactive Query', ui=first,
+             do='사용자가 묻기 전에<br>Weave가 첫 질문을 만듭니다.', model='상황별 틀 + sLLM', ref='Weave 온디바이스 UX 설계'),
+        dict(no='2', name='하위 질문 분해', en='Decomposition',
+             ui=lambda x, y, w: subq(x, y, w, ['아내가 면세점에서 바란 건?', ('그것', '의 정확한 제품명은?')]),
+             do='먼저 풀 질문과<br>빈칸이 있는 질문으로 나눕니다.', model='sLLM 1~2B', ref='Hi-Q (NeurIPS 2026)'),
+        dict(no='3', name='1홉 추론 검색', en='Hop Retrieval',
+             ui=lambda x, y, w: rec(x, y, w, 'talk', '아내', '카카오톡 · 3주 전', '여보, 동생이 이 갈색병 좋대. 면세점에서 판다더라', on=True),
+             do='카톡 알림 글자에서<br>직접 말하지 않은 부탁을 읽습니다.', model='보낸 사람 필터 + Reasoning Embedding', ref='RIR Survey, BESPOKE, ImpliRet'),
+        dict(no='4', name='단서 결합·질의 재작성', en='Query Rewriting',
+             ui=lambda x, y, w: rewrite(x, y, w, '갈색병', '의 정확한 제품명은?', '같은 날 저장한 사진'),
+             do='‘갈색병’을 넣어 질문을 다시 쓰고<br>같은 날 저장한 사진으로 좁힙니다.', model='기록 복사, 날짜 필터', ref='Hi-Q, IRCoT (ACL 2023)'),
+        dict(no='3', name='2홉 추론 검색', en='Hop Retrieval', ui=label,
+             do='쿠폰 캡처 말고 병 사진을 찾고<br>라벨에서 정확한 제품명을 읽습니다.', model='이미지 임베딩 + OCR', ref='DocHop-QA (EMNLP 2026)'),
+        dict(no='5', name='근거 기반 응답 생성', en='Grounded Synthesis', on=True,
+             ui=lambda x, y, w: answer(x, y, w, '자동 완성 추천', ['전에 말한 에스티 로더', '면세점에서 사 갈게.'], '입력하기'),
+             do='카톡, 갤러리, 월렛, GPS를 엮어 건넵니다.<br>입력과 전송은 사용자가 합니다.', model='sLLM, 대화 말투 반영', ref='Hi-Q (NeurIPS 2026)'),
     ]
-    foot = ['<b>UX 2와 다른 점:</b> UX 2는 라벨 글자를 읽어 정확한 이름을 찾고, UX 3은 지금 상황과 3주 전 부탁을 잇습니다. 강점은 찾기보다 묻기 전에 건네는 순간 감지입니다.',
-            '<b>기록 범위:</b> 카카오톡 알림에서는 글자만 읽습니다. 사진은 갤러리에 저장한 경우에 읽습니다. 위치만으로는 출국, 입국, 마중을 가릴 수 없어서 탑승권을 함께 봅니다.']
-    srcs = ['* 출처: Wei et al., "RIR Survey", ACL 2026 · Taghavi et al., "ImpliRet", EMNLP 2025 · Kim et al., "BESPOKE", 2025 · Kim et al., "Hi-Q", NeurIPS 2026',
-            '   Park et al., "DocHop-QA", EMNLP 2026 · Samsung Newsroom, "Galaxy S26 Series" (2026. 02)']
+    srcs = ['Wei et al., "RIR Survey", ACL 2026', 'Taghavi et al., "ImpliRet", EMNLP 2025', 'Kim et al., "BESPOKE", 2025', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Trivedi et al., "IRCoT", ACL 2023',
+            'Park et al., "DocHop-QA", EMNLP 2026', 'Samsung Newsroom, "Galaxy S26 Series" (2026. 02)']
     notes = """Appendix · UX 3 상세. 출장에서 돌아와 인천공항에 내린 순간의 절차입니다. 아내와 메시지 세 개를 주고받은 뒤 실타래 버튼이 반짝입니다.
-삼성 S26 발표 각주: Now Brief의 회상 데이터는 지원 앱 알림, 메시지, Gmail, Samsung Wallet에서 옵니다. 그래서 월렛을 상황 신호로 쓰는 것은 자연스러운 확장입니다. Weave는 예약 정보만이 아니라 예약이 아닌 대화 속 부탁까지 잇습니다.
-삼성월렛 공식 안내: 탑승권 알림은 탑승 3시간 전부터 도착 1시간 뒤까지 뜨고, QR은 도착 24시간 뒤 비활성화됩니다. 입국 순간에도 유효합니다.
-입국장 면세점 입점은 2019년 개장 기사(SM면세점 에스티로더) 기준이라 지금은 확인하지 못했습니다. 그래서 보낼 말은 입점을 단정하지 않습니다.
-예상 질문: Now Nudge와 무엇이 다른가요? Now Nudge는 화면 맥락에 따라 제안합니다. 여기서 화면에 보이는 말은 '조심히 들어와'뿐이고, 3주 전 아내 카톡과 사진을 이어야 무엇을 살지 알 수 있습니다."""
-    ux_page('page-a6', 'Appendix · UX 3 상세', 'UX 3 먼저 건네는 기억: 단계별 모델과 근거', '아내 "출장 고생했어! 한국 도착했어?" → 나 "응, 방금 내렸어" → 아내 "그래, 조심히 들어와~" → 실타래 버튼이 반짝', strip, rows, foot, srcs, notes)
+위치와 삼성 월렛 탑승권이 귀국 중임을 알려 주고, 대화 상대가 아내이므로 Weave가 첫 질문을 스스로 만듭니다. 1홉에서 아내의 카톡 알림 글자에서 갈색병 부탁을 찾고, 2홉에서 갤러리에 저장해 둔 사진의 라벨을 읽어 에스티 로더 나이트 리페어라는 정확한 제품명을 찾습니다.
+삼성 S26의 Now Brief도 지원 앱 알림, 메시지, Gmail, Samsung Wallet을 회상 데이터로 씁니다. 월렛을 상황 신호로 쓰는 것은 자연스러운 확장입니다. Now Nudge와 다른 점은, 화면에 보이는 말이 조심히 들어와뿐인데도 3주 전 카톡과 사진을 이어 무엇을 살지 찾는다는 점입니다."""
+    ux_page('page-a6', 'Appendix · UX 3 상세', 'UX 3 <span class="hl">먼저 건네는 기억</span>: 단계별 모델과 근거', '아내 “그래, 조심히 들어와~” 뒤에 실타래 버튼이 먼저 반짝입니다.', steps, srcs, notes)
 
 
+# ───────────────────────────────── A7 비교 (덱의 차별화 표와 같은 모양)
 def a7():
-    b = ''
-    cols = [(76, '방식'), (236, '무엇으로 찾나'), (436, '잘하는 것'), (640, "'지은이네 집들이 때 마셨던 와인'에서 막히는 곳"), (1000, '미리 해 둘 일')]
+    b, svg = '', ''
+    x0, y0, lw, cw, wv = 64, 158, 136, 168, 176
+    cols = ['키워드 검색<br>(BM25)', '일반 임베딩', '하이브리드 검색', '지식 그래프<br>(PDE 방식)', 'Samsung Finder<br>Now Nudge']
     rows = [
-        ('키워드 검색 (BM25)', '같은 단어', '이름, 숫자, 파일명', "'집들이'가 없는 초대 카톡, '집들이'가 없는 와인 사진", '단어 색인'),
-        ('일반 임베딩', '가까운 뜻', '표현이 다른 같은 내용', '1위에 오른 다른 날 와인 사진', '기록 벡터'),
-        ('하이브리드', '두 순위를 합친 한 번 검색', '두 방식의 장점', '처음 질문에 없는 집들이 날짜', '단어 색인과 벡터'),
-        ('지식 그래프 (PDE 방식)', '미리 뽑아 둔 관계', '정해 둔 관계의 여러 단계 연결', "그래프에 없는 '휴지 안 사 와도 돼 = 집들이'", '기록의 관계 추출'),
-        ('Finder, Now Nudge', '앱별 자연어 검색, 화면 맥락 제안', '앱 안의 사진과 메모, 화면 속 요청', '카톡 초대와 그날 사진을 잇는 단계', '앱별 색인'),
-        ('Weave', '찾은 단서로 다시 쓴 질문', '단어가 다르고 단계가 빠진 질문', '막히지 않고 배비치 소비뇽 블랑까지', '기록 벡터와 메타데이터'),
+        ('핵심 탐색 기준', ['같은 단어', '가까운 뜻', '두 순위를 합친<br>한 번 검색', '미리 뽑아 둔 관계', '앱별 자연어 검색,<br>화면 맥락 제안'], '찾은 단서로<br>다시 쓴 질문'),
+        ('강점', ['이름, 숫자, 파일명', '표현이 다른<br>같은 내용', '두 방식의 장점', '정해 둔 관계의<br>여러 단계 연결', '앱 안의 사진과 메모,<br>화면 속 요청'], '단어가 다르고<br>단계가 빠진 질문'),
+        ('사전 색인 구조', ['단어 색인', '기록 벡터', '단어 색인과 벡터', '기록의 관계 추출', '앱별 색인'], '기록 벡터와<br>메타데이터'),
     ]
-    top, rh = 150, 54
-    b += f'  <div class="panel" style="left:60px; top:{top}px; width:1160px; height:{32 + rh * len(rows) + 6}px;"></div>\n'
-    for x, t in cols:
-        b += T('th', x, top + 10, t)
-    y = top + 32
-    for i, r in enumerate(rows):
-        me = r[0] == 'Weave'
-        if me:
-            b += f'  <div class="box ll" style="left:66px; top:{y + 2}px; width:1148px; height:{rh - 4}px;"></div>\n'
-        else:
-            b += f'  <div class="rule" style="left:76px; top:{y - 1}px; width:1128px;"></div>\n'
-        b += T('st', cols[0][0], y + 18, r[0], extra=' color:#6B4EFF;' if me else '')
-        for j in range(1, 5):
-            b += T('tx', cols[j][0], y + 18, ('<b>%s</b>' % r[j]) if me else r[j])
+    last = [('x', '‘집들이’가 없는<br>초대 카톡, 와인 사진'), ('x', '1위에 오른<br>다른 날 와인 사진'), ('x', '처음 질문에 없는<br>집들이 날짜'), ('t', '그래프에 없는<br>‘휴지 = 집들이’'), ('t', '카톡 초대와 그날 사진을<br>잇는 단계'), ('o', '배비치 소비뇽 블랑까지<br>찾아냅니다')]
+    tw_all = lw + cw * 5 + wv
+    hh, rh, lh = 58, 72, 84
+    th = hh + rh * 3 + lh
+    b += BOX('card', x0, y0, tw_all, th + 8)
+    wx = x0 + lw + cw * 5
+    b += BOX('abs', wx, y0 + 4, wv - 4, th, ' background:#F4F0FF; border-radius:14px;')
+    b += BOX('abs', wx, y0 + 4, wv - 4, hh - 4, ' background:#6B4EFF; border-radius:14px 14px 0 0;')
+    b += T('t12', x0 + 18, y0 + 20, '검색 방식', extra=' font-weight:700; color:#8E88A0; font-size:13px;')
+    for i, c in enumerate(cols):
+        x = x0 + lw + i * cw
+        n = c.count('<br>') + 1
+        b += T('t12b', x, y0 + (20 if n == 1 else 11), c, cw, ' text-align:center; line-height:17px; font-size:13.5px;')
+    b += T('t18b', wx, y0 + 16, 'Weave Assist', wv - 4, ' text-align:center; color:#fff; line-height:24px;')
+    y = y0 + hh
+    for lab, vals, me in rows:
+        b += BOX('bar', x0 + 12, y, tw_all - 24, 1)
+        b += T('t12b', x0 + 18, y + rh / 2 - 9, lab, extra=' font-size:13px;')
+        for i, v in enumerate(vals):
+            n = v.count('<br>') + 1
+            b += T('t12', x0 + lw + i * cw, y + rh / 2 - 9 * n, v, cw, ' text-align:center; font-size:12.3px;')
+        n = me.count('<br>') + 1
+        b += T('t12b', wx, y + rh / 2 - 9 * n, me, wv - 4, ' text-align:center; line-height:18px; font-size:12.8px;')
         y += rh
-    y += 14
-    b += T('note', 62, y, '<b>기존 방식을 대체하지 않습니다.</b> Weave도 BM25와 임베딩, 메타데이터를 함께 쓰고, 날짜와 사람처럼 같은 값으로 잇는 일은 메타데이터와 PDE가 잘합니다. Weave는 기록 내용 속의 연결을 질문할 때 잇습니다.')
-    y += 22
-    b += T('note', 62, y, '<b>지식 그래프:</b> 여러 단계 연결은 오히려 강점입니다. 막히는 곳은 그래프에 없는 사실입니다. PDE의 내부 구조는 공개되지 않아, 여기서는 지식 그래프 방식의 일반 특성으로 설명합니다.')
-    y += 22
-    b += T('note', 62, y, '<b>Finder:</b> One UI 8.5부터 자연어 검색을 지원합니다. 공식 대상은 음성 녹음, 통화 녹음, 캘린더, 노트, 리마인더, 내 파일입니다. 여기 적은 내용은 공개 자료 기준입니다.')
-    y += 30
-    b += T('src', 62, y, '* 출처: Robertson & Zaragoza, "BM25 and Beyond", 2009 · Karpukhin et al., "DPR", EMNLP 2020 · Cormack et al., "Reciprocal Rank Fusion", SIGIR 2009 · Oxford Semantic Technologies, RDFox 문서')
-    b += T('src', 62, y + 15, '   삼성전자 뉴스룸, "[갤럭시 언팩 2025] ①" (2025. 01) · Samsung 지원, "Understanding Finder on Galaxy phones" · Samsung Newsroom, "Galaxy S26 Series" (2026. 02)')
+    b += BOX('bar', x0 + 12, y, tw_all - 24, 1)
+    b += T('t12b', x0 + 18, y + lh / 2 - 18, '멀티홉 질문<br>‘집들이 와인’', extra=' font-size:13px; line-height:18px;')
+    for i, (m, v) in enumerate(last):
+        me = i == 5
+        x = wx if me else x0 + lw + i * cw
+        w = wv - 4 if me else cw
+        cx, cy = x + w / 2, y + 19
+        if m == 'x':
+            svg += f'<path d="M{cx - 7} {cy - 7} L{cx + 7} {cy + 7} M{cx + 7} {cy - 7} L{cx - 7} {cy + 7}" stroke="#E5484D" stroke-width="2.4" stroke-linecap="round" fill="none"/>'
+        elif m == 't':
+            svg += f'<path d="M{cx} {cy - 8} L{cx + 9} {cy + 7} L{cx - 9} {cy + 7} Z" stroke="#E08A2E" stroke-width="2.4" stroke-linejoin="round" fill="none"/>'
+        else:
+            svg += f'<circle cx="{cx}" cy="{cy}" r="8.5" stroke="#1E9E55" stroke-width="2.4" fill="none"/>'
+        b += T('t12b' if me else 't12', x, y + 33, v, w, ' text-align:center; line-height:17px; font-size:' + ('12.3px;' if me else '11.8px;') + (' color:#6B4EFF;' if me else ''))
+    y += lh + 18
+    b += BOX('lav', x0, y, tw_all, 44, ' border-radius:14px;')
+    b += IMG('spool', x0 + 14, y + 11, 22)
+    b += T('t12', x0 + 46, y + 12, '<b>기존 방식을 대체하지 않습니다.</b> Weave도 BM25와 임베딩, 메타데이터를 함께 쓰고, 정확한 값은 메타데이터와 PDE로 잇고, 기록 내용 속 연결은 질문할 때 잇습니다.', extra=' font-size:13px;')
+    b += sources(['Robertson & Zaragoza, "BM25 and Beyond", 2009', 'Karpukhin et al., "DPR", EMNLP 2020', 'Cormack et al., "Reciprocal Rank Fusion", SIGIR 2009', 'Oxford Semantic Technologies, RDFox 문서',
+                  '삼성전자 뉴스룸, "[갤럭시 언팩 2025] ①" (2025. 01)', 'Samsung 지원, "Understanding Finder on Galaxy phones"', 'Samsung Newsroom, "Galaxy S26 Series" (2026. 02)'], y + 54)
     notes = """Appendix · 비교. 같은 와인 질문을 방식마다 어디까지 찾는지 비교한 표입니다. 각 방식이 잘하는 것부터 말하고, 이 질문에서 막히는 곳을 말합니다.
-쓰지 말아야 할 말: "PDE는 못 한다", "Finder는 키워드 검색이다", "여러 단계 개인 검색은 아무도 못 한다". Apple Siri AI도 메시지에서 이메일로 이어지는 공식 예시가 있습니다.
+지식 그래프는 여러 단계 연결이 오히려 강점이고, 막히는 곳은 그래프에 없는 사실입니다. Finder는 One UI 8.5부터 자연어 검색을 지원하고, 공식 대상은 음성 녹음, 통화 녹음, 캘린더, 노트, 리마인더, 내 파일입니다.
 Weave의 차별점은 온디바이스에서 미리 정한 항목 없이 원문 기록을 이어 가는 추론 검색입니다."""
-    page('page-a7', 'Appendix · 비교', '기존 검색, 삼성 기술과 무엇이 다른가요?', '같은 질문을 방식마다 어디까지 찾는지 비교했습니다.', b, '', notes)
+    page('page-a7', 'Appendix · 비교', '기존 검색 및 온디바이스 AI 대비 <span class="hl">Weave의 차별점</span>', '같은 멀티홉 질문 ‘지은이네 집들이 때 마셨던 와인’을 방식마다 비교했습니다.', b, svg, notes)
 
 
 if __name__ == '__main__':

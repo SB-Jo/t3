@@ -118,10 +118,10 @@
   <!-- ───────── Q4 (행 509~630) ───────── -->
   <div class="qn" data-x style="left:112px; top:527px;">Q4</div>
   <div class="qq" data-x style="left:112px; top:555px;">임베딩으로 어떻게<br>‘연쇄 탐색’을 하나요?</div>
-  <div class="al" data-x style="left:300px; top:527px;">A.</div>
-  <div class="aa" data-x style="left:322px; top:527px;">찾은 단서를 빈칸에 넣어 <b>질문을 다시 쓰고</b>, 다시 쓴 질문을 임베딩으로 찾습니다.<br>임베딩은 앞 기록을 기억하지 않습니다. <b>새 단서가 없으면 멈춥니다.</b></div>
-  <div class="sl" data-x style="left:322px; top:575px;">보충</div>
-  <div class="ss" data-x style="left:358px; top:575px;">질문과 앞서 찾은 기록을 함께 벡터로 바꿔 다음 기록을 찾는 방식<span class="sup">3</span>은 보조 경로로 검토하고,<br>학습 데이터는 ‘질문 + 확인한 단서 → 다음 근거’와 헷갈리기 쉬운 오답으로 구성합니다<span class="sup">2</span>.</div>
+  <div class="al" data-x style="left:300px; top:521px;">A.</div>
+  <div class="aa" data-x style="left:322px; top:521px;">1차 검색에서 찾은 단서(예: 3월 15일)를 반영해 <b>2차 질문을 새로 구성(Query Rewriting)</b>하고,<br>이를 다시 임베딩해 다음 기록을 찾습니다. 매 홉마다 단서가 결합된 완결된 질문을 인코딩하므로<br>연산이 가볍고, <b>더 이상 새로운 단서가 나오지 않으면 탐색을 종료합니다.</b></div>
+  <div class="sl" data-x style="left:322px; top:587px;">보충</div>
+  <div class="ss" data-x style="left:358px; top:587px;">질문과 앞서 찾은 기록을 함께 벡터로 바꿔 다음 기록을 찾는 방식<span class="sup">3</span>은 보조 경로로 두고,<br>학습 데이터는 ‘질문 + 확인한 단서 → 다음 근거’와 헷갈리기 쉬운 오답으로 구성합니다<span class="sup">2</span>.</div>
   <!-- 그림: 두 번의 검색 -->
   <div class="box" data-s style="left:940px; top:521px; width:230px; height:97px;"></div>
   <div class="t11p" data-x style="left:948px; top:533px;">1회차</div>

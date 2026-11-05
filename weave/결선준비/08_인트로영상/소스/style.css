@@ -192,8 +192,9 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 #logo .mark { width: 150px; height: 150px; border-radius: 40px; background: linear-gradient(145deg, #8D6BFF, #6B4EFF 55%, #5A3FE0); display: grid; place-items: center; box-shadow: 0 30px 60px rgba(107,78,255,.35); }
 #logo .mark img { width: 100px; height: 100px; }
 #logo .word { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 132px; letter-spacing: -0.02em; line-height: 1; }
-#logo .word .wv { background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #4E36CF 0%, #6248F2 40%, #7A55FF 72%, #8F66FF 100%);
-  background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 10px 24px rgba(107,78,255,.20)); }
+/* 'Weave Assist' 글자: PPT 표지와 같은 그라데이션(글자 전체 #4E36CF → #8F66FF), 오프닝과 끝 화면이 같다 */
+#logo .word, #op .word { background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #4E36CF 0%, #8F66FF 100%);
+  background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 10px 24px rgba(107,78,255,.20)); padding: 0 .04em .08em; }
 #tag { position: absolute; left: 0; right: 0; top: 586px; text-align: center; font-size: 58px; font-weight: 700; letter-spacing: -0.035em; color: var(--ink); }
 #tag .en { font-family: 'Samsung Sharp Sans', 'SamsungOne'; color: var(--purple); }
 #sub { position: absolute; left: 0; right: 0; top: 684px; text-align: center; font-size: 33px; color: var(--gray); letter-spacing: -0.02em; }
@@ -269,8 +270,11 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 
 /* ── v4: 챕터 카드 · 헤드라인 · 선 통일 ───────────── */
 .chap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
-.chap .no { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 140px; line-height: 1; letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #4E36CF, #7A55FF 70%, #8F66FF); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chap .no { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 140px; line-height: 1; letter-spacing: -0.02em; padding: 0 .06em;
+  background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.75) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, #4E36CF 0%, #8F66FF 100%);
+  background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chap .cs { position: absolute; left: 50%; top: 50%; display: block; opacity: 0; filter: drop-shadow(0 4px 12px rgba(107,78,255,.35)); }
+.chap .cs svg { display: block; width: 100%; height: 100%; }
 .chap .tt { margin-top: 24px; font-size: 84px; font-weight: 700; letter-spacing: -0.04em; color: var(--ink); }
 .chap .csub { margin-top: 20px; font-size: 38px; font-weight: 500; letter-spacing: -0.03em; color: var(--gray); }
 .head { position: absolute; width: auto; }
@@ -427,8 +431,7 @@ mark.rm { color: inherit; padding: 0 1px; }
 #op .oprow { display: flex; justify-content: center; align-items: center; gap: 30px; }
 #op .mark { width: 132px; height: 132px; border-radius: 36px; background: linear-gradient(145deg, #8D6BFF, #6B4EFF 55%, #5A3FE0); display: grid; place-items: center; box-shadow: 0 30px 60px rgba(107,78,255,.35); }
 #op .mark img { width: 88px; height: 88px; }
-#op .word { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 116px; letter-spacing: -0.02em; line-height: 1; color: var(--ink); }
-#op .word .wv { color: var(--purple); }
+#op .word { font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-weight: 700; font-size: 116px; letter-spacing: -0.02em; line-height: 1; }
 #opSub { margin-top: 44px; font-size: 56px; font-weight: 700; letter-spacing: -0.035em; color: var(--ink); }
 
 #hdB { top: 56px; }
@@ -476,3 +479,13 @@ mark.rm { color: inherit; padding: 0 1px; }
 #trio .tp img { width: 356px; height: auto; display: block; }
 #trio .tc { margin-top: 18px; display: flex; align-items: center; gap: 12px; font-size: 36px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; }
 #trio .tc b { width: 46px; height: 46px; border-radius: 50%; background: var(--purple); color: #fff; font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-size: 26px; display: grid; place-items: center; }
+
+/* v10: UX 3 두 번째 기록(저장한 사진). 카톡 글자 → 갤러리 사진 라벨 */
+#fp { left: 1080px; width: 640px; padding-top: 20px; padding-bottom: 22px; }
+#fp .t { white-space: nowrap; }
+#fp .t .m2 { font-size: 19px; font-weight: 500; color: var(--gray2); margin-left: 8px; letter-spacing: -0.01em; }
+#fp .prow { margin-top: 12px; display: flex; align-items: center; gap: 18px; }
+#fp .pimg { position: relative; display: block; width: 172px; height: 110px; border-radius: 14px; overflow: hidden; flex: none; box-shadow: 0 2px 6px rgba(29,36,48,.12); }
+#fp .pimg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#scanP { position: absolute; left: 0; right: 0; top: 0; height: 40px; background: linear-gradient(180deg, rgba(166,124,242,0), rgba(166,124,242,.55) 85%, rgba(255,255,255,.95)); mix-blend-mode: screen; opacity: 0; }
+#fp .plab { font-family: 'SamsungOne', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: .05em; color: var(--violet); padding: 10px 18px; background: var(--lav); border-radius: 14px; white-space: nowrap; }

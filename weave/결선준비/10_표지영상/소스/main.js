@@ -1,17 +1,19 @@
-/* Weave 결선 표지 루프 v3 — 18초, 끝과 처음이 똑같아 끊김 없이 반복된다.
-   모든 상태는 시간 t의 순수 함수(render(t)). 떠다니는 움직임은 주기가 18초(또는 9초)인 사인파.
+/* Weave 결선 표지 루프 v5 — 24초, 끝과 처음이 똑같아 끊김 없이 반복된다.
+   모든 상태는 시간 t의 순수 함수(render(t)). 떠다니는 움직임은 주기가 24초(또는 12초)인 사인파.
    window.__seek(t), window.__DURATION, window.__ready, window.__probe(t)
-   이야기는 How it Works A1(장표5/a1.py)과 같고, v1(14초)보다 앞뒤가 늘었다:
-   빈 구글 검색창에 '지은이네 집들이 때 마셨던 와인'을 침 → 실타래 버튼 → 지은 카톡(3/15 일 '박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼. 몸만 와')
+   이야기는 How it Works A1(장표5/a1.py)과 같다:
+   빈 구글 검색창에 '지은이네 집들이 때 마셨던 와인'을 침 → 실타래 버튼 → 지은 카톡
+   → 질문의 '지은'이 카드의 보낸 사람 '지은'으로, 질문의 '집들이'가 메시지 '박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼'로 건너가 '= 집들이'가 붙음
    → 단서 '3/15 (일)'가 그날 사진(3/15 20:14)으로 → 라벨 'SAUVIGNON BLANC' → 추천 '배비치 소비뇽 블랑'
    → 입력하기 → 검색어가 '배비치 소비뇽 블랑'으로 바뀜 → 검색 키 → 쇼핑 결과 → 처음 화면(빈 검색창)으로
-   v3: 빠르기는 v1과 v2의 중간(실 0.65~0.7초, 버튼 → 추천 카드 5.35초), 오른쪽 장면 전체를 0.93배로(위·아래·오른쪽 여백) */
-const LOOP = 18.0;
+   v5: 전체를 천천히(18 → 24초), 첫 연결에서 추론이 보이게 */
+const LOOP = 24.0;
 // 오른쪽 장면(#world)은 (846, 540)을 기준으로 줄임. 안쪽 계산은 모두 줄이기 전 좌표(1920×1080)로 하고, 검사용 값만 화면 좌표로 바꿈
 const WS = 0.93, WO = { x: 846, y: 540 };
 const toScreen = p => ({ x: WO.x + (p.x - WO.x) * WS, y: WO.y + (p.y - WO.y) * WS });
 const QTEXT = '지은이네 집들이 때 마셨던 와인';   // 2026-11-05 최종 시나리오(화이트/레드 구분 없음)
 const ANS = '배비치 소비뇽 블랑';
+const QHTML = '<span class="hl" id="qJ">지은</span>이네 <span class="hl" id="qH">집들이</span> 때 마셨던 와인';   // 다 친 뒤의 검색어(낱말을 짚을 수 있게)
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const lerp = (a, b, u) => a + (b - a) * u;
@@ -23,20 +25,23 @@ const seg = (t, t0, d) => clamp((t - t0) / d);
 const pulse = (t, t0, d0, t1, d1, ein = e2o, eout = e2io) => Math.min(ein(seg(t, t0, d0)), 1 - eout(seg(t, t1, d1)));
 
 /* ── 시각(초) ── */
-const THR = { A: 0.7, B: 0.65, C: 0.7 };   // 실 한 가닥이 그려지는 시간(v1 0.9·0.8·0.9초, v2 0.5초)
+const THR = { A: 0.9, B: 0.85, C: 0.9 };   // 실 한 가닥이 그려지는 시간
 const T = {
-  type0: 0.8, cps: 10,               // 타자 시작, 초당 글자 수(띄어쓰기는 더 빠르게)
-  tap: 3.55, wave: 3.65, shim: 3.75, // 실타래 버튼(손은 0.8초 전부터 들어옴)
-  t1: 4.09, litJ: 4.6, hlJ: 5.08,
-  t2: 5.63, tokIn: 5.7, tokRide: 5.77, tokDur: 0.8, litP: 6.52, hlD: 6.61,
-  scan: 7.01, ocrbox: 7.48, hlL: 7.82,
-  t3: 8.29, sug: 8.9,                // 버튼 → 추천 카드 5.35초(v1 7.2초, v2 3.5초)
-  tapIn: 10.85,                      // 입력하기(추천 카드를 1.5초쯤 읽을 시간)
-  sel: 10.98, swap: 11.33,           // 검색어가 선택됐다가 '배비치 소비뇽 블랑'으로 바뀜
-  reset: 11.13,                      // 실·카드·형광펜이 걷힘
-  tapS: 12.1,                        // 검색 키
-  res: 12.25, mark: 13.05,           // 쇼핑 결과, 결과 속 이름에 형광펜
-  back: 15.8,                        // 처음 화면(빈 검색창)으로 0.9초, 16.7초부터 쉬는 모습
+  type0: 0.9, cps: 9,                // 타자 시작, 초당 글자 수(띄어쓰기는 더 빠르게)
+  tap: 4.1, wave: 4.2, shim: 4.3,    // 실타래 버튼(손은 0.8초 전부터 들어옴)
+  t1: 4.7, litJ: 5.35,               // 실 → 지은 카톡이 켜짐
+  qJ: 5.7, tJ: 5.85, tJd: 0.85, hlN: 6.65,                // 질문의 '지은' → 카드의 보낸 사람 '지은'
+  qH: 7.25, tH: 7.4, tHd: 0.9, hlB: 8.2, hlJ: 8.6, eq: 9.0,   // 질문의 '집들이' → 메시지에 형광펜 → '= 집들이'
+  hlK: 9.95,                         // 이 카톡을 받은 날이 단서
+  t2: 10.45, tokIn: 10.5, tokRide: 10.6, tokDur: 0.95, litP: 11.4, hlD: 11.5,
+  scan: 12.05, ocrbox: 12.6, hlL: 12.95,
+  t3: 13.5, sug: 14.2,               // 추천 카드
+  tapIn: 16.6,                       // 입력하기(추천 카드를 2.4초 읽을 시간)
+  sel: 16.75, swap: 17.15,           // 검색어가 선택됐다가 '배비치 소비뇽 블랑'으로 바뀜
+  reset: 16.9,                       // 실·카드·형광펜이 걷힘
+  tapS: 18.0,                        // 검색 키
+  res: 18.15, mark: 19.1,            // 쇼핑 결과, 결과 속 이름에 형광펜
+  back: 21.7,                        // 처음 화면(빈 검색창)으로 0.9초, 22.6초부터 쉬는 모습
 };
 // 타자 시각: 글자마다 조금씩 다르게(씨앗 고정이라 늘 같음)
 const TYPE_T = (() => {
@@ -74,7 +79,6 @@ const CHIPS = [
   ['app-kakao', '회사 동기', '점심 뭐 먹지?'],
   ['app-map', '최근 경로', '회사에서 집'],
   ['samsung-email-blue', '뉴스레터', '이번 주 소식'],
-  ['samsung-phone', '통화 기록', '2분 14초'],
 ];
 const LAYER = { near: { s: 0.92, o: 0.38, a: 6 }, mid: { s: 0.8, o: 0.3, a: 5 }, far: { s: 0.68, o: 0.22, a: 3.5 } };
 const ORDER = ['near', 'mid', 'far', 'near', 'mid', 'near', 'far', 'mid'];
@@ -213,7 +217,8 @@ async function build() {
   // 재어 둘 자리(모든 것이 쉬는 상태에서)
   $('#sug').style.opacity = '1';
   G = { frame: R('#phone .frame'), tb: R('#kb .tb'), wv: R('#kb .wv'), sug: R('#sug'), btn: R('#sug .b'), srch: R('#kb .srch'),
-        cJ: R('#cJ'), cP: R('#cP'), hlJ: R('#hlJ'), hlD: R('#hlD'), hlL: R('#hlL'), kb: R('#kb'), q: R('#q') };
+        cJ: R('#cJ'), cP: R('#cP'), hlJ: R('#hlJ'), hlD: R('#hlD'), hlL: R('#hlL'), hlN: R('#hlN'), eqH: R('#eqH'), kb: R('#kb'), q: R('#q') };
+  $('#q').innerHTML = QHTML; G.qJ = R('#qJ'); G.qH = R('#qH'); $('#q').innerHTML = '';
   $('#sug').style.opacity = '0';
   // 버튼 효과를 버튼 한가운데에(키보드 기준, 휴대폰 배율을 되돌려서)
   { const k = G.kb, w = G.wv, sc = G.frame.w / 452; const fx = $('#kb .wvfx'); fx.style.left = `${(w.cx - k.l) / sc}px`; fx.style.top = `${(w.cy - k.t) / sc}px`; }
@@ -234,7 +239,7 @@ function qState(t) {
   if (t < T.sel) {
     let n = 0; while (n < TYPE_T.length && TYPE_T[n] <= t + 1e-9) n++;
     const solid = t < TYPE_END + 0.45;                         // 치는 동안은 깜빡이지 않음
-    return { html: esc([...QTEXT].slice(0, n).join('')), caret: solid || blink(t - TYPE_END - 0.45) };
+    return { html: n >= TYPE_T.length ? QHTML : esc([...QTEXT].slice(0, n).join('')), caret: solid || blink(t - TYPE_END - 0.45) };
   }
   if (t < T.swap) return { html: `<span class="sel">${esc(QTEXT)}</span>`, caret: false };
   if (t < T.back + 0.36) return { html: esc(ANS), caret: t < T.tapS + 0.05 };
@@ -286,8 +291,14 @@ function render(t) {
 
   // 형광펜(같은 단서) — 켜질 때 왼쪽에서 오른쪽으로, 걷힐 때 반대로
   const hl = (el, v) => { el.style.setProperty('--w', `${(100 * v).toFixed(1)}%`); el.style.color = v > 0.02 ? '#5B3FE6' : ''; };
-  hl($('#hlJ'), pulse(t, T.hlJ, 0.48, T.reset, 0.45, e2io, e2io));
-  hl($('#hlK'), pulse(t, T.hlJ + 0.34, 0.4, T.reset, 0.45, e2io, e2io));
+  hl($('#hlN'), pulse(t, T.hlN, 0.4, T.reset, 0.45, e2io, e2io));
+  hl($('#hlB'), pulse(t, T.hlB, 0.42, T.reset, 0.45, e2io, e2io));
+  hl($('#hlJ'), pulse(t, T.hlJ, 0.42, T.reset, 0.45, e2io, e2io));
+  hl($('#hlK'), pulse(t, T.hlK, 0.4, T.reset, 0.45, e2io, e2io));
+  // 메시지 끝에 내려앉는 '= 집들이'
+  { const v = pulse(t, T.eq, 0.36, T.reset, 0.4, eBack, e2io);
+    $('#eqH').style.opacity = clamp(v).toFixed(3);
+    $('#eqH').style.transform = `scale(${lerp(0.7, 1, v).toFixed(3)})`; }
   hl($('#hlD'), pulse(t, T.hlD, 0.46, T.reset + 0.05, 0.45, e2io, e2io));
   hl($('#hlL'), pulse(t, T.hlL, 0.48, T.reset + 0.1, 0.45, e2io, e2io));
 
@@ -325,6 +336,17 @@ function render(t) {
     }
   }
 
+  // 질문의 낱말 표: '지은' → 카드의 보낸 사람, '집들이' → 메시지 끝. 표가 날아가는 동안 카드는 천천히 떠다님
+  const rideTok = (el, tIn, tRide, dur, P) => {
+    const a = clamp(eBack(seg(t, tIn, 0.28))), out = e2i(seg(t, tRide + dur - 0.05, 0.2)), vis = a * (1 - out);
+    if (vis <= 0.001) { el.style.opacity = '0'; return; }
+    const p = bAt(P, e2io(seg(t, tRide, dur)));
+    el.style.opacity = vis.toFixed(3);
+    el.style.transform = `translate(${p.x.toFixed(2)}px, ${p.y.toFixed(2)}px) translate(-50%, -50%) scale(${lerp(0.6, 1, a).toFixed(3)})`;
+  };
+  rideTok($('#tokN'), T.tJ, T.tJ + 0.1, T.tJd, bezH({ x: G.qJ.cx, y: G.qJ.cy }, inCard(th.J, G.cJ, { x: G.hlN.cx, y: G.hlN.cy }), 0.55));
+  rideTok($('#tokH'), T.tH, T.tH + 0.1, T.tHd, bezH({ x: G.qH.cx, y: G.qH.cy }, inCard(th.J, G.cJ, { x: G.eqH.cx, y: G.eqH.cy }), 0.55));
+
   // 휴대폰: 버튼 누름 → 버튼이 보라로, 빛·물결, 휴대폰 테두리 빛, 도구줄을 지나는 빛
   const bt = pulse(t, T.tap, 0.25, T.tap + 1.25, 0.45);
   $('#kb .wv').style.backgroundColor = `rgb(${Math.round(lerp(230, 107, bt))}, ${Math.round(lerp(222, 78, bt))}, ${Math.round(lerp(255, 255, bt))})`;
@@ -344,6 +366,10 @@ function render(t) {
   // 검색창 글자와 깜빡이
   const qs = qState(t);
   if (qs.html !== lastQ) { $('#q').innerHTML = qs.html; lastQ = qs.html; }
+  if (qs.html === QHTML) {                                  // 질문 속 낱말: 추론하는 동안 형광펜(글자가 바뀌기 전에 걷힘)
+    hl($('#qJ'), pulse(t, T.qJ, 0.35, T.reset - 0.45, 0.4, e2io, e2io));
+    hl($('#qH'), pulse(t, T.qH, 0.35, T.reset - 0.45, 0.4, e2io, e2io));
+  }
   $('#caret').style.opacity = qs.caret ? '1' : '0';
   const sw = seg(t, T.swap, 0.5);
   $('#gsweep').style.transform = `scaleX(${e2o(sw).toFixed(4)})`;
