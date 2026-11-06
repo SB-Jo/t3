@@ -340,7 +340,7 @@ mark { background: linear-gradient(transparent 56%, rgba(166,124,242,.42) 56%) n
 
 /* ── v6 ─────────────────────────────────────────── */
 /* 공통: 같은 단서를 표시하는 형광펜(너비 0 → 100%) */
-.hl, .card .mm .dt, mark.rm, #callQ .qk, #callA u, #gpsDj, #kkDj {
+.hl, .card .mm .dt, mark.rm, #callQ .qk, #callA u, #gpsDj, #kkDj, #qa1, #qa2 {
   background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; }
 #kkDj { background-image: linear-gradient(transparent 52%, rgba(107,78,255,.30) 52%); }
 .card .mm .dt { color: var(--ink2); font-weight: 700; padding: 0 2px; }
@@ -548,3 +548,29 @@ mark.rm { color: inherit; padding: 0 1px; }
 #kkNm { background: linear-gradient(transparent 56%, rgba(166,124,242,.5) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
 /* 03: 추천은 한 줄 */
 #wC .sg .v { font-size: 20.5px; white-space: nowrap; letter-spacing: -0.035em; }
+
+/* ── v13 (2026-11-06 5차 피드백) ── */
+/* 인트로·아웃트로 로고: 그라데이션을 조금 더 */
+#logo .word, #op .word { background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #3C22C0 0%, #6A47EE 52%, #AE88FF 100%); }
+/* 01: 생각도 '나'의 말풍선. 기록 카드는 글 길이만큼 */
+#callT .bb { border-radius: 44px; padding: 16px 40px 24px 32px; }
+#callT .who { display: flex; margin-bottom: 8px; }
+#callT .who .me { font-size: 24px; font-weight: 700; color: #fff; background: var(--purple); border-radius: 14px; padding: 3px 14px 4px; letter-spacing: -0.02em; }
+#callA .who .me { font-size: 24px; border-radius: 14px; padding: 3px 14px 4px; }
+#fl1, #fl2, #fl3, #fl4 { width: max-content; }
+#fl1 .sn, #fl2 .sn, #fl3 .sn, #fl4 .sn { width: fit-content; }
+/* 02: 검색어의 두 조각이 떨어져 나와 두 질문이 된다 */
+#pill { top: 150px; }
+#topScrim { height: 150px; }
+#qa1, #qa2 { padding: 0 2px; }
+.qchip { position: absolute; left: 0; top: 0; font-size: 36px; font-weight: 600; letter-spacing: -0.025em; color: var(--purple); background: #EFE9FF; border-radius: 14px; padding: 3px 12px 5px; white-space: nowrap; box-shadow: 0 10px 22px rgba(107,78,255,.28); z-index: 6; }
+#tokA { font-size: 26px; padding: 6px 16px 8px; }
+/* 03: 제목은 한 번 뜨고, 읽었을 때 빛이 한 번. 플로팅은 위치 → 탑승권 → 카톡을 세로로(셋 다 실이 보이게) */
+#hdC .tl { padding: 0 .04em .12em; margin-bottom: -.12em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--ink) 0%, var(--ink) 100%); background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+#hdC em.tl { background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--purple) 0%, var(--purple) 100%); }
+#fg { left: 940px; top: 46px; }
+#fw { left: 940px; top: 193px; }
+#fk { left: 940px; top: 340px; }
+/* 끝 장면: 옛 데모 GIF처럼 세 화면이 각자 움직인다(tools/trio.cjs가 만든 스프라이트) */
+#trio .tp .gif { position: relative; width: 356px; height: 740px; overflow: hidden; }
+#trio .tp .gif img { position: absolute; left: 0; top: 0; width: auto; height: auto; max-width: none; }

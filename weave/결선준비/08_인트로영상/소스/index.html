@@ -65,12 +65,13 @@
   <div id="w1">
     <svg id="threads" viewBox="0 0 1920 1080" width="1920" height="1080">
       <g id="tA"><path class="thr-halo" d="M600 314 C 600 400, 500 376, 500 460"/><path class="thr" d="M600 314 C 600 400, 500 376, 500 460"/></g>
+      <g id="tQ2"><path class="thr-halo" d="M0 0 L1 1"/><path class="thr" d="M0 0 L1 1"/></g>
       <g id="tB"><path class="thr-halo" d="M550 560 C 628 560, 622 700, 700 700"/><path class="thr" d="M550 560 C 628 560, 622 700, 700 700"/></g>
       <g id="tC"><path class="thr-halo" d="M1160 800 C 1238 800, 1232 640, 1310 640"/><path class="thr" d="M1160 800 C 1238 800, 1232 640, 1310 640"/></g>
     </svg>
     <div id="pill" class="kr">
       <img class="spool" src="assets/icons/weave-spool-6B4EFF.png" alt="">
-      <div class="q"><span id="qtx">지은이네 집들이 때 마셨던 와인</span></div>
+      <div class="q"><span id="qtx"><span id="qa1">지은이네 집들이 때</span> <span id="qa2">마셨던 와인</span></span></div>
       <div class="send"><svg><use href="#i-up"/></svg></div>
     </div>
     <div id="cA" class="card kr">
@@ -91,6 +92,8 @@
     <div class="pen" id="pen2" style="left:700px; top:318px">그날 찍은 사진엔?</div>
     <div class="pen" id="pen3" style="left:1310px; top:436px">라벨엔 뭐라고?</div>
     <span class="tok kr" id="tokA">3월 15일</span>
+    <span class="qchip kr" id="qc1">지은이네 집들이 때</span>
+    <span class="qchip kr" id="qc2">마셨던 와인</span>
   </div>
   <div id="topScrim"></div>
   <div class="head kr" id="h1"><h3>단서에서 단서로 엮어, <em>정확한 이름을 찾습니다</em></h3></div>
@@ -102,11 +105,10 @@
 
     <svg id="uxThreads" viewBox="0 0 1920 1080" width="1920" height="1080"></svg>
     <div class="bigf kr" id="fl1"><img src="assets/icons/samsung-calendar.png" alt=""><div><div class="t">삼성기술전 시연</div><div class="m">캘린더 · 11월 19일 (목)</div><div class="sn"><mark id="mk1">오후 2시</mark>, 수원 디지털시티 <mark id="mk4">3번 부스</mark></div></div></div>
-    <div class="bigf kr" id="fl2"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">삼성기술전 준비 회의</div><div class="m">삼성노트 · 11월 3일 (화)</div><div class="sn">시연 순서: 제품 소개 → 라이브 데모 → Q&amp;A</div></div></div>
+    <div class="bigf kr" id="fl2"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">삼성기술전 준비 회의</div><div class="m">삼성노트 · 11월 3일 (화)</div><div class="sn"><mark id="mk6">시연 순서</mark>: 제품 소개 → 라이브 데모 → Q&amp;A</div></div></div>
     <div class="bigf kr" id="fl3"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">주간 회의</div><div class="m">삼성노트 · 11월 10일 (화)</div><div class="sn">제품 소개 빼고 <mark id="mk2">문제 상황부터</mark><br><mark id="mk2b">→ 라이브 데모 → 관람객 체험</mark><br>자료는 <mark id="mk3">민수 님</mark>이 다시 정리</div></div></div>
     <div class="bigf kr" id="fl4"><img src="assets/icons/samsung-email-blue.png" alt=""><div><div class="t">최종본 공유드려요</div><div class="m">메일 · 민수 · 11월 12일 (목)</div><div class="sn">첨부: <mark id="mk5">Demo_Final.pptx</mark></div></div></div>
     <svg class="flink" id="flLink" viewBox="0 0 1920 1080" width="1920" height="1080"></svg>
-    <span class="tagchip kr" id="flChip">이전 안</span>
     <div class="bigf kr" id="fg"><span class="gpsI"><i class="pulse"></i><i class="pulse"></i><svg viewBox="0 0 24 24"><use href="#i-pin"/></svg></span><div><div class="t">위치 <span class="m2">GPS · 실시간</span></div><div class="loc">인천공항 <span id="gpsDj">면세점</span> 인근</div></div></div>
     <div class="bigf kr" id="fw"><img src="assets/icons/samsung-wallet.png" alt=""><div><div class="t">탑승권 <span class="m2">삼성 월렛 · 오늘 도착</span></div><div class="loc">싱가포르 → 인천</div></div></div>
     <div class="bigf kr" id="fk"><img src="assets/icons/app-kakao.png" alt=""><div><div class="t">아내 <span class="m2">카카오톡 · 3주 전</span></div>
@@ -114,7 +116,6 @@
         <div class="lnk" id="kkMore"><div class="mm l url">https://m.ssg.com/item/1000573</div>
           <div class="lpv" id="kkPv"><img src="assets/img/ssg-preview.jpg" alt=""><div class="lt">[신세계백화점] <span id="kkNm">에스티 로더</span> 어드밴스드 나이트 리페어 50ml</div><div class="ld">m.ssg.com</div></div></div></div></div></div></div></div>
     <span class="tok kr" id="tokC">면세점</span>
-    <span class="tok kr" id="tokD">갈색병</span>
     <div id="phone">
       <div class="frame"><div class="bezel"><div class="screen kr">
         <div class="punch"></div>
@@ -203,10 +204,10 @@
       <div class="who"><span class="av"><svg><use href="#i-phone"/></svg></span><b>재웅 선배</b><span class="st">통화 중</span><span class="eq"><i></i><i></i><i></i><i></i><i></i></span></div>
       <div class="q"><span class="w">프로님,</span> <span class="w">우리 팀이 맡은</span><br><b class="w qk">삼성기술전 시연</b> <span class="w">어떻게</span><br><span class="w">진행하기로 했었죠?</span></div>
     </div>
-    <div id="callT" class="kr"><i class="c1"></i><i class="c2"></i><div class="bb"><b>노트</b>였나… <b>메일</b>이었나…</div></div>
+    <div id="callT" class="kr"><i class="c1"></i><i class="c2"></i><div class="bb"><div class="who"><span class="me">나</span></div><b>노트</b>였나… <b>메일</b>이었나…</div></div>
     <div id="callA" class="kr">
       <div class="who"><span class="me">나</span></div>
-      <div class="q"><span class="w"><u id="ua1">11월 19일 오후 2시</u>이고,</span><br><span class="w">순서는 <u id="ua2">문제 상황, 라이브 데모,</u></span><br><span class="w"><u id="ua2b">관람객 체험</u>으로 바뀌었어요.</span><br><span class="w">최종본은 <u id="ua3">민수 님 메일</u>에 있어요!</span></div>
+      <div class="q"><span class="w"><u id="ua1">11월 19일 오후 2시</u>이고,</span><br><span class="w">순서는 <u id="ua2">문제 상황, 라이브 데모,</u></span><br><span class="w"><u id="ua2b">관람객 체험</u>으로 바뀌었어요.</span><br><span class="w">최종본은 <u id="ua3">메일로 전달</u> 드릴게요!</span></div>
     </div>
   </div>
 
@@ -224,9 +225,9 @@
   <div class="chap kr" id="ch2"><div class="no">01</div><div class="tt">기록 통합 검색</div></div>
   <div class="chap kr" id="ch3"><div class="no">03</div><div class="tt">먼저 건네는 기억</div></div>
   <div id="trio" class="kr">
-    <div class="tp"><img src="assets/img/trio-1.png" alt=""><div class="tc"><b>1</b>기록 통합 검색</div></div>
-    <div class="tp"><img src="assets/img/trio-2.png" alt=""><div class="tc"><b>2</b>단서로 찾는 기억</div></div>
-    <div class="tp"><img src="assets/img/trio-3.png" alt=""><div class="tc"><b>3</b>먼저 건네는 기억</div></div>
+    <div class="tp"><div class="gif"><img src="assets/img/trio/trio-1.png" alt=""></div><div class="tc"><b>1</b>기록 통합 검색</div></div>
+    <div class="tp"><div class="gif"><img src="assets/img/trio/trio-2.png" alt=""></div><div class="tc"><b>2</b>단서로 찾는 기억</div></div>
+    <div class="tp"><div class="gif"><img src="assets/img/trio/trio-3.png" alt=""></div><div class="tc"><b>3</b>먼저 건네는 기억</div></div>
   </div>
   <div id="vignette"></div>
   <div id="spark"><svg viewBox="-60 -60 120 120" width="120" height="120"><g stroke-linecap="round" stroke-width="5" fill="none">

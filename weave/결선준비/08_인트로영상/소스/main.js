@@ -1,7 +1,8 @@
-/* Weave 결선 인포그래픽 v12 (2026-11-06 4차 피드백) — Pain Points 뒤에 트는 세 시나리오 소개 영상.
+/* Weave 결선 인포그래픽 v13 (2026-11-06 5차 피드백) — Pain Points 뒤에 트는 세 시나리오 소개 영상.
    오프닝(로고와 한 문장) → 1 기록 통합 검색(통화, 요약) → 2 단서로 찾는 기억(구글 창, 와인) → 3 먼저 건네는 기억(카톡 링크 미리보기) → 세 화면 → 로고.
    v11: 85초 → 약 2분. 한 번에 하나씩(제목 → 말풍선 → 생각 → 검색 → 기록 하나씩 → 요약을 크게 → 답변), 장면 카드는 별 없이 번호와 이름에 빛, 메일 버튼과 갤러리 삭제.
    v12: 120초 → 100초. 순서와 비트는 그대로 두고 머무는 시간과 비트 안의 간격만 줄임(v10보다 늘어난 34초 중 24초가 1에 몰려 있어서 1을 가장 많이 줄임).
+   v13: 100초 → 107.5초. 장면 카드 빛은 이름에 한 번, 01 제목은 왼쪽 위로 옮겨 남음, 검색하면 연결된 기억이 바로 뜸, 02 검색어가 두 질문으로 갈라짐, 03 위치 → 탑승권 → 카톡 세 실, 끝 장면은 GIF처럼.
    순서와 장면 이름은 5쪽 Solution과 같다. 코드 안의 01·02·03 표시는 옛 이름(01 = 와인, 02 = 통화, 03 = 카톡)으로 남겨 두었다.
    이전: Weave 결선 인트로 v8 — GSAP 타임라인 하나(paused)를 시간 t로 탐색해 프레임을 찍는다.
    window.__seek(t), window.__DURATION, window.__events(효과음 시점 → tools/music.py), window.__ready, window.__taps, window.__marks, window.__probe(t)
@@ -28,30 +29,31 @@ const OP = { mark: 0.2, word: 0.5, sub: 0.95, out: 3.05 };   // 오프닝: 로�
 const CH = 1.9;                                        // 장면 카드가 머무는 시간(빛이 다 지나간 뒤에 걷힘)
 // 1 통화
 const C2 = D1 + 0.05, s2 = C2 + CH;                    // 카드, 시작(제목만 보이는 때)
-const tCall = s2 + 3.1, tThink = tCall + 2.6;          // 재웅 선배 말풍선, 상상 말풍선
-const tFocus = tThink + 1.4, dragT = tFocus + 1.0, dragD = 1.0;   // 말풍선을 걷고 손잡이로, 위로 끌기
-const tType = dragT + dragD + 0.1, tGo = tType + 1.4;  // 검색창을 크게 보며 입력, 손으로 검색 버튼
-const tSmall = tGo + 0.35, tRec = tSmall + 0.95;       // 누른 다음에 화면이 작아짐, 기록 시작
-const REC = [0, 2.2, 3.9, 7.0].map(d => tRec + d);     // 기록 네 개가 하나씩 오는 때
-const tWoven = tRec + 8.7, tSum = tWoven + 0.65;       // 네 기록을 실로 엮음, 요약을 크게
-const tBack = tSum + 5.9, tAns = tBack + 0.85, X2 = tAns + 3.7;   // 작아지고 말풍선이 돌아옴, 답변, 장면 끝
+const tUp = s2 + 2.75, tCall = s2 + 3.2, tThink = tCall + 2.9;    // 제목이 왼쪽 위로, 재웅 선배 말풍선, 상상 말풍선
+const tFocus = tThink + 1.6, dragT = tFocus + 1.1, dragD = 1.05;  // 말풍선을 걷고 손잡이로, 위로 끌기
+const tType = dragT + dragD + 0.1, tGo = tType + 1.7;  // 검색창을 크게 보며 입력, 손으로 검색 버튼
+const tSmall = tGo + 0.45, tRec = tSmall + 1.05;       // 누른 순간 연결된 기억이 뜨고 화면이 작아짐, 하나씩 크게 보기 시작
+const REC = [0, 2.3, 4.2, 7.2].map(d => tRec + d);     // 기록 네 개를 실로 이어 하나씩 크게
+const tWoven = tRec + 8.9, tSum = tWoven + 0.7;        // 네 기록을 실로 엮음, 요약을 크게
+const tBack = tSum + 5.9, tAns = tBack + 1.0, X2 = tAns + 3.9;    // 작아지고 말풍선이 돌아옴, 답변, 장면 끝
 // 2 와인
 const C1 = X2 + 0.35, P0 = C1 + CH + 0.2;              // 카드, 휴대폰 등장
-const pTap1 = P0 + 4.2;                                // Weave 버튼
-const c1 = pTap1 + 1.5, c2 = c1 + 3.7, c3 = c2 + 3.4, c4 = c3 + 2.25;  // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서, 라벨, 답
-const T2 = c4 + 3.4, X1 = T2 + 4.3;                    // 입력하기, 장면 끝
+const pTap1 = P0 + 4.4;                                // Weave 버튼
+const c1 = pTap1 + 1.6, c2 = c1 + 4.3, c3 = c2 + 4.8, c4 = c3 + 2.3;   // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서, 라벨, 답
+const T2 = c4 + 3.4, X1 = T2 + 5.0;                    // 입력하기, 장면 끝(결과를 보며 1초 남짓 머문 뒤)
 // 3 카톡: 대화와 입력하기 → 전송 → 답장은 v10보다 빨라지지 않게(사용자가 늘려 달라고 한 곳)
 const C3 = X1 + 0.35, s3 = C3 + CH + 0.05;             // 카드, 시작(제목만 보이는 때)
-const tChat = s3 + 3.1, tM2 = tChat + 2.0, tM3 = tM2 + 1.8;   // 대화: 아내 → 나 → 아내
-const g3 = tM3 + 1.85, tG = g3 + 1.75, tK = tG + 1.5, tL = tK + 2.2;  // 플로팅: 탑승권 → 위치 → 아내 카톡 → 링크 미리보기
-const th3 = tL + 2.0;                                  // 기록들이 휴대폰으로 엮이는 실
-const pTapW = th3 + 2.2, pTapI = pTapW + 3.0, pTapS = pTapI + 1.6;    // Weave 버튼 · 입력하기 · 전송
+const tChat = s3 + 3.4, tM2 = tChat + 3.0, tM3 = tM2 + 1.8;   // 대화: 아내 → 나(입력해서 전송) → 아내
+const g3 = tM3 + 1.75, tW = g3 + 1.95, tK = tW + 1.4, tL = tK + 2.4;  // 플로팅: 위치 → 탑승권 → 아내 카톡 → 링크 미리보기
+const th3 = tL + 1.9;                                  // 세 기록이 휴대폰으로 엮이는 실
+const pTapW = th3 + 2.1, pTapI = pTapW + 3.0, pTapS = pTapI + 1.6;    // Weave 버튼 · 입력하기 · 전송
 const tRead = pTapS + 1.05, tReply = pTapS + 2.1;      // 읽음(1이 사라짐) → 답장
-const tTrioD = 2.5;                                    // 세 화면이 머무는 시간
+const tTrioD = 3.5;                                    // 세 화면이 머무는 시간(GIF처럼 움직임)
 const LOGO_MIN = tReply + 2.1 + 0.35 + tTrioD;         // 답장을 읽을 시간 + 휴대폰이 빠지는 시간 + 세 화면
 const LOGO = D1 + Math.ceil((LOGO_MIN - D1) / BAR - 1e-6) * BAR;   // 로고는 곡의 마디 첫 박에(마지막 한 방)
 const tTrio = LOGO - tTrioD;                           // 세 화면이 모이는 때
 const DUR = LOGO + 5.5;                                // 끝 화면 5.5초
+const GIF = { w: 356, h: 740, cols: 13, fps: 20, n: 52, off: [0, 0.15, 0.3] };   // 끝 장면 스프라이트(tools/trio.cjs가 같은 값을 읽음)
 
 const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 1.0 } });
 const EV = [];
@@ -165,12 +167,12 @@ function curve(id, d, t, dur = 0.55, w = 5.5) {
 }
 const bez = (a, b, bend = 0.5) => { const dx = b.x - a.x; return `M${a.x} ${a.y} C ${a.x + dx * bend} ${a.y}, ${b.x - dx * bend} ${b.y}, ${b.x} ${b.y}`; };
 // 같은 단서가 다음 기록으로 건너간다: 작은 보라 표(토큰)가 a에서 b로 둥글게 날아감
-function hop(sel, a, b, t, d = 0.7, lift = 70) {
-  const mid = { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - lift };
+function hop(sel, a, b, t, d = 0.7, lift = 70, o = {}) {
+  const mid = o.mid || { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - lift }, hold = o.hold || 0;
   gsap.set(sel, { x: a.x, y: a.y, xPercent: -50, yPercent: -50, autoAlpha: 0, scale: 0.6 });
   tl.to(sel, { autoAlpha: 1, scale: 1, duration: 0.25, ease: 'back.out(2)' }, t);
-  tl.to(sel, { motionPath: { path: [a, mid, b], curviness: 1.25 }, duration: d, ease: 'power2.inOut' }, t + 0.2);
-  tl.to(sel, { autoAlpha: 0, scale: 0.7, duration: 0.2, ease: 'power2.in' }, t + 0.2 + d);
+  tl.to(sel, { motionPath: { path: [a, mid, b], curviness: 1.25 }, duration: d, ease: o.ease || 'power2.inOut' }, t + 0.2 + hold);
+  tl.to(sel, { autoAlpha: 0, scale: 0.7, duration: 0.2, ease: 'power2.in' }, t + 0.2 + hold + d);
 }
 
 /* ── 챕터 카드 · 헤드라인 ─────────────────────────── */
@@ -178,10 +180,10 @@ const sweep = (sel, t) => tl.fromTo(sel, { backgroundPosition: '170% 0%, 0% 0%' 
 const chapIn = (id, t) => {
   tl.set(id, { autoAlpha: 1 }, t);
   tl.fromTo([`${id} .no`, `${id} .tt`], { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, stagger: 0.11, ease: 'expo.out', immediateRender: false }, t);
-  sweep(`${id} .no`, t + 0.5); sweep(`${id} .tt`, t + 0.72);                           // 번호에서 이름으로 빛이 한 번 지나간다
+  sweep(`${id} .tt`, t + 0.6);                                                         // 이름에 빛이 한 번
 };
 const chapOut = (id, t) => { tl.to([`${id} .no`, `${id} .tt`], { y: -26, opacity: 0, duration: 0.35, stagger: 0.04, ease: 'power2.in' }, t); tl.set(id, { autoAlpha: 0 }, t + 0.45); };
-const titleIn = (id, t) => { tl.set(id, { autoAlpha: 1 }, t); tl.fromTo(`${id} .tl`, { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 0.95, stagger: 0.38, ease: 'expo.out', immediateRender: false }, t); };   // 큰 제목: 두 줄을 차례로
+const titleIn = (id, t) => { tl.set(id, { autoAlpha: 1 }, t); tl.fromTo(`${id} .tl`, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'expo.out', immediateRender: false }, t); };   // 큰 제목: 두 줄을 한 번에
 const headIn = (id, t) => { tl.set(id, { autoAlpha: 1 }, t); tl.fromTo(`${id} > *`, { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.1, ease: 'expo.out', immediateRender: false }, t); };
 const headOut = (id, t) => { tl.to(`${id} > *`, { y: -16, opacity: 0, duration: 0.45, ease: 'power2.in' }, t); tl.set(id, { autoAlpha: 0 }, t + 0.5); };
 
@@ -218,10 +220,15 @@ async function build() {
     let y = (1080 - H) / 2; for (const k of ['#fl1', '#fl2', '#fl3', '#fl4']) { $(k).style.top = `${y}px`; y += rectOf(k).height + G; } }
   const natMore = rectOf('#kkMore').height;
   const FLR = {}; for (const k of ['#fl1', '#fl2', '#fl3', '#fl4', '#fg', '#fw', '#fk']) FLR[k] = rectOf(k);
-  const DT = { a: ctr('#dtA'), b: ctr('#dtB'), g: ctr('#gpsDj'), k: ctr('#kkDj'), s: ctr('#kkSs'), p: ctr('#kkPv > img') };   // 같은 단서(날짜·면세점·갈색병)의 자리
+  const DT = { a: ctr('#dtA'), b: ctr('#dtB'), g: ctr('#gpsDj'), k: ctr('#kkDj'), qa: ctr('#qa1'), qb: ctr('#qa2'), pill: ctr('#pill'), p1: ctr('#pen1'), p2: ctr('#pen2') };   // 같은 단서(날짜·면세점)와 검색어 조각의 자리
+  // 02: 검색어 조각 → 질문을 잇는 실
+  { const pb = rectOf('#pill').bottom, r1 = rectOf('#pen1'), r2 = rectOf('#pen2'), y1 = (r1.top + r1.bottom) / 2;
+    const setD = (g, d) => $$(`${g} path`).forEach(p => p.setAttribute('d', d));
+    setD('#tA', `M${DT.qa.x} ${pb} C ${DT.qa.x} ${pb + 120}, ${r1.right + 130} ${y1}, ${r1.right + 2} ${y1}`);
+    setD('#tQ2', `M${DT.qb.x} ${pb} C ${DT.qb.x} ${pb + 34}, ${DT.qb.x - 44} ${r2.top - 30}, ${DT.qb.x - 44} ${r2.top + 2}`); }   // 곧은 세로줄은 그라데이션이 안 그려져서 살짝 휜다
   gsap.set('.chap', { autoAlpha: 0 });
   gsap.set('.head', { autoAlpha: 0 });
-  gsap.set(['#fl1', '#fl2', '#fl3', '#fl4', '#fg', '#fw', '#fk', '#flChip', '#flLink', '#callQ', '#callT', '#callA', '#flyChip', '#topScrim', '#gai', '#tokA', '#tokC', '#tokD', '#trio'], { autoAlpha: 0 });
+  gsap.set(['#fl1', '#fl2', '#fl3', '#fl4', '#fg', '#fw', '#fk', '#flLink', '#callQ', '#callT', '#callA', '#flyChip', '#topScrim', '#gai', '#tokA', '#tokC', '#qc1', '#qc2', '#trio'], { autoAlpha: 0 });
 
   /* ── 오프닝: 로고와 한 문장(끝 화면과 같은 로고) ── */
   gsap.set('#op .mark', { scale: 0.4, rotation: -30, opacity: 0 });
@@ -246,7 +253,7 @@ async function build() {
   tl.fromTo('#caretA', { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: 9, yoyo: true, repeatDelay: 0.3, ease: 'none' }, P0 + 0.4);
   cam(P0 + 0.6, camPose(2.3, B['#gbox'], { x: 960, y: 430 }), 0.85);                          // 검색할 때는 검색창을 크게
   typeIn($('#sqA'), QA, P0 + 1.3, 12);
-  cam(P0 + 3.0, camPose(2.3, { x: B['#kbA .wv'].x + 90, y: B['#kbA .wv'].y }, { x: 960, y: 600 }), 0.85);   // Weave를 누를 때는 Weave 아이콘 쪽
+  cam(P0 + 3.15, camPose(2.3, { x: B['#kbA .wv'].x + 90, y: B['#kbA .wv'].y }, { x: 960, y: 600 }), 0.85);   // Weave를 누를 때는 Weave 아이콘 쪽
   edge(pTap1 + 0.05);
   tl.fromTo('#kbA .wv', { boxShadow: '0 0 0 0 rgba(107,78,255,.6)' }, { boxShadow: '0 0 0 14px rgba(107,78,255,0)', duration: 0.6, ease: 'power2.out', immediateRender: false }, pTap1 + 0.05);
   tl.to(phone, { y: '+=2300', duration: 0.55, ease: 'power2.in' }, pTap1 + 0.25);       // 휴대폰은 아래로 빠지고, 물음은 위로
@@ -255,7 +262,7 @@ async function build() {
   // 사슬: 단계마다 카메라가 그 자리로 옮겨 가고, 질문이 먼저 혼자 뜬 다음에 실이 이어지고 기록이 나온다
   gsap.set('#w1', { transformOrigin: '0 0', x: 0, y: 0, scale: 1 });
   gsap.set(['#cA', '#cB', '#cC'], { autoAlpha: 0, scale: 0.9, y: 26 });
-  gsap.set(['#tA .thr', '#tA .thr-halo', '#tB .thr', '#tB .thr-halo', '#tC .thr', '#tC .thr-halo'], { drawSVG: '0% 0%' });
+  gsap.set(['#tA .thr', '#tA .thr-halo', '#tQ2 .thr', '#tQ2 .thr-halo', '#tB .thr', '#tB .thr-halo', '#tC .thr', '#tC .thr-halo'], { drawSVG: '0% 0%' });
   gsap.set('.pen', { autoAlpha: 0, y: 16, scale: 0.6, transformOrigin: '12% 100%' });
   gsap.set('#scan', { y: -80, opacity: 0 }); gsap.set('#ocr', { opacity: 0 });
   gsap.set('#ocrbox', { opacity: 0, scale: 1.25 });
@@ -267,16 +274,26 @@ async function build() {
   };
   const cardIn = (id, t) => tl.to(id, { autoAlpha: 1, scale: 1, y: 0, duration: 0.9, ease: 'back.out(1.3)' }, t);
   tl.to('#topScrim', { autoAlpha: 1, duration: 0.5 }, pTap1 + 0.75); headIn('#h1', pTap1 + 0.75);
-  wcam(c1, wPose(1.5, { x: 300, y: 450 }, { x: 800, y: 620 }), 1.0);                         // 집들이가 언제였지? → 지은 카톡
-  penIn('#pen1', c1 + 0.75);
-  draw('#tA', c1 + 1.6, 0.6); cardIn('#cA', c1 + 1.9);
-  mark('#hlT', c1 + 2.55, 0.55);                                                               // '휴지 안 사 와도 돼' = 집들이
-  mark('#dtA', c1 + 3.1, 0.5);                                                               // 카톡을 받은 날이 그날
+  // 검색어 조각에 형광펜 → 조각이 떨어져 나와 실을 끌고 날아가 질문이 된다
+  const splitQ = (seg, chip, g, pen, a, path, t, d) => {
+    mark(seg, t, 0.35);
+    gsap.set(chip, { x: a.x, y: a.y, xPercent: -50, yPercent: -50 });
+    tl.to(chip, { autoAlpha: 1, scale: 1.03, duration: 0.2, ease: 'back.out(2)' }, t + 0.35);
+    tl.to(chip, { motionPath: { path, curviness: 1 }, scale: 1, duration: d, ease: 'power2.inOut' }, t + 0.5);
+    draw(g, t + 0.5, d);
+    tl.to(chip, { autoAlpha: 0, duration: 0.14, ease: 'power1.in' }, t + 0.5 + d - 0.14);       // 칩이 걷히는 자리에 질문이 뜬다
+    penIn(pen, t + 0.5 + d - 0.03);
+  };
+  wcam(c1, wPose(1.5, { x: 300, y: 450 }, { x: 800, y: 620 }), 1.0);                         // '지은이네 집들이 때' → 집들이가 언제였지? → 지은 카톡
+  splitQ('#qa1', '#qc1', '#tA', '#pen1', DT.qa, [DT.qa, { x: DT.qa.x - 30, y: DT.qa.y + 130 }, { x: DT.p1.x + 230, y: DT.p1.y }, DT.p1], c1 + 0.6, 0.6);
+  cardIn('#cA', c1 + 2.3);
+  mark('#hlT', c1 + 3.05, 0.55);                                                               // '휴지 안 사 와도 돼' = 집들이
+  mark('#dtA', c1 + 3.65, 0.5);                                                               // 카톡을 받은 날이 그날
   wcam(c2, wPose(1.25, { x: 640, y: 500 }, { x: 960, y: 620 }), 1.0);                       // 그날 찍은 사진엔? → 카톡과 사진을 한 화면에
-  penIn('#pen2', c2 + 0.7);
-  draw('#tB', c2 + 1.5, 0.55); cardIn('#cB', c2 + 1.75);
-  hop('#tokA', DT.a, DT.b, c2 + 2.3, 0.55);                                                    // 같은 날짜(3월 15일)가 사진 카드로 건너감
-  mark('#dtB', c2 + 3.0, 0.4);                                                                    // 표가 도착하는 순간
+  splitQ('#qa2', '#qc2', '#tQ2', '#pen2', DT.qb, [DT.qb, { x: DT.qb.x - 10, y: (DT.qb.y + DT.p2.y) / 2 }, DT.p2], c2 + 0.6, 0.45);   // '마셨던 와인' → 그날 찍은 사진엔?
+  draw('#tB', c2 + 2.0, 0.55); cardIn('#cB', c2 + 2.25);
+  hop('#tokA', DT.a, DT.b, c2 + 2.85, 1.0, 70, { hold: 0.3, ease: 'sine.inOut' });                                                    // 같은 날짜(3월 15일)가 사진 카드로 건너감
+  mark('#dtB', c2 + 4.25, 0.4);                                                                    // 표가 도착하는 순간
   wcam(c3, wPose(1.6, { x: 930, y: 700 }, { x: 960, y: 610 }), 0.9);                        // 사진 속 라벨 글자 읽기
   tl.to('#scan', { opacity: 1, duration: 0.1 }, c3 + 0.8).to('#scan', { y: 240, duration: 0.65, ease: 'power1.inOut' }, c3 + 0.8).to('#scan', { opacity: 0, duration: 0.2 }, c3 + 1.35);
   tl.to('#ocrbox', { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2)' }, c3 + 1.2);
@@ -316,17 +333,22 @@ async function build() {
   const R2 = { x: 520, y: 0, scale: 1 };
   tl.set(phone, { x: 1400, y: 0, scale: 1, rotation: 0, filter: 'blur(0px)', autoAlpha: 1 }, s2 - 0.1);
   tl.to(phone, { x: R2.x, duration: 1.05, ease: 'power3.out' }, s2);
-  titleIn('#hdB', s2 + 0.4); headOut('#hdB', tCall - 0.45);                                  // 제목만 먼저
+  titleIn('#hdB', s2 + 0.4);                                                                  // 제목만 먼저
+  gsap.set('#hdB', { transformOrigin: '0% 0%' });
+  tl.to('#hdB', { x: -50, y: -350, scale: 0.5, duration: 0.85, ease: 'power3.inOut' }, tUp);  // 읽고 나면 왼쪽 위로 작아져 남는다
+  tl.to('#hdB', { autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, tFocus);                  // 검색창을 키우는 동안만 걷힘
+  tl.to('#hdB', { autoAlpha: 1, duration: 0.5, ease: 'power2.out' }, tBack + 0.5);            // 확대가 풀리면 다시
+  tl.to('#hdB', { autoAlpha: 0, duration: 0.4, ease: 'power2.in' }, X2);
   cont.push(t => { const v = 48 + Math.floor(clamp(t - s2, 0, 200)); $('#ctime').textContent = `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`; });
   // 재웅 선배가 말한다: 말풍선이 뜨고 한 덩이씩, 끝나면 물어보는 것에 형광펜
   tl.fromTo('#callQ', { autoAlpha: 0, x: -24, scale: 0.96, transformOrigin: '100% 60%' }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tCall);
   gsap.set('#callQ .w', { opacity: 0, y: 8 });
-  tl.to('#callQ .w', { opacity: 1, y: 0, duration: 0.4, stagger: 0.28, ease: 'power2.out' }, tCall + 0.35);
+  tl.to('#callQ .w', { opacity: 1, y: 0, duration: 0.4, stagger: 0.3, ease: 'power2.out' }, tCall + 0.35);
   $$('#callQ .eq i').forEach((b, i) => {
     const d = 0.13 + 0.04 * ((i * 7) % 5);
     tl.fromTo(b, { scaleY: 0.25 }, { scaleY: 1, duration: d, repeat: Math.floor(2.4 / d), yoyo: true, ease: 'sine.inOut', immediateRender: false }, tCall + 0.3 + i * 0.03);
   });
-  mark('#callQ .qk', tCall + 1.85, 0.55);
+  mark('#callQ .qk', tCall + 2.0, 0.55);
   // 내 생각: 작은 동그라미 → 상상 말풍선
   gsap.set('#callT i', { scale: 0, opacity: 0 }); gsap.set('#callT .bb', { scale: 0.82, opacity: 0, transformOrigin: '92% 92%' });
   tl.set('#callT', { autoAlpha: 1 }, tThink);
@@ -339,9 +361,9 @@ async function build() {
   const qPose = camPose(2.7, B['#qB'], { x: 960, y: 430 });
   cam(tFocus + 0.1, hPose, 0.85);
   gsap.set('#chevB svg', { opacity: 0 });
-  tl.fromTo('#chevB svg', { y: 8, opacity: 0 }, { y: -8, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'power1.out', immediateRender: false }, tFocus + 0.45);
+  tl.fromTo('#chevB svg', { y: 8, opacity: 0 }, { y: -8, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'power1.out', immediateRender: false }, tFocus + 0.5);
   tl.to('#chevB svg', { opacity: 0, duration: 0.15 }, dragT);
-  tl.fromTo('#scrB .hlab', { scale: 1 }, { scale: 1.12, duration: 0.3, yoyo: true, repeat: 1, ease: 'power1.inOut', immediateRender: false }, tFocus + 0.4);
+  tl.fromTo('#scrB .hlab', { scale: 1 }, { scale: 1.12, duration: 0.3, yoyo: true, repeat: 1, ease: 'power1.inOut', immediateRender: false }, tFocus + 0.45);
   tl.fromTo('#handle', { y: 0, boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { y: -7, boxShadow: '0 0 12px 3px rgba(107,78,255,.55)', duration: 0.22, yoyo: true, repeat: 1, ease: 'sine.inOut', immediateRender: false }, tFocus + 0.5);
   gsap.set('#wB', { y: lift + 14, autoAlpha: 0 });
   tl.set('#wB', { autoAlpha: 1 }, dragT);
@@ -349,52 +371,51 @@ async function build() {
   when(t => t >= dragT && t < dragT + dragD + 0.25, on => $('#wB').classList.toggle('drag', on));
   cam(dragT, qPose, dragD, 'power2.inOut');                                                   // 카메라가 손을 따라 올라가 검색창을 화면 가운데에 크게
   edge(dragT + 0.3);
-  typeIn($('#qB'), '삼성기술전 시연 내용', tType, 10);
+  typeIn($('#qB'), '삼성기술전 시연 내용', tType, 9);
   // 손으로 검색 버튼을 누른 다음에야 화면이 작아진다
   tl.fromTo('#wB .go', { boxShadow: '0 0 0 0 rgba(107,78,255,.6)' }, { boxShadow: '0 0 0 12px rgba(107,78,255,0)', duration: 0.6, ease: 'power2.out', immediateRender: false }, tGo + 0.05);
   cam(tSmall, R2, 1.05);
   const rowsB = ['#b1', '#b2', '#b3', '#b4'], FL = ['#fl1', '#fl2', '#fl3', '#fl4'];
   gsap.set(rowsB, { opacity: 0, y: 14 }); gsap.set(['#sgB', '#ttlB'], { opacity: 0, y: 10 });
-  tl.to(['#sgB', '#ttlB'], { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'expo.out' }, tSmall + 0.3);
-  // 기록은 하나씩: 휴대폰 속 줄이 뜨고 → 실이 이어지고 → 카드가 나오고 → 형광펜. 다음 기록이 오면 앞의 카드는 옅어진다
-  gsap.set(FL, { autoAlpha: 0, scale: 0.94, x: 50 });
+  // 검색을 누른 순간 요약 자리와 연결된 기억이 바로 뜬다(앱은 빠르다)
+  tl.to(['#sgB', '#ttlB'], { opacity: 1, y: 0, duration: 0.22, stagger: 0.04, ease: 'expo.out' }, tGo + 0.1);
+  tl.to(rowsB, { opacity: 1, y: 0, duration: 0.28, stagger: 0.05, ease: 'expo.out' }, tGo + 0.18);
+  // 그다음에 하나씩: 휴대폰 속 줄 → 실 → 줄이 커지듯 카드 → 형광펜. 다음 기록이 오면 앞의 카드는 옅어진다
+  gsap.set(FL, { autoAlpha: 0, scale: 0.6, x: 90, transformOrigin: '100% 50%' });
   REC.forEach((t, i) => {
-    tl.to(rowsB[i], { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out' }, t);
-    tl.fromTo(rowsB[i], { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 2.5px rgba(107,78,255,.75)', duration: 0.35, immediateRender: false }, t + 0.1);
+    tl.fromTo(rowsB[i], { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 2.5px rgba(107,78,255,.75)', duration: 0.3, immediateRender: false }, t);
     tl.to(rowsB[i], { boxShadow: '0 0 0 0 rgba(107,78,255,0)', duration: 0.35 }, (REC[i + 1] || tWoven) - 0.1);
-    tl.to(FL[i], { autoAlpha: 1, scale: 1, x: 0, duration: 0.75, ease: 'back.out(1.25)' }, t + 0.5);
+    tl.to(FL[i], { autoAlpha: 1, scale: 1, x: 0, duration: 0.7, ease: 'back.out(1.2)' }, t + 0.3);
     if (i) tl.to(FL[i - 1], { opacity: 0.5, duration: 0.4 }, t + 0.25);
   });
   mark('#mk1', REC[0] + 1.05, 0.55); mark('#mk4', REC[0] + 1.6, 0.45);                       // 언제 어디서
-  mark('#mk2', REC[2] + 1.05, 0.6); mark('#mk2b', REC[2] + 1.65, 0.65);                      // 바뀐 순서
-  // 이전 안이라는 표시(날짜가 나중인 기록이 앞선다)
-  gsap.set('#flChip', { left: FLR['#fl2'].right - 112, top: FLR['#fl2'].top + 16, x: 0, scale: 0.8 });
-  tl.to('#flChip', { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'back.out(2)' }, REC[2] + 2.35);
-  tl.to('#b2', { opacity: 0.45, duration: 0.5, ease: 'power2.out' }, REC[2] + 2.35);
-  mark('#mk3', REC[2] + 2.65, 0.4);
-  mark('#mk5', REC[3] + 1.05, 0.55);                                                          // 최종본 파일
+  mark('#mk6', REC[1] + 1.0, 0.45);                                                           // 그때의 시연 순서
+  mark('#mk2', REC[2] + 1.0, 0.6); mark('#mk2b', REC[2] + 1.6, 0.65);                        // 바뀐 순서
+  mark('#mk3', REC[2] + 2.3, 0.45);
+  mark('#mk5', REC[3] + 1.0, 0.55);                                                           // 최종본 파일
   // 네 기록이 다 나오면 밝아지고 왼쪽에서 실로 엮인다
-  tl.to(['#fl1', '#fl3'], { opacity: 1, duration: 0.4 }, tWoven);
+  tl.to(['#fl1', '#fl2', '#fl3'], { opacity: 1, duration: 0.4 }, tWoven);
   const L1 = FL.map(k => ({ x: FLR[k].left + 2, y: FLR[k].top + FLR[k].height / 2 }));
   const xb = L1[0].x - 70;
   curve('flc', `M${L1[0].x} ${L1[0].y}` + [1, 2, 3].map(i => ` C ${xb} ${L1[i - 1].y}, ${xb} ${L1[i].y}, ${L1[i].x} ${L1[i].y}`).join(''), tWoven - 0.1, 0.6, 5.5);
   // 요약: 카드를 걷고 요약 상자를 화면 가운데에 크게. 세 문장이 읽는 속도로 한 줄씩
-  tl.to([...FL, '#flChip', '#flc'], { autoAlpha: 0, x: -30, duration: 0.45, ease: 'power2.in', stagger: 0.03 }, tSum);
+  tl.to([...FL, '#flc'], { autoAlpha: 0, x: -30, duration: 0.45, ease: 'power2.in', stagger: 0.03 }, tSum);
   const sumPose = camPose(2.85, B['#sgB'], { x: 960, y: 462 });
   cam(tSum + 0.1, sumPose, 1.0);
   tl.to(['#wB .wpill', '#ttlB', '#b1', '#b2', '#b3', '#b4'], { opacity: 0.2, duration: 0.5 }, tSum + 0.3);
   tl.to('#sgB', { boxShadow: '0 0 0 2.5px rgba(107,78,255,.8)', duration: 0.4, ease: 'power2.out' }, tSum + 0.7);
   gsap.set(['#sl1', '#sl2', '#sl3'], { clipPath: 'inset(-20% 100% -20% 0)' });
+  const SUMD = 1.25;                                                                          // 한 줄을 쓰는 시간. 줄 사이에 멈추지 않는다
   ['#sl1', '#sl2', '#sl3'].forEach((k, i) => {
-    const t = tSum + 1.0 + i * 1.6;
+    const t = tSum + 1.0 + i * SUMD, r = rectOf(k), m = rectOf(`${k} .sumk`);
+    const f0 = (m.left - r.left) / r.width, f1 = (m.right - r.left) / r.width;                // 글자가 써지는 대로 형광펜이 함께 지나간다
     tl.to(`.sumv .skel:nth-child(${i + 1})`, { opacity: 0, duration: 0.25 }, t);
-    tl.to(k, { clipPath: 'inset(-20% 0% -20% 0)', duration: 0.75, ease: 'none' }, t);
-    mark(`${k} .sumk`, t + 0.8, 0.45);
+    tl.to(k, { clipPath: 'inset(-20% 0% -20% 0)', duration: SUMD, ease: 'none' }, t);
+    mark(`${k} .sumk`, t + f0 * SUMD, (f1 - f0) * SUMD);
   });
   // 작아진 다음에 통화 말풍선이 돌아오고, 답변이 한 줄씩
   tl.to('#sgB', { boxShadow: '0 0 0 0px rgba(107,78,255,0)', duration: 0.4 }, tBack);
-  tl.to(['#wB .wpill', '#ttlB', '#b1', '#b3', '#b4'], { opacity: 1, duration: 0.5 }, tBack + 0.1);
-  tl.to('#b2', { opacity: 0.45, duration: 0.5 }, tBack + 0.1);
+  tl.to(['#wB .wpill', '#ttlB', '#b1', '#b2', '#b3', '#b4'], { opacity: 1, duration: 0.5 }, tBack + 0.1);
   cam(tBack, R2, 0.9);
   tl.to('#callQ', { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power2.out' }, tBack + 0.6);
   tl.fromTo('#callA', { autoAlpha: 0, x: -20, scale: 0.96, transformOrigin: '100% 50%' }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tAns);
@@ -411,7 +432,7 @@ async function build() {
   const R3 = { x: -430, y: 0, scale: 1 };
   tl.set(phone, { x: -1500, y: 0, scale: 1, rotation: 0, filter: 'blur(0px)', autoAlpha: 1 }, s3 - 0.1);
   tl.to(phone, { x: R3.x, duration: 1.0, ease: 'power3.out' }, s3);
-  titleIn('#hdC', s3 + 0.4); headOut('#hdC', tChat - 0.45);                                  // 제목만 먼저
+  titleIn('#hdC', s3 + 0.4); sweep('#hdC .tl', s3 + 2.05); headOut('#hdC', tChat - 0.45);   // 제목이 한 번 뜨고, 읽었을 때 빛이 한 번
   // 대화: 아내 → 나 → 아내. 제목이 걷히면 휴대폰을 가운데로 크게
   const chatPose = camPose(2.1, { x: 960, y: MS[2]['#m2'].y + 10 }, { x: 960, y: 560 });
   const reveal = (k, t) => {
@@ -422,30 +443,32 @@ async function build() {
   gsap.set(['#m2 .bub', '#m3 .bub', '#mSent .bub', '#mReply .bub'], { opacity: 0 });
   cam(tChat - 0.1, chatPose, 0.9);
   tl.fromTo('#m1 .bub', { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 3px rgba(107,78,255,.45)', duration: 0.35, yoyo: true, repeat: 1, repeatDelay: 0.4, immediateRender: false }, tChat + 0.7);
-  reveal('#m2', tM2);
+  // 나의 답은 입력해서 보낸다
+  typeIn($('#kinTx'), '응, 방금 내렸어', tM2 - 1.15, 11);
+  textAt($('#kinTx'), tM2 + 0.06, { html: PH });
+  reveal('#m2', tM2 + 0.06);
   reveal('#m3', tM3);
   cam(g3 - 0.3, R3, 0.9);
-  // 플로팅은 하나씩: 탑승권(귀국 중) → 위치(면세점 근처) → 아내 카톡(면세점) → 링크 미리보기(이 갈색병의 이름). 다음 것이 오면 앞의 것은 옅어진다
+  // 플로팅은 하나씩: 위치(면세점 근처) → 탑승권(귀국 중) → 아내 카톡(면세점) → 링크 미리보기(이 갈색병의 이름). 다음 것이 오면 앞의 것은 옅어진다
   gsap.set(['#fw', '#fg', '#fk'], { autoAlpha: 0, scale: 0.94, x: 40 });
   const popF = (k, t) => tl.to(k, { autoAlpha: 1, scale: 1, x: 0, duration: 0.8, ease: 'back.out(1.4)' }, t);
-  popF('#fw', g3 + 0.45);
-  tl.to('#fw', { opacity: 0.5, duration: 0.4 }, tG + 0.1);
-  popF('#fg', tG);
-  tl.fromTo('#fg .pulse', { scale: 1, opacity: 0.9 }, { scale: 2.2, opacity: 0, duration: 1.2, repeat: 1, stagger: 0.6, ease: 'power1.out', immediateRender: false }, tG + 0.25);
-  mark('#gpsDj', tG + 0.75, 0.5);
+  popF('#fg', g3 + 0.45);
+  tl.fromTo('#fg .pulse', { scale: 1, opacity: 0.9 }, { scale: 2.2, opacity: 0, duration: 1.2, repeat: 1, stagger: 0.6, ease: 'power1.out', immediateRender: false }, g3 + 0.7);
+  mark('#gpsDj', g3 + 1.15, 0.5);
+  tl.to('#fg', { opacity: 0.5, duration: 0.4 }, tW + 0.1);
+  popF('#fw', tW);
+  tl.to('#fw', { opacity: 0.5, duration: 0.4 }, tK + 0.1);
   popF('#fk', tK);
-  hop('#tokC', DT.g, DT.k, tK + 0.65, 0.55, 40);                                               // 위치의 '면세점'이 아내 카톡의 '면세점'으로
-  tl.to('#fg', { opacity: 0.5, duration: 0.4 }, tK + 1.15);
-  mark('#kkDj', tK + 1.35, 0.4);
-  mark('#kkSs', tK + 1.7, 0.45);                                                              // 그때 말한 '이 갈색병'
-  tl.fromTo('#kkBub', { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 3px rgba(107,78,255,.85)', duration: 0.4, ease: 'power2.out', immediateRender: false }, tK + 1.7);
-  // 아내가 함께 보낸 링크와 미리보기가 펼쳐지고, '갈색병'이 미리보기로 건너가 제품 이름을 짚는다
+  hop('#tokC', DT.g, DT.k, tK + 0.55, 0.8, 40, { mid: { x: Math.max(DT.g.x, DT.k.x) + 230, y: (DT.g.y + DT.k.y) / 2 } });   // 위치의 '면세점'이 아내 카톡의 '면세점'으로
+  mark('#kkDj', tK + 1.5, 0.4);
+  mark('#kkSs', tK + 1.85, 0.45);                                                             // 그때 말한 '이 갈색병'
+  tl.fromTo('#kkBub', { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 3px rgba(107,78,255,.85)', duration: 0.4, ease: 'power2.out', immediateRender: false }, tK + 1.85);
+  // 아내가 함께 보낸 링크와 미리보기가 펼쳐지고, 제품 이름에 형광펜
   gsap.set('#kkMore', { height: 0, opacity: 0, overflow: 'hidden' });
   tl.to('#kkMore', { height: natMore, opacity: 1, duration: 0.65, ease: 'power2.inOut' }, tL);
   tl.set('#kkMore', { overflow: 'visible' }, tL + 0.67);
-  hop('#tokD', DT.s, DT.p, tL + 0.65, 0.45, 26);
-  tl.fromTo('#kkPv', { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 3px rgba(107,78,255,.85)', duration: 0.4, ease: 'power2.out', immediateRender: false }, tL + 1.25);
-  mark('#kkNm', tL + 1.25, 0.5);
+  tl.fromTo('#kkPv', { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 3px rgba(107,78,255,.85)', duration: 0.4, ease: 'power2.out', immediateRender: false }, tL + 0.8);
+  mark('#kkNm', tL + 0.85, 0.5);
   tl.to(['#fw', '#fg'], { opacity: 1, duration: 0.4 }, th3 - 0.35);                           // 실로 엮기 전에 다시 밝게
   const TC = { thread: th3 };
   // 기록들이 휴대폰(키보드 도구줄 높이)으로 엮이면, 빛이 도구줄을 따라가 Weave 버튼이 크게 반짝 — 누르라는 신호
@@ -458,7 +481,7 @@ async function build() {
     .to('#kbC .wv', { scale: 1.3, duration: 0.3, ease: 'power2.inOut' }, wvGlow + 0.42)
     .to('#kbC .wv', { scale: 1.42, duration: 0.42, yoyo: true, repeat: 2, ease: 'sine.inOut' }, wvGlow + 0.75);
   tl.fromTo('#kbC .wvfx .glow', { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'power2.out', immediateRender: false }, wvGlow)
-    .to('#kbC .wvfx .glow', { scale: 1.25, opacity: 0.65, duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' }, wvGlow + 0.5);
+    .to('#kbC .wvfx .glow', { scale: 1.25, opacity: 0.65, duration: 0.36, yoyo: true, repeat: 1, ease: 'sine.inOut' }, wvGlow + 0.5);
   tl.fromTo('#kbC .wvfx .rg', { scale: 1, opacity: 0.9 }, { scale: 3.4, opacity: 0, duration: 1.0, stagger: 0.3, ease: 'power2.out', immediateRender: false }, wvGlow + 0.05);
   tl.fromTo('#kbC .wvfx .badge', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(3)', immediateRender: false }, wvGlow + 0.2);
   const SO = [[-34, -26], [38, -30], [44, 16], [-30, 22]];
@@ -468,8 +491,8 @@ async function build() {
   });
   tl.set(['#kbC .wvfx .badge', '#kbC .wvfx .glow'], { opacity: 0 }, pTapW + 0.1);              // 누르면 배지·빛은 사라지고 시트가 뜬다
   tl.set('#kbC .wv', { scale: 1, backgroundColor: '#E6DEFF', boxShadow: 'none' }, pTapW + 1.0); tl.set('#kbC .wv img.lit', { opacity: 0 }, pTapW + 1.0);
-  tl.to(['#fw', '#fg', '#fk'], { autoAlpha: 0, x: 30, duration: 0.4, ease: 'power2.in' }, th3 + 1.2);   // 실이 모이면 플로팅은 걷히고 버튼만
-  cam(th3 + 1.2, camPose(1.9, { x: 900, y: B['#kbC .tb'].y + 30 }, { x: 720, y: 540 }), 0.75);
+  tl.to(['#fw', '#fg', '#fk'], { autoAlpha: 0, x: 30, duration: 0.4, ease: 'power2.in' }, th3 + 1.25);   // 실이 모이면 플로팅은 걷히고 버튼만
+  cam(th3 + 1.25, camPose(1.9, { x: 900, y: B['#kbC .tb'].y + 30 }, { x: 720, y: 540 }), 0.75);
   gsap.set('#wC', { y: 760 }); gsap.set('#scrimC', { opacity: 0 });
   tl.to('#wC', { y: 0, duration: 0.75, ease: 'power3.out' }, pTapW + 0.15);
   tl.to('#scrimC', { opacity: 1, duration: 0.5 }, pTapW + 0.15);
@@ -481,11 +504,9 @@ async function build() {
   tl.to('#wC', { y: 760, duration: 0.55, ease: 'power3.in' }, pTapI + 0.25);
   tl.to('#scrimC', { opacity: 0, duration: 0.45 }, pTapI + 0.3);
   textAt($('#kinTx'), pTapI + 0.4, { text: MSGTX });
-  cam(pTapI + 0.3, camPose(2.35, { x: MS[2].kin.x, y: MS[2].kin.y - 18 }, { x: 960, y: 560 }), 0.8);          // 입력창을 크게: 들어간 말이 읽히게
+  cam(pTapI + 0.3, camPose(2.05, { x: 970, y: (MS[4]['#mSent'].y + MS[4]['#mReply'].y) / 2 }, { x: 960, y: 540 }), 0.85);   // 입력하기 뒤로는 한 자리: 입력창과 대화가 함께 담긴다
   textAt($('#kinTx'), pTapS + 0.1, { html: PH });
   reveal('#mSent', pTapS + 0.1);
-  cam(pTapS + 0.15, camPose(2.05, { x: 985, y: MS[3]['#mSent'].y }, { x: 960, y: 520 }), 0.75);                 // 보낸 말을 크게
-  cam(tReply - 0.15, camPose(2.05, { x: 970, y: (MS[4]['#mSent'].y + MS[4]['#mReply'].y) / 2 }, { x: 960, y: 540 }), 0.75);   // 답장이 오면 둘 다
   tl.to('#rdSent', { opacity: 0, duration: 0.2 }, tRead);
   reveal('#mReply', tReply); ev(tReply, 'msg');
 
@@ -496,6 +517,10 @@ async function build() {
   tl.set('#trio', { autoAlpha: 1 }, tTrio - 0.05);
   tl.to('#trio .tp', { y: 0, opacity: 1, scale: 1, duration: 0.85, stagger: 0.16, ease: 'expo.out' }, tTrio);
   tl.to('#trio', { opacity: 0, y: -30, filter: 'blur(8px)', duration: 0.45, ease: 'power2.in' }, LOGO - 0.42);
+  const gifs = $$('#trio .gif img');                                                          // 옛 데모 GIF처럼: 저마다 20fps로 넘어가고, 시작이 조금씩 어긋난다
+  cont.push(t => { if (t < tTrio - 0.3 || t > LOGO + 0.1) return;
+    gifs.forEach((im, i) => { const f = clamp(Math.floor((t - tTrio - GIF.off[i]) * GIF.fps), 0, GIF.n - 1);
+      if (im._f !== f) { im._f = f; im.style.transform = `translate(${-(f % GIF.cols) * GIF.w}px, ${-Math.floor(f / GIF.cols) * GIF.h}px)`; } }); });
   gsap.set('#logo .mark', { scale: 0.4, rotation: -30, opacity: 0 });
   gsap.set('#logo .word', { clipPath: 'inset(-50% 100% -50% -4%)', x: -30, autoAlpha: 0 });   // 감춰 두지 않으면 글자 그림자가 처음부터 옅게 비침
   gsap.set(['#tag', '#sub'], { y: 24, opacity: 0 });
@@ -518,6 +543,7 @@ async function build() {
   /* ── 손·실·날아가는 답: 카메라·시트가 움직인 뒤의 실제 자리를 재서 맞춘다 ── */
   const at = (t, sel) => { seekAll(t); return ctr(sel); };
   const atR = (t, sel) => { seekAll(t); return rectOf(sel); };
+  const pM = at(tM2 - 0.1, '#kSend');
   const p1 = at(pTap1 - 0.1, '#kbA .wv');
   const p2 = at(T2 - 0.1, '#btnCC');
   const p3 = at(pTap3 - 0.1, '#kbA .srch');
@@ -542,8 +568,9 @@ async function build() {
   gsap.set(hand, { x: 2100, y: 1200, rotation: -12, autoAlpha: 0 });
   gsap.set(spark, { autoAlpha: 0 });
   gsap.set('#htrail', { rotation: 12, height: 0 }); gsap.set('#htouch', { opacity: 0, scale: 0.6 });
+  handIn(pM.x, pM.y, tM2, 0.6); press(pM.x, pM.y, tM2, '#kSend'); handOut(tM2 + 0.3);
   handIn(p1.x, p1.y, pTap1); press(p1.x, p1.y, pTap1, '#kbA .wv'); handOut(pTap1 + 0.2);
-  tl.fromTo('#pill', { x: p1.x - 960, y: p1.y - 262, scale: 0.3, autoAlpha: 0 }, { x: 0, y: 0, scale: 1, autoAlpha: 1, duration: 1.1, ease: 'expo.out', immediateRender: false }, pTap1 + 0.5);
+  tl.fromTo('#pill', { x: p1.x - DT.pill.x, y: p1.y - DT.pill.y, scale: 0.3, autoAlpha: 0 }, { x: 0, y: 0, scale: 1, autoAlpha: 1, duration: 1.1, ease: 'expo.out', immediateRender: false }, pTap1 + 0.5);
   tl.to('#pill', { autoAlpha: 0, duration: 0.5 }, c3);
   handIn(p2.x, p2.y, T2); press(p2.x, p2.y, T2, '#btnCC'); handOut(T2 + 0.3);
   // 답이 칩이 되어 검색창으로 날아간다
@@ -569,16 +596,15 @@ async function build() {
   // 1: 입력을 마치면 손으로 검색 버튼을 누른다(누른 다음에 화면이 작아진다)
   handIn(pGo.x, pGo.y, tGo, 0.65); press(pGo.x, pGo.y, tGo, '#wB .go'); handOut(tGo + 0.2);
   // 1: 기록마다 휴대폰 속 줄 → 왼쪽 큰 카드로 실이 한 가닥씩. 다음 기록이 오면 앞의 실은 옅어지고, 요약 전에 걷힘
-  const tb = FL.map((k, i) => curve(`tb${i}`, bez({ x: rb[i].left + 8, y: rb[i].top + rb[i].height / 2 }, { x: FLR[k].right - 2, y: FLR[k].top + FLR[k].height / 2 }, 0.55), REC[i] + 0.12, 0.7));
+  const tb = FL.map((k, i) => curve(`tb${i}`, bez({ x: rb[i].left + 8, y: rb[i].top + rb[i].height / 2 }, { x: FLR[k].right - 2, y: FLR[k].top + FLR[k].height / 2 }, 0.55), REC[i] + 0.06, 0.5));
   tb.forEach((g, i) => { if (REC[i + 1]) tl.to(g, { opacity: 0.3, duration: 0.4 }, REC[i + 1] + 0.25); });
   tl.to(tb, { opacity: 1, duration: 0.4 }, tWoven);
   tl.to(tb, { autoAlpha: 0, duration: 0.4 }, tSum);
-  // 3: 위치 → 탑승권, 탑승권·아내 카톡 → 휴대폰 오른쪽, 키보드 도구줄 높이로 모인다
+  // 3: 위치, 탑승권, 아내 카톡이 차례로 휴대폰 오른쪽 키보드 도구줄 높이로 모인다
   const K = { x: frC.right - 6, y: tbC.y };
   const lm = (k, u = 0.5) => ({ x: FLR[k].left + 2, y: FLR[k].top + FLR[k].height * u });
-  const wr = { x: FLR['#fw'].right - 2, y: FLR['#fw'].top + FLR['#fw'].height / 2 };
-  const tg = [curve('tg3', bez(lm('#fg'), wr, 0.5), TC.thread - 0.25, 0.3, 6), curve('tg1', bez(lm('#fw'), K, 0.6), TC.thread, 0.6, 6), curve('tg2', bez(lm('#fk', 0.42), K, 0.6), TC.thread, 0.6, 6)];
-  tl.to(tg, { autoAlpha: 0, duration: 0.35 }, th3 + 1.2);
+  const tg = [curve('tg1', bez(lm('#fg'), K, 0.6), TC.thread, 0.55, 6), curve('tg2', bez(lm('#fw'), K, 0.6), TC.thread + 0.12, 0.55, 6), curve('tg3', bez(lm('#fk', 0.42), K, 0.6), TC.thread + 0.24, 0.55, 6)];
+  tl.to(tg, { autoAlpha: 0, duration: 0.35 }, th3 + 1.25);
   sparkAt(wvG.x, wvG.y, wvGlow);
   handIn(pW.x, pW.y, pTapW); press(pW.x, pW.y, pTapW, null); handOut(pTapW + 0.3);
   handIn(pI.x, pI.y, pTapI); press(pI.x, pI.y, pTapI, '#btnC'); handOut(pTapI + 0.3);
@@ -586,7 +612,8 @@ async function build() {
 
   window.__events = EV.sort((a, b) => a.t - b.t);
   window.__taps = { p1, p2, p3, pW, pI, pS, h0, pGo, lift };
-  window.__marks = { logo: LOGO, logoMin: LOGO_MIN, trio: tTrio, x1: X1, x2: X2, drop: D1, bar: BAR, ch1: C1, p0: P0, pTap1, c1, c2, c3, c4, t2: T2, ch2: C2, s2, tCall, tThink, tFocus, dragT, tType, tGo, tSmall, tRec, rec: REC, tWoven, tSum, tBack, tAns, ch3: C3, s3, tChat, tM2, tM3, g3, tG, tK, tL, th3, wvGlow, tapW: pTapW, tapI: pTapI, tapS: pTapS, reply: tReply, dur: DUR };
+  window.__gif = GIF;
+  window.__marks = { pTap3, tUp, tW, tRead, logo: LOGO, logoMin: LOGO_MIN, trio: tTrio, x1: X1, x2: X2, drop: D1, bar: BAR, ch1: C1, p0: P0, pTap1, c1, c2, c3, c4, t2: T2, ch2: C2, s2, tCall, tThink, tFocus, dragT, tType, tGo, tSmall, tRec, rec: REC, tWoven, tSum, tBack, tAns, ch3: C3, s3, tChat, tM2, tM3, g3, tK, tL, th3, wvGlow, tapW: pTapW, tapI: pTapI, tapS: pTapS, reply: tReply, dur: DUR };
   seekAll(0);
   return true;
 }
