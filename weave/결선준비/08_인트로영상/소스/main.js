@@ -28,26 +28,26 @@ const OP = { mark: 0.2, word: 0.5, sub: 0.95, out: 3.05 };   // 오프닝: 로�
 const CH = 1.9;                                        // 장면 카드가 머무는 시간(빛이 다 지나간 뒤에 걷힘)
 // 1 통화
 const C2 = D1 + 0.05, s2 = C2 + CH;                    // 카드, 시작(제목만 보이는 때)
-const tCall = s2 + 3.2, tThink = tCall + 2.8;          // 재웅 선배 말풍선, 상상 말풍선
-const tFocus = tThink + 1.5, dragT = tFocus + 1.1, dragD = 1.05;  // 말풍선을 걷고 손잡이로, 위로 끌기
-const tType = dragT + dragD + 0.1, tGo = tType + 1.5;  // 검색창을 크게 보며 입력, 손으로 검색 버튼
-const tSmall = tGo + 0.35, tRec = tSmall + 1.0;        // 누른 다음에 화면이 작아짐, 기록 시작
-const REC = [0, 2.3, 4.2, 7.4].map(d => tRec + d);     // 기록 네 개가 하나씩 오는 때
-const tWoven = tRec + 9.2, tSum = tWoven + 0.7;        // 네 기록을 실로 엮음, 요약을 크게
-const tBack = tSum + 6.0, tAns = tBack + 0.9, X2 = tAns + 3.8;    // 작아지고 말풍선이 돌아옴, 답변, 장면 끝
+const tCall = s2 + 3.1, tThink = tCall + 2.6;          // 재웅 선배 말풍선, 상상 말풍선
+const tFocus = tThink + 1.4, dragT = tFocus + 1.0, dragD = 1.0;   // 말풍선을 걷고 손잡이로, 위로 끌기
+const tType = dragT + dragD + 0.1, tGo = tType + 1.4;  // 검색창을 크게 보며 입력, 손으로 검색 버튼
+const tSmall = tGo + 0.35, tRec = tSmall + 0.95;       // 누른 다음에 화면이 작아짐, 기록 시작
+const REC = [0, 2.2, 3.9, 7.0].map(d => tRec + d);     // 기록 네 개가 하나씩 오는 때
+const tWoven = tRec + 8.7, tSum = tWoven + 0.65;       // 네 기록을 실로 엮음, 요약을 크게
+const tBack = tSum + 5.9, tAns = tBack + 0.85, X2 = tAns + 3.7;   // 작아지고 말풍선이 돌아옴, 답변, 장면 끝
 // 2 와인
-const C1 = X2 + 0.4, P0 = C1 + CH + 0.2;               // 카드, 휴대폰 등장
-const pTap1 = P0 + 3.9;                                // Weave 버튼
-const c1 = pTap1 + 1.6, c2 = c1 + 3.8, c3 = c2 + 3.4, c4 = c3 + 2.25;  // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서, 라벨, 답
-const T2 = c4 + 3.5, X1 = T2 + 4.4;                    // 입력하기, 장면 끝
-// 3 카톡
-const C3 = X1 + 0.4, s3 = C3 + CH + 0.05;              // 카드, 시작(제목만 보이는 때)
-const tChat = s3 + 3.2, tM2 = tChat + 2.0, tM3 = tM2 + 1.2;   // 대화: 아내 → 나 → 아내
-const g3 = tM3 + 1.3, tG = g3 + 1.75, tK = tG + 1.6, tL = tK + 2.2;   // 플로팅: 탑승권 → 위치 → 아내 카톡 → 링크 미리보기
-const th3 = tL + 2.1;                                  // 기록들이 휴대폰으로 엮이는 실
-const pTapW = th3 + 1.95, pTapI = pTapW + 3.0, pTapS = pTapI + 1.3;   // Weave 버튼 · 입력하기 · 전송
-const tRead = pTapS + 0.85, tReply = pTapS + 1.7;      // 읽음(1이 사라짐) → 답장
-const tTrioD = 2.6;                                    // 세 화면이 머무는 시간
+const C1 = X2 + 0.35, P0 = C1 + CH + 0.2;              // 카드, 휴대폰 등장
+const pTap1 = P0 + 4.2;                                // Weave 버튼
+const c1 = pTap1 + 1.5, c2 = c1 + 3.7, c3 = c2 + 3.4, c4 = c3 + 2.25;  // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서, 라벨, 답
+const T2 = c4 + 3.4, X1 = T2 + 4.3;                    // 입력하기, 장면 끝
+// 3 카톡: 대화와 입력하기 → 전송 → 답장은 v10보다 빨라지지 않게(사용자가 늘려 달라고 한 곳)
+const C3 = X1 + 0.35, s3 = C3 + CH + 0.05;             // 카드, 시작(제목만 보이는 때)
+const tChat = s3 + 3.1, tM2 = tChat + 2.0, tM3 = tM2 + 1.8;   // 대화: 아내 → 나 → 아내
+const g3 = tM3 + 1.85, tG = g3 + 1.75, tK = tG + 1.5, tL = tK + 2.2;  // 플로팅: 탑승권 → 위치 → 아내 카톡 → 링크 미리보기
+const th3 = tL + 2.0;                                  // 기록들이 휴대폰으로 엮이는 실
+const pTapW = th3 + 2.2, pTapI = pTapW + 3.0, pTapS = pTapI + 1.6;    // Weave 버튼 · 입력하기 · 전송
+const tRead = pTapS + 1.05, tReply = pTapS + 2.1;      // 읽음(1이 사라짐) → 답장
+const tTrioD = 2.5;                                    // 세 화면이 머무는 시간
 const LOGO_MIN = tReply + 2.1 + 0.35 + tTrioD;         // 답장을 읽을 시간 + 휴대폰이 빠지는 시간 + 세 화면
 const LOGO = D1 + Math.ceil((LOGO_MIN - D1) / BAR - 1e-6) * BAR;   // 로고는 곡의 마디 첫 박에(마지막 한 방)
 const tTrio = LOGO - tTrioD;                           // 세 화면이 모이는 때
@@ -245,8 +245,8 @@ async function build() {
   tl.to(phone, { autoAlpha: 1, y: 0, scale: 1, duration: 1.1, ease: 'power3.out' }, P0);
   tl.fromTo('#caretA', { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: 9, yoyo: true, repeatDelay: 0.3, ease: 'none' }, P0 + 0.4);
   cam(P0 + 0.6, camPose(2.3, B['#gbox'], { x: 960, y: 430 }), 0.85);                          // 검색할 때는 검색창을 크게
-  typeIn($('#sqA'), QA, P0 + 1.2, 12);
-  cam(P0 + 2.75, camPose(2.3, { x: B['#kbA .wv'].x + 90, y: B['#kbA .wv'].y }, { x: 960, y: 600 }), 0.8);   // Weave를 누를 때는 Weave 아이콘 쪽
+  typeIn($('#sqA'), QA, P0 + 1.3, 12);
+  cam(P0 + 3.0, camPose(2.3, { x: B['#kbA .wv'].x + 90, y: B['#kbA .wv'].y }, { x: 960, y: 600 }), 0.85);   // Weave를 누를 때는 Weave 아이콘 쪽
   edge(pTap1 + 0.05);
   tl.fromTo('#kbA .wv', { boxShadow: '0 0 0 0 rgba(107,78,255,.6)' }, { boxShadow: '0 0 0 14px rgba(107,78,255,0)', duration: 0.6, ease: 'power2.out', immediateRender: false }, pTap1 + 0.05);
   tl.to(phone, { y: '+=2300', duration: 0.55, ease: 'power2.in' }, pTap1 + 0.25);       // 휴대폰은 아래로 빠지고, 물음은 위로
@@ -270,8 +270,8 @@ async function build() {
   wcam(c1, wPose(1.5, { x: 300, y: 450 }, { x: 800, y: 620 }), 1.0);                         // 집들이가 언제였지? → 지은 카톡
   penIn('#pen1', c1 + 0.75);
   draw('#tA', c1 + 1.6, 0.6); cardIn('#cA', c1 + 1.9);
-  mark('#hlT', c1 + 2.6, 0.55);                                                               // '휴지 안 사 와도 돼' = 집들이
-  mark('#dtA', c1 + 3.2, 0.5);                                                               // 카톡을 받은 날이 그날
+  mark('#hlT', c1 + 2.55, 0.55);                                                               // '휴지 안 사 와도 돼' = 집들이
+  mark('#dtA', c1 + 3.1, 0.5);                                                               // 카톡을 받은 날이 그날
   wcam(c2, wPose(1.25, { x: 640, y: 500 }, { x: 960, y: 620 }), 1.0);                       // 그날 찍은 사진엔? → 카톡과 사진을 한 화면에
   penIn('#pen2', c2 + 0.7);
   draw('#tB', c2 + 1.5, 0.55); cardIn('#cB', c2 + 1.75);
@@ -321,12 +321,12 @@ async function build() {
   // 재웅 선배가 말한다: 말풍선이 뜨고 한 덩이씩, 끝나면 물어보는 것에 형광펜
   tl.fromTo('#callQ', { autoAlpha: 0, x: -24, scale: 0.96, transformOrigin: '100% 60%' }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tCall);
   gsap.set('#callQ .w', { opacity: 0, y: 8 });
-  tl.to('#callQ .w', { opacity: 1, y: 0, duration: 0.4, stagger: 0.3, ease: 'power2.out' }, tCall + 0.35);
+  tl.to('#callQ .w', { opacity: 1, y: 0, duration: 0.4, stagger: 0.28, ease: 'power2.out' }, tCall + 0.35);
   $$('#callQ .eq i').forEach((b, i) => {
     const d = 0.13 + 0.04 * ((i * 7) % 5);
     tl.fromTo(b, { scaleY: 0.25 }, { scaleY: 1, duration: d, repeat: Math.floor(2.4 / d), yoyo: true, ease: 'sine.inOut', immediateRender: false }, tCall + 0.3 + i * 0.03);
   });
-  mark('#callQ .qk', tCall + 2.0, 0.55);
+  mark('#callQ .qk', tCall + 1.85, 0.55);
   // 내 생각: 작은 동그라미 → 상상 말풍선
   gsap.set('#callT i', { scale: 0, opacity: 0 }); gsap.set('#callT .bb', { scale: 0.82, opacity: 0, transformOrigin: '92% 92%' });
   tl.set('#callT', { autoAlpha: 1 }, tThink);
@@ -339,9 +339,9 @@ async function build() {
   const qPose = camPose(2.7, B['#qB'], { x: 960, y: 430 });
   cam(tFocus + 0.1, hPose, 0.85);
   gsap.set('#chevB svg', { opacity: 0 });
-  tl.fromTo('#chevB svg', { y: 8, opacity: 0 }, { y: -8, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'power1.out', immediateRender: false }, tFocus + 0.5);
+  tl.fromTo('#chevB svg', { y: 8, opacity: 0 }, { y: -8, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'power1.out', immediateRender: false }, tFocus + 0.45);
   tl.to('#chevB svg', { opacity: 0, duration: 0.15 }, dragT);
-  tl.fromTo('#scrB .hlab', { scale: 1 }, { scale: 1.12, duration: 0.3, yoyo: true, repeat: 1, ease: 'power1.inOut', immediateRender: false }, tFocus + 0.45);
+  tl.fromTo('#scrB .hlab', { scale: 1 }, { scale: 1.12, duration: 0.3, yoyo: true, repeat: 1, ease: 'power1.inOut', immediateRender: false }, tFocus + 0.4);
   tl.fromTo('#handle', { y: 0, boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { y: -7, boxShadow: '0 0 12px 3px rgba(107,78,255,.55)', duration: 0.22, yoyo: true, repeat: 1, ease: 'sine.inOut', immediateRender: false }, tFocus + 0.5);
   gsap.set('#wB', { y: lift + 14, autoAlpha: 0 });
   tl.set('#wB', { autoAlpha: 1 }, dragT);
@@ -365,14 +365,14 @@ async function build() {
     tl.to(FL[i], { autoAlpha: 1, scale: 1, x: 0, duration: 0.75, ease: 'back.out(1.25)' }, t + 0.5);
     if (i) tl.to(FL[i - 1], { opacity: 0.5, duration: 0.4 }, t + 0.25);
   });
-  mark('#mk1', REC[0] + 1.1, 0.55); mark('#mk4', REC[0] + 1.7, 0.45);                       // 언제 어디서
-  mark('#mk2', REC[2] + 1.1, 0.6); mark('#mk2b', REC[2] + 1.75, 0.65);                      // 바뀐 순서
+  mark('#mk1', REC[0] + 1.05, 0.55); mark('#mk4', REC[0] + 1.6, 0.45);                       // 언제 어디서
+  mark('#mk2', REC[2] + 1.05, 0.6); mark('#mk2b', REC[2] + 1.65, 0.65);                      // 바뀐 순서
   // 이전 안이라는 표시(날짜가 나중인 기록이 앞선다)
   gsap.set('#flChip', { left: FLR['#fl2'].right - 112, top: FLR['#fl2'].top + 16, x: 0, scale: 0.8 });
-  tl.to('#flChip', { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'back.out(2)' }, REC[2] + 2.45);
-  tl.to('#b2', { opacity: 0.45, duration: 0.5, ease: 'power2.out' }, REC[2] + 2.45);
-  mark('#mk3', REC[2] + 2.75, 0.4);
-  mark('#mk5', REC[3] + 1.1, 0.55);                                                          // 최종본 파일
+  tl.to('#flChip', { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'back.out(2)' }, REC[2] + 2.35);
+  tl.to('#b2', { opacity: 0.45, duration: 0.5, ease: 'power2.out' }, REC[2] + 2.35);
+  mark('#mk3', REC[2] + 2.65, 0.4);
+  mark('#mk5', REC[3] + 1.05, 0.55);                                                          // 최종본 파일
   // 네 기록이 다 나오면 밝아지고 왼쪽에서 실로 엮인다
   tl.to(['#fl1', '#fl3'], { opacity: 1, duration: 0.4 }, tWoven);
   const L1 = FL.map(k => ({ x: FLR[k].left + 2, y: FLR[k].top + FLR[k].height / 2 }));
@@ -458,7 +458,7 @@ async function build() {
     .to('#kbC .wv', { scale: 1.3, duration: 0.3, ease: 'power2.inOut' }, wvGlow + 0.42)
     .to('#kbC .wv', { scale: 1.42, duration: 0.42, yoyo: true, repeat: 2, ease: 'sine.inOut' }, wvGlow + 0.75);
   tl.fromTo('#kbC .wvfx .glow', { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'power2.out', immediateRender: false }, wvGlow)
-    .to('#kbC .wvfx .glow', { scale: 1.25, opacity: 0.65, duration: 0.3, yoyo: true, repeat: 1, ease: 'sine.inOut' }, wvGlow + 0.5);
+    .to('#kbC .wvfx .glow', { scale: 1.25, opacity: 0.65, duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' }, wvGlow + 0.5);
   tl.fromTo('#kbC .wvfx .rg', { scale: 1, opacity: 0.9 }, { scale: 3.4, opacity: 0, duration: 1.0, stagger: 0.3, ease: 'power2.out', immediateRender: false }, wvGlow + 0.05);
   tl.fromTo('#kbC .wvfx .badge', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(3)', immediateRender: false }, wvGlow + 0.2);
   const SO = [[-34, -26], [38, -30], [44, 16], [-30, 22]];
@@ -468,8 +468,8 @@ async function build() {
   });
   tl.set(['#kbC .wvfx .badge', '#kbC .wvfx .glow'], { opacity: 0 }, pTapW + 0.1);              // 누르면 배지·빛은 사라지고 시트가 뜬다
   tl.set('#kbC .wv', { scale: 1, backgroundColor: '#E6DEFF', boxShadow: 'none' }, pTapW + 1.0); tl.set('#kbC .wv img.lit', { opacity: 0 }, pTapW + 1.0);
-  tl.to(['#fw', '#fg', '#fk'], { autoAlpha: 0, x: 30, duration: 0.4, ease: 'power2.in' }, th3 + 1.1);   // 실이 모이면 플로팅은 걷히고 버튼만
-  cam(th3 + 1.1, camPose(1.9, { x: 900, y: B['#kbC .tb'].y + 30 }, { x: 720, y: 540 }), 0.75);
+  tl.to(['#fw', '#fg', '#fk'], { autoAlpha: 0, x: 30, duration: 0.4, ease: 'power2.in' }, th3 + 1.2);   // 실이 모이면 플로팅은 걷히고 버튼만
+  cam(th3 + 1.2, camPose(1.9, { x: 900, y: B['#kbC .tb'].y + 30 }, { x: 720, y: 540 }), 0.75);
   gsap.set('#wC', { y: 760 }); gsap.set('#scrimC', { opacity: 0 });
   tl.to('#wC', { y: 0, duration: 0.75, ease: 'power3.out' }, pTapW + 0.15);
   tl.to('#scrimC', { opacity: 1, duration: 0.5 }, pTapW + 0.15);
@@ -481,11 +481,11 @@ async function build() {
   tl.to('#wC', { y: 760, duration: 0.55, ease: 'power3.in' }, pTapI + 0.25);
   tl.to('#scrimC', { opacity: 0, duration: 0.45 }, pTapI + 0.3);
   textAt($('#kinTx'), pTapI + 0.4, { text: MSGTX });
-  cam(pTapI + 0.3, camPose(2.35, { x: MS[2].kin.x, y: MS[2].kin.y - 18 }, { x: 960, y: 560 }), 0.7);          // 입력창을 크게: 들어간 말이 읽히게
+  cam(pTapI + 0.3, camPose(2.35, { x: MS[2].kin.x, y: MS[2].kin.y - 18 }, { x: 960, y: 560 }), 0.8);          // 입력창을 크게: 들어간 말이 읽히게
   textAt($('#kinTx'), pTapS + 0.1, { html: PH });
   reveal('#mSent', pTapS + 0.1);
   cam(pTapS + 0.15, camPose(2.05, { x: 985, y: MS[3]['#mSent'].y }, { x: 960, y: 520 }), 0.75);                 // 보낸 말을 크게
-  cam(tReply - 0.15, camPose(2.05, { x: 970, y: (MS[4]['#mSent'].y + MS[4]['#mReply'].y) / 2 }, { x: 960, y: 540 }), 0.7);   // 답장이 오면 둘 다
+  cam(tReply - 0.15, camPose(2.05, { x: 970, y: (MS[4]['#mSent'].y + MS[4]['#mReply'].y) / 2 }, { x: 960, y: 540 }), 0.75);   // 답장이 오면 둘 다
   tl.to('#rdSent', { opacity: 0, duration: 0.2 }, tRead);
   reveal('#mReply', tReply); ev(tReply, 'msg');
 
@@ -578,11 +578,11 @@ async function build() {
   const lm = (k, u = 0.5) => ({ x: FLR[k].left + 2, y: FLR[k].top + FLR[k].height * u });
   const wr = { x: FLR['#fw'].right - 2, y: FLR['#fw'].top + FLR['#fw'].height / 2 };
   const tg = [curve('tg3', bez(lm('#fg'), wr, 0.5), TC.thread - 0.25, 0.3, 6), curve('tg1', bez(lm('#fw'), K, 0.6), TC.thread, 0.6, 6), curve('tg2', bez(lm('#fk', 0.42), K, 0.6), TC.thread, 0.6, 6)];
-  tl.to(tg, { autoAlpha: 0, duration: 0.35 }, th3 + 1.1);
+  tl.to(tg, { autoAlpha: 0, duration: 0.35 }, th3 + 1.2);
   sparkAt(wvG.x, wvG.y, wvGlow);
   handIn(pW.x, pW.y, pTapW); press(pW.x, pW.y, pTapW, null); handOut(pTapW + 0.3);
-  handIn(pI.x, pI.y, pTapI); press(pI.x, pI.y, pTapI, '#btnC'); handOut(pTapI + 0.25);
-  handIn(pS.x, pS.y, pTapS, 0.45); press(pS.x, pS.y, pTapS, '#kSend'); handOut(pTapS + 0.3);
+  handIn(pI.x, pI.y, pTapI); press(pI.x, pI.y, pTapI, '#btnC'); handOut(pTapI + 0.3);
+  handIn(pS.x, pS.y, pTapS, 0.6); press(pS.x, pS.y, pTapS, '#kSend'); handOut(pTapS + 0.3);
 
   window.__events = EV.sort((a, b) => a.t - b.t);
   window.__taps = { p1, p2, p3, pW, pI, pS, h0, pGo, lift };
