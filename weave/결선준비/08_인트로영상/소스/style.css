@@ -489,3 +489,62 @@ mark.rm { color: inherit; padding: 0 1px; }
 #fp .pimg img { width: 100%; height: 100%; object-fit: cover; display: block; }
 #scanP { position: absolute; left: 0; right: 0; top: 0; height: 40px; background: linear-gradient(180deg, rgba(166,124,242,0), rgba(166,124,242,.55) 85%, rgba(255,255,255,.95)); mix-blend-mode: screen; opacity: 0; }
 #fp .plab { font-family: 'SamsungOne', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: .05em; color: var(--violet); padding: 10px 18px; background: var(--lav); border-radius: 14px; white-space: nowrap; }
+
+/* ── v11 (2026-11-06): 한 번에 하나씩. 제목·말풍선·기록 카드를 크게, 장면 카드는 별 없이 빛만 ── */
+.chap .tt { padding: 0 .06em .14em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--ink) 0%, var(--ink) 100%);
+  background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tl { display: block; }
+#hdB { left: 110px; top: 396px; }
+#hdB h3 { font-size: 80px; line-height: 1.32; }
+#hdC { left: 830px; top: 408px; }
+#hdC h3 { font-size: 70px; line-height: 1.32; }
+#h1 h3 { font-size: 64px; }
+/* 01: 재웅 선배 말풍선 → 그 아래 상상 말풍선 → (요약 뒤) 답변 말풍선 */
+#callQ { left: auto; right: 706px; top: 214px; width: auto; padding: 24px 36px 30px 32px; border-radius: 30px; }
+#callQ::after { top: 116px; }
+#callQ .who { font-size: 24px; gap: 12px; }
+#callQ .who .av { width: 42px; height: 42px; }
+#callQ .who .av svg { width: 22px; height: 22px; }
+#callQ .who .st { font-size: 19px; }
+#callQ .q { margin-top: 16px; font-size: 44px; line-height: 1.4; }
+#callQ .w, #callA .w { display: inline-block; }
+#callT { left: auto; right: 756px; top: 566px; font-size: 40px; letter-spacing: -0.03em; color: #6E6880; z-index: 20; }
+#callT .bb { padding: 22px 44px 26px; background: #fff; border-radius: 60px; box-shadow: 0 22px 50px rgba(64,40,140,.14), 0 0 0 1.5px #E6DEFF inset; white-space: nowrap; }
+#callT i { position: absolute; display: block; border-radius: 50%; background: #fff; box-shadow: 0 6px 14px rgba(64,40,140,.12), 0 0 0 1.5px #E6DEFF inset; }
+#callT .c1 { width: 26px; height: 26px; right: -10px; bottom: -6px; }
+#callT .c2 { width: 14px; height: 14px; right: -30px; bottom: -22px; }
+#callA { left: auto; right: 706px; top: 552px; width: auto; padding: 18px 36px 26px 30px; }
+#callA .q { margin-top: 10px; font-size: 38px; line-height: 1.42; }
+/* 01: 기록 카드 */
+#fl1, #fl2, #fl3, #fl4 { left: 150px; width: 780px; grid-template-columns: 62px 1fr; column-gap: 20px; padding: 18px 26px 18px 22px; }
+#fl1 > img, #fl2 > img, #fl3 > img, #fl4 > img { width: 62px; height: 62px; border-radius: 16px; }
+#fl1 .t, #fl2 .t, #fl3 .t, #fl4 .t { font-size: 31px; }
+#fl1 .m, #fl2 .m, #fl3 .m, #fl4 .m { font-size: 19px; }
+#fl1 .sn, #fl2 .sn, #fl3 .sn, #fl4 .sn { font-size: 25px; margin-top: 10px; padding: 9px 16px; }
+#flChip { font-size: 20px; padding: 5px 14px; }
+/* 01: 시트. 메일 버튼을 빼고, 요약은 상자를 채우는 세 문장 */
+#wB { min-height: 545px; }
+#wB .sg { padding: 11px 12px 13px; }
+.sumv { height: 84px; margin-top: 7px; font-size: 17.1px; line-height: 28px; letter-spacing: -0.03em; }
+#sl1 { top: 0; } #sl2 { top: 28px; } #sl3 { top: 56px; }
+.sumv .skel:nth-child(1) { top: 8px; width: 94%; } .sumv .skel:nth-child(2) { top: 36px; width: 95%; } .sumv .skel:nth-child(3) { top: 64px; width: 98%; }
+/* 02: 단서 질문은 Weave가 묻는 말풍선처럼 진하게 */
+.pen { font-size: 34px; color: #fff; background: var(--purple); border: 0; border-radius: 20px; padding: 9px 22px 11px; box-shadow: 0 14px 30px rgba(107,78,255,.34); }
+.pen::after { content: ''; position: absolute; left: 34px; bottom: -11px; border: 12px solid transparent; border-top-color: var(--purple); border-bottom: 0; }
+/* 03: 탑승권 → 위치 → 아내 카톡 */
+#fw { left: 830px; top: 64px; width: 510px; padding: 20px 22px 22px; }
+#fg { left: 1354px; top: 64px; width: 510px; padding: 20px 22px 22px; }
+#fg .loc, #fw .loc { margin-top: 8px; font-size: 38px; }
+#fk { left: 1000px; top: 250px; width: 700px; }
+.bigf .mini .mcol { gap: 6px; }
+.bigf .mini .mm { font-size: 26px; }
+/* 카카오톡 링크 말풍선과 미리보기: URL 말풍선 아래 흰 카드, 카드 안은 2:1 이미지 → 제목 → 도메인 */
+.lnk { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 470px; }
+.bigf .mini .mm.url { font-size: 22px; color: #1B62C4; text-decoration: underline; text-underline-offset: 3px; letter-spacing: -0.01em; }
+.lpv { width: 470px; background: #fff; border-radius: 14px; overflow: hidden; }
+.lpv > img { display: block; width: 100%; height: 235px; }
+.lpv .lt { padding: 12px 16px 0; font-size: 24px; font-weight: 500; line-height: 1.36; letter-spacing: -0.02em; color: #1d2430; }
+.lpv .ld { padding: 6px 16px 14px; font-size: 18px; color: #8a93a0; }
+#kkNm { background: linear-gradient(transparent 56%, rgba(166,124,242,.5) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
+/* 03: 추천은 한 줄 */
+#wC .sg .v { font-size: 20.5px; white-space: nowrap; letter-spacing: -0.035em; }

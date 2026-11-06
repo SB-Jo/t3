@@ -531,15 +531,16 @@ def rewrite(x, y, w, chip, rest, flt):
     return s
 
 
-def answer(x, y, w, label, lines, btn):
-    """✦ 라벨 카드 + 보라 버튼. 카드에는 글만."""
+def answer(x, y, w, label, lines, btn=None):
+    """✦ 라벨 카드 + (있으면) 보라 버튼. 카드에는 글만."""
     n = len(lines)
     h = 22 + n * 14.5
     s = BOX('lav', x, y - 2, w, h)
     s += SPARK(x + 7, y + 3, 11) + T('t10p', x + 21, y + 1, label)
     s += T('t10b', x + 8, y + 17, '<br>'.join(lines), extra=' font-size:11px; line-height:14.5px;')
-    s += BOX('btn', x, y + h + 2, w, 22, ' border-radius:11px;')
-    s += T('ct fill', x, y + h + 2, btn, w, ' height:22px; line-height:22px; font-size:11px;')
+    if btn:
+        s += BOX('btn', x, y + h + 2, w, 22, ' border-radius:11px;')
+        s += T('ct fill', x, y + h + 2, btn, w, ' height:22px; line-height:22px; font-size:11px;')
     return s
 
 
@@ -600,8 +601,8 @@ def a4():
              ui=lambda x, y, w: rec(x, y, w, 'mail', '최종본 공유드려요', '메일 · 민수 · 11월 12일 (목)', '첨부: Demo_Final.pptx', on=True),
              do='‘민수 님이 다시 정리’를 단서로<br>민수 메일에서 최종본을 찾습니다.', model='보낸 사람·날짜 필터 + Embedding', ref='DER-RAG, MDR (ICLR 2021)'),
         dict(no='5', name='근거 기반 응답 생성', en='Grounded Synthesis', on=True,
-             ui=lambda x, y, w: answer(x, y, w, '요약', ['11월 19일(목) 오후 2시, 수원 3번 부스', '시연 순서: 문제 상황 → 라이브 데모 → 관람객 체험'], 'Demo_Final.pptx 메일로 보내기'),
-             do='날짜순으로 세워 마지막 결정을 요약합니다.<br>전송은 사용자가 합니다.', model='sLLM, 이름·날짜 복사 검사', ref='LongMemEval (Chain-of-Note), Hi-Q'),
+             ui=lambda x, y, w: answer(x, y, w, '요약', ['시연은 11월 19일(목) 오후 2시, 수원 3번 부스예요.', '순서는 문제 상황, 라이브 데모, 관람객 체험이에요.', '최종본 Demo_Final.pptx는 민수 님 메일에 있어요.']),
+             do='날짜순으로 세워 마지막 결정을 요약하고,<br>최종본이 있는 메일까지 알려 줍니다.', model='sLLM, 이름·날짜 복사 검사', ref='LongMemEval (Chain-of-Note), Hi-Q'),
     ]
     srcs = ['Wu et al., "LongMemEval", ICLR 2025', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Trivedi et al., "IRCoT", ACL 2023', 'Su et al., "BRIGHT", ICLR 2025', 'Shao et al., "ReasonIR", COLM 2025',
             'Wei et al., "RIR Survey", ACL 2026', 'Chen et al., "ReasonEmbed", ACL 2026', 'Lee & Lim, "DER-RAG", arXiv 2609.06065', 'Xiong et al., "MDR", ICLR 2021']
@@ -664,18 +665,21 @@ def a5():
 
 def a6():
     def signals(x, y, w):
-        s = BOX('chip', x, y, 84, 24, ' border-radius:12px;') + USE('i-pin', x + 7, y + 5, 14, '#2F7BF6') + T('t10b', x + 24, y + 5, '인천공항')
-        s += BOX('chip', x + 90, y, w - 90, 24, ' border-radius:12px;') + IMG('wal', x + 97, y + 4, 16) + T('t10b', x + 118, y + 5, '싱가포르 → 인천')
+        s = BOX('chip', x, y, 108, 24, ' border-radius:12px;') + USE('i-pin', x + 7, y + 5, 14, '#2F7BF6') + T('t10b', x + 24, y + 5, '인천공항 면세점')
+        s += BOX('chip', x + 114, y, w - 114, 24, ' border-radius:12px;') + IMG('wal', x + 121, y + 4, 16) + T('t10b', x + 142, y + 5, '싱가포르 → 인천')
         s += BOX('chip', x, y + 30, 112, 24, ' border-radius:12px;') + IMG('talk', x + 7, y + 34, 16, 4) + T('t10b', x + 28, y + 35, '아내와 대화 중')
         s += f'  <svg class="app" viewBox="0 0 40 40" style="left:{x + 128}px; top:{y + 26}px; width:36px; height:36px;"><circle cx="20" cy="20" r="20" fill="#6B4EFF" opacity=".18"/><circle cx="20" cy="20" r="14" fill="#6B4EFF"/></svg>\n'
         s += IMG('spoolw', x + 137, y + 35, 18, 0, ' z-index:6;')
         s += T('t10p', x + 170, y + 37, '먼저 반짝')
         return s
 
-    def label(x, y, w):
-        s = PHOTO(BOTTLE, x, y, 96, 72, 10, '50% 62%')
-        s += BOX('mini on', x + 104, y + 6, w - 104, 34) + T('t10p', x + 112, y + 16, 'ESTEE LAUDER')
-        s += T('t10', x + 106, y + 48, '에스티 로더 나이트 리페어')
+    def preview(x, y, w):
+        # 카카오톡 링크 미리보기: 이미지와 제목, 도메인
+        s = BOX('mini on', x, y - 2, w, 76)
+        s += PHOTO(BOTTLE, x + 6, y + 4, 76, 64, 8, '50% 62%')
+        s += T('t10m', x + 90, y + 3, '아내가 보낸 링크 미리보기')
+        s += T('t10b', x + 90, y + 19, '[신세계백화점] <span style="color:#6B4EFF">에스티 로더</span><br>어드밴스드 나이트 리페어 50ml', extra=' line-height:14px;')
+        s += T('t10m', x + 90, y + 51, 'm.ssg.com')
         return s
 
     def first(x, y, w):
@@ -683,8 +687,8 @@ def a6():
 
     steps = [
         dict(no='00', name='사전 준비', en='Indexing',
-             ui=lambda x, y, w: ''.join(IMG(k, x + 2 + i * 26, y + 2, 21, 5 if k == 'talk' else 0) for i, k in enumerate(['talk', 'gal', 'wal'])) + T('t10', x + 84, y + 6, '알림 글자, 사진, 탑승권') + BOX('mini', x, y + 32, w, 36) + T('t10', x + 10, y + 36, '벡터와 메타데이터로 색인') + T('t10b', x + 10, y + 51, '{ date, app, from }'),
-             do='알림의 글자, 갤러리 사진, 월렛 탑승권을<br>미리 색인합니다.', model='Reasoning Embedding, 이미지 임베딩', ref='DocHop-QA (EMNLP 2026)'),
+             ui=lambda x, y, w: ''.join(IMG(k, x + 2 + i * 26, y + 2, 21, 5 if k == 'talk' else 0) for i, k in enumerate(['talk', 'wal'])) + T('t10', x + 58, y + 6, '알림 글자, 링크 미리보기, 탑승권') + BOX('mini', x, y + 32, w, 36) + T('t10', x + 10, y + 36, '벡터와 메타데이터로 색인') + T('t10b', x + 10, y + 51, '{ date, app, from }'),
+             do='알림의 글자, 링크 미리보기, 월렛 탑승권을<br>미리 색인합니다.', model='Reasoning Embedding', ref='Open Graph, Kakao 스크랩 문서'),
         dict(no='01', name='순간 감지', en='Trigger', ui=signals,
              do='위치, 탑승권, 대화 상대가 귀국을 가리키면<br>실타래 버튼이 먼저 반짝입니다.', model='멀티시그널 컨텍스트 트리거', ref='Samsung Wallet·GPS 연동, Now Brief'),
         dict(no='1', name='첫 질문 생성', en='Proactive Query', ui=first,
@@ -696,19 +700,19 @@ def a6():
              ui=lambda x, y, w: rec(x, y, w, 'talk', '아내', '카카오톡 · 3주 전', '여보, 동생이 이 갈색병 좋대. 면세점에서 판다더라', on=True),
              do='카톡 알림 글자에서<br>직접 말하지 않은 부탁을 읽습니다.', model='보낸 사람 필터 + Reasoning Embedding', ref='RIR Survey, BESPOKE, ImpliRet'),
         dict(no='4', name='단서 결합·질의 재작성', en='Query Rewriting',
-             ui=lambda x, y, w: rewrite(x, y, w, '갈색병', '의 정확한 제품명은?', '같은 날 저장한 사진'),
-             do='‘갈색병’을 넣어 질문을 다시 쓰고<br>같은 날 저장한 사진으로 좁힙니다.', model='기록 복사, 날짜 필터', ref='Hi-Q, IRCoT (ACL 2023)'),
-        dict(no='3', name='2홉 추론 검색', en='Hop Retrieval', ui=label,
-             do='쿠폰 캡처 말고 병 사진을 찾고<br>라벨에서 정확한 제품명을 읽습니다.', model='이미지 임베딩 + OCR', ref='DocHop-QA (EMNLP 2026)'),
+             ui=lambda x, y, w: rewrite(x, y, w, '갈색병', '의 정확한 제품명은?', '같은 메시지의 링크'),
+             do='‘갈색병’을 넣어 질문을 다시 쓰고<br>같은 메시지의 링크로 좁힙니다.', model='기록 복사, 메시지 필터', ref='Hi-Q, IRCoT (ACL 2023)'),
+        dict(no='3', name='2홉 추론 검색', en='Hop Retrieval', ui=preview,
+             do='링크 미리보기의 제목에서<br>정확한 제품명을 읽습니다.', model='링크 메타데이터 + Reasoning Embedding', ref='DocHop-QA (EMNLP 2026), Open Graph'),
         dict(no='5', name='근거 기반 응답 생성', en='Grounded Synthesis', on=True,
-             ui=lambda x, y, w: answer(x, y, w, '자동 완성 추천', ['전에 말한 에스티 로더', '면세점에서 사 갈게.'], '입력하기'),
-             do='카톡, 갤러리, 월렛, GPS를 엮어 건넵니다.<br>입력과 전송은 사용자가 합니다.', model='sLLM, 대화 말투 반영', ref='Hi-Q (NeurIPS 2026)'),
+             ui=lambda x, y, w: answer(x, y, w, '자동 완성 추천', ['전에 말한 에스티 로더 면세점에서 사 갈게.'], '입력하기'),
+             do='카톡, 월렛, GPS를 엮어 건넵니다.<br>입력과 전송은 사용자가 합니다.', model='sLLM, 대화 말투 반영', ref='Hi-Q (NeurIPS 2026)'),
     ]
     srcs = ['Wei et al., "RIR Survey", ACL 2026', 'Taghavi et al., "ImpliRet", EMNLP 2025', 'Kim et al., "BESPOKE", 2025', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Trivedi et al., "IRCoT", ACL 2023',
-            'Park et al., "DocHop-QA", EMNLP 2026', 'Samsung Newsroom, "Galaxy S26 Series" (2026. 02)']
+            'Park et al., "DocHop-QA", EMNLP 2026', 'The Open Graph Protocol (ogp.me)', 'Kakao DevTalk, "Scrap(스크랩, 미리보기)란?"', 'Samsung Newsroom, "Galaxy S26 Series" (2026. 02)']
     notes = """Appendix · UX 3 상세. 출장에서 돌아와 인천공항에 내린 순간의 절차입니다. 아내와 메시지 세 개를 주고받은 뒤 실타래 버튼이 반짝입니다.
-위치와 삼성 월렛 탑승권이 귀국 중임을 알려 주고, 대화 상대가 아내이므로 Weave가 첫 질문을 스스로 만듭니다. 1홉에서 아내의 카톡 알림 글자에서 갈색병 부탁을 찾고, 2홉에서 갤러리에 저장해 둔 사진의 라벨을 읽어 에스티 로더 나이트 리페어라는 정확한 제품명을 찾습니다.
-삼성 S26의 Now Brief도 지원 앱 알림, 메시지, Gmail, Samsung Wallet을 회상 데이터로 씁니다. 월렛을 상황 신호로 쓰는 것은 자연스러운 확장입니다. Now Nudge와 다른 점은, 화면에 보이는 말이 조심히 들어와뿐인데도 3주 전 카톡과 사진을 이어 무엇을 살지 찾는다는 점입니다."""
+위치와 삼성 월렛 탑승권이 귀국 중임을 알려 주고, 대화 상대가 아내이므로 Weave가 첫 질문을 스스로 만듭니다. 1홉에서 아내의 카톡 알림 글자에서 갈색병 부탁을 찾고, 2홉에서 아내가 함께 보낸 링크의 미리보기를 읽어 에스티 로더 어드밴스드 나이트 리페어 50ml라는 정확한 제품명을 찾습니다. 아내는 갈색병이라고만 말했고, 제품 이름은 미리보기 제목에 있습니다. 알림에 온 링크 주소에서 페이지의 Open Graph 제목과 이미지를 기기에서 읽어 함께 색인합니다.
+삼성 S26의 Now Brief도 지원 앱 알림, 메시지, Gmail, Samsung Wallet을 회상 데이터로 씁니다. 월렛을 상황 신호로 쓰는 것은 자연스러운 확장입니다. Now Nudge와 다른 점은, 화면에 보이는 말이 조심히 들어와뿐인데도 3주 전 카톡과 링크를 이어 무엇을 살지 찾는다는 점입니다."""
     ux_page('page-a6', 'Appendix · UX 3 상세', 'UX 3 <span class="hl">먼저 건네는 기억</span>: 단계별 모델과 근거', '아내 “그래, 조심히 들어와~” 뒤에 실타래 버튼이 먼저 반짝입니다.', steps, srcs, notes)
 
 

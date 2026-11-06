@@ -11,7 +11,7 @@ const ROOT = path.resolve(__dirname, '..');
   await p.goto(pathToFileURL(path.join(ROOT, '소스', 'index.html')).href);
   await p.evaluate(() => window.__ready);
   const m = await p.evaluate(() => window.__marks);
-  const shots = [[m.tSend + 0.6, 1], [m.x1 - 0.3, 2], [m.reply + 1.5, 3]];
+  const shots = [[m.x2 - 0.3, 1], [m.x1 - 0.3, 2], [m.reply + 1.5, 3]];
   await p.addStyleTag({ content: 'html, body { background: transparent !important; } body * { visibility: hidden; } #phone, #phone * { visibility: visible; } .frame { box-shadow: none !important; }' });
   for (const [t, n] of shots) {
     await p.evaluate(t => { window.__seek(t); gsap.set('#phone', { x: 0, y: 0, scale: 1, rotation: 0, filter: 'none', autoAlpha: 1 }); }, t);
