@@ -14,3 +14,19 @@ SamsungSharpSans*.otf
 
 # 파이썬 캐시
 __pycache__/
+
+# 저장소에는 지금 쓰는 판만 둔다(2026-11-06). 아래는 작업 컴퓨터에만 남는다
+08_인트로영상/이전판/
+08_인트로영상/*_무음.mp4
+08_인트로영상/배경음악/*.wav
+10_표지영상/이전판/
+09_HowItWorks/장표/
+09_HowItWorks/장표2/
+09_HowItWorks/장표3/
+09_HowItWorks/장표4/
+09_HowItWorks/장표5/out/
+Argon/
+07_소스/slides/comic/
+07_소스/slides/p68/*
+!07_소스/slides/p68/scenario.css
+!07_소스/slides/p68/scenario.js
