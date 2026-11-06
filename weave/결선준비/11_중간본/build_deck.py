@@ -36,7 +36,7 @@ HIW = ROOT / '09_HowItWorks' / '장표5'
 SOL = ROOT / '07_소스' / 'slides' / 'p05_결선' / 'apply_solution.py'
 APX = ROOT / '07_소스' / 'slides' / 'appendix_결선' / 'apply_appendix.py'
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'
-INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_인포그래픽_120초.mp4'
+INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_인포그래픽_100초.mp4'
 VENV_PY = Path.home() / '.cache' / 'weave-tools' / 'venv' / 'bin' / 'python'
 
 sys.path.insert(0, str(HIW))
@@ -144,7 +144,7 @@ def cover_text(slide, team_style='under'):
             x = lx + 11 + tw_ + 36
 
 
-INFO_NOTES = ('인포그래픽 영상입니다(2분, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
+INFO_NOTES = ('인포그래픽 영상입니다(1분 40초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
               '마지막 로고가 뜨면 무대 중앙으로 돌아와 다음 장으로 넘어갑니다. '
               '현장 음향이 작을 때만 장면 카드가 뜰 때 한 문장씩 얹습니다. '
               '첫째, 급한 통화 중에도 앱을 뒤질 필요 없이, 아래에서 쓸어 올리면 끝납니다. '
