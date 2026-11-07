@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>Weave Assist · 결선 인포그래픽 v11</title>
+<title>Weave Assist · 결선 인포그래픽 v14</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -76,7 +76,7 @@
     </div>
     <div id="cA" class="card kr">
       <div class="hd"><img src="assets/icons/app-kakao.png" alt=""><div><div class="tt">지은</div><div class="mm">카카오톡 · <span class="dt" id="dtA">3월 15일</span> (일) 오후 4:12</div></div></div>
-      <div class="snip">박스 정리 다 했어! 이따 올 때<br><span class="hl" id="hlT">휴지 안 사 와도 돼</span></div>
+      <div class="snip"><span class="hl" id="hlT0">박스 정리</span> 다 했어! 이따 올 때<br><span class="hl" id="hlT">휴지 안 사 와도 돼</span></div>
     </div>
     <div id="cB" class="card kr">
       <div class="hd"><img src="assets/icons/samsung-gallery.png" alt=""><div><div class="tt">그날 저녁 사진</div><div class="mm">갤러리 · <span class="dt" id="dtB">3월 15일</span> 20:14</div></div></div>
@@ -89,24 +89,25 @@
       <div class="btn" id="btnCC"><svg width="26" height="26" style="color:#fff"><use href="#i-check"/></svg>입력하기</div>
     </div>
     <div class="pen" id="pen1" style="left:110px; top:376px">집들이가 언제였지?</div>
-    <div class="pen" id="pen2" style="left:700px; top:318px">그날 찍은 사진엔?</div>
-    <div class="pen" id="pen3" style="left:1310px; top:436px">라벨엔 뭐라고?</div>
+    <div class="pen" id="pen2" style="left:700px; top:318px">그날 찍은 와인 사진은?</div>
+    <div class="pen" id="pen3" style="left:1310px; top:436px">와인 이름이 뭐지?</div>
     <span class="tok kr" id="tokA">3월 15일</span>
     <span class="qchip kr" id="qc1">지은이네 집들이 때</span>
     <span class="qchip kr" id="qc2">마셨던 와인</span>
   </div>
   <div id="topScrim"></div>
-  <div class="head kr" id="h1"><h3>단서에서 단서로 엮어, <em>정확한 이름을 찾습니다</em></h3></div>
+  <div class="head kr" id="h1"><h3>기억 속 단서를 엮어, <em>정확한 이름을 찾습니다</em></h3></div>
 
   <!-- 3. 휴대폰 UX -->
   <div id="ux">
     <div class="head kr" id="hdB"><h3><span class="tl">앱마다 흩어진 기록을,</span><em class="tl">한 번에 찾아 요약합니다</em></h3></div>
-    <div class="head kr" id="hdC"><h3><span class="tl">지금 상황과 지난 기록을 엮어,</span><em class="tl">보낼 말을 추천합니다</em></h3></div>
+    <div class="head kr" id="hd2"><h3><span class="tl">“지은이네 집들이 때 마셨던 와인” 좋았는데,</span><em class="tl">하나 사볼까? 이름이 뭐였더라…</em></h3></div>
+    <div class="head kr" id="hdC"><h3><span class="tl">지금 상황과 지난 기억을 엮어,</span><em class="tl">보낼 말을 먼저 추천합니다</em></h3></div>
 
     <svg id="uxThreads" viewBox="0 0 1920 1080" width="1920" height="1080"></svg>
     <div class="bigf kr" id="fl1"><img src="assets/icons/samsung-calendar.png" alt=""><div><div class="t">삼성기술전 시연</div><div class="m">캘린더 · 11월 19일 (목)</div><div class="sn"><mark id="mk1">오후 2시</mark>, 수원 디지털시티 <mark id="mk4">3번 부스</mark></div></div></div>
-    <div class="bigf kr" id="fl2"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">삼성기술전 준비 회의</div><div class="m">삼성노트 · 11월 3일 (화)</div><div class="sn"><mark id="mk6">시연 순서</mark>: 제품 소개 → 라이브 데모 → Q&amp;A</div></div></div>
-    <div class="bigf kr" id="fl3"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">주간 회의</div><div class="m">삼성노트 · 11월 10일 (화)</div><div class="sn">제품 소개 빼고 <mark id="mk2">문제 상황부터</mark><br><mark id="mk2b">→ 라이브 데모 → 관람객 체험</mark><br>자료는 <mark id="mk3">민수 님</mark>이 다시 정리</div></div></div>
+    <div class="bigf kr" id="fl2"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">삼성기술전 준비 회의</div><div class="m">삼성노트 · 11월 3일 (화)</div><div class="sn"><mark id="mk6">시연 순서: 제품 소개 → 라이브 데모 → Q&amp;A</mark></div></div></div>
+    <div class="bigf kr" id="fl3"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">주간 회의</div><div class="m">삼성노트 · 11월 10일 (화)</div><div class="sn">제품 소개 빼고 <mark id="mk2">문제 상황부터 → 라이브 데모 → 관람객 체험</mark><br>자료는 <mark id="mk3">민수 님</mark>이 다시 정리</div></div></div>
     <div class="bigf kr" id="fl4"><img src="assets/icons/samsung-email-blue.png" alt=""><div><div class="t">최종본 공유드려요</div><div class="m">메일 · 민수 · 11월 12일 (목)</div><div class="sn">첨부: <mark id="mk5">Demo_Final.pptx</mark></div></div></div>
     <svg class="flink" id="flLink" viewBox="0 0 1920 1080" width="1920" height="1080"></svg>
     <div class="bigf kr" id="fg"><span class="gpsI"><i class="pulse"></i><i class="pulse"></i><svg viewBox="0 0 24 24"><use href="#i-pin"/></svg></span><div><div class="t">위치 <span class="m2">GPS · 실시간</span></div><div class="loc">인천공항 <span id="gpsDj">면세점</span> 인근</div></div></div>
@@ -177,9 +178,9 @@
           <div id="chat"><div id="chatIn">
             <div class="dpill">2026년 11월 4일 수요일</div>
             <div class="msg" id="m1"><img class="av" src="assets/img/wife-avatar.jpg" alt=""><div><div class="nm">아내</div><div class="bub">출장 고생했어!<br>한국 도착했어?</div></div><span class="tm">오후 3:40</span></div>
-            <div class="msg me" id="m2"><span class="tm">오후 3:41</span><div class="bub">응, 방금 내렸어</div></div>
-            <div class="msg" id="m3"><img class="av" src="assets/img/wife-avatar.jpg" alt=""><div><div class="nm">아내</div><div class="bub">그래, 조심히 들어와~</div></div><span class="tm">오후 3:41</span></div>
-            <div class="msg me" id="mSent"><span class="meta"><span class="rd" id="rdSent">1</span><span class="tm">오후 3:42</span></span><div class="bub">전에 말한 에스티 로더<br>면세점에서 사 갈게.</div></div>
+            <div class="msg me" id="m2"><span class="tm">오후 3:41</span><div class="bub">응 방금 도착했어</div></div>
+            <div class="msg" id="m3"><img class="av" src="assets/img/wife-avatar.jpg" alt=""><div><div class="nm">아내</div><div class="bub">고생했어 조심히 와~</div></div><span class="tm">오후 3:41</span></div>
+            <div class="msg me" id="mSent"><span class="meta"><span class="rd" id="rdSent">1</span><span class="tm">오후 3:42</span></span><div class="bub">여보, 전에 말한 에스티 로더 갈색병<br>면세점에서 사 갈까?</div></div>
             <div class="msg" id="mReply"><img class="av" src="assets/img/wife-avatar.jpg" alt=""><div><div class="nm">아내</div><div class="bub">그걸 기억했네? 고마워, 여보!</div></div><span class="tm">오후 3:43</span></div>
           </div></div>
           <div class="kin"><svg width="20" height="20" style="color:#7a7686"><use href="#i-plus"/></svg><span class="tx" id="kinTx"></span><svg width="20" height="20" style="color:#7a7686"><use href="#i-emo"/></svg><span class="snd" id="kSend"><svg><use href="#i-up"/></svg></span></div>
@@ -187,7 +188,7 @@
           <div class="scrim" id="scrimC"></div>
           <div class="ws" id="wC">
             <div class="row"><img src="assets/icons/weave-spool-6B4EFF.png" alt=""><span class="ttl">Weave</span><span class="x">✕</span></div>
-            <div class="sg" id="sgC"><div class="l"><svg><use href="#i-spark"/></svg>자동 완성 추천</div><div class="v"><span id="sgK">전에 말한 에스티 로더</span> 면세점에서 사 갈게.</div></div>
+            <div class="sg" id="sgC"><div class="l"><svg><use href="#i-spark"/></svg>자동 완성 추천</div><div class="v">여보, <span id="sgK">전에 말한 에스티 로더 갈색병</span><br>면세점에서 사 갈까?</div></div>
             <div class="pbtn" id="btnC"><svg width="18" height="18" style="color:#fff"><use href="#i-check"/></svg>입력하기</div>
             <div class="ttl ttlc">연결된 기억</div>
             <div class="mc" id="c1card"><img src="assets/icons/app-kakao.png" alt=""><div><div class="a">아내</div><div class="b">카카오톡 · 3주 전</div></div><div class="c">“동생이 이 갈색병 좋대. 면세점에서 판다더라”</div><div class="c cph"><img src="assets/img/wife-bottle.jpg" alt=""><span>[신세계백화점] 에스티 로더 어드밴스드 나이트 리페어 50ml</span></div></div>
@@ -202,12 +203,11 @@
     </div>
     <div id="callQ" class="kr">
       <div class="who"><span class="av"><svg><use href="#i-phone"/></svg></span><b>재웅 선배</b><span class="st">통화 중</span><span class="eq"><i></i><i></i><i></i><i></i><i></i></span></div>
-      <div class="q"><span class="w">프로님,</span> <span class="w">우리 팀이 맡은</span><br><b class="w qk">삼성기술전 시연</b> <span class="w">어떻게</span><br><span class="w">진행하기로 했었죠?</span></div>
+      <div class="q">프로님, 우리 팀이 맡은<br><b class="qk">삼성기술전 시연</b> 어떻게<br>진행하기로 했었죠?</div>
     </div>
-    <div id="callT" class="kr"><i class="c1"></i><i class="c2"></i><div class="bb"><div class="who"><span class="me">나</span></div><b>노트</b>였나… <b>메일</b>이었나…</div></div>
     <div id="callA" class="kr">
       <div class="who"><span class="me">나</span></div>
-      <div class="q"><span class="w"><u id="ua1">11월 19일 오후 2시</u>이고,</span><br><span class="w">순서는 <u id="ua2">문제 상황, 라이브 데모,</u></span><br><span class="w"><u id="ua2b">관람객 체험</u>으로 바뀌었어요.</span><br><span class="w">최종본은 <u id="ua3">메일로 전달</u> 드릴게요!</span></div>
+      <div class="q"><u id="ua1">11월 19일 오후 2시</u>이고,<br>순서는 <u id="ua2">문제 상황, 라이브 데모,</u><br><u id="ua2b">관람객 체험</u>으로 바뀌었어요.<br>최종본 파일도<br><u id="ua3">메일로 전달</u>해 드릴게요!</div>
     </div>
   </div>
 

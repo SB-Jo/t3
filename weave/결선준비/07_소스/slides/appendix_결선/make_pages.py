@@ -705,15 +705,15 @@ def a6():
         dict(no='3', name='2홉 추론 검색', en='Hop Retrieval', ui=preview,
              do='링크 미리보기의 제목에서<br>정확한 제품명을 읽습니다.', model='링크 메타데이터 + Reasoning Embedding', ref='DocHop-QA (EMNLP 2026), Open Graph'),
         dict(no='5', name='근거 기반 응답 생성', en='Grounded Synthesis', on=True,
-             ui=lambda x, y, w: answer(x, y, w, '자동 완성 추천', ['전에 말한 에스티 로더 면세점에서 사 갈게.'], '입력하기'),
+             ui=lambda x, y, w: answer(x, y, w, '자동 완성 추천', ['여보, 전에 말한 에스티 로더 갈색병', '면세점에서 사 갈까?'], '입력하기'),
              do='카톡, 월렛, GPS를 엮어 건넵니다.<br>입력과 전송은 사용자가 합니다.', model='sLLM, 대화 말투 반영', ref='Hi-Q (NeurIPS 2026)'),
     ]
     srcs = ['Wei et al., "RIR Survey", ACL 2026', 'Taghavi et al., "ImpliRet", EMNLP 2025', 'Kim et al., "BESPOKE", 2025', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Trivedi et al., "IRCoT", ACL 2023',
             'Park et al., "DocHop-QA", EMNLP 2026', 'The Open Graph Protocol (ogp.me)', 'Kakao DevTalk, "Scrap(스크랩, 미리보기)란?"', 'Samsung Newsroom, "Galaxy S26 Series" (2026. 02)']
     notes = """Appendix · UX 3 상세. 출장에서 돌아와 인천공항에 내린 순간의 절차입니다. 아내와 메시지 세 개를 주고받은 뒤 실타래 버튼이 반짝입니다.
 위치와 삼성 월렛 탑승권이 귀국 중임을 알려 주고, 대화 상대가 아내이므로 Weave가 첫 질문을 스스로 만듭니다. 1홉에서 아내의 카톡 알림 글자에서 갈색병 부탁을 찾고, 2홉에서 아내가 함께 보낸 링크의 미리보기를 읽어 에스티 로더 어드밴스드 나이트 리페어 50ml라는 정확한 제품명을 찾습니다. 아내는 갈색병이라고만 말했고, 제품 이름은 미리보기 제목에 있습니다. 알림에 온 링크 주소에서 페이지의 Open Graph 제목과 이미지를 기기에서 읽어 함께 색인합니다.
-삼성 S26의 Now Brief도 지원 앱 알림, 메시지, Gmail, Samsung Wallet을 회상 데이터로 씁니다. 월렛을 상황 신호로 쓰는 것은 자연스러운 확장입니다. Now Nudge와 다른 점은, 화면에 보이는 말이 조심히 들어와뿐인데도 3주 전 카톡과 링크를 이어 무엇을 살지 찾는다는 점입니다."""
-    ux_page('page-a6', 'Appendix · UX 3 상세', 'UX 3 <span class="hl">먼저 건네는 기억</span>: 단계별 모델과 근거', '아내 “그래, 조심히 들어와~” 뒤에 실타래 버튼이 먼저 반짝입니다.', steps, srcs, notes)
+삼성 S26의 Now Brief도 지원 앱 알림, 메시지, Gmail, Samsung Wallet을 회상 데이터로 씁니다. 월렛을 상황 신호로 쓰는 것은 자연스러운 확장입니다. Now Nudge와 다른 점은, 화면에 보이는 말이 ‘조심히 와’뿐인데도 3주 전 카톡과 링크를 이어 무엇을 살지 찾는다는 점입니다."""
+    ux_page('page-a6', 'Appendix · UX 3 상세', 'UX 3 <span class="hl">먼저 건네는 기억</span>: 단계별 모델과 근거', '아내 “고생했어 조심히 와~” 뒤에 실타래 버튼이 먼저 반짝입니다.', steps, srcs, notes)
 
 
 # ───────────────────────────────── A7 비교 (덱의 차별화 표와 같은 모양)

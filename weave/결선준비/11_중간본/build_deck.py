@@ -144,7 +144,7 @@ def cover_text(slide, team_style='under'):
             x = lx + 11 + tw_ + 36
 
 
-INFO_NOTES = ('인포그래픽 영상입니다(1분 48초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
+INFO_NOTES = ('인포그래픽 영상입니다(1분 55초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
               '마지막 로고가 뜨면 무대 중앙으로 돌아와 다음 장으로 넘어갑니다. '
               '현장 음향이 작을 때만 장면 카드가 뜰 때 한 문장씩 얹습니다. '
               '첫째, 급한 통화 중에도 앱을 뒤질 필요 없이, 아래에서 쓸어 올리면 끝납니다. '
@@ -357,8 +357,8 @@ def add_media(pptx, cover_idx, intro_idx, embed_fonts=False):
     else:
         print('   ! 표지 영상이 아직 없음:', COVER_MP4)
     shutil.copyfile(INTRO_MP4, tmpd / 'intro.mp4')
-    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 인포그래픽 미리보기 그림 = 오프닝 로고(2.2초)
-    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '2.2', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
+    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 인포그래픽 미리보기 그림 = 오프닝 로고(3초, 빛이 다 지나간 뒤)
+    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '3.0', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
                    check=True)
     args += ['-IntroMp4', render2.winpath(tmpd / 'intro.mp4'), '-IntroPoster', render2.winpath(tmpd / 'intro.png')]
     code, log = render2.ps(tmpd / 'media.ps1', *args)

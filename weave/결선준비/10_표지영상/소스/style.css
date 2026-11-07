@@ -168,5 +168,9 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 /* ── v3: 오른쪽 장면을 한 판(#world)에 담아 (846, 540)을 기준으로 살짝 줄임 → 위·아래·오른쪽 여백. 배경·비네트는 화면 전체 ── */
 #world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 846px 540px; }
 
-/* v5: 메시지가 집들이임을 알아본 표시. 날아온 '집들이' 표가 내려앉는 자리 */
+/* v5: 날아온 '집들이' 표가 내려앉는 자리(글자는 표가 대신하므로 보이지 않음) */
 .eq { display: inline-block; margin-left: 10px; padding: 1px 10px 2px; border-radius: 10px; background: var(--purple); color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.02em; opacity: 0; transform-origin: 0 50%; }
+
+/* v6: 검색어 형광펜은 여백 없이(입력을 마쳐도 글자 폭이 그대로). 라벨 글자는 사진을 읽은 뒤에 펼쳐짐 */
+#q .hl { padding: 0; }
+#cP .ocrw { overflow: hidden; }

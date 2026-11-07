@@ -1,5 +1,5 @@
 // 끝 장면의 세 화면을 영상과 같은 화면에서 찍어 스프라이트로 만든다 → 소스/assets/img/trio/trio-1~3.png
-// 옛 데모 GIF처럼 세 화면이 각자 움직이게, 장면마다 몇 구간을 빠르게 이어 붙인다.
+// 옛 데모 GIF처럼 세 화면이 각자 움직이게, 장면마다 두세 구간을 이어 붙인다. 빠르기는 실제의 1~1.8배(너무 빠르면 움직임이 부자연스러움).
 // 사용: node tools/trio.cjs  (소스를 고친 뒤 영상 렌더 전에 한 번). 스프라이트는 다시 만들 수 있어서 저장소에 올리지 않는다
 const path = require('path'), fs = require('fs'), { execFileSync } = require('child_process'), { pathToFileURL } = require('url');
 const HOME = process.env.HOME;
@@ -23,9 +23,9 @@ const pngSize = f => { const b = fs.readFileSync(f); return [b.readUInt32BE(16),
   const FW = 452, scale = G.w / FW;                    // 스프라이트 칸 크기로 바로 찍어 글자를 선명하게
   // 구간: [시작, 끝, 칸 수]. 칸 수의 합이 G.n
   const CLIPS = [
-    { dim: true, segs: [[m.dragT, m.tGo + 0.55, 25], [m.tSum + 0.9, m.tSum + 4.85, 27]] },                       // 시트 올림 → 입력 → 검색 → 기억 → 요약
-    { dim: false, segs: [[m.p0 + 1.3, m.p0 + 2.7, 14], [m.t2 + 0.75, m.t2 + 1.6, 11], [m.pTap3 - 0.25, m.pTap3 + 1.6, 27]] },   // 입력 → 답으로 바뀜 → 검색 결과
-    { dim: false, segs: [[m.tM2 - 1.2, m.tM3 + 0.5, 19], [m.tapW - 0.1, m.tapW + 1.0, 8], [m.tapI + 0.1, m.reply + 0.55, 25]] },  // 대화 → 추천 → 보내기 → 답장
+    { dim: true, segs: [[m.tType + 0.4, m.tGo + 0.55, 30], [m.tSum + 0.9, m.tSum + 5.3, 48]] },                     // 입력 → 검색 → 연결된 기억 → 요약
+    { dim: false, segs: [[m.tZ + 0.7, m.tZ + 2.25, 28], [m.t2 + 0.85, m.t2 + 1.7, 14], [m.pTap3 - 0.25, m.pTap3 + 1.5, 36]] },   // 입력 → 답으로 바뀜 → 검색 결과
+    { dim: false, segs: [[m.tapW - 0.05, m.tapW + 1.5, 26], [m.tapI + 0.1, m.reply + 0.55, 52]] },                    // 추천 → 보내기 → 답장
   ];
   const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: scale });
   const p = await ctx.newPage();

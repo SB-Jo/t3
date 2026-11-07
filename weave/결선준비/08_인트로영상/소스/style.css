@@ -552,10 +552,7 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* ── v13 (2026-11-06 5차 피드백) ── */
 /* 인트로·아웃트로 로고: 그라데이션을 조금 더 */
 #logo .word, #op .word { background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #3C22C0 0%, #6A47EE 52%, #AE88FF 100%); }
-/* 01: 생각도 '나'의 말풍선. 기록 카드는 글 길이만큼 */
-#callT .bb { border-radius: 44px; padding: 16px 40px 24px 32px; }
-#callT .who { display: flex; margin-bottom: 8px; }
-#callT .who .me { font-size: 24px; font-weight: 700; color: #fff; background: var(--purple); border-radius: 14px; padding: 3px 14px 4px; letter-spacing: -0.02em; }
+/* 01: 기록 카드는 글 길이만큼 */
 #callA .who .me { font-size: 24px; border-radius: 14px; padding: 3px 14px 4px; }
 #fl1, #fl2, #fl3, #fl4 { width: max-content; }
 #fl1 .sn, #fl2 .sn, #fl3 .sn, #fl4 .sn { width: fit-content; }
@@ -568,9 +565,32 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* 03: 제목은 한 번 뜨고, 읽었을 때 빛이 한 번. 플로팅은 위치 → 탑승권 → 카톡을 세로로(셋 다 실이 보이게) */
 #hdC .tl { padding: 0 .04em .12em; margin-bottom: -.12em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--ink) 0%, var(--ink) 100%); background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
 #hdC em.tl { background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--purple) 0%, var(--purple) 100%); }
-#fg { left: 940px; top: 46px; }
-#fw { left: 940px; top: 193px; }
-#fk { left: 940px; top: 340px; }
 /* 끝 장면: 옛 데모 GIF처럼 세 화면이 각자 움직인다(tools/trio.cjs가 만든 스프라이트) */
 #trio .tp .gif { position: relative; width: 356px; height: 740px; overflow: hidden; }
 #trio .tp .gif img { position: absolute; left: 0; top: 0; width: auto; height: auto; max-width: none; }
+
+/* ── v14 (2026-11-07 6차 피드백) ── */
+/* 01: 왼쪽 제목 · 가운데 말풍선 둘 · 오른쪽 휴대폰(휴대폰을 40px 오른쪽으로). 제목은 옮기지 않고 그 자리에 남는다 */
+#hdB { left: 80px; top: 372px; }
+#hdB h3 { font-size: 70px; line-height: 1.32; }
+#callQ { right: 666px; top: 150px; padding: 22px 32px 26px 30px; }
+#callQ .q { margin-top: 14px; font-size: 41px; line-height: 1.4; }
+#callQ::after { top: 108px; }
+#callA { right: 666px; top: 448px; padding: 16px 32px 22px 28px; }
+#callA .q { margin-top: 8px; font-size: 36px; line-height: 1.42; }
+/* 02: 처음에 왼쪽에 뜨는 큰 글(휴대폰은 오른쪽) */
+#hd2 { left: 80px; top: 372px; }
+#hd2 h3 { margin-top: 0; font-size: 70px; line-height: 1.32; }
+/* 02: 위쪽 문장 뒤로 지나가는 말풍선이 비치지 않게 */
+#topScrim { background: linear-gradient(180deg, rgba(252,251,255,1) 0%, rgba(252,251,255,1) 62%, rgba(252,251,255,0) 100%); }
+/* 03: 위치와 탑승권을 나란히, 그 아래 아내 카톡 */
+#fg, #fw { width: max-content; top: 131px; }
+#fg { left: 880px; }
+#fw { left: 1387px; }
+#fk { left: 880px; top: 289px; }
+/* 03: 추천 문장이 입력창에 들어오면 두 줄(입력창 안에 들어가게 줄 간격을 좁힘) */
+.kin .tx { line-height: 1.22; }
+/* 끝 화면: 로고와 문구 사이를 조금 좁히고 전체를 가운데로 */
+#logo { top: 366px; }
+#tag { top: 572px; }
+#sub { top: 670px; }
