@@ -54,7 +54,7 @@ def hits(a, b, m=0):
 
 
 LINES = ('th', 'gth', 'fl', 'bk', 'sth', 'sbk', 'lc')
-CUT_SKIP = ('ui.glogo', 'ui.head', 'ui.msg', 'ui.sbox', 'res', 'ui.res', 'qp.head')
+CUT_SKIP = ('ui.glogo', 'ui.head', 'ui.msg', 'ui.sbox', 'ui.sbox.done', 'res', 'ui.res', 'qp.head')
 
 
 def is_frame(key):

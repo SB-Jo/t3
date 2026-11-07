@@ -170,8 +170,8 @@ def fit_pt(text, maxw, pt=9.5, weight='b', lo=7.5):
 
 
 # ------------------------------------------------------------------ 위 띠(01~04)
-STAGES = [('01', '순간 감지'), ('02', '질문 다시 쓰기'), ('03', '연쇄 탐색'), ('04', '전달')]
-STAGES0 = [('00', '사전 준비')] + STAGES        # 00판: 기록을 미리 벡터 + 메타데이터로 저장하는 단계까지
+STAGES = [('01', '맥락 감지'), ('02', '질의 분해·재작성'), ('03', '연쇄 탐색'), ('04', '정답 전달')]
+STAGES0 = [('00', '온디바이스 색인')] + STAGES        # 00판: 기록을 미리 벡터 + 메타데이터로 저장하는 단계까지
 
 
 def bar_layout(stages=STAGES):
@@ -412,13 +412,24 @@ def phone_items(sc):
             txt = ui['answer_q'] if style == 'done' else ui['query']
             tl = wrap(txt, 11, w - 92, 'r')[:2]
             hh = 46 if len(tl) == 1 else 62
-            by = y + (72 if style == 'up' else 106)      # 'up' = 전달 카드가 올라올 때 검색창이 가려지지 않게 위로
+            by = y + (72 if style in ('up', 'up_done') else 106)      # 'up' = 전달 카드가 올라올 때 검색창이 가려지지 않게 위로
             return [R('ui.sbox/bg', x + 18, by, w - 36, hh, prst='roundRect', radius=23, fill='FFFFFF', line='DADCE0', line_w=1.2,
                       shadow=S.L.SHADOW_SOFT),
                     R('ui.sbox/lens', x + 34, by + hh / 2 - 8, 13, 13, prst='ellipse', fill=None, line='9AA0A6', line_w=1.8),
                     R('ui.sbox/lens2', x + 44, by + hh / 2 + 3, 6, 2, fill='9AA0A6', line=None),
                     T('ui.sbox/t', x + 58, by, w - 92, hh, tl, size=11, color=INK, anchor='ctr', lnspc=12)]
         sc.put('ui.sbox', sbox)
+        tl_q = wrap(ui['query'], 11, w - 92, 'r')[:2]
+        tl_done = wrap(ui['answer_q'], 11, w - 92, 'b')[:2]
+        hh_d = 46 if len(tl_q) == 1 else 62
+        by_d = y + 72
+        sc.put('ui.sbox.done', [R('ui.sbox.done/bg', x + 18, by_d, w - 36, hh_d, prst='roundRect', radius=23, fill='FFFFFF', line=RING,
+                                  line_w=1.8, shadow=S.L.SHADOW_SOFT, glow=(6, RING, 22)),
+                                R('ui.sbox.done/lens', x + 34, by_d + hh_d / 2 - 8, 13, 13, prst='ellipse', fill=None, line=PURPLE,
+                                  line_w=1.8),
+                                R('ui.sbox.done/lens2', x + 44, by_d + hh_d / 2 + 3, 6, 2, fill=PURPLE, line=None),
+                                T('ui.sbox.done/t', x + 58, by_d, w - 92, hh_d, tl_done, size=11.5, color=PURPLE, weight='b',
+                                  anchor='ctr', lnspc=12)])
         res = []
         ry = y + 196
         for i, (rt, rs) in enumerate(ui.get('results', [])):
@@ -690,7 +701,7 @@ def engine_items(sc):
     hx = EX + 42 + tw('Query Rewriting', 12.5, 'b') + 8
     sc.put('qp.head', [P('qp.head/ic', S.ICON['spool'], EX + 16, QY + 14, 20, 20),
                        T('qp.head/title', EX + 42, QY + 12, 220, 24, 'Query Rewriting', size=12.5, color=PURPLE, weight='b', anchor='ctr'),
-                       T('qp.head/ko', hx, QY + 12, 120, 24, '질문 다시 쓰기', size=9, color=MUTE, weight='sb', anchor='ctr')])
+                       T('qp.head/ko', hx, QY + 12, 140, 24, '질의 분해·재작성', size=9, color=MUTE, weight='sb', anchor='ctr')])
     ol = wrap('“%s”' % sp['ask'], 10.5, EW - 34, 'm')[:2]
     qo = [T('qorig/l', EX + 16, QY + 46, 220, 16, sp.get('ask_label', '처음 질문'), size=8.5, color=MUTE, weight='b', anchor='ctr'),
           T('qorig/t', EX + 16, QY + 64, EW - 30, 19 * len(ol), ol, size=10.5, color=INK, weight='m', lnspc=14)]
@@ -1261,9 +1272,53 @@ def build(spec):
         sc.put('pair.div', [R('pair/div', LX0 + HWL + GX_ / 2 - 0.6, TOP + 8, 1.2, tot_h - 16, fill=LINE2, line=None)])
         kwbox = union([sc.box[k_] for k_ in kw_keys])
         embbox = union([sc.box[k_] for k_ in emb_keys])
+        pbox = union([kwbox, embbox])
         e1 = {'emb.qv': dict(kind='wipe_in', dir='left', delay=0, dur=320)}
-        return dict(kw=kw_keys, emb=emb_keys, beats=[{'kw.hl': dict(kind='wipe_in', dir='left', delay=0, dur=260)}, k2, k3, e1, e2, e3, e4],
-                    kwbox=kwbox, embbox=embbox, box=union([kwbox, embbox]), div='pair.div', zmax=PR.get('zmax', 1.3))
+        b_kw1 = dict({'kw.hl': dict(kind='wipe_in', dir='left', delay=0, dur=240)},
+                     **{k_: dict(v_, delay=v_.get('delay', 0) + 180) for k_, v_ in k2.items()})
+        b_kw2 = k3
+        b_emb1 = dict(e1, **{k_: ([dict(x_, delay=x_.get('delay', 0) + 180) for x_ in v_] if isinstance(v_, list)
+                                  else dict(v_, delay=v_.get('delay', 0) + 180)) for k_, v_ in e2.items()})
+        b_emb2 = dict(e3, **{k_: dict(v_, delay=v_.get('delay', 0) + 280) for k_, v_ in e4.items()})
+        # Let's think step by step 카드 (배경이 흐려지며 정중앙에 등장)
+        scx, scy = pbox[0] + pbox[2] / 2, pbox[1] + pbox[3] / 2
+        scw, sch = 680, 248
+        sx0, sy0 = scx - scw / 2, scy - sch / 2
+        pw_b = tw('MULTI-HOP REASONING', 10, 'b') + 52
+        px_b, py_b = scx - pw_b / 2, sy0 + 22
+        step_prims = [
+            R('step/halo', sx0 - 30, sy0 - 22, scw + 60, sch + 44, prst='roundRect', radius=32, fill='F8F5FF', alpha=88, line=None),
+            R('step/bg', sx0, sy0, scw, sch, prst='roundRect', radius=24, fill='FFFFFF', line=RING, line_w=2.2,
+              shadow=S.L.SHADOW_LIFT, glow=(14, RING, 34)),
+            R('step/pill', px_b, py_b, pw_b, 28, prst='roundRect', fill=LAV, line=RING, line_w=1.0),
+            P('step/ic', S.ICON['spool'], px_b + 12, py_b + 5, 18, 18),
+            T('step/pill_t', px_b + 34, py_b, pw_b - 42, 28, 'MULTI-HOP REASONING', size=10, color=PURPLE, weight='b',
+              align='c', anchor='ctr', spc=0.4),
+            T('step/quote', sx0 + 24, sy0 + 60, scw - 48, 52, '“Let’s think step by step!”', size=26, color=PURPLE, weight='b',
+              align='c', anchor='ctr', spc=-0.3),
+            T('step/sub', sx0 + 24, sy0 + 118, scw - 48, 46,
+              ['단 한 번의 검색(One-hop)으로 닿지 않는 기억은,', '중간 단서를 먼저 찾아 질문을 단계별로 이어 가야 합니다'],
+              size=12, color=INK2, weight='sb', align='c', lnspc=17),
+        ]
+        s_chips = ['① 문맥 추론 (집들이 날짜)', '② 질의 재작성 & 날짜 필터', '③ 와인 라벨 판독']
+        c_ws = [tw(t_, 10, 'b') + 26 for t_ in s_chips]
+        arr_w = 24
+        tot_cw = sum(c_ws) + arr_w * 2
+        cx_cur = scx - tot_cw / 2
+        cy_row = sy0 + 186
+        for ci, (ct_, cw__) in enumerate(zip(s_chips, c_ws)):
+            step_prims += [
+                R('step/c%d' % ci, cx_cur, cy_row, cw__, 32, prst='roundRect', fill='F4F0FF', line='DCD0FF', line_w=1.1),
+                T('step/ct%d' % ci, cx_cur, cy_row, cw__, 32, ct_, size=10, color=PURPLE, weight='b', align='c', anchor='ctr'),
+            ]
+            cx_cur += cw__
+            if ci < 2:
+                step_prims.append(T('step/ca%d' % ci, cx_cur, cy_row, arr_w, 32, '→', size=11, color=PURPLE2, weight='b',
+                                    align='c', anchor='ctr'))
+                cx_cur += arr_w
+        sc.put('step.card', [G('step.card/g', step_prims)])
+        return dict(kw=kw_keys, emb=emb_keys, beats=[b_kw1, b_kw2, b_emb1, b_emb2],
+                    kwbox=kwbox, embbox=embbox, box=pbox, div='pair.div', zmax=PR.get('zmax', 1.3))
 
     # -------------------------------------------------------------- 1 더미: 이야기 기록도 작은 조각으로, 아무 데나 흩어짐(옅게) → 몇 개만 켜짐
     cap_c = dict(t=CP['cloud'])
@@ -1431,7 +1486,7 @@ def build(spec):
             rest = hop['q'][2] if len(hop['q']) > 2 else hop['q'][1]
         key = 're:%d' % n
         prims, pt_, fc, h = engine_block(key, sc.RE_Y, 'Reasoning Embedding',
-                                         'Hop %d  %s' % (n, '다시 쓴 질문' if n > 1 else '첫 질문'), token, rest, cond, 're',
+                                         'Hop %d · %s' % (n, '2차 탐색 (날짜 반영)' if n > 1 else '1차 탐색'), token, rest, cond, 're',
                                          chip_name=('tok%d' % (n - 1)) if n > 1 else None)
         sc.put(key, prims)
         re_keys[n] = key
@@ -1630,11 +1685,11 @@ def build(spec):
         ent = [R('ixe/bg', ex0, ey0, EWD, EH, prst='roundRect', radius=16, fill='FFFFFF', line=RING, line_w=1.6, shadow=S.L.SHADOW_CARD,
                  glow=(8, RING, 22)),
                P('ixe/ic', S.ICON['spool'], ex0 + 16, ey0 + 13, 18, 18),
-               T('ixe/h', ex0 + 40, ey0 + 11, 260, 22, IX.get('entry_title', '기기 안에 저장한 모습'), size=10, color=PURPLE2, weight='b',
+               T('ixe/h', ex0 + 40, ey0 + 11, 340, 22, IX.get('entry_title', '온디바이스 색인 구조'), size=10, color=PURPLE2, weight='b',
                  anchor='ctr')]
         LX_, VX_ = ex0 + 18, ex0 + 104
         rows_y = [ey0 + 48, ey0 + 82, ey0 + 116]
-        for j, lab_ in enumerate(['글자', '벡터', '메타데이터']):
+        for j, lab_ in enumerate(['원문', '벡터', '메타데이터']):
             ent.append(T('ixe/l%d' % j, LX_, rows_y[j], 84, 24, lab_, size=9.5, color=PURPLE if j else MUTE, weight='b', anchor='ctr'))
         ent.append(T('ixe/v0', VX_, rows_y[0], EWD - (VX_ - ex0) - 14, 24, IX.get('text', ''), size=9.5, color=MUTE, anchor='ctr'))
         sc.put('ix.entry', ent)
@@ -1742,7 +1797,7 @@ def build(spec):
         phone_now = [x for x in cur if x == 'ui' or x.startswith('ui.')]
         hide(*phone_now)
 
-    if IXD:
+    if IXD and not IX.get('after_hybrid'):
         # 1 기록 더미가 먼저: 매일 쌓이는 기록들
         show(*all_cloud)
         ca_ = {k: IX.get('cloud_alpha', 72) for k in all_cloud}
@@ -1771,12 +1826,18 @@ def build(spec):
         trig_step()
     # 실패: 키워드 검색(왼쪽, 클릭마다) → 임베딩 검색(오른쪽, 클릭마다) → 둘을 나란히
     prev = []
-    if PAIR:      # 키워드(왼쪽)와 임베딩(오른쪽)을 한 장에. 맺음 설명은 마지막 클릭에
+    if PAIR:      # 키워드(왼쪽)와 임베딩(오른쪽)을 한 장에. 상단 제목은 진입 즉시 표시
         show_under(PAIR['div'])
         show(*PAIR['kw'], *PAIR['emb'])
         shot('fail', [], 'top', set(PAIR['kw'] + PAIR['emb'] + [PAIR['div']]), dict(done={'01'}) if spec.get('trig_first') else {}, PAIR['zmax'], frame_box=PAIR['box'], morph=1500,
-             beats=PAIR['beats'] + [{}], cap_beat=len(PAIR['beats']))
+             beats=PAIR['beats'])
         prev = PAIR['kw'] + PAIR['emb'] + [PAIR['div']]
+        if 'step' in CP:
+            show('step.card')
+            shot('step', [], 'top', {'step.card'}, dict(done={'01'}) if spec.get('trig_first') else {}, PAIR['zmax'],
+                 frame_box=PAIR['box'], morph=1100, half=prev, alpha={k_: 22 for k_ in prev},
+                 anim={'step.card': dict(kind='zoom_in', delay=120, dur=360, **{'from': 0.88})})
+            hide('step.card')
     for j, P_ in enumerate(passes):
         hide(*prev)
         last_pass = j == len(passes) - 1
@@ -1806,6 +1867,13 @@ def build(spec):
              'hans')
         styles.pop(HYB['mid'], None)
     hide(*prev, *all_cloud)
+    if IXD and IX.get('after_hybrid'):
+        show(*IXD['close'])
+        shot('idx2', [], 'top', set(IXD['close']), {}, IX.get('z1', 1.6), frame_box=IXD['box1'], cap=CP['idx2'], notes=NT['idx2'],
+             morph=1500,
+             beats=[{'ix.vec': dict(kind='wipe_in', dir='left', delay=0, dur=260)},
+                    {'ix.meta': dict(kind='wipe_in', dir='left', delay=0, dur=260)}])
+        hide(*IXD['close'])
     if not spec.get('trig_first'):
         trig_step()
     # 02 Query Rewriting: 처음 질문(정적) → 첫 질문(클릭) → 빈칸이 있는 둘째 질문(클릭)
@@ -1961,21 +2029,26 @@ def build(spec):
         hide('ui.kbd', 'ui.on')
         db = union([sc.box['ans'], sc.box['ui.sheet.big']])
         dfocus = ['ui', 'ui.head', 'ui.sheet', 'ans', 'ui.tap2']
+        dbeat = {'ui.tap2': dict(kind='zoom_in', delay=0, dur=200)}
     elif kind == 'google':
         sb = sc.box['ui.sbox']
         if sc.box['ans'][1] < sb[1] + sb[3] + 8:      # 카드가 검색창에 닿으면 검색창을 올림(구글 로고 자리)
             styles['ui.sbox'] = 'up'
             sb = bbox(sc.items['ui.sbox']('up'))
             hide('ui.glogo')
+        show('ui.sbox.done')
         db = union([sb, sc.box['ans'], sc.box['ui.kbd']])
-        dfocus = ui_base + ['ans', 'ui.tap2', 'ui.on']
+        dfocus = ui_base + ['ui.sbox.done', 'ans', 'ui.tap2', 'ui.on']
+        dbeat = {'ui.tap2': dict(kind='zoom_in', delay=0, dur=200),
+                 'ui.sbox.done': dict(kind='fade_in', delay=240, dur=260)}
     else:
         db = union([sc.box['ans'], sc.box['ui.kbd']])
         dfocus = ui_base + ['ans', 'ui.tap2', 'ui.on']
+        dbeat = {'ui.tap2': dict(kind='zoom_in', delay=0, dur=200)}
     shot('deliver', [], 'right', set(dfocus), dict(cur='04', done=D('01', '02', '03')), 2.3, frame_box=db, cap_y=cy_of('ans'),
-         anim={'ans': dict(kind='rise', delay=0, dur=260)}, beats=[{'ui.tap2': dict(kind='zoom_in', delay=0, dur=200)}], morph=1500)
+         anim={'ans': dict(kind='rise', delay=0, dur=260)}, beats=[dbeat], morph=1500)
     # 결과: 조금 빼서 화면 전체
-    hide('ui.tap2', 'ans', 'ui.on', 'ui.kbd', 'ui.keys')
+    hide('ui.tap2', 'ans', 'ui.on', 'ui.kbd', 'ui.keys', 'ui.sbox.done')
     show('ui.msg')
     if kind == 'google':
         styles['ui.sbox'] = 'done'
