@@ -287,8 +287,6 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 /* ── v5 ─────────────────────────────────────────── */
 /* 01: 사슬 레이어(카메라), 위쪽 제목 */
 #w1 { position: absolute; inset: 0; transform-origin: 0 0; }
-#topScrim { position: absolute; left: 0; right: 0; top: 0; height: 260px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(252,251,255,.97) 0%, rgba(252,251,255,.93) 52%, rgba(252,251,255,0) 100%); }
 #h1 { left: 0; right: 0; top: 40px; text-align: center; }
 #h1 h3 { font-size: 54px; }
 #flyChip { position: absolute; left: 0; top: 0; padding: 8px 26px 10px; border-radius: 30px; background: #fff; color: var(--purple); font-size: 44px; font-weight: 700;
@@ -558,7 +556,6 @@ mark.rm { color: inherit; padding: 0 1px; }
 #fl1 .sn, #fl2 .sn, #fl3 .sn, #fl4 .sn { width: fit-content; }
 /* 02: 검색어의 두 조각이 떨어져 나와 두 질문이 된다 */
 #pill { top: 150px; }
-#topScrim { height: 150px; }
 #qa1, #qa2 { padding: 0 2px; }
 .qchip { position: absolute; left: 0; top: 0; font-size: 36px; font-weight: 600; letter-spacing: -0.025em; color: var(--purple); background: #EFE9FF; border-radius: 14px; padding: 3px 12px 5px; white-space: nowrap; box-shadow: 0 10px 22px rgba(107,78,255,.28); z-index: 6; }
 #tokA { font-size: 26px; padding: 6px 16px 8px; }
@@ -581,8 +578,6 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* 02: 처음에 왼쪽에 뜨는 큰 글(휴대폰은 오른쪽) */
 #hd2 { left: 80px; top: 372px; }
 #hd2 h3 { margin-top: 0; font-size: 70px; line-height: 1.32; }
-/* 02: 위쪽 문장 뒤로 지나가는 말풍선이 비치지 않게 */
-#topScrim { background: linear-gradient(180deg, rgba(252,251,255,1) 0%, rgba(252,251,255,1) 62%, rgba(252,251,255,0) 100%); }
 /* 03: 위치와 탑승권을 나란히, 그 아래 아내 카톡 */
 #fg, #fw { width: max-content; top: 131px; }
 #fg { left: 880px; }
@@ -594,3 +589,14 @@ mark.rm { color: inherit; padding: 0 1px; }
 #logo { top: 366px; }
 #tag { top: 572px; }
 #sub { top: 670px; }
+
+/* ── v15 (2026-11-07 7차 피드백) ── */
+/* 02: 위쪽 문장 자리. 배경에 띠를 덮지 않고, 사슬만 위쪽에서 흐려져 사라진다 */
+#w1mask { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 96px, #000 150px); mask-image: linear-gradient(180deg, transparent 0, transparent 96px, #000 150px); }
+/* 03: 추천 문장의 두 번째 형광펜, 답장의 하트 */
+#sgK2 { background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
+.bub .hrt { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; }
+/* 끝 장면: 휴대폰을 5% 크게, 전체를 아래로 내려 무게중심을 맞춤 */
+#trio { top: 112px; gap: 60px; }
+#trio .tp .gif { width: 374px; height: 777px; }
+#trio .tc { margin-top: 14px; }

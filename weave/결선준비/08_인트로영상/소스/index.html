@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>Weave Assist · 결선 인포그래픽 v14</title>
+<title>Weave Assist · 결선 인포그래픽 v15</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -62,7 +62,7 @@
     <div id="opSub" class="kr">기억이 막히는 세 순간, Weave가 이어 줍니다</div></div>
 
   <!-- 2. 엮기 (01): 사슬 전체가 #w1 안에서 카메라처럼 확대·이동 -->
-  <div id="w1">
+  <div id="w1mask"><div id="w1">
     <svg id="threads" viewBox="0 0 1920 1080" width="1920" height="1080">
       <g id="tA"><path class="thr-halo" d="M600 314 C 600 400, 500 376, 500 460"/><path class="thr" d="M600 314 C 600 400, 500 376, 500 460"/></g>
       <g id="tQ2"><path class="thr-halo" d="M0 0 L1 1"/><path class="thr" d="M0 0 L1 1"/></g>
@@ -94,14 +94,13 @@
     <span class="tok kr" id="tokA">3월 15일</span>
     <span class="qchip kr" id="qc1">지은이네 집들이 때</span>
     <span class="qchip kr" id="qc2">마셨던 와인</span>
-  </div>
-  <div id="topScrim"></div>
+  </div></div>
   <div class="head kr" id="h1"><h3>기억 속 단서를 엮어, <em>정확한 이름을 찾습니다</em></h3></div>
 
   <!-- 3. 휴대폰 UX -->
   <div id="ux">
     <div class="head kr" id="hdB"><h3><span class="tl">앱마다 흩어진 기록을,</span><em class="tl">한 번에 찾아 요약합니다</em></h3></div>
-    <div class="head kr" id="hd2"><h3><span class="tl">“지은이네 집들이 때 마셨던 와인” 좋았는데,</span><em class="tl">하나 사볼까? 이름이 뭐였더라…</em></h3></div>
+    <div class="head kr" id="hd2"><h3><span class="tl">지은이네 집들이 와인 좋았는데,</span><em class="tl">다시 사 볼까? 이름이 뭐였더라…</em></h3></div>
     <div class="head kr" id="hdC"><h3><span class="tl">지금 상황과 지난 기억을 엮어,</span><em class="tl">보낼 말을 먼저 추천합니다</em></h3></div>
 
     <svg id="uxThreads" viewBox="0 0 1920 1080" width="1920" height="1080"></svg>
@@ -181,14 +180,14 @@
             <div class="msg me" id="m2"><span class="tm">오후 3:41</span><div class="bub">응 방금 도착했어</div></div>
             <div class="msg" id="m3"><img class="av" src="assets/img/wife-avatar.jpg" alt=""><div><div class="nm">아내</div><div class="bub">고생했어 조심히 와~</div></div><span class="tm">오후 3:41</span></div>
             <div class="msg me" id="mSent"><span class="meta"><span class="rd" id="rdSent">1</span><span class="tm">오후 3:42</span></span><div class="bub">여보, 전에 말한 에스티 로더 갈색병<br>면세점에서 사 갈까?</div></div>
-            <div class="msg" id="mReply"><img class="av" src="assets/img/wife-avatar.jpg" alt=""><div><div class="nm">아내</div><div class="bub">그걸 기억했네? 고마워, 여보!</div></div><span class="tm">오후 3:43</span></div>
+            <div class="msg" id="mReply"><img class="av" src="assets/img/wife-avatar.jpg" alt=""><div><div class="nm">아내</div><div class="bub">기억하고 있었어? 고마워 여보 <svg class="hrt" viewBox="0 0 24 24"><path d="M12 21s-7.6-4.9-9.8-9.4C.6 8.1 2.6 4.4 6.4 4.4c2.2 0 4 1.2 5.6 3.2 1.6-2 3.4-3.2 5.6-3.2 3.8 0 5.8 3.7 4.2 7.2C19.6 16.1 12 21 12 21Z" fill="#F0304F"/></svg></div></div><span class="tm">오후 3:43</span></div>
           </div></div>
           <div class="kin"><svg width="20" height="20" style="color:#7a7686"><use href="#i-plus"/></svg><span class="tx" id="kinTx"></span><svg width="20" height="20" style="color:#7a7686"><use href="#i-emo"/></svg><span class="snd" id="kSend"><svg><use href="#i-up"/></svg></span></div>
           <div class="kb" id="kbC"></div>
           <div class="scrim" id="scrimC"></div>
           <div class="ws" id="wC">
             <div class="row"><img src="assets/icons/weave-spool-6B4EFF.png" alt=""><span class="ttl">Weave</span><span class="x">✕</span></div>
-            <div class="sg" id="sgC"><div class="l"><svg><use href="#i-spark"/></svg>자동 완성 추천</div><div class="v">여보, <span id="sgK">전에 말한 에스티 로더 갈색병</span><br>면세점에서 사 갈까?</div></div>
+            <div class="sg" id="sgC"><div class="l"><svg><use href="#i-spark"/></svg>자동 완성 추천</div><div class="v">여보, 전에 말한 <span id="sgK">에스티 로더 갈색병</span><br><span id="sgK2">면세점</span>에서 사 갈까?</div></div>
             <div class="pbtn" id="btnC"><svg width="18" height="18" style="color:#fff"><use href="#i-check"/></svg>입력하기</div>
             <div class="ttl ttlc">연결된 기억</div>
             <div class="mc" id="c1card"><img src="assets/icons/app-kakao.png" alt=""><div><div class="a">아내</div><div class="b">카카오톡 · 3주 전</div></div><div class="c">“동생이 이 갈색병 좋대. 면세점에서 판다더라”</div><div class="c cph"><img src="assets/img/wife-bottle.jpg" alt=""><span>[신세계백화점] 에스티 로더 어드밴스드 나이트 리페어 50ml</span></div></div>
