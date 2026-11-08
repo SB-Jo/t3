@@ -607,11 +607,13 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* 01: 답변 문장이 길어져 다섯 줄. 줄 길이가 고르게 글자를 조금 작게 */
 #callA .q { font-size: 34px; }
 #callA { padding: 16px 28px 22px 24px; }
-/* 02: 갤러리 카드는 날짜가 건너오기 전까지 제목과 사진 자리만 */
-#cB .tt { position: relative; }
-#cB .skel { position: absolute; left: 0; top: 50%; width: 128px; height: 24px; margin-top: -12px; border-radius: 12px; background: #E9E3F8; }
+/* 02: 갤러리 카드는 날짜가 건너오기 전까지 사진 자리만 비어 있음 */
 #cB .photo { background: #F0ECFA; }
 /* 03: 제목을 오른쪽으로 조금(아래 플로팅과 같은 왼쪽 끝) */
 #hdC { left: 880px; }
 /* 끝 장면: 번호 원에 입체감(로고 아이콘과 같은 방향의 그라데이션, 위쪽 반사광, 부드러운 그림자) */
 #trio .tc b { background: linear-gradient(145deg, #8D6BFF, #6B4EFF 55%, #5A3FE0); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.38), inset 0 -2px 4px rgba(46,24,140,.28), 0 6px 14px rgba(107,78,255,.32), 0 2px 4px rgba(64,40,140,.18); text-shadow: 0 1px 1px rgba(40,20,120,.35); }
+
+/* ── v17 (2026-11-08 9차 피드백) ── */
+/* 03: 추천 시트 맨 위 'Weave'를 보라로(실타래 아이콘과 같은 색) */
+#wC .row .ttl { color: var(--purple); }

@@ -31,7 +31,8 @@ const pngSize = f => { const b = fs.readFileSync(f); return [b.readUInt32BE(16),
   const p = await ctx.newPage();
   p.on('pageerror', e => console.error('PAGE ERROR', e.message));
   await p.goto(URL_); await p.evaluate(() => window.__ready);
-  await p.addStyleTag({ content: 'html, body { background: transparent !important; } body * { visibility: hidden; } #phone, #phone * { visibility: visible; } .frame { box-shadow: none !important; }' });
+  // 검색을 누를 때 위쪽에 잠깐 생기는 불러오기 줄(#gload)은 뺀다. 20fps로 띄엄띄엄 찍으면 한 장에만 걸려 지직거리는 것처럼 보임
+  await p.addStyleTag({ content: 'html, body { background: transparent !important; } body * { visibility: hidden; } #phone, #phone * { visibility: visible; } .frame { box-shadow: none !important; } #gload { display: none !important; }' });
   fs.rmSync(TMP, { recursive: true, force: true }); fs.mkdirSync(DEST, { recursive: true });
   for (const [i, c] of CLIPS.entries()) {
     const dir = path.join(TMP, String(i + 1)); fs.mkdirSync(dir, { recursive: true });

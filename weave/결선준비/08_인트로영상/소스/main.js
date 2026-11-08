@@ -7,6 +7,8 @@
    v15: 115초 → 117초. 장면 카드 글자가 번쩍였다 다시 뜨던 버그 수정, 02 처음 글과 위쪽 띠(배경은 그대로 두고 사슬만 위에서 흐려짐), 03 위치와 탑승권은 곧은 실, 끝 장면을 조금 크고 느리게.
    v16: 117초 → 118.3초. 곡을 첫 마디부터(오프닝 두 마디, 4.8초에 첫 장면 카드와 함께 터짐), 01 형광펜 뒤 0.5초 줄임과 답변 문장, 요약의 '3번 부스',
         02 갤러리 카드는 날짜가 건너온 뒤에 날짜와 사진이 뜸, 01과 03 제목은 02처럼 걷힘(03 빛 없음), 로고 글자 끝을 진하게, 세 화면 번호에 입체감.
+   v17: 길이 그대로(118.3초). 02 처음 큰 글은 둘째 줄이 보라, 02 제목은 '기억 속 단서를 엮어,'가 보라, 갤러리 카드 제목은 처음부터(날짜만 건너온 뒤),
+        03 탑승권을 0.5초 더 보여 줌, 03 제목 둘째 줄 '필요한 말을 먼저 추천합니다', 추천 시트의 'Weave'를 보라로, 끝 장면 GIF에서 검색 불러오기 줄을 뺌.
    순서와 장면 이름은 5쪽 Solution과 같다. 코드 안의 01·02·03 표시는 옛 이름(01 = 와인, 02 = 통화, 03 = 카톡)으로 남겨 두었다.
    이전: Weave 결선 인트로 v8 — GSAP 타임라인 하나(paused)를 시간 t로 탐색해 프레임을 찍는다.
    window.__seek(t), window.__DURATION, window.__events(효과음 시점 → tools/music.py), window.__ready, window.__taps, window.__marks, window.__probe(t)
@@ -44,17 +46,17 @@ const tBack = tSum + 6.1, tAns = tBack + 1.05, X2 = tAns + 4.8;   // 작아지�
 const C1 = X2 + 0.35, P0 = C1 + CH;                    // 카드, 휴대폰 등장(왼쪽에 큰 글)
 const tZ = P0 + 3.7;                                   // 큰 글이 걷히고 휴대폰이 가운데로 와서 검색창을 크게
 const pTap1 = tZ + 3.85;                               // Weave 버튼
-const c1 = pTap1 + 1.65, c2 = c1 + 4.8, c3 = c2 + 5.6, c4 = c3 + 2.5;   // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서(날짜가 건너간 뒤 사진이 뜸), 라벨, 답
+const c1 = pTap1 + 1.65, c2 = c1 + 4.8, c3 = c2 + 5.5, c4 = c3 + 2.5;   // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서(날짜가 건너간 뒤 사진이 뜸), 라벨, 답
 const T2 = c4 + 3.5, X1 = T2 + 5.3;                    // 입력하기, 장면 끝(결과를 보며 1초 남짓 머문 뒤)
 // 3 카톡: 대화와 입력하기 → 전송 → 답장은 v10보다 빨라지지 않게(사용자가 늘려 달라고 한 곳)
 const C3 = X1 + 0.35, s3 = C3 + CH + 0.05;             // 카드, 시작(제목만 보이는 때)
 const tChat = s3 + 3.6, tM2 = tChat + 3.0, tM3 = tM2 + 1.8;   // 대화: 아내 → 나(입력해서 전송) → 아내
-const g3 = tM3 + 1.75, tW = g3 + 2.0, tK = tW + 1.6, tL = tK + 2.45;  // 플로팅: 위치 → 탑승권(오른쪽에 이어짐) → 아내 카톡 → 링크 미리보기
+const g3 = tM3 + 1.75, tW = g3 + 2.0, tK = tW + 2.1, tL = tK + 2.45;  // 플로팅: 위치 → 탑승권(오른쪽에 이어짐, 실 뒤에 읽을 틈) → 아내 카톡 → 링크 미리보기
 const th3 = tL + 1.95;                                 // 위치와 카톡이 휴대폰으로 엮이는 실
 const pTapW = th3 + 2.1, pTapI = pTapW + 3.6, pTapS = pTapI + 1.6;    // Weave 버튼 · 입력하기 · 전송
 const tRead = pTapS + 1.05, tReply = pTapS + 2.1;      // 읽음(1이 사라짐) → 답장
 const tTrioD = 5.2;                                    // 세 화면이 머무는 시간(GIF처럼 움직임)
-const LOGO_MIN = tReply + 2.4 + 0.35 + tTrioD;         // 답장을 읽을 시간 + 휴대폰이 빠지는 시간 + 세 화면
+const LOGO_MIN = tReply + 2.1 + 0.35 + tTrioD;         // 답장을 읽을 시간 + 휴대폰이 빠지는 시간 + 세 화면(로고가 마디에 맞아 남는 시간은 답장 뒤에 붙음)
 const LOGO = D1 + Math.ceil((LOGO_MIN - D1) / BAR - 1e-6) * BAR;   // 로고는 곡의 마디 첫 박에(마지막 한 방)
 const tTrio = LOGO - tTrioD;                           // 세 화면이 모이는 때
 const DUR = LOGO + 5.5;                                // 끝 화면 5.5초
@@ -288,7 +290,7 @@ async function build() {
   // 사슬: 단계마다 카메라가 그 자리로 옮겨 가고, 질문이 먼저 혼자 뜬 다음에 실이 이어지고 기록이 나온다
   gsap.set('#w1', { transformOrigin: '0 0', x: 0, y: 0, scale: 1 });
   gsap.set(['#cA', '#cB', '#cC'], { autoAlpha: 0, scale: 0.9, y: 26 });
-  gsap.set(['#cBd', '#cBt', '#cB .photo img'], { opacity: 0 });
+  gsap.set(['#cBd', '#cB .photo img'], { opacity: 0 });
   gsap.set(['#tA .thr', '#tA .thr-halo', '#tQ2 .thr', '#tQ2 .thr-halo', '#tB .thr', '#tB .thr-halo', '#tC .thr', '#tC .thr-halo'], { drawSVG: '0% 0%' });
   gsap.set('.pen', { autoAlpha: 0, y: 16, scale: 0.6, transformOrigin: '12% 100%' });
   gsap.set('#scan', { y: -80, opacity: 0 }); gsap.set('#ocr', { opacity: 0 });
@@ -318,13 +320,11 @@ async function build() {
   mark('#dtA', c1 + 4.1, 0.45);                                                               // 카톡을 받은 날이 그날
   wcam(c2, wPose(1.25, { x: 640, y: 500 }, { x: 960, y: 620 }), 1.0);                       // 그날 찍은 와인 사진은? → 카톡과 사진을 한 화면에
   splitQ('#qa2', '#qc2', '#tQ2', '#pen2', DT.qb, [DT.qb, { x: DT.qb.x - 10, y: (DT.qb.y + DT.p2.y) / 2 }, DT.p2], c2 + 0.6, 0.55);   // '마셨던 와인' → 그날 찍은 와인 사진은?
-  draw('#tB', c2 + 2.1, 0.6); cardIn('#cB', c2 + 2.35);                                           // 갤러리 카드는 처음에 비어 있음(제목과 사진 자리만, 날짜 없음)
+  draw('#tB', c2 + 2.1, 0.6); cardIn('#cB', c2 + 2.35);                                           // 갤러리 카드는 제목('와인 사진', 질문에 있는 말)만 있고 날짜와 사진은 아직 없음
   hop('#tokA', DT.a, DT.b, c2 + 2.95, 1.0, 70, { hold: 0.3, ease: 'sine.inOut' });               // 같은 날짜(3월 15일)가 사진 카드로 건너감
   tl.to('#cBd', { opacity: 1, duration: 0.3, ease: 'power1.out' }, c2 + 4.4);                   // 표가 내려앉는 자리에 날짜가 생기고
   mark('#dtB', c2 + 4.6, 0.4);
-  tl.to('#skT', { opacity: 0, duration: 0.3 }, c2 + 4.8);                                       // 그날의 와인 사진과 제목이 뜬다
-  tl.to('#cBt', { opacity: 1, duration: 0.45 }, c2 + 4.8);
-  tl.fromTo('#cB .photo img', { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out', immediateRender: false }, c2 + 4.8);
+  tl.fromTo('#cB .photo img', { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out', immediateRender: false }, c2 + 4.7);   // 그날의 와인 사진이 뜬다
   wcam(c3, wPose(1.6, { x: 930, y: 700 }, { x: 960, y: 610 }), 1.0);                        // 사진 속 라벨 글자 읽기
   tl.to('#scan', { opacity: 1, duration: 0.1 }, c3 + 0.9).to('#scan', { y: 240, duration: 0.7, ease: 'power1.inOut' }, c3 + 0.9).to('#scan', { opacity: 0, duration: 0.2 }, c3 + 1.5);
   tl.to('#ocrbox', { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2)' }, c3 + 1.3);
