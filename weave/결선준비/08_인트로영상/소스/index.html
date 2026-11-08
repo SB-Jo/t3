@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>Weave Assist · 결선 인포그래픽 v15</title>
+<title>Weave Assist · 결선 인포그래픽 v16</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -79,7 +79,7 @@
       <div class="snip"><span class="hl" id="hlT0">박스 정리</span> 다 했어! 이따 올 때<br><span class="hl" id="hlT">휴지 안 사 와도 돼</span></div>
     </div>
     <div id="cB" class="card kr">
-      <div class="hd"><img src="assets/icons/samsung-gallery.png" alt=""><div><div class="tt">그날 저녁 사진</div><div class="mm">갤러리 · <span class="dt" id="dtB">3월 15일</span> 20:14</div></div></div>
+      <div class="hd"><img src="assets/icons/samsung-gallery.png" alt=""><div><div class="tt"><i class="skel" id="skT"></i><span id="cBt">와인 사진</span></div><div class="mm">갤러리<span id="cBd"> · <span class="dt" id="dtB">3월 15일</span> 20:14</span></div></div></div>
       <div class="photo"><img src="assets/img/wine-2x.png" alt=""><div id="scan"></div><div id="ocrbox"></div></div>
       <div id="ocr"></div>
     </div>
@@ -100,13 +100,13 @@
   <!-- 3. 휴대폰 UX -->
   <div id="ux">
     <div class="head kr" id="hdB"><h3><span class="tl">앱마다 흩어진 기록을,</span><em class="tl">한 번에 찾아 요약합니다</em></h3></div>
-    <div class="head kr" id="hd2"><h3><span class="tl">지은이네 집들이 와인 좋았는데,</span><em class="tl">다시 사 볼까? 이름이 뭐였더라…</em></h3></div>
+    <div class="head kr" id="hd2"><h3><span class="tl"><em>지은이네 집들이 와인</em> 좋았는데,</span><span class="tl">다시 사 볼까? 이름이 뭐였더라…</span></h3></div>
     <div class="head kr" id="hdC"><h3><span class="tl">지금 상황과 지난 기억을 엮어,</span><em class="tl">보낼 말을 먼저 추천합니다</em></h3></div>
 
     <svg id="uxThreads" viewBox="0 0 1920 1080" width="1920" height="1080"></svg>
     <div class="bigf kr" id="fl1"><img src="assets/icons/samsung-calendar.png" alt=""><div><div class="t">삼성기술전 시연</div><div class="m">캘린더 · 11월 19일 (목)</div><div class="sn"><mark id="mk1">오후 2시</mark>, 수원 디지털시티 <mark id="mk4">3번 부스</mark></div></div></div>
     <div class="bigf kr" id="fl2"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">삼성기술전 준비 회의</div><div class="m">삼성노트 · 11월 3일 (화)</div><div class="sn"><mark id="mk6">시연 순서: 제품 소개 → 라이브 데모 → Q&amp;A</mark></div></div></div>
-    <div class="bigf kr" id="fl3"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">주간 회의</div><div class="m">삼성노트 · 11월 10일 (화)</div><div class="sn">제품 소개 빼고 <mark id="mk2">문제 상황부터 → 라이브 데모 → 관람객 체험</mark><br>자료는 <mark id="mk3">민수 님</mark>이 다시 정리</div></div></div>
+    <div class="bigf kr" id="fl3"><img src="assets/icons/app-notes.png" alt=""><div><div class="t">주간 회의</div><div class="m">삼성노트 · 11월 10일 (화)</div><div class="sn">제품 소개 빼고 <mark id="mk2">문제 상황부터 → 라이브 데모 → 관람객 체험</mark><br>자료는 <mark id="mk3">민수 님</mark>이 최종 정리 후 공유 예정</div></div></div>
     <div class="bigf kr" id="fl4"><img src="assets/icons/samsung-email-blue.png" alt=""><div><div class="t">최종본 공유드려요</div><div class="m">메일 · 민수 · 11월 12일 (목)</div><div class="sn">첨부: <mark id="mk5">Demo_Final.pptx</mark></div></div></div>
     <svg class="flink" id="flLink" viewBox="0 0 1920 1080" width="1920" height="1080"></svg>
     <div class="bigf kr" id="fg"><span class="gpsI"><i class="pulse"></i><i class="pulse"></i><svg viewBox="0 0 24 24"><use href="#i-pin"/></svg></span><div><div class="t">위치 <span class="m2">GPS · 실시간</span></div><div class="loc">인천공항 <span id="gpsDj">면세점</span> 인근</div></div></div>
@@ -159,7 +159,7 @@
             <div class="wpill"><img src="assets/icons/weave-spool-6B4EFF.png" alt=""><span class="q" id="qB"></span><span class="go"><svg><use href="#i-up"/></svg></span></div>
             <div class="sg" id="sgB"><div class="l"><svg><use href="#i-spark"/></svg>요약</div>
               <div class="sumv"><i class="skel"></i><i class="skel"></i><i class="skel"></i>
-                <span class="ln" id="sl1">시연은 <span class="hl sumk">11월 19일(목) 오후 2시</span>, 수원 3번 부스예요.</span>
+                <span class="ln" id="sl1">시연은 <span class="hl sumk">11월 19일(목) 오후 2시</span>, 수원 <span class="hl sumk">3번 부스</span>예요.</span>
                 <span class="ln" id="sl2">순서는 <span class="hl sumk">문제 상황, 라이브 데모, 관람객 체험</span>이에요.</span>
                 <span class="ln" id="sl3">최종본 Demo_Final.pptx는 <span class="hl sumk">민수 님 메일</span>에 있어요.</span></div></div>
             <div class="ttl" id="ttlB" style="margin:14px 2px 2px">연결된 기억</div>
@@ -206,7 +206,7 @@
     </div>
     <div id="callA" class="kr">
       <div class="who"><span class="me">나</span></div>
-      <div class="q"><u id="ua1">11월 19일 오후 2시</u>이고,<br>순서는 <u id="ua2">문제 상황, 라이브 데모,</u><br><u id="ua2b">관람객 체험</u>으로 바뀌었어요.<br>최종본 파일도<br><u id="ua3">메일로 전달</u>해 드릴게요!</div>
+      <div class="q"><u id="ua1">11월 19일 오후 2시</u>, <u id="ua1b">3번 부스</u>에서<br>진행해요. 순서는 <u id="ua2">문제 상황,</u><br><u id="ua2b">라이브 데모, 관람객 체험</u>으로<br>바뀌었고, 최종본 파일도<br><u id="ua3">메일로 전달</u>해 드릴게요!</div>
     </div>
   </div>
 

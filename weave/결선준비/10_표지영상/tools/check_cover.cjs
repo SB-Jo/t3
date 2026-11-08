@@ -50,13 +50,13 @@ const SAFE = 846;
         }
       }
     });
-    // 실 끝: 카드 가장자리에서 4px 안(카드 안쪽 3px로 묻힘), 휴대폰은 틀 왼쪽 가장자리에서 10px 안
-    const E = P.ends, F = P.frame, J = P.cJ, Q = P.cP;
-    const gaps = [Math.abs(E.A[0].x - F[0]) <= 10 ? 0 : 99, Math.abs(E.A[1].x - J[2]), Math.abs(E.B[0].y - J[1]), Math.abs(E.B[1].y - Q[3]),
-      Math.abs(E.C[0].x - Q[2]), Math.abs(E.C[1].x - F[0]) <= 10 ? 0 : 99];
+    // 실 끝(v8): 카드 가장자리에서 '보라 테두리 바깥 선 + 2px'(보라 실 끝이 테두리에 1px 겹치는 자리, 화면 배율 반영)과 2px 안, 휴대폰은 틀 왼쪽 가장자리에서 10px 안
+    const E = P.ends, F = P.frame, J = P.cJ, Q = P.cP, oJ = P.ringOut.J, oQ = P.ringOut.P;
+    const gaps = [Math.abs(E.A[0].x - F[0]) <= 10 ? 0 : 99, Math.abs(E.A[1].x - (J[2] + oJ)), Math.abs(E.B[0].y - (J[1] - oJ)), Math.abs(E.B[1].y - (Q[3] + oQ)),
+      Math.abs(E.C[0].x - (Q[2] + oQ)), Math.abs(E.C[1].x - F[0]) <= 10 ? 0 : 99];
     const inY = E.A[1].y > J[1] && E.A[1].y < J[3] && E.C[0].y > Q[1] && E.C[0].y < Q[3] && E.B[0].x > J[0] && E.B[0].x < J[2] && E.B[1].x > Q[0] && E.B[1].x < Q[2];
     const g = Math.max(...gaps); maxEnd = Math.max(maxEnd, g);
-    if (g > 4 || !inY) bad.endGap.push([t.toFixed(2), gaps.map(v => v.toFixed(1)).join('/'), inY]);
+    if (g > 2 || !inY) bad.endGap.push([t.toFixed(2), gaps.map(v => v.toFixed(1)).join('/'), inY]);
     if (P.hlLines.some((n, k) => k === 3 ? n > 1 : n !== 1)) bad.hlWrap.push([t.toFixed(2), P.hlLines.join(',')]);   // 3번째(#q)는 빈칸이면 0줄
     maxQ = Math.max(maxQ, P.q.scroll - P.q.client);
     for (const k of Object.keys(edge)) edge[k] = Math.min(edge[k], P.edges[k]);

@@ -94,7 +94,7 @@ def cover_text(slide, team_style='under'):
                 'side'  = 이름 둘을 위아래로, 오른쪽에 팀 이름을 두 줄로(사용자 제안 'AI System / Team')
     """
     pa = S.Painter(slide)                        # 바탕은 영상이 깔므로 도형 바탕은 그리지 않음(영상이 그 뒤로 숨지 않게)
-    cy = 260                                     # 제목 줄 가운데
+    cy = 276                                     # 제목 줄 가운데(8차: 260 → 276, 무게중심이 위에 있어 조금 내림)
     pa.prim(S.R('cover/mark', CX, cy - MARK / 2, MARK, MARK, prst='roundRect', radius=15, line=None,
                 grad=dict(stops=[(0, '8D6BFF', None), (55, '6B4EFF', None), (100, '5A3FE0', None)], ang=55),
                 shadow=(18, 7, '6B4EFF', 30)))
@@ -113,7 +113,7 @@ def cover_text(slide, team_style='under'):
             continue
         old.addprevious(etree.fromstring(GRAD))
         rp.remove(old)
-    pa.prim(S.T('cover/sub', CX + 1, 306, 520, 40, TAGLINE, size=20, color=S.INK2, weight='b', anchor='ctr'))
+    pa.prim(S.T('cover/sub', CX + 1, cy + 46, 520, 40, TAGLINE, size=20, color=S.INK2, weight='b', anchor='ctr'))
 
     x = CX + 1
     if team_style == 'under':
@@ -144,7 +144,7 @@ def cover_text(slide, team_style='under'):
             x = lx + 11 + tw_ + 36
 
 
-INFO_NOTES = ('인포그래픽 영상입니다(1분 57초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
+INFO_NOTES = ('인포그래픽 영상입니다(1분 58초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
               '마지막 로고가 뜨면 무대 중앙으로 돌아와 다음 장으로 넘어갑니다. '
               '현장 음향이 작을 때만 장면 카드가 뜰 때 한 문장씩 얹습니다. '
               '첫째, 급한 통화 중에도 앱을 뒤질 필요 없이, 아래에서 쓸어 올리면 끝납니다. '
@@ -358,7 +358,7 @@ def add_media(pptx, cover_idx, intro_idx, embed_fonts=False):
         print('   ! 표지 영상이 아직 없음:', COVER_MP4)
     shutil.copyfile(INTRO_MP4, tmpd / 'intro.mp4')
     ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 인포그래픽 미리보기 그림 = 오프닝 로고(3초, 빛이 다 지나간 뒤)
-    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '3.0', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
+    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '3.4', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
                    check=True)
     args += ['-IntroMp4', render2.winpath(tmpd / 'intro.mp4'), '-IntroPoster', render2.winpath(tmpd / 'intro.png')]
     code, log = render2.ps(tmpd / 'media.ps1', *args)

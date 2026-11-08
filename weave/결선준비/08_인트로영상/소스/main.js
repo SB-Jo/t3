@@ -5,6 +5,8 @@
    v13: 100초 → 107.5초. 장면 카드 빛은 이름에 한 번, 01 제목은 왼쪽 위로 옮겨 남음, 검색하면 연결된 기억이 바로 뜸, 02 검색어가 두 질문으로 갈라짐, 03 위치 → 탑승권 → 카톡 세 실, 끝 장면은 GIF처럼.
    v14: 107.5초 → 115초. 빛은 글자를 천천히 한 번 지나감, 01 제목은 왼쪽에 그대로 남고 말풍선은 한 글자씩(상상 말풍선 삭제), 02는 왼쪽 큰 글과 오른쪽 휴대폰으로 시작, 03 플로팅은 위치와 탑승권을 나란히 잇고 위치와 카톡을 휴대폰으로, 끝 장면은 거의 실제 빠르기로.
    v15: 115초 → 117초. 장면 카드 글자가 번쩍였다 다시 뜨던 버그 수정, 02 처음 글과 위쪽 띠(배경은 그대로 두고 사슬만 위에서 흐려짐), 03 위치와 탑승권은 곧은 실, 끝 장면을 조금 크고 느리게.
+   v16: 117초 → 118.3초. 곡을 첫 마디부터(오프닝 두 마디, 4.8초에 첫 장면 카드와 함께 터짐), 01 형광펜 뒤 0.5초 줄임과 답변 문장, 요약의 '3번 부스',
+        02 갤러리 카드는 날짜가 건너온 뒤에 날짜와 사진이 뜸, 01과 03 제목은 02처럼 걷힘(03 빛 없음), 로고 글자 끝을 진하게, 세 화면 번호에 입체감.
    순서와 장면 이름은 5쪽 Solution과 같다. 코드 안의 01·02·03 표시는 옛 이름(01 = 와인, 02 = 통화, 03 = 카톡)으로 남겨 두었다.
    이전: Weave 결선 인트로 v8 — GSAP 타임라인 하나(paused)를 시간 t로 탐색해 프레임을 찍는다.
    window.__seek(t), window.__DURATION, window.__events(효과음 시점 → tools/music.py), window.__ready, window.__taps, window.__marks, window.__probe(t)
@@ -24,15 +26,15 @@ gsap.registerPlugin(DrawSVGPlugin, MotionPathPlugin, CustomEase);
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 
 /* ── 음악 마디에 맞춘 시각(tools/music.py와 같은 값) ── */
-const D1 = 3.75, BAR = 2.4;                            // 곡(Mixkit 'A Special Feeling', 100 BPM)이 터지는 순간(첫 장면 카드), 한 마디 길이
+const D1 = 4.8, BAR = 2.4;                             // 곡(Mixkit 'A Special Feeling', 100 BPM)이 터지는 순간(첫 장면 카드), 한 마디 길이. 오프닝은 곡의 첫 두 마디
 
 /* ── 장면 시각(초): 한 번에 하나씩. 새 요소가 혼자 뜨고, 읽을 시간을 준 뒤에 다음 요소가 온다 ── */
-const OP = { mark: 0.2, word: 0.5, sub: 0.95, out: 3.2 };    // 오프닝: 로고 → 글자 → 문장 → 걷힘
+const OP = { mark: 0.1, word: 0.45, sub: 1.2, glint: 1.75, out: 4.25 };    // 오프닝: 곡의 첫 박과 함께 로고 → 글자 → 문장 → 둘째 마디에 빛 → 걷힘
 const CH = 2.35;                                       // 장면 카드: 글자가 올라옴 → 잠깐 쉼 → 빛이 천천히 한 번 → 걷힘
 // 1 통화
 const C2 = D1 + 0.05, s2 = C2 + CH;                    // 카드, 시작(제목만 보이는 때)
 const tCall = s2 + 2.5;                                // 재웅 선배 말풍선(글자는 한 글자씩)
-const tFocus = tCall + 4.2, dragT = tFocus + 1.2, dragD = 1.1;    // 말풍선을 걷고 손잡이로, 위로 끌기
+const tFocus = tCall + 3.7, dragT = tFocus + 1.2, dragD = 1.1;    // 말풍선을 걷고 손잡이로, 위로 끌기(형광펜 뒤 약 0.8초 머묾)
 const tType = dragT + dragD + 0.1, tGo = tType + 1.8;  // 검색창을 크게 보며 입력, 손으로 검색 버튼
 const tSmall = tGo + 0.45, tRec = tSmall + 1.1;        // 누른 순간 연결된 기억이 뜨고 화면이 작아짐, 하나씩 크게 보기 시작
 const REC = [0, 2.5, 4.6, 7.5].map(d => tRec + d);     // 기록 네 개를 실로 이어 하나씩 크게
@@ -42,7 +44,7 @@ const tBack = tSum + 6.1, tAns = tBack + 1.05, X2 = tAns + 4.8;   // 작아지�
 const C1 = X2 + 0.35, P0 = C1 + CH;                    // 카드, 휴대폰 등장(왼쪽에 큰 글)
 const tZ = P0 + 3.7;                                   // 큰 글이 걷히고 휴대폰이 가운데로 와서 검색창을 크게
 const pTap1 = tZ + 3.85;                               // Weave 버튼
-const c1 = pTap1 + 1.65, c2 = c1 + 4.8, c3 = c2 + 5.1, c4 = c3 + 2.5;   // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서, 라벨, 답
+const c1 = pTap1 + 1.65, c2 = c1 + 4.8, c3 = c2 + 5.6, c4 = c3 + 2.5;   // 카메라가 옮겨 가는 때: 첫째 단서, 둘째 단서(날짜가 건너간 뒤 사진이 뜸), 라벨, 답
 const T2 = c4 + 3.5, X1 = T2 + 5.3;                    // 입력하기, 장면 끝(결과를 보며 1초 남짓 머문 뒤)
 // 3 카톡: 대화와 입력하기 → 전송 → 답장은 v10보다 빨라지지 않게(사용자가 늘려 달라고 한 곳)
 const C3 = X1 + 0.35, s3 = C3 + CH + 0.05;             // 카드, 시작(제목만 보이는 때)
@@ -260,7 +262,7 @@ async function build() {
   tl.to('#op .mark', { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: 'back.out(1.6)' }, OP.mark);
   tl.set('#op .word', { autoAlpha: 1 }, OP.word);
   tl.to('#op .word', { clipPath: 'inset(-50% -5% -50% -4%)', x: 0, duration: 0.8, ease: 'expo.out' }, OP.word);
-  sweep('#op .word', OP.word + 0.95, 1.3);
+  sweep('#op .word', OP.glint, 1.3);                                                          // 빛이 글자 가운데를 지날 때 곡의 둘째 마디(2.4초)
   tl.to('#opSub', { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out' }, OP.sub);
   tl.to('#op', { opacity: 0, y: -20, filter: 'blur(8px)', duration: 0.5, ease: 'power2.in' }, OP.out);
 
@@ -286,6 +288,7 @@ async function build() {
   // 사슬: 단계마다 카메라가 그 자리로 옮겨 가고, 질문이 먼저 혼자 뜬 다음에 실이 이어지고 기록이 나온다
   gsap.set('#w1', { transformOrigin: '0 0', x: 0, y: 0, scale: 1 });
   gsap.set(['#cA', '#cB', '#cC'], { autoAlpha: 0, scale: 0.9, y: 26 });
+  gsap.set(['#cBd', '#cBt', '#cB .photo img'], { opacity: 0 });
   gsap.set(['#tA .thr', '#tA .thr-halo', '#tQ2 .thr', '#tQ2 .thr-halo', '#tB .thr', '#tB .thr-halo', '#tC .thr', '#tC .thr-halo'], { drawSVG: '0% 0%' });
   gsap.set('.pen', { autoAlpha: 0, y: 16, scale: 0.6, transformOrigin: '12% 100%' });
   gsap.set('#scan', { y: -80, opacity: 0 }); gsap.set('#ocr', { opacity: 0 });
@@ -315,9 +318,13 @@ async function build() {
   mark('#dtA', c1 + 4.1, 0.45);                                                               // 카톡을 받은 날이 그날
   wcam(c2, wPose(1.25, { x: 640, y: 500 }, { x: 960, y: 620 }), 1.0);                       // 그날 찍은 와인 사진은? → 카톡과 사진을 한 화면에
   splitQ('#qa2', '#qc2', '#tQ2', '#pen2', DT.qb, [DT.qb, { x: DT.qb.x - 10, y: (DT.qb.y + DT.p2.y) / 2 }, DT.p2], c2 + 0.6, 0.55);   // '마셨던 와인' → 그날 찍은 와인 사진은?
-  draw('#tB', c2 + 2.1, 0.6); cardIn('#cB', c2 + 2.35);
-  hop('#tokA', DT.a, DT.b, c2 + 2.95, 1.0, 70, { hold: 0.3, ease: 'sine.inOut' });                                                    // 같은 날짜(3월 15일)가 사진 카드로 건너감
-  mark('#dtB', c2 + 4.35, 0.4);                                                                    // 표가 도착하는 순간
+  draw('#tB', c2 + 2.1, 0.6); cardIn('#cB', c2 + 2.35);                                           // 갤러리 카드는 처음에 비어 있음(제목과 사진 자리만, 날짜 없음)
+  hop('#tokA', DT.a, DT.b, c2 + 2.95, 1.0, 70, { hold: 0.3, ease: 'sine.inOut' });               // 같은 날짜(3월 15일)가 사진 카드로 건너감
+  tl.to('#cBd', { opacity: 1, duration: 0.3, ease: 'power1.out' }, c2 + 4.4);                   // 표가 내려앉는 자리에 날짜가 생기고
+  mark('#dtB', c2 + 4.6, 0.4);
+  tl.to('#skT', { opacity: 0, duration: 0.3 }, c2 + 4.8);                                       // 그날의 와인 사진과 제목이 뜬다
+  tl.to('#cBt', { opacity: 1, duration: 0.45 }, c2 + 4.8);
+  tl.fromTo('#cB .photo img', { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out', immediateRender: false }, c2 + 4.8);
   wcam(c3, wPose(1.6, { x: 930, y: 700 }, { x: 960, y: 610 }), 1.0);                        // 사진 속 라벨 글자 읽기
   tl.to('#scan', { opacity: 1, duration: 0.1 }, c3 + 0.9).to('#scan', { y: 240, duration: 0.7, ease: 'power1.inOut' }, c3 + 0.9).to('#scan', { opacity: 0, duration: 0.2 }, c3 + 1.5);
   tl.to('#ocrbox', { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2)' }, c3 + 1.3);
@@ -357,9 +364,10 @@ async function build() {
   tl.set(phone, { x: 1400, y: 0, scale: 1, rotation: 0, filter: 'blur(0px)', autoAlpha: 1 }, s2 - 0.1);
   tl.to(phone, { x: R2.x, duration: 1.05, ease: 'power3.out' }, s2);
   titleIn('#hdB', s2 + 0.4);                                                                  // 제목만 먼저
-  tl.to('#hdB', { autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, tFocus);                  // 검색창을 키우는 동안만 걷힘
-  tl.to('#hdB', { autoAlpha: 1, duration: 0.5, ease: 'power2.out' }, tBack + 0.5);            // 확대가 풀리면 다시
-  tl.to('#hdB', { autoAlpha: 0, duration: 0.4, ease: 'power2.in' }, X2);
+  headOut('#hdB', tFocus);                                                                    // 검색창을 키우는 동안만 걷힘(02, 03 제목과 같은 걷힘)
+  tl.set('#hdB', { autoAlpha: 1 }, tBack + 0.5);                                              // 확대가 풀리면 다시
+  tl.fromTo('#hdB > *', { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', immediateRender: false }, tBack + 0.5);
+  headOut('#hdB', X2);
   cont.push(t => { const v = 48 + Math.floor(clamp(t - s2, 0, 200)); $('#ctime').textContent = `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`; });
   // 재웅 선배가 말한다: 말풍선이 뜨고 한 글자씩, 끝나면 물어보는 것에 형광펜
   tl.fromTo('#callQ', { autoAlpha: 0, x: -24, scale: 0.96, transformOrigin: '100% 60%' }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tCall);
@@ -421,11 +429,12 @@ async function build() {
   gsap.set(['#sl1', '#sl2', '#sl3'], { clipPath: 'inset(-20% 100% -20% 0)' });
   const SUMD = 1.4;                                                                           // 한 줄을 쓰는 시간. 줄 사이에 멈추지 않는다
   ['#sl1', '#sl2', '#sl3'].forEach((k, i) => {
-    const t = tSum + 1.0 + i * SUMD, r = rectOf(k), m = rectOf(`${k} .sumk`);
-    const f0 = (m.left - r.left) / r.width, f1 = (m.right - r.left) / r.width;                // 글자가 써지는 대로 형광펜이 함께 지나간다
+    const t = tSum + 1.0 + i * SUMD, r = rectOf(k);
     tl.to(`.sumv .skel:nth-child(${i + 1})`, { opacity: 0, duration: 0.25 }, t);
     tl.to(k, { clipPath: 'inset(-20% 0% -20% 0)', duration: SUMD, ease: 'none' }, t);
-    mark(`${k} .sumk`, t + f0 * SUMD, (f1 - f0) * SUMD);
+    $$(`${k} .sumk`).forEach(e => { const m = e.getBoundingClientRect();                       // 글자가 써지는 대로 형광펜이 함께 지나간다(한 줄에 둘이면 둘 다)
+      const f0 = (m.left - r.left) / r.width, f1 = (m.right - r.left) / r.width;
+      mark(e, t + f0 * SUMD, (f1 - f0) * SUMD); });
   });
   // 작아진 다음에 통화 말풍선이 돌아오고, 답변이 한 줄씩
   tl.to('#sgB', { boxShadow: '0 0 0 0px rgba(107,78,255,0)', duration: 0.4 }, tBack);
@@ -433,8 +442,8 @@ async function build() {
   cam(tBack, R2, 0.9);
   tl.to('#callQ', { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power2.out' }, tBack + 0.6);
   tl.fromTo('#callA', { autoAlpha: 0, x: -20, scale: 0.96, transformOrigin: '100% 50%' }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tAns);
-  const ta = typeChars($('#callA .q'), tAns + 0.3, 18);
-  ['#ua1', '#ua2', '#ua2b', '#ua3'].forEach(k => { const [a, b] = ta.spanOf(k); mark(k, a, Math.max(0.2, b - a + 0.06)); });   // 글자가 써지는 대로 형광펜이 함께
+  const ta = typeChars($('#callA .q'), tAns + 0.3, 20);                                       // 문장이 길어진 만큼 조금 빠르게(초당 18 → 20자)
+  ['#ua1', '#ua1b', '#ua2', '#ua2b', '#ua3'].forEach(k => { const [a, b] = ta.spanOf(k); mark(k, a, Math.max(0.2, b - a + 0.06)); });   // 글자가 써지는 대로 형광펜이 함께
 
   /* ── 3 먼저 건네기: 휴대폰 왼쪽. 제목 → 대화 → 위치 → 탑승권 → 아내 카톡 → 링크 미리보기 → 실 → Weave 버튼 → 추천 → 답장 ── */
   tl.to(['#callQ', '#callA'], { autoAlpha: 0, x: -30, duration: 0.45, ease: 'power2.in', stagger: 0.03 }, X2);
@@ -445,7 +454,7 @@ async function build() {
   const R3 = { x: -430, y: 0, scale: 1 };
   tl.set(phone, { x: -1500, y: 0, scale: 1, rotation: 0, filter: 'blur(0px)', autoAlpha: 1 }, s3 - 0.1);
   tl.to(phone, { x: R3.x, duration: 1.0, ease: 'power3.out' }, s3);
-  titleIn('#hdC', s3 + 0.4); sweep('#hdC .tl', s3 + 1.95, 1.2); headOut('#hdC', tChat - 0.45);   // 제목이 한 번 뜨고, 읽었을 때 빛이 한 번
+  titleIn('#hdC', s3 + 0.4); headOut('#hdC', tChat - 0.45);                                   // 제목이 한 번 뜨고, 02처럼 걷힘(빛 없음)
   // 대화: 아내 → 나 → 아내. 제목이 걷히면 휴대폰을 가운데로 크게
   const chatPose = camPose(2.1, { x: 960, y: MS[2]['#m2'].y + 10 }, { x: 960, y: 560 });
   const reveal = (k, t) => {

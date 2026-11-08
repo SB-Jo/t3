@@ -599,7 +599,7 @@ def a4():
              do='‘기술전’도 ‘시연’도 없는 주간 회의에서<br>바뀐 순서를 찾습니다.', model='Reasoning Embedding', ref='LongMemEval (ICLR 2025)'),
         dict(no='3', name='3홉 추론 검색', en='Hop Retrieval',
              ui=lambda x, y, w: rec(x, y, w, 'mail', '최종본 공유드려요', '메일 · 민수 · 11월 12일 (목)', '첨부: Demo_Final.pptx', on=True),
-             do='‘민수 님이 다시 정리’를 단서로<br>민수 메일에서 최종본을 찾습니다.', model='보낸 사람·날짜 필터 + Embedding', ref='DER-RAG, MDR (ICLR 2021)'),
+             do='‘민수 님이 최종 정리 후 공유 예정’을<br>단서로 민수 메일에서 최종본을 찾습니다.', model='보낸 사람·날짜 필터 + Embedding', ref='DER-RAG, MDR (ICLR 2021)'),
         dict(no='5', name='근거 기반 응답 생성', en='Grounded Synthesis', on=True,
              ui=lambda x, y, w: answer(x, y, w, '요약', ['시연은 11월 19일(목) 오후 2시, 수원 3번 부스예요.', '순서는 문제 상황, 라이브 데모, 관람객 체험이에요.', '최종본 Demo_Final.pptx는 민수 님 메일에 있어요.']),
              do='날짜순으로 세워 마지막 결정을 요약하고,<br>최종본이 있는 메일까지 알려 줍니다.', model='sLLM, 이름·날짜 복사 검사', ref='LongMemEval (Chain-of-Note), Hi-Q'),
@@ -607,7 +607,7 @@ def a4():
     srcs = ['Wu et al., "LongMemEval", ICLR 2025', 'Kim et al., "Hi-Q", NeurIPS 2026', 'Trivedi et al., "IRCoT", ACL 2023', 'Su et al., "BRIGHT", ICLR 2025', 'Shao et al., "ReasonIR", COLM 2025',
             'Wei et al., "RIR Survey", ACL 2026', 'Chen et al., "ReasonEmbed", ACL 2026', 'Lee & Lim, "DER-RAG", arXiv 2609.06065', 'Xiong et al., "MDR", ICLR 2021']
     notes = """Appendix · UX 1 상세. 통화 중 재웅 선배의 질문에 답하는 절차입니다.
-처음 검색에는 11월 3일 회의록과 v1 파일이 올라옵니다. Weave는 일정과 순서를 하위 질문으로 나눠 찾고, 찾은 날짜보다 나중 기록으로 좁혀 11월 10일 주간 회의를 찾습니다. 주간 회의의 민수 님이 다시 정리라는 말을 단서로 민수의 메일에서 최종본을 찾습니다.
+처음 검색에는 11월 3일 회의록과 v1 파일이 올라옵니다. Weave는 일정과 순서를 하위 질문으로 나눠 찾고, 찾은 날짜보다 나중 기록으로 좁혀 11월 10일 주간 회의를 찾습니다. 주간 회의의 민수 님이 최종 정리 후 공유 예정이라는 말을 단서로 민수의 메일에서 최종본을 찾습니다.
 순서는 임베딩이 맞추지 않습니다. 임베딩이 같은 일의 기록을 찾고, 메타데이터 날짜가 앞뒤를 가리고, sLLM이 마지막 결정을 읽습니다. 관련 연구로는 LongMemEval의 Knowledge Update가 같은 문제를 다룹니다."""
     ux_page('page-a4', 'Appendix · UX 1 상세', 'UX 1 <span class="hl">기록 통합 검색</span>: 단계별 모델과 근거', '재웅 선배: “프로님, 우리 팀이 맡은 삼성기술전 시연 어떻게 진행하기로 했었죠?”', steps, srcs, notes)
 

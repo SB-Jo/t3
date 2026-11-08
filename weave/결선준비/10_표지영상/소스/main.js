@@ -8,7 +8,8 @@
    → 입력하기 → 검색어가 '배비치 소비뇽 블랑'으로 바뀜 → 검색 키 → 쇼핑 결과 → 처음 화면(빈 검색창)으로
    v5: 전체를 천천히(18 → 24초), 첫 연결에서 추론이 보이게
    v6: 입력을 마쳐도 검색창 글자 폭이 그대로, 검색어 형광펜은 '지은이네 집들이'와 '와인', 라벨 글자는 사진을 읽은 뒤에 뜸
-   v7: 24 → 22초(실이 이어지는 구간을 조금 빠르게), '집들이' 표가 먼저 건너간 뒤 메시지에 형광펜, 라벨 글자 전체에 형광펜 */
+   v7: 24 → 22초(실이 이어지는 구간을 조금 빠르게), '집들이' 표가 먼저 건너간 뒤 메시지에 형광펜, 라벨 글자 전체에 형광펜
+   v8: 실은 카드 바깥 보라 테두리까지만(흰 카드 안까지 들어가 테두리와 카드 사이에 보라 실이 비치던 것을 없앰) */
 const LOOP = 22.0;
 // 오른쪽 장면(#world)은 (846, 540)을 기준으로 줄임. 안쪽 계산은 모두 줄이기 전 좌표(1920×1080)로 하고, 검사용 값만 화면 좌표로 바꿈
 const WS = 0.93, WO = { x: 846, y: 540 };
@@ -132,14 +133,20 @@ const sJ = t => 1 + 0.035 * litJ(t), sP = t => 1 + 0.035 * litP(t);
 const ocrV = t => pulse(t, T.ocrT, 0.42, T.reset + 0.1, 0.45, e2io, e2io);   // 0: 라벨 글자 접힘, 1: 펼침
 const baseP = v => ({ cx: G.cP.cx, cy: lerp(G.cP0.cy, G.cP.cy, v), w: G.cP.w, h: lerp(G.cP0.h, G.cP.h, v) });
 
-function threadPts(t, v = ocrV(t)) {
+// 실의 끝: 카드 바깥 보라 테두리(.ring, 카드에서 6px 밖, 두께 3px). 보라 실(반지름 3)은 테두리에 1px 겹치고(테두리가 위에 그려져 끝이 숨음),
+// 실의 흰 테두리(반지름 6.5)는 HALO만큼 덜 그려 보라 테두리 바깥 선에서 멈춘다. 그래서 보라 테두리와 흰 카드 사이 틈에는 아무것도 비치지 않는다
+const RING = 6, CAP = 2.0, HALO = 4.5;
+const pull = (P, i, dx, dy) => P.map((q, k) => (k === i || k === (i ? 2 : 1)) ? { x: q.x + dx, y: q.y + dy } : q);   // 끝점과 옆 조절점을 같이 옮김(끝 방향 그대로)
+function threadPts(t, v = ocrV(t), ring = true) {                // ring = false: v7까지의 끝(카드 안쪽 3px). 조각 배치는 이 모양으로 계산해 배치가 그대로
   const bP = baseP(v);
   const J = cardBox(G.cJ, DJ, sJ(t), t), P = cardBox(bP, DP, sP(t), t);
-  const A = bezH({ x: G.frame.l + 5, y: G.tb.cy }, { x: J.r - 3, y: J.cy }, 0.55);
+  const oJ = ring ? RING * J.s + CAP : -3, oP = ring ? RING * P.s + CAP : -3;
+  const A = bezH({ x: G.frame.l + 5, y: G.tb.cy }, { x: J.r + oJ, y: J.cy }, 0.55);
   const hj = inCard(J, G.cJ, { x: G.hlJ.cx, y: G.hlJ.cy }), hd = inCard(P, bP, { x: G.hlD.cx, y: lerp(G.hlD0.cy, G.hlD.cy, v) });
-  const B = bezV({ x: hj.x, y: J.t + 3 }, { x: hd.x, y: P.b - 3 }, 0.5);
-  const C = bezH({ x: P.r - 3, y: P.cy }, { x: G.frame.l + 5, y: G.sug.cy }, 0.55);
-  return { A, B, C, J, P };
+  const B = bezV({ x: hj.x, y: J.t - oJ }, { x: hd.x, y: P.b + oP }, 0.5);
+  const C = bezH({ x: P.r + oP, y: P.cy }, { x: G.frame.l + 5, y: G.sug.cy }, 0.55);
+  const hA = ring ? pull(A, 3, HALO, 0) : A, hB = ring ? pull(pull(B, 0, 0, -HALO), 3, 0, HALO) : B, hC = ring ? pull(C, 0, HALO, 0) : C;
+  return { A, B, C, hA, hB, hC, J, P };
 }
 
 /* ── 조각 배치: 왼쪽 글자 자리(PPT 제목·이름)·휴대폰·두 카드를 피해 고르게. 실은 조각 사이를 지나가게(실 길에서 조금 띄움).
@@ -148,7 +155,7 @@ const TEXT_SAFE = { l: -200, t: -200, r: 846, b: 1300 };   // x 0–846은 비�
 function tryLayout(sd) {
   let s_ = sd;
   const rn = () => (s_ = (s_ * 16807) % 2147483647) / 2147483647;
-  const th = threadPts(0, 1);             // 라벨 글자가 펼쳐진 카드 기준(그때 실이 다 그려져 있음)
+  const th = threadPts(0, 1, false);      // 라벨 글자가 펼쳐진 카드 기준(그때 실이 다 그려져 있음). v7의 실 모양으로 재서 조각 배치가 바뀌지 않게
   const lane = [];
   for (const P of [th.A, th.B, th.C]) for (let i = 0; i <= 60; i++) lane.push(bAt(P, i / 60));
   const avoid = [TEXT_SAFE, grow(G.frame, 22), grow(G.cJ, 24), grow(G.cP, 24)];
@@ -319,9 +326,9 @@ function render(t) {
 
   // 실 세 가닥: 그려지고(머리가 나아감) → 입력하기 뒤 함께 옅어짐
   const fade = 1 - e2io(seg(t, T.reset, 0.7));
-  [['#tA', th.A, T.t1, THR.A], ['#tB', th.B, T.t2, THR.B], ['#tC', th.C, T.t3, THR.C]].forEach(([id, P, t0, d]) => {
-    const p = e2io(seg(t, t0, d)), d_ = dOf(P);
-    $$(`${id} path`).forEach(pa => { pa.setAttribute('d', d_); pa.style.strokeDashoffset = (1 - p).toFixed(4); });
+  [['#tA', th.A, th.hA, T.t1, THR.A], ['#tB', th.B, th.hB, T.t2, THR.B], ['#tC', th.C, th.hC, T.t3, THR.C]].forEach(([id, P, H, t0, d]) => {
+    const p = e2io(seg(t, t0, d));
+    $$(`${id} path`).forEach(pa => { pa.setAttribute('d', dOf(pa.classList.contains('thr-halo') ? H : P)); pa.style.strokeDashoffset = (1 - p).toFixed(4); });
     $(id).style.opacity = p > 0.002 ? fade.toFixed(3) : '0';
   });
 
@@ -444,6 +451,7 @@ window.__probe = t => {
     wave: ['#wv1', '#wv2'].map(s => ({ r: +$(s).getAttribute('r') * WS, op: +$(s).style.opacity })), waveO: toScreen({ x: G.wv.cx, y: G.wv.cy }),
     lanes: [th.A, th.B, th.C].map(P => { const pts = []; for (let i = 0; i <= 40; i++) pts.push(toScreen(bAt(P, i / 40))); return pts; }),
     ends: { A: [th.A[0], th.A[3]].map(toScreen), B: [th.B[0], th.B[3]].map(toScreen), C: [th.C[0], th.C[3]].map(toScreen) },
+    ringOut: { J: (RING * th.J.s + CAP) * WS, P: (RING * th.P.s + CAP) * WS },   // 카드 가장자리에서 실 끝까지(화면 px)
     edges: (() => {   // 화면 가장자리까지 남은 여백(보이는 조각·카드·휴대폰)
       const bs = [...chips.filter(c => +c.el.style.opacity > 0.01).map(c => box(c.el)), box($('#cJ')), box($('#cP')), box($('#phone .frame'))];
       return { top: Math.min(...bs.map(b => b[1])), bottom: 1080 - Math.max(...bs.map(b => b[3])), right: 1920 - Math.max(...bs.map(b => b[2])), phoneRight: 1920 - box($('#phone .frame'))[2], phoneTop: box($('#phone .frame'))[1], phoneBottom: 1080 - box($('#phone .frame'))[3] };

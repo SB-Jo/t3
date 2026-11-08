@@ -1,11 +1,12 @@
-"""Weave 인포그래픽 v15 배경음악 — 기존 곡(Mixkit, 무료 상업 이용 가능)을 영상에 맞춰 편집하고, 꼭 필요한 순간에만 작은 효과음을 얹는다 (48kHz 스테레오)
+"""Weave 인포그래픽 v16 배경음악 — 기존 곡(Mixkit, 무료 상업 이용 가능)을 영상에 맞춰 편집하고, 꼭 필요한 순간에만 작은 효과음을 얹는다 (48kHz 스테레오)
 
 사용: ~/.cache/weave-tools/venv/bin/python tools/music.py            → out/bgm.wav(음악+효과음), out/bgm_music.wav, out/bgm_sfx.wav  (기본 곡)
 입력: out/events.json(효과음 시점, node tools/render.cjs --events), ~/.cache/weave-tools/music/<번호>.mp3
 
 편집 원칙
 - 곡을 새로 만들거나 리믹스하지 않는다. 마디 단위로만 잘라 붙여(템포·박자 그대로) 길이를 맞추고, 이음매는 40ms로 겹친다.
-- 도입(질문 장면)은 조금 작고 먹먹하게 두었다가, 01 장면이 시작될 때 곡이 제대로 터지도록 연다.
+- v16: 곡을 첫 마디부터 그대로 튼다(오프닝 = 곡의 첫 두 마디, I–IV). 01 장면 카드(D1)에서 곡의 12마디(I, 킥·베이스)로 넘어가 터진다.
+       (v15까지는 곡의 10.44마디, 즉 곡 중간에서 먹먹하게 시작해서 시작 느낌이 없었음)
 - 로고(LOGO)는 곡의 마지막 한 방(기본 곡) 또는 마디 첫 박(다른 곡)에 맞춘다. 끝 화면이 하얗게 사라질 때 소리도 같이 사라진다.
 - 효과음: 손으로 누를 때 작은 '톡', 글자 입력은 아주 작게, 단서 질문이 뜰 때 아주 작은 '뽁', 정답 카드에 '딩', 03 Weave 버튼이 반짝일 때 아주 짧은 '띵', 답장에 '뽁'. 바람·탬버린 같은 소리는 넣지 않는다.
 - v5: v4 곡(Digital Clouds)보다 밝은 장조 곡으로 바꿈.
@@ -17,7 +18,7 @@ import json, subprocess, sys
 from pathlib import Path
 import numpy as np
 from scipy.io import wavfile
-from scipy.signal import butter, sosfilt, sosfilt_zi, fftconvolve, lfilter
+from scipy.signal import butter, sosfilt, fftconvolve, lfilter
 
 SR = 48000
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,16 +29,17 @@ EVJ = json.loads((OUT / 'events.json').read_text())
 DUR = float(EVJ['duration'])
 N = int(round(DUR * SR))
 LOGO = next(e['t'] for e in EVJ['events'] if e['type'] == 'logo')
-D1 = 3.75                                                  # 01 장면에서 기본 곡이 터지는 순간(main.js의 D1)
+D1 = 4.8                                                   # 01 장면에서 기본 곡이 터지는 순간(main.js의 D1). 곡의 첫 두 마디 뒤
 
 # ── 곡 정보: 마디 길이(bar)와 첫 마디 시작(g0)은 박 검출로 잰 값. segs = [(영상 시작초, 그때 곡의 마디 번호), ...]
 #    drop = 곡이 터지는 영상 시각, hit = 로고 자리가 곡의 마지막 한 방인지(아니면 로고에 작은 반짝임 효과음), hall = 마지막 한 방 뒤 울림 ──
 TRACKS = {
     '1087': dict(name='A Special Feeling', artist='Michael Ramir C.', bpm=100.0, g0=0.0, key='C# 장조',
-                 # v15: 영상이 117초라 45마디가 필요함(곡을 그대로 틀면 28마디). 도입은 곡의 10.44마디부터(오프닝) → 3.75초에 12마디(킥·베이스, 첫 장면 카드).
-                 # 25마디 끝(37.35초, 01 답변 중)에서 21마디로 돌아가 5마디를 더하고(26·21마디 화음 0.988, 리듬 0.81 이상, 음량 차 0.1dB), 36마디 끝(75.75초, 03 카드)에서 25마디로 돌아가 12마디를 더함(37·25마디 화음 0.991, 리듬 0.76 이상, 음량 차 1dB)
-                 # → 40마디(곡의 마지막 한 방)가 로고(111.75초)에. 조용한 28·29마디는 54.15–58.95초(02 첫 단서 끝)와 82.95–87.75초(03 대화)에 온다
-                 segs=lambda T: [(0.0, 12 - D1 / T['bar']), (D1 + 14 * T['bar'], 21), (D1 + 30 * T['bar'], 25)], drop=lambda T: D1, hit=True, hall=0.22, hitbar=40),
+                 # v16: 곡의 화음은 네 마디마다 I–IV–vi–V(C#–F#–A#m–G#). 오프닝은 곡의 0·1마디(I–IV, 곡의 진짜 시작) → 4.8초(D1, 첫 장면 카드)에 12마디(I, 킥·베이스)로 넘어감(IV → I).
+                 # 그 뒤는 v15와 같음: 25마디 끝(38.4초, 01 답변 중)에서 21마디로 돌아가 5마디를 더하고(26·21마디 화음 0.988, 리듬 0.81 이상, 음량 차 0.1dB),
+                 # 36마디 끝(76.8초, 03 카드)에서 25마디로 돌아가 12마디를 더함(37·25마디 화음 0.991, 리듬 0.76 이상, 음량 차 1dB)
+                 # → 40마디(곡의 마지막 한 방)가 로고(112.8초)에. 조용한 28·29마디는 55.2–60.0초(02 첫 단서 끝)와 84.0–88.8초(03 대화)에 온다
+                 segs=lambda T: [(0.0, 0), (D1, 12), (D1 + 14 * T['bar'], 21), (D1 + 30 * T['bar'], 25)], drop=lambda T: D1, hit=True, hall=0.22, hitbar=40),
 }
 MAIN = '1087'
 for T in TRACKS.values():
@@ -94,24 +96,6 @@ def edit(T):
     return out, joins
 
 
-def hook_open(x, drop, bar):
-    """도입부: 4dB 작고 고역을 누른 상태(1.6kHz) → 터지기 1.5마디 전부터 열려서 drop에 원래 소리"""
-    t = np.arange(N) / SR
-    o0, o1 = drop - 1.5 * bar, drop
-    fc = 1600 * (18000 / 1600) ** smooth(o0, o1, t)
-    y = np.zeros_like(x); blk = 256
-    zi = None
-    end = int(min(N, (drop + 0.05) * SR))
-    for i in range(0, end, blk):
-        sos = butter(2, min(fc[i], 20000) / (SR / 2), 'low', output='sos')
-        if zi is None: zi = np.stack([sosfilt_zi(sos) * x[c, 0] for c in range(2)])
-        for c in range(2):
-            y[c, i:i + blk], zi[c] = sosfilt(sos, x[c, i:i + blk], zi=zi[c])
-    wet = 1 - smooth(drop - 0.02, drop + 0.05, t)             # drop 직후엔 원래 소리로
-    g = 10 ** (-4 * (1 - smooth(o0, o1, t)) / 20)
-    return (y * wet + x * (1 - wet)) * g
-
-
 def make_ir(rt=3.0, pre=0.02, damp=5000, seed=7):
     r = np.random.default_rng(seed); n = int(rt * SR); t = np.arange(n) / SR
     ir = r.standard_normal((2, n)) * np.exp(-6.9 * t / rt); ir = lp(ir, damp, 1); ir[:, : int(pre * SR)] = 0
@@ -124,9 +108,8 @@ def music_for(key):
     x, joins = edit(T)
     s0 = T['segs'](T)[-1]; at_logo = s0[1] + (LOGO - s0[0]) / T['bar']        # 로고 자리에 오는 곡의 마디
     assert abs(at_logo - T['hitbar']) < 1e-6, f"{key}: 로고에 {at_logo:.2f}마디가 옴(마지막 한 방은 {T['hitbar']}마디) — main.js의 LOGO가 바뀌면 segs를 맞출 것"
-    x = hook_open(x, drop, T['bar'])
     t = np.arange(N) / SR
-    x *= smooth(0, 1.2, t)                                   # 처음 1.2초 동안 천천히 들어옴
+    x *= smooth(0, 0.025, t)                                 # 곡의 첫 소리는 그대로(딸깍 소리만 막게 25ms)
     if T['hall'] > 0:                                        # 마지막 한 방 뒤 울림을 조금 길게(홀 잔향) — 끝 화면이 조용히 이어지도록
         a, b = int(LOGO * SR), int(min(N, (LOGO + 2.0) * SR))
         hall = make_ir()
