@@ -6,7 +6,7 @@
 | 파일 | 원본 | 저작자 | 라이선스 |
 |---|---|---|---|
 | photo-glass.jpg | https://commons.wikimedia.org/wiki/File:A_glass_of_red_wine.jpg | Davide Restivo (Flickr) | CC BY-SA 2.0 |
-| photo-vineyard.jpg | https://commons.wikimedia.org/wiki/File:J._Lohr_Hilltop_Vineyard_Picnic.jpg | Danicox40 | CC BY-SA 4.0 |
+| photo-meadow.jpg | https://commons.wikimedia.org/wiki/File:Wine_on_a_meadow_(Unsplash).jpg | Jamie Street (Unsplash) | CC0 |
 | photo-champagne.jpg | https://commons.wikimedia.org/wiki/File:Champagne_pouring.jpg | L.C. Nøttaasen (Flickr) | CC BY 2.0 |
 | photo-seaside.jpg | https://commons.wikimedia.org/wiki/File:Enjoying_a_bottle_of_red_wine_(Unsplash).jpg | Jez Timms (Unsplash) | CC0 |
 | photo-homedinner.jpg | https://commons.wikimedia.org/wiki/File:Special_foods_%26_cuisines_in_Chongqing_-_Family_Dinner_3rd.jpg | Jason M. C. Han | CC BY-SA 4.0 |

@@ -51,7 +51,7 @@ PH = {
     'babich': ('photo-babich.png', '2026. 3. 15', (0.5, 0.45)),
     'table': ('photo-homedinner.jpg', '2026. 3. 15', (0.5, 0.5)),
     'w1': ('photo-seaside.jpg', '2025. 7. 19', (0.62, 0.5)),
-    'w2': ('photo-vineyard.jpg', '2025. 9. 27', (0.72, 0.55)),
+    'w2': ('photo-meadow.jpg', '2025. 9. 27', (0.66, 0.6)),
     'w3': ('photo-champagne.jpg', '2025. 12. 31', (0.62, 0.45)),
     'glass': ('photo-glass.jpg', '2026. 1. 9', (0.45, 0.45)),
 }

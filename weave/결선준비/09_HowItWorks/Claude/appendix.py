@@ -379,7 +379,7 @@ APPENDIX = [a_divider, a_roles, a_rem, a_kg, a_hops, a_compare, a_ux, q_pde, q_s
 
 
 CREDITS = [('와인 잔(임베딩 장)', 'Davide Restivo, "A glass of red wine", Wikimedia Commons, CC BY-SA 2.0'),
-           ('포도밭 피크닉', 'Danicox40, "J. Lohr Hilltop Vineyard Picnic", Wikimedia Commons, CC BY-SA 4.0'),
+           ('풀밭 위 와인', 'Jamie Street, "Wine on a meadow", Unsplash(Wikimedia Commons 사본), CC0'),
            ('샴페인', 'L.C. Nøttaasen, "Champagne pouring", Wikimedia Commons, CC BY 2.0'),
            ('바닷가 와인', 'Jez Timms, "Enjoying a bottle of red wine", Unsplash, CC0'),
            ('집 저녁 식탁', 'Jason M. C. Han, "Special foods & cuisines in Chongqing - Family Dinner 3rd", Wikimedia Commons, CC BY-SA 4.0')]
