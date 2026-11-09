@@ -1,14 +1,14 @@
-// 끝 장면의 세 화면을 영상과 같은 화면에서 찍어 스프라이트로 만든다 → 소스/assets/img/trio/trio-1~3.png
+// 끝 장면의 세 화면을 영상과 같은 화면에서 찍어 한 장씩 저장한다 → 소스/assets/img/trio/1~3/f000~143.png
+// 4K 영상(render.cjs --scale 2)에 맞게 두 배 화소(748×1554)로 찍는다. 스프라이트 한 장으로 묶으면 브라우저마다 2GB를 풀어 둬야 해서 장마다 따로 둠
 // 옛 데모 GIF처럼 세 화면이 각자 움직이게, 장면마다 두세 구간을 이어 붙인다. 빠르기는 실제와 비슷하게, 글이 써지는 구간만 1.5배까지(너무 빠르면 움직임이 부자연스러움).
-// 사용: node tools/trio.cjs  (소스를 고친 뒤 영상 렌더 전에 한 번). 스프라이트는 다시 만들 수 있어서 저장소에 올리지 않는다
-const path = require('path'), fs = require('fs'), { execFileSync } = require('child_process'), { pathToFileURL } = require('url');
+// 사용: node tools/trio.cjs [--scale 2]  (소스를 고친 뒤 영상 렌더 전에 한 번). 그림은 다시 만들 수 있어서 저장소에 올리지 않는다
+const path = require('path'), fs = require('fs'), { pathToFileURL } = require('url');
 const HOME = process.env.HOME;
 const { chromium } = require(path.join(HOME, '.cache/weave-tools/node/node_modules/playwright-core'));
 const CHROME = path.join(HOME, '.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell');
-const FFMPEG = path.join(HOME, '.cache/weave-tools/bin/ffmpeg');
 const ROOT = path.resolve(__dirname, '..');
 const DEST = path.join(ROOT, '소스', 'assets', 'img', 'trio');
-const TMP = path.join(ROOT, 'out', '_trio');
+const SCALE = Number(process.argv.includes('--scale') ? process.argv[process.argv.indexOf('--scale') + 1] : 2);
 const URL_ = pathToFileURL(path.join(ROOT, '소스', 'index.html')).href;
 const ARGS = ['--no-sandbox', '--force-color-profile=srgb', '--font-render-hinting=none', '--disable-lcd-text'];
 const pngSize = f => { const b = fs.readFileSync(f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
@@ -20,7 +20,7 @@ const pngSize = f => { const b = fs.readFileSync(f); return [b.readUInt32BE(16),
   await p0.goto(URL_); await p0.evaluate(() => window.__ready);
   const m = await p0.evaluate(() => window.__marks), G = await p0.evaluate(() => window.__gif);
   await p0.close();
-  const FW = 452, scale = G.w / FW;                    // 스프라이트 칸 크기로 바로 찍어 글자를 선명하게
+  const FW = 452, cell = G.w / FW, scale = SCALE * cell;   // 칸 크기(× SCALE)로 바로 찍어 글자를 선명하게
   // 구간: [시작, 끝, 칸 수]. 칸 수의 합이 G.n(v21: 30fps라 144칸, 빠르기는 20fps 때와 같음)
   const CLIPS = [
     { dim: true, segs: [[m.tType + 0.4, m.tGo + 0.55, 57], [m.tSum + 0.9, m.tSum + 5.3, 87]] },                     // 입력 → 검색 → 연결된 기억 → 요약
@@ -33,9 +33,9 @@ const pngSize = f => { const b = fs.readFileSync(f); return [b.readUInt32BE(16),
   await p.goto(URL_); await p.evaluate(() => window.__ready);
   // 검색을 누를 때 위쪽에 잠깐 생기는 불러오기 줄(#gload)은 뺀다. 20fps로 띄엄띄엄 찍으면 한 장에만 걸려 지직거리는 것처럼 보임
   await p.addStyleTag({ content: 'html, body { background: transparent !important; } body * { visibility: hidden; } #phone, #phone * { visibility: visible; } .frame { box-shadow: none !important; } #gload { display: none !important; }' });
-  fs.rmSync(TMP, { recursive: true, force: true }); fs.mkdirSync(DEST, { recursive: true });
+  fs.rmSync(DEST, { recursive: true, force: true });
   for (const [i, c] of CLIPS.entries()) {
-    const dir = path.join(TMP, String(i + 1)); fs.mkdirSync(dir, { recursive: true });
+    const dir = path.join(DEST, String(i + 1)); fs.mkdirSync(dir, { recursive: true });
     const n = c.segs.reduce((a, s) => a + s[2], 0);
     if (n !== G.n) throw new Error(`clip ${i + 1}: ${n} frames, expected ${G.n}`);
     let k = 0;
@@ -49,13 +49,11 @@ const pngSize = f => { const b = fs.readFileSync(f); return [b.readUInt32BE(16),
         return { x: q.x, y: q.y };
       }, { t, dim: c.dim && t >= m.tSum });
       const f = path.join(dir, `f${String(k).padStart(3, '0')}.png`);
-      await p.screenshot({ path: f, clip: { x: r.x, y: r.y, width: FW, height: G.h / scale }, omitBackground: true });
-      if (k === 0) { const [w, h] = pngSize(f); if (w !== G.w || h !== G.h) throw new Error(`frame ${w}x${h}, expected ${G.w}x${G.h}`); }
+      await p.screenshot({ path: f, clip: { x: r.x, y: r.y, width: FW, height: G.h / cell }, omitBackground: true });
+      if (k === 0) { const [w, h] = pngSize(f); if (w !== Math.round(SCALE * G.w) || h !== Math.round(SCALE * G.h)) throw new Error(`frame ${w}x${h}, expected ${SCALE * G.w}x${SCALE * G.h}`); }
     }
-    const out = path.join(DEST, `trio-${i + 1}.png`);
-    execFileSync(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', String(G.fps), '-i', path.join(dir, 'f%03d.png'), '-vf', `tile=${G.cols}x${Math.ceil(G.n / G.cols)}`, '-frames:v', '1', '-pix_fmt', 'rgba', out]);
-    console.log('trio', i + 1, out.replace(ROOT + path.sep, ''), `${(fs.statSync(out).size / 1048576).toFixed(1)} MB`);
+    const mb = fs.readdirSync(dir).reduce((a, f) => a + fs.statSync(path.join(dir, f)).size, 0) / 1048576;
+    console.log('trio', i + 1, dir.replace(ROOT + path.sep, ''), `${n}장 ${(SCALE * G.w)}×${(SCALE * G.h)}`, `${mb.toFixed(1)} MB`);
   }
-  fs.rmSync(TMP, { recursive: true, force: true });
   await b.close();
 })();

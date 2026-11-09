@@ -562,9 +562,9 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* 03: 제목은 한 번 뜨고, 읽었을 때 빛이 한 번. 플로팅은 위치 → 탑승권 → 카톡을 세로로(셋 다 실이 보이게) */
 #hdC .tl { padding: 0 .04em .12em; margin-bottom: -.12em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--ink) 0%, var(--ink) 100%); background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
 #hdC em.tl { background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--purple) 0%, var(--purple) 100%); }
-/* 끝 장면: 옛 데모 GIF처럼 세 화면이 각자 움직인다(tools/trio.cjs가 만든 스프라이트) */
+/* 끝 장면: 옛 데모 GIF처럼 세 화면이 각자 움직인다(tools/trio.cjs가 찍은 그림을 한 장씩) */
 #trio .tp .gif { position: relative; width: 356px; height: 740px; overflow: hidden; }
-#trio .tp .gif img { position: absolute; left: 0; top: 0; width: auto; height: auto; max-width: none; }
+#trio .tp .gif img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; max-width: none; }
 
 /* ── v14 (2026-11-07 6차 피드백) ── */
 /* 01: 왼쪽 제목 · 가운데 말풍선 둘 · 오른쪽 휴대폰(휴대폰을 40px 오른쪽으로). 제목은 옮기지 않고 그 자리에 남는다 */
@@ -618,5 +618,5 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* 03: 추천 시트 맨 위 'Weave'를 보라로(실타래 아이콘과 같은 색) */
 #wC .row .ttl { color: var(--purple); }
 /* v21 수미상관: 첫 문장(#opSub)은 끝 화면 한 줄 소개(#sub)와 같은 글꼴, 끝 화면은 '그때 그거?' 줄 없이 로고 아래 44px(오프닝과 같은 간격)에 한 줄 */
-#opSub { font-size: 54px; font-weight: 400; color: var(--gray); letter-spacing: -0.02em; }
-#sub { top: 560px; font-size: 54px; }   /* 33 → 40 → 54px(사용자 요청) */
+#opSub { font-size: 48px; font-weight: 400; color: var(--gray); letter-spacing: -0.02em; }
+#sub { top: 560px; font-size: 48px; }   /* 33 → 40 → 54 → 48px(사용자 요청) */

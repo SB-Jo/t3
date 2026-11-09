@@ -11,7 +11,8 @@
         03 탑승권을 0.5초 더 보여 줌, 03 제목 둘째 줄 '필요한 말을 먼저 추천합니다', 추천 시트의 'Weave'를 보라로, 끝 장면 GIF에서 검색 불러오기 줄을 뺌.
    v18: 첫 문장 '우리들의 흩어진 기억, Weave가 잇습니다', 01의 '민수님'(붙여 씀).
    v21: 첫 문장 '일상 속 흩어진 기억, Weave가 이어 줍니다'(잇습니다 → 이어 줍니다). 끝 장면 세 화면을 30fps로(20fps는 끊겨 보임), 번호 원의 입체감을 줄임.
-        수미상관: 첫 문장을 끝 화면 한 줄 소개와 같은 글꼴(두 줄 모두 54px)로, 끝 화면의 '그때 그거? Weave got it!'을 빼고 한 줄 소개를 로고 아래 같은 간격·박자로.
+        수미상관: 첫 문장을 끝 화면 한 줄 소개와 같은 글꼴(두 줄 모두 48px)로, 끝 화면의 '그때 그거? Weave got it!'을 빼고 한 줄 소개를 로고 아래 같은 간격·박자로.
+        화질: 표지 영상처럼 4K(3840×2160)로 찍음. 끝 장면 세 화면은 두 배 화소 그림을 한 장씩 바꾸고, 다 그려진 뒤 찍음(__seek가 기다림).
    v20: 01 요약에서 돌아올 때 제목을 다시 띄우지 않고, 말풍선 + 휴대폰을 290px 왼쪽으로(묶음이 화면 가운데). 03 아내 카톡은 위 두 플로팅 묶음의 가운데에.
         음악은 북이 빠지는 마디 없이 다시 편집.
    v19: 첫 문장 '일상 속 흩어진 기억, Weave가 잇습니다'. 01 검색 뒤 기록이 하나씩 뜨는 구간을 1.2배 빠르게(SPD1, 1.8초 줄어 남는 시간은 03 답장 뒤에 붙음).
@@ -68,7 +69,8 @@ const LOGO_MIN = tReply + 2.1 + 0.35 + tTrioD;         // 답장을 읽을 시�
 const LOGO = D1 + Math.ceil((LOGO_MIN - D1) / BAR - 1e-6) * BAR;   // 로고는 곡의 마디 첫 박에(마지막 한 방)
 const tTrio = LOGO - tTrioD;                           // 세 화면이 모이는 때
 const DUR = LOGO + 5.5;                                // 끝 화면 5.5초
-const GIF = { w: 374, h: 777, cols: 12, fps: 30, n: 144, off: [0, 0.15, 0.3] };   // v21: 20 → 30fps(60fps 영상에서 한 장이 세 프레임씩 머물러 끊겨 보였음)   // 끝 장면 스프라이트(tools/trio.cjs가 같은 값을 읽음)
+const GIF = { w: 374, h: 777, fps: 30, n: 144, off: [0, 0.15, 0.3] };   // v21: 20 → 30fps(60fps 영상에서 한 장이 세 프레임씩 머물러 끊겨 보였음)   // 끝 장면 세 화면(tools/trio.cjs가 같은 값을 읽음)
+const gifSrc = (i, f) => `assets/img/trio/${i + 1}/f${String(f).padStart(3, '0')}.png`;
 
 const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 1.0 } });
 const EV = [];
@@ -88,6 +90,7 @@ const ctr = s => { const r = rectOf(s); return { x: r.left + r.width / 2, y: r.t
 const PH = '<span style="color:#9a96a6; font-weight:400">메시지 입력</span>';
 const QA = '지은이네 집들이 때 마셨던 와인', ANS = '배비치 소비뇽 블랑', MSGTX = '여보, 전에 말한 에스티 로더 갈색병<br>면세점에서 사 갈까?';
 const cont = [];                                       // 매 프레임 tl.seek 뒤에 부르는 함수들
+const pend = [];                                        // 아직 다 그려지지 않은 그림(__seek가 기다림)
 const seekAll = t => { tl.seek(t, false); for (const f of cont) f(t); };
 const when = (test, fn) => { let last; cont.push(t => { const v = test(t); if (v !== last) { last = v; fn(v); } }); };
 
@@ -555,10 +558,10 @@ async function build() {
   tl.set('#trio', { autoAlpha: 1 }, tTrio - 0.05);
   tl.to('#trio .tp', { y: 0, opacity: 1, scale: 1, duration: 0.85, stagger: 0.16, ease: 'expo.out' }, tTrio);
   tl.to('#trio', { opacity: 0, y: -30, filter: 'blur(8px)', duration: 0.45, ease: 'power2.in' }, LOGO - 0.42);
-  const gifs = $$('#trio .gif img');                                                          // 옛 데모 GIF처럼: 저마다 20fps로 넘어가고(거의 실제 빠르기), 시작이 조금씩 어긋난다
+  const gifs = $$('#trio .gif img');                                                          // 옛 데모 GIF처럼: 저마다 30fps로 넘어가고(거의 실제 빠르기), 시작이 조금씩 어긋난다
   cont.push(t => { if (t < tTrio - 0.3 || t > LOGO + 0.1) return;
     gifs.forEach((im, i) => { const f = clamp(Math.floor((t - tTrio - GIF.off[i]) * GIF.fps), 0, GIF.n - 1);
-      if (im._f !== f) { im._f = f; im.style.transform = `translate(${-(f % GIF.cols) * GIF.w}px, ${-Math.floor(f / GIF.cols) * GIF.h}px)`; } }); });
+      if (im._f !== f) { im._f = f; im.src = gifSrc(i, f); pend.push(im.decode().catch(() => {})); } }); });
   gsap.set('#logo .mark', { scale: 0.4, rotation: -30, opacity: 0 });
   gsap.set('#logo .word', { clipPath: 'inset(-50% 100% -50% -4%)', x: -30, autoAlpha: 0 });   // 감춰 두지 않으면 글자 그림자가 처음부터 옅게 비침
   gsap.set('#sub', { y: 24, opacity: 0 });
@@ -656,5 +659,5 @@ async function build() {
 }
 
 window.__DURATION = DUR;
-window.__seek = t => seekAll(t);
+window.__seek = t => { seekAll(t); return Promise.all(pend.splice(0)); };
 window.__ready = build();
