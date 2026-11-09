@@ -211,7 +211,7 @@ def bar_layout():
     widths = [24 + 8 + tw(ko, BAR_PT, 'b') + 20 for _, ko in STAGES]
     gap = 30
     total = sum(widths) + gap * (len(STAGES) - 1)
-    x = 724 - total / 2
+    x = 640 - total / 2
     out = []
     for w in widths:
         out.append((x, w))

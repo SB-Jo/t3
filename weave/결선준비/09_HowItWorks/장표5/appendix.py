@@ -15,11 +15,8 @@ def apx_badge(s):
                           spc=0.5, fill=PURPLE, radius=14)])
 
 
-def head(s, title_runs, sub=None, y=58, size=24):
-    apx_badge(s)
+def head(s, title_runs, sub=None, y=48, size=25):
     s.add('apx/title', [caption('apx/title', [title_runs], 640, y, size=size)])
-    if sub:
-        s.add('apx/sub', [T('apx/sub', 100, y + size * 1.42 + 6, 1080, 24, sub, size=13, color=SUB, align='c')])
 
 
 def foot(s, text, y=682):
