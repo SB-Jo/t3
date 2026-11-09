@@ -26,8 +26,8 @@ import render_c
 from hiw_lib import q
 from ui import (BODY, GRAY_FILL, HL, ICON, INK, INK2, LAV, LAV2, LINE, LINE2, MUTE, PURPLE, PURPLE2, RED, RING, SUB,
                 SHADOW_CARD, SHADOW_LIFT, SHADOW_SOFT, BADGE_BOX, C, P, Painter, R, T, Xf, badge_prims, bg_prims, caption, card,
-                chip, crop_fit, gallery, hl_band, line, magnifier, numdot, qbadge, scurve, search_pill, thread, topbar_prims, tw,
-                vcurve, xmark)
+                check_icon, chip, crop_fit, gallery, hl_band, line, magnifier, numdot, qbadge, scurve, search_pill, star4_icon,
+                thread, topbar_prims, tw, vcurve, xmark)
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -62,9 +62,9 @@ BLUE, BLUE_HL, BLUE_BG = '4F7BFF', '7EA2FF', 'EEF3FF'    # 둘째 하위 질문 
 
 # ------------------------------------------------------------------ 장
 class Slide:
-    def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, cur=None, done=(), bg=True):
+    def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, badge=None, cur=None, done=(), bg=True):
         self.key, self.notes, self.trans, self.advance = key, notes, trans, advance
-        self.bar, self.cur, self.done, self.bg = bar, cur, set(done), bg
+        self.bar, self.badge, self.cur, self.done, self.bg = bar, (bar if badge is None else badge), cur, set(done), bg
         self.items = []
         self.groups = [[]]
 
@@ -133,8 +133,15 @@ def band(name, pos, sub, kind='low', start=0, alpha=34):
 
 
 def tag_red(name, cx, y, label, pt=10.5):
-    prims, w = chip(name, cx, y, label, 'red', pt=pt, h=28, padx=13, align='c')
-    return prims
+    clean = label.lstrip('✕ ').strip()
+    h = 28
+    w = 13 + 9 + 7 + tw(clean, pt, 'b') + 13
+    x = cx - w / 2
+    xc, yc, r = x + 17.5, y + h / 2, 4.0
+    return [R(name + '/bg', x, y, w, h, prst='roundRect', fill='FFFFFF', line='F2B8BA', line_w=1.0, shadow=SHADOW_SOFT),
+            line(name + '/x1', (xc - r, yc - r), (xc + r, yc + r), color='C8323A', w=1.8),
+            line(name + '/x2', (xc + r, yc - r), (xc - r, yc + r), color='C8323A', w=1.8),
+            T(name + '/t', x + 28, y, w - 28, h, clean, size=pt, color='C8323A', weight='b', anchor='ctr')]
 
 
 def dim_over(name, box, radius=12, alpha=62):
@@ -200,7 +207,7 @@ def phone_prims(key, alpha=100):
 
 
 def s_ask():
-    s = Slide('ask', trans=('morph', 1000),
+    s = Slide('ask', trans=('morph', 1000), bar=False, badge=True,
               notes='집들이 때 마셨던 와인이 맛있어서 다시 사려는데, 이름이 떠오르지 않습니다.')
     bx, by, bw, bh = BADGE_BOX
     s.add('hiw/big', [T('hiw/big', bx, by - 4, bw, bh + 8, [[('How it ', {'color': INK}), ('works?', {'color': PURPLE})]],
@@ -256,7 +263,7 @@ def frag(key, kind, title, meta, x, y, s=1.0, alpha=100, style='base'):
 
 
 def s_cloud():
-    s = Slide('cloud', trans=('morph', 900),
+    s = Slide('cloud', trans=('morph', 900), bar=False, badge=True,
               notes='사실 정답은 이미 기기 안에 있습니다. (클릭) 다만 그 단서가 카톡과 갤러리처럼 여러 앱에 흩어져 있습니다.')
     talk = card('cl_talk', 'talk', 70, 126, 300, '지은', '카카오톡 · 3월 15일 (일)', ['박스 정리 다 했어! 이따 올 때', '휴지 안 사 와도 돼'], pt=11.5)
     photo = card('cl_photo', 'photo', 990, 128, 240, '갤러리', '3월 15일 (일) 20:14', img=PH['babich'][0], img_h=140,
@@ -272,8 +279,8 @@ def s_cloud():
     s.add('cl_photo', photo[0])
     s.add('cl_ring1', [ring_box('cl_ring1', (70, 126, 300, talk[1]))])
     s.add('cl_ring2', [ring_box('cl_ring2', (990, 128, 240, photo[1]))])
-    s.add('cl_t1', [caption('cl_t1', [[('정답은 이미 기기 안에', INK)]], 640, 278, size=32)])
-    s.add('cl_t2', [caption('cl_t2', [[('그러나, ', INK), ('여러 앱에 흩어져 있는 단서들', PURPLE)]], 640, 328, size=32)])
+    s.add('cl_t1', [caption('cl_t1', [[('정답은 이미 기기 안에 있습니다', SUB)]], 640, 282, size=24)])
+    s.add('cl_t2', [caption('cl_t2', [[('그러나, ', INK), ('여러 앱에 흩어져 있는 단서들', PURPLE)]], 640, 324, size=32)])
     keys = order[:]
     random.Random(7).shuffle(keys)
     keys = ['cl_talk', 'cl_photo'] + keys[:5] + ['cl_photo2'] + keys[5:]
@@ -294,7 +301,7 @@ def old_title(y=300, size=54):
 
 
 def s_old():
-    s = Slide('old', trans=('morph', 600), notes='기존 검색이라면 어떨까요?')
+    s = Slide('old', trans=('morph', 600), bar=False, badge=True, notes='기존 검색이라면 어떨까요?')
     s.add('old/title', [old_title(300, 56)])
     s.on('old/title', 'pop', 0, 650, **{'from': 0.7, 'over': 1.05})
     return s
@@ -311,7 +318,7 @@ def kw_parts(dimmed=()):
     fx, fy, fw, fh = KW_FIELD
     parts = []
     lab_w = tw('키워드 검색', 15, 'b')
-    bm, bmw = chip('kw/bm', px + 24 + lab_w + 10, py + 15, 'BM25', 'soft', pt=10, h=24, padx=10)
+    bm, bmw = chip('kw/bm', px + 24 + lab_w + 10, py + 15, '단어 일치 (BM25)', 'soft', pt=10, h=24, padx=10)
     parts.append(('kw/panel', [R('kw/panel/bg', px, py, pw, ph, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.4,
                                  shadow=SHADOW_CARD),
                                T('kw/panel/l', px + 24, py + 13, 200, 26, '키워드 검색', size=15, color=INK, weight='b')] + bm +
@@ -351,7 +358,7 @@ def kw_parts(dimmed=()):
     for i, (k, label) in enumerate((('kw/c1', '와인 정보가 없는 메모'), ('kw/c2', '다른 사람의 집들이 일정'))):
         x, y, w, h = boxes[k]
         parts.append(('kw/x%d' % (i + 1), xmark('kw/x%d' % (i + 1), x + w / 2, y + h / 2 + 4, s=46)))
-        parts.append(('kw/v%d' % (i + 1), tag_red('kw/v%d' % (i + 1), x + w / 2, y + h + 12, '✕  ' + label)))
+        parts.append(('kw/v%d' % (i + 1), tag_red('kw/v%d' % (i + 1), x + w / 2, y + h + 12, label)))
     # 사진 날짜 형광펜 + 물음
     gx, gy, gw, gh = boxes['kw/c3']
     dates = []
@@ -362,7 +369,7 @@ def kw_parts(dimmed=()):
                        line=None))
     parts.append(('kw/dates', dates))
     parts.append(('kw/qb', qbadge('kw/qb', gx + gw / 2, gy - 50, '어느 날이 집들이였지?', pt=12)))
-    parts.append(('kw/end', [caption('kw/end', [[('정답은 이 사진들 중에 있지만, ', INK)], [('‘집들이’가 없는 카톡은 못 찾아 날짜를 모릅니다', PURPLE)]], 640, 566,
+    parts.append(('kw/end', [caption('kw/end', [[('정답은 이 사진들 중에 있지만, ', INK)], [('집들이가 언제였는지 알 수 없습니다', PURPLE)]], 640, 566,
                                      size=25)]))
     return parts, boxes
 
@@ -371,10 +378,9 @@ KW_SMALL = Xf(ax=40, ay=120, bx=30, by=168, s=0.46)
 
 
 def s_kw():
-    s = Slide('kw', trans=('morph', 900),
-              notes=('키워드 검색은 (클릭) 질문 속 단어가 든 기록을 찾습니다. (클릭) 지은이네로는 와인 정보가 없는 주소 메모가, '
-                    '(클릭) 집들이로는 작년 성빈이네 집들이 일정이 나옵니다. (클릭) 와인 사진도 여러 장 나오고, 정답도 이 안에 있습니다. '
-                    '하지만 지은이의 초대 카톡에는 집들이라는 단어가 없어서, 그날이 언제였는지 알 수 없습니다.'))
+    s = Slide('kw', trans=('morph', 900), bar=False, badge=True,
+              notes=('키워드 검색은 (클릭) 질문 속 단어로 기록을 찾습니다. (클릭) 지은이네로는 주소 메모가, '
+                    '(클릭) 집들이로는 다른 사람의 집들이 일정이 나옵니다. (클릭) 와인 사진도 나오지만, 어느 날 사진인지는 알 수 없습니다.'))
     s.add('old/title', [old_title(78, 30)])
     parts, boxes = kw_parts()
     order = ['kw/t1', 'kw/t2', 'kw/t3', 'kw/c1', 'kw/c2', 'kw/c3', 'kw/panel', 'kw/q', 'kw/m1', 'kw/m2', 'kw/h1', 'kw/h2', 'kw/h3',
@@ -414,21 +420,21 @@ def s_kw():
 # 임베딩 장
 EM_PANEL = (624, 136, 600, 120)
 EM_FIELD = (646, 186, 556, 50)
-SPACE = (624, 318, 600, 332)
-STAR = (884, 498)
+SPACE = (624, 314, 600, 326)
+STAR = (884, 492)
 
 
 def s_emb():
-    s = Slide('emb', trans=('morph', 1000),
-              notes=('임베딩 검색은 (클릭) 질문 전체를 벡터 하나로 바꾸고, (클릭) 미리 만들어 둔 임베딩 공간에서 가장 가까운 기록을 한 번에 찾습니다. '
-                    '(클릭) 하지만 가까운 건 와인 메모와 다른 날 와인 사진입니다. 뜻은 비슷해도, 집들이가 언제였는지는 여전히 모릅니다.'))
+    s = Slide('emb', trans=('morph', 1000), bar=False, badge=True,
+              notes=('임베딩 검색은 (클릭) 질문 전체를 벡터로 바꿔서 (클릭) 가장 가까운 기록을 한 번에 찾습니다. '
+                    '(클릭) 하지만 가까운 건 와인 메모와 다른 날 와인 사진입니다.'))
     s.add('old/title', [old_title(78, 30)])
     parts, _ = kw_parts()
     keep = ['kw/t1', 'kw/t2', 'kw/t3', 'kw/c1', 'kw/c2', 'kw/c3', 'kw/panel', 'kw/q', 'kw/m1', 'kw/m2', 'kw/h1', 'kw/h2', 'kw/h3',
-            'kw/n1', 'kw/n2', 'kw/n3', 'kw/dates', 'kw/x1', 'kw/v1', 'kw/x2', 'kw/v2', 'kw/qb', 'kw/end']
+            'kw/n1', 'kw/n2', 'kw/n3', 'kw/dates', 'kw/x1', 'kw/v1', 'kw/x2', 'kw/v2', 'kw/qb']
     pm = dict(parts)
     for k in keep:
-        al = 38 if k != 'kw/end' else 70
+        al = 38
         if k in ('kw/c1', 'kw/c2', 'kw/n1', 'kw/n2', 'kw/m1', 'kw/m2'):
             al = 22
         s.add(k, pm[k], alpha=al, xf=KW_SMALL)
@@ -448,7 +454,7 @@ def s_emb():
     s.add('em/hl', [hl_band('em/hl', qx, qy, QUERY, QUERY, qpt, kind='low', alpha=36)])
     s.add('em/q', [T('em/q', qx, qy, fw - 30, S * 1.3, QUERY, size=qpt, color=INK)])
     # 벡터 줄
-    vy = 270
+    vy = 268
     vec = '[0.80, 0.30, −0.83, 0.90, −0.02, …]'
     s.add('em/vt', thread('em/vt', [(qx + tw(QUERY, qpt) / 2, fy + fh + 2), (qx + tw(QUERY, qpt) / 2, vy - 4)], w=2.2))
     s.add('em/vl', [T('em/vl', px + 24, vy, 60, 30, '벡터', size=12.5, color=PURPLE, weight='b', anchor='ctr')])
@@ -468,7 +474,7 @@ def s_emb():
         dots.append(R('em/dot%d' % i, x_ - r_, y_ - r_, 2 * r_, 2 * r_, prst='ellipse', fill='CBC0EC', alpha=80, line=None))
     s.add('em/dots', dots)
     far = [('em/r_mail', 'mail', '관리비 고지서', sx + 24, sy + 40), ('em/r_cal', 'cal', '팀 회식', sx + 460, sy + 50),
-           ('em/r_talk2', 'talk', '택배', sx + 30, sy + 272), ('em/r_note', 'note', '지은이네 주소', sx + 440, sy + 278),
+           ('em/r_talk2', 'talk', '택배', sx + 30, sy + 266), ('em/r_note', 'note', '지은이네 주소', sx + 440, sy + 272),
            ('em/r_jieun', 'talk', '지은', sx + 492, sy + 150)]
     for k, kind, label, x_, y_ in far:
         prims, w_, h_ = mini_chip(k, x_, y_, kind, label, alpha=70)
@@ -490,14 +496,13 @@ def s_emb():
     s.add('em/k2', [ring_box('em/k2', pic_box, pad=4, radius=14, w=2.2)])
     s.add('em/n1', numdot('em/n1', memo_box[0] + 2, memo_box[1] + 2, 1, r=11, pt=9))
     s.add('em/n2', numdot('em/n2', pic_box[0] + 2, pic_box[1] + 2, 2, r=11, pt=9))
-    s.add('em/foot', [T('em/foot', sx, sy + sh_ + 6, sw, 18, '가까울수록 뜻이 비슷한 기록', size=9.5, color=MUTE, align='r')])
+    s.add('em/foot', [T('em/foot', sx, sy + sh_ + 4, sw, 18, '가까울수록 뜻이 비슷한 기록', size=9.5, color=MUTE, align='r')])
     # 판정
     s.add('em/x1', xmark('em/x1', memo_box[0] - 18, memo_box[1] + memo_box[3] / 2, s=22, w=4.2))
     s.add('em/x2', xmark('em/x2', pic_box[0] + pic_box[2] + 18, pic_box[1] + pic_box[3] / 2, s=22, w=4.2))
-    s.add('em/v1', tag_red('em/v1', memo_box[0] + memo_box[2] / 2 - 10, memo_box[1] - 38, '✕  집들이와 상관없는 와인 메모', pt=10))
-    s.add('em/v2', tag_red('em/v2', pic_box[0] + pic_box[2] / 2, pic_box[1] + pic_box[3] + 10, '✕  집들이 날인지 알 수 없는 와인 사진', pt=10))
-    s.add('em/v_jieun', tag_red('em/v_jieun', sx + 470, sy + 114, '✕  ‘집들이·와인’ 단어가 없어 멀리 떨어진 지은 카톡', pt=9.5))
-    s.add('em/end', [caption('em/end', [[('단어 뜻만 비슷할 뿐, ', INK), ('집들이 날짜 단서는 여전히 못 찾습니다', PURPLE)]], 924, 672, size=18.5)])
+    s.add('em/v1', tag_red('em/v1', memo_box[0] + memo_box[2] / 2 - 10, memo_box[1] - 38, '집들이와 상관없는 와인 메모', pt=10))
+    s.add('em/v2', tag_red('em/v2', pic_box[0] + pic_box[2] / 2, pic_box[1] + pic_box[3] + 10, '집들이 날인지 알 수 없는 와인 사진', pt=10))
+    s.add('em/end', [caption('em/end', [[('뜻만 비슷할 뿐, ', INK), ('집들이가 언제였는지는 여전히 모릅니다', PURPLE)]], 924, 672, size=18)])
     # 효과
     s.on('em/div', 'fade_in', 200, 400)
     s.on('em/panel', 'rise', 300, 500, dy=14)
@@ -526,8 +531,7 @@ def s_emb():
     s.on('em/x2', 'pop', 300, 420, **{'from': 0.3, 'over': 1.15})
     s.on('em/v1', 'pop', 380, 450, **{'from': 0.5, 'over': 1.1})
     s.on('em/v2', 'pop', 480, 450, **{'from': 0.5, 'over': 1.1})
-    s.on('em/v_jieun', 'pop', 600, 450, **{'from': 0.5, 'over': 1.1})
-    s.on('em/end', 'rise', 800, 500, dy=12)
+    s.on('em/end', 'rise', 750, 500, dy=12)
     return s
 
 
@@ -554,7 +558,7 @@ def chain_talk(x, y, w=356):
 
 
 def s_chain():
-    s = Slide('chain', trans=('morph', 1000),
+    s = Slide('chain', trans=('morph', 1000), bar=False, badge=True,
               notes=('질문과 정답 사이에 끊어진 고리가 있습니다. (클릭) Weave는 먼저 지은이의 카톡에서 박스 정리 다 했어, 휴지 안 사 와도 돼를 보고 '
                     '3월 15일이 집들이였다는 걸 알아냅니다. (클릭) 그 날짜로 갤러리를 다시 찾으면 그날 와인 사진이 나옵니다. '
                     '(클릭) 그럼 이 중간 단서를 Weave는 어떻게 찾아낼까요?'))
@@ -596,14 +600,14 @@ def s_chain():
     s.add('ch/dim', [dim_over('ch/dim%d' % i, sp, radius=10, alpha=68) for i, sp in enumerate(spots) if i != wi])
     s.add('ch/pring', [ring_box('ch/pring', win, pad=4, radius=12, w=3.0)])
     # 날짜 토큰: 카톡 날짜 → 사진 날짜
-    tok, tw_ = chip('ch/tok', 0, 0, '3월 15일', 'fill', pt=11, h=28, padx=12)
+    tok, tw_ = chip('ch/tok', 0, 0, '3/15 (일)', 'fill', pt=11, h=28, padx=12)
     tx_, ty_ = win[0] + win[2] / 2 - tw_ / 2, win[1] + win[3] / 2 - 14
-    tok, _ = chip('ch/tok', tx_, ty_, '3월 15일', 'fill', pt=11, h=28, padx=12)
+    tok, _ = chip('ch/tok', tx_, ty_, '3/15 (일)', 'fill', pt=11, h=28, padx=12)
     s.add('ch/tok', tok, temp=True)
     mx, my = tp['meta'][0] + tw('카카오톡 · ', 9.5), tp['meta'][1]
     ans, aw = chip('ch/ans', cx_ + cw_ / 2, cy_ + gal[1] + 16, '배비치 소비뇽 블랑', 'fill', pt=13, h=34, padx=16, align='c')
     s.add('ch/ans', ans)
-    s.add('ch/bridge', [caption('ch/bridge', [[('이 중간 단서를, ', INK), ('Weave는 어떻게 찾아낼까요?', PURPLE)]], 640, 600, size=26)])
+    s.add('ch/bridge', [caption('ch/bridge', [[('이 중간 단서를 ', INK), ('Weave는 어떻게 찾아낼까요?', PURPLE)]], 640, 600, size=26)])
     # 효과
     s.on('ch/sp', 'rise', 150, 500, dy=14)
     s.on('ch/l1', 'wipe_in', 450, 400)
@@ -642,14 +646,21 @@ IDX = (500, 232, 724, 300)
 def s_idx():
     s = Slide('idx', trans=('morph', 1000), cur='00',
               notes='먼저 Weave는 평소에 기록을 색인해 둡니다. (클릭) 문장의 뜻은 벡터로, 날짜와 앱 같은 정보는 메타데이터로 나눠 저장합니다.')
-    s.add('idx/cap', [caption('idx/cap', [[('Weave는 ', INK), ('평소에', PURPLE), (' 기록을 색인해 둡니다', INK)]], 640, 86, size=26)])
-    s.add('idx/cap2', [caption('idx/cap2', [[('뜻은 벡터로, 날짜와 앱은 메타데이터로', SUB)]], 640, 132, size=17)])
-    talk = chain_talk(56, 300, 360)
+    s.add('idx/cap', [caption('idx/cap', [[('단서를 즉시 이어 찾도록, ', INK), ('평소에 기록을 색인', PURPLE), ('해 둡니다', INK)]], 640, 86, size=25)])
+    s.add('idx/cap2', [caption('idx/cap2', [[('글자와 사진 라벨은 원문·벡터로, 날짜와 앱은 메타데이터로', SUB)]], 640, 132, size=17)])
+    talk = chain_talk(56, 252, 360)
     s.add('ch/talk', talk[0])
+    apps = []
+    ax = 56
+    for ic, lb in (('gallery', '갤러리'), ('note', '삼성노트'), ('cal', '캘린더'), ('mail', '이메일')):
+        c_, cw_, _ = mini_chip('idx/a_' + ic, ax, 456, ic, lb, pt=9.5, alpha=85)
+        apps += c_
+        ax += cw_ + 6
+    s.add('idx/apps', apps)
     x, y, w, h = IDX
     s.add('idx/st2', [R('idx/st2', x + 20, y + 20, w, h, prst='roundRect', radius=22, fill='FFFFFF', alpha=50, line=LINE, line_w=1)])
     s.add('idx/st1', [R('idx/st1', x + 10, y + 10, w, h, prst='roundRect', radius=22, fill='FFFFFF', alpha=75, line=LINE, line_w=1)])
-    s.add('idx/arr', thread('idx/arr', scurve((416, 370), (x - 4, 380)), w=2.6))
+    s.add('idx/arr', thread('idx/arr', scurve((416, 360), (x - 4, 380)), w=2.6))
     rows_y = [y + 84, y + 158, y + 232]
     s.add('idx/card', [R('idx/card/bg', x, y, w, h, prst='roundRect', radius=22, fill='FFFFFF', line=RING, line_w=2.2, glow=(10, RING, 22),
                          shadow=SHADOW_LIFT),
@@ -660,16 +671,16 @@ def s_idx():
                        R('idx/card/s1', x + 26, rows_y[1] - 18, w - 52, 1, fill='EEE9F8', line=None),
                        R('idx/card/s2', x + 26, rows_y[2] - 18, w - 52, 1, fill='EEE9F8', line=None)])
     lab = dict(size=12.5, color=SUB, weight='b', anchor='ctr')
-    s.add('idx/l0', [T('idx/l0', x + 30, rows_y[0], 110, 34, '원문', **lab)])
+    s.add('idx/l0', [T('idx/l0', x + 30, rows_y[0], 110, 34, '원문 · OCR', **lab)])
     s.add('idx/r0', [T('idx/r0', x + 150, rows_y[0], w - 170, 34, '박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼', size=13, color=BODY,
                        anchor='ctr')])
     vec = '[0.86, −0.08, 0.33, 0.46, 0.60, 0.83, 0.90, …]'
     meta = '{ date: "2026-03-15", app: "kakaotalk", … }'
-    s.add('idx/l1', [T('idx/l1', x + 30, rows_y[1], 110, 34, '벡터', size=12.5, color=PURPLE, weight='b', anchor='ctr')])
+    s.add('idx/l1', [T('idx/l1', x + 30, rows_y[1], 110, 34, '의미 벡터', size=12.5, color=PURPLE, weight='b', anchor='ctr')])
     s.add('idx/r1', [T('idx/r1', x + 150, rows_y[1], w - 170, 34, vec, size=15, color=PURPLE, weight='m', anchor='ctr')])
     s.add('idx/l2', [T('idx/l2', x + 30, rows_y[2], 110, 34, '메타데이터', size=12.5, color=PURPLE, weight='b', anchor='ctr')])
     s.add('idx/r2', [T('idx/r2', x + 150, rows_y[2], w - 170, 34, meta, size=15, color=INK, weight='m', anchor='ctr')])
-    s.on(['idx/st2', 'idx/st1'], 'fade_in', 200, 500)
+    s.on(['idx/st2', 'idx/st1', 'idx/apps'], 'fade_in', 200, 500)
     s.on('idx/card', 'rise', 250, 550, dy=14)
     s.on('idx/arr', 'wipe_in', 500, 450)
     s.on(['idx/l0', 'idx/r0'], 'fade_in', 750, 400)
@@ -847,7 +858,7 @@ def re_card(key, box, hop, query_runs, active=True, done=False, alpha=100):
                          anchor='ctr'))
             tx += tw(t, 13.5, 'm')
     if done:
-        out.append(T(key + '/ok', x + w - 46, y + 60, 30, 32, '✓', size=16, color=PURPLE, weight='b', align='c', anchor='ctr'))
+        out += check_icon(key + '/ok', x + w - 31, y + 76, s=14, color=PURPLE, w=2.4)
     return out
 
 
@@ -871,9 +882,9 @@ def s_hop1():
     s.add('h1/re', re_card('h1/re', H1, 1, [('지은이네 집들이는 언제였지?', 'q')]))
     s.add('h2/re', re_card('h2/re', H2, 2, [('그날 마셨던 와인은?', 'q')], active=False), alpha=45)
     # ① → Hop 1: 판 왼쪽 바깥으로 도는 화살표
-    s.add('h1/c', thread('h1/c', [(QC[0] + 14, r1y + 20), (QC[0] - 22, r1y + 20), (H1[0] - 22, H1[1] + 30), (H1[0] - 2, H1[1] + 30)],
+    s.add('h1/c', thread('h1/c', [(QC[0] + 14, r1y + 20), (QC[0] - 14, r1y + 20), (H1[0] - 14, H1[1] + 30), (H1[0] - 2, H1[1] + 30)],
                          w=2.2, tail='triangle'))
-    s.add('h1/cap', [caption('h1/cap', [[('Reasoning Embedding', PURPLE), ('은 답이 될 기록을 가까이 둡니다', INK)]], 640, 80, size=22)])
+    s.add('h1/cap', [caption('h1/cap', [[('Reasoning Embedding', PURPLE), ('은 단어가 달라도 단서가 될 기록을 가깝게 둡니다', INK)]], 640, 80, size=21.5)])
     sx, sy, sw, sh = H1_SPACE
     s.add('h1/space', [R('h1/space/bg', sx, sy, sw, sh, prst='roundRect', radius=22, fill='FFFFFF', alpha=88, line=LINE2, line_w=1.2)])
     tx0, ty0 = sx + 20, sy + 16
@@ -917,7 +928,7 @@ def s_hop1():
     s.add('h1/d2', d2, start=off(d2i, d2f))
     s.add('h1/k', kk, start=off(ki, kf))
     s.add('h1/star', star('h1/star', *H1_STAR))
-    s.add('h1/starl', chip('h1/starl', H1_STAR[0] + 20, H1_STAR[1] - 44, '질문 ①', 'soft', pt=9.5, h=22, padx=8)[0])
+    s.add('h1/starl', chip('h1/starl', H1_STAR[0] + 20, H1_STAR[1] - 44, '질문 ①', 'soft', pt=9.5, h=22, padx=8, weight='m')[0])
     s.add('h1/x1', xmark('h1/x1', d1f[0] + d1w + 18, d1f[1] + d1h / 2, s=22, w=4))
     s.add('h1/x2', xmark('h1/x2', d2f[0] + d2w + 18, d2f[1] + d2h / 2, s=22, w=4))
     s.add('h1/kring', [ring_box('h1/kring', (kf[0], kf[1], kw_, kh_), pad=4, radius=14, w=2.4)])
@@ -959,7 +970,7 @@ def s_hop1():
 
 H2_TALK = (520, 150, 330)
 H2_GAL = (500, 404, 736)
-H2_PHOTOS = ['babich', 'table', 'cheers', 'w3', 'w2']
+H2_PHOTOS = ['babich', 'table', 'w1', 'w3', 'w2']
 
 
 def s_hop2():
@@ -989,7 +1000,7 @@ def s_hop2():
     tok, _ = chip('h1/tok', x + 56, r2y + 8, '3/15 (일)', 'fill', pt=10.5, h=24, padx=9)
     s.add('h1/tok', tok)
     s.add('h2/back', thread('h2/back', scurve((tx, ty + 30), (x + w + 2, r2y + 20), 0.45), w=2.2, tail='triangle'))
-    s.add('h2/c', thread('h2/c', [(x + 14, r2y + 20), (x - 22, r2y + 20), (H2[0] - 22, H2[1] + 30), (H2[0] - 2, H2[1] + 30)],
+    s.add('h2/c', thread('h2/c', [(x + 14, r2y + 20), (x - 14, r2y + 20), (H2[0] - 14, H2[1] + 30), (H2[0] - 2, H2[1] + 30)],
                          w=2.2, tail='triangle'))
     # Hop 2 결과(갤러리) — 오른쪽 아래
     gx, gy, gw = H2_GAL
@@ -1009,7 +1020,7 @@ def s_hop2():
         px_, py_ = gx + 16 + i * (pw + 10), gy + 50
         spots.append((px_, py_, pw, ph))
         photos.append(P('h2/p%d' % i, img, px_, py_, pw, ph, radius=10, crop=crop_fit(img, pw, ph, fo)))
-        label = d + (' 20:14' if k == 'babich' else (' 19:52' if k == 'table' else (' 20:40' if k == 'cheers' else '')))
+        label = d + (' 20:14' if k == 'babich' else (' 19:52' if k == 'table' else ''))
         dtxt.append(label)
         dates.append(T('h2/d%d' % i, px_, py_ + ph + 5, pw, 18, label, size=9.5, color=SUB, align='c'))
     s.add('h2/photos', photos + dates)
@@ -1023,10 +1034,8 @@ def s_hop2():
     s.add('h2/dhl', [hl_band('h2/dhl%d' % i, spots[i][0] + pw / 2 - tw(dtxt[i], 9.5) / 2, spots[i][1] + ph + 5, dtxt[i], dtxt[i][:11], 9.5,
                              alpha=40) for i in keep])
     t_i = H2_PHOTOS.index('table')
-    c_i = H2_PHOTOS.index('cheers')
     w_i = H2_PHOTOS.index('babich')
-    s.add('h2/dimt', [dim_over('h2/dimt', spots[t_i], radius=10, alpha=70),
-                      dim_over('h2/dimc', spots[c_i], radius=10, alpha=70)])
+    s.add('h2/dimt', [dim_over('h2/dimt', spots[t_i], radius=10, alpha=70)])
     s.add('h2/pring', [ring_box('h2/pring', spots[w_i], pad=4, radius=12, w=3.0)])
     lab, lw_ = chip('h2/ocr', spots[w_i][0] + pw / 2, spots[w_i][1] + ph - 30, 'BABICH SAUVIGNON BLANC', 'outline', pt=8.5, h=22, padx=8,
                     align='c')
@@ -1071,13 +1080,16 @@ def s_deliver():
     sx, sy, sw, sh = SHEET
     by_ = sy + 128
     rows = [('talk', '지은', '‘휴지 안 사 와도 돼’  3월 15일'), ('gallery', '와인 사진', '3월 15일 20:14')]
+    bt_w = tw('입력하기', 14, 'b')
+    bt_cx = sx + sw / 2
     out = [R('dl/sheet/bg', sx, sy, sw, sh, prst='roundRect', radius=24, fill='FFFFFF', line=LINE2, line_w=1.4, shadow=SHADOW_LIFT),
-           R('dl/sheet/card', sx + 18, sy + 18, sw - 36, 96, prst='roundRect', radius=16, fill=LAV, line=None),
-           T('dl/sheet/lab', sx + 36, sy + 30, 300, 22, [[('✦ ', {'color': PURPLE}), ('자동 완성 추천', {'color': PURPLE})]], size=11.5,
-             weight='b'),
+           R('dl/sheet/card', sx + 18, sy + 18, sw - 36, 96, prst='roundRect', radius=16, fill=LAV, line=None)] + \
+          star4_icon('dl/sheet/star', sx + 42, sy + 41, r=5.5, color=PURPLE) + \
+          [T('dl/sheet/lab', sx + 53, sy + 30, 300, 22, '자동 완성 추천', size=11.5, color=PURPLE, weight='b'),
            T('dl/sheet/ans', sx + 36, sy + 56, sw - 72, 44, ans, size=24, color=INK, weight='b', anchor='ctr'),
-           R('dl/sheet/btn', sx + 18, by_, sw - 36, 50, prst='roundRect', radius=14, fill=PURPLE, line=None, shadow=(14, 4, '6B4EFF', 24)),
-           T('dl/sheet/btnt', sx + 18, by_, sw - 36, 50, '✓  입력하기', size=14, color='FFFFFF', weight='b', align='c', anchor='ctr'),
+           R('dl/sheet/btn', sx + 18, by_, sw - 36, 50, prst='roundRect', radius=14, fill=PURPLE, line=None, shadow=(14, 4, '6B4EFF', 24))] + \
+          check_icon('dl/sheet/chk', bt_cx - bt_w / 2 - 11, by_ + 25, s=11.5, color='FFFFFF', w=2.2) + \
+          [T('dl/sheet/btnt', sx + 34, by_, sw - 52, 50, '입력하기', size=14, color='FFFFFF', weight='b', align='c', anchor='ctr'),
            T('dl/sheet/mem', sx + 26, by_ + 66, 200, 20, '연결된 기억', size=11, color=SUB, weight='b')]
     for i, (ic, a, b) in enumerate(rows):
         ry = by_ + 94 + i * 38
@@ -1108,12 +1120,12 @@ def s_overview():
               notes='정리하면, Weave는 평소에 기록을 색인해 두고, 검색하다 막히면 질문을 나눈 뒤 찾은 단서로 다시 묻습니다. '
                     '이 모든 과정은 기기 안에서 이뤄집니다.')
     s.add('ov/cap', [caption('ov/cap', [[('질문을 나누고, ', INK), ('찾은 단서로 다시 묻습니다', PURPLE)]], 640, 80, size=26)])
-    tagw = tw('모든 단계가 기기 안에서 (100% On-Device)', 10.5, 'b') + 48
+    tagw = tw('모든 단계가 기기 안에서', 10.5, 'b') + 48
     s.add('ov/dev', [R('ov/dev/bg', 36, 136, 1208, 558, prst='roundRect', radius=28, fill='FFFFFF', alpha=55, line=LINE2, line_w=1.4),
                      R('ov/dev/tag', 60, 122, tagw, 28, prst='roundRect', fill='FFFFFF', line=LINE2, line_w=1.2),
                      R('ov/dev/ph', 74, 128, 11, 16, prst='roundRect', radius=3, fill=None, line=PURPLE, line_w=1.6),
                      R('ov/dev/ph2', 77.5, 141, 4, 1.4, fill=PURPLE, line=None),
-                     T('ov/dev/t', 94, 122, tagw - 40, 28, '모든 단계가 기기 안에서 (100% On-Device)', size=10.5, color=PURPLE, weight='b', anchor='ctr')])
+                     T('ov/dev/t', 94, 122, tagw - 40, 28, '모든 단계가 기기 안에서', size=10.5, color=PURPLE, weight='b', anchor='ctr')])
 
     def stage_tag(key, x, y, no, name):
         w = tw(name, 10.5, 'b') + 46
@@ -1125,86 +1137,81 @@ def s_overview():
     cy = 166
     # Column 1: 01 상황 인식 (x=54, w=236)
     c1x, c1w = 54, 236
-    pill, txt, _, _ = search_pill('ov/q', c1x + 12, cy + 52, c1w - 24, 48, QUERY, pt=10.5, icon='mag', cursor=False)
+    pill, txt, _, _ = search_pill('ov/q', c1x + 12, cy + 72, c1w - 24, 48, QUERY, pt=9.5, icon='mag', cursor=False)
     tbw = c1w - 24
     tbh = tbw * 168 / 1300
     s.add('ov/q', [R('ov/q/card', c1x, cy + 34, c1w, 332, prst='roundRect', radius=18, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD)] +
           stage_tag('ov/q/tag', c1x, cy, '01', '상황 인식') + pill + [txt] +
-          [P('ov/q/kb', str(AS / 'kb-toolbar.png'), c1x + 12, cy + 114, tbw, tbh, radius=8),
-           R('ov/q/ring', c1x + 12 + 102 * tbw / 1300 - 14, cy + 114 + 82 * tbh / 168 - 14, 28, 28, prst='ellipse', fill=None, line=PURPLE,
-             line_w=2.0, glow=(6, RING, 35)),
-           R('ov/q/sub', c1x + 12, cy + 168, c1w - 24, 182, prst='roundRect', radius=12, fill='F7F5FC', line=None),
-           T('ov/q/st', c1x + 24, cy + 182, c1w - 48, 22, '진입 신호 감지', size=11, color=PURPLE, weight='b'),
-           T('ov/q/sd', c1x + 24, cy + 210, c1w - 48, 128,
-             ['• 검색창: 키보드 실타래 버튼 탭', '• 통화 중: 화면 위로 쓸어 올리기', '• 공항 도착: 위치·탑승권·대화 맥락', '', '→ 현재 화면의 질문·맥락 수신'],
-             size=9.5, color=BODY, lnspc=15)])
+          [P('ov/q/kb', str(AS / 'kb-toolbar.png'), c1x + 12, cy + 146, tbw, tbh, radius=8),
+           R('ov/q/ring', c1x + 12 + 102 * tbw / 1300 - 15, cy + 146 + 82 * tbh / 168 - 15, 30, 30, prst='ellipse', fill=None, line=PURPLE,
+             line_w=2.2, glow=(8, RING, 40)),
+           T('ov/q/sd', c1x + 16, cy + 218, c1w - 32, 26, '검색창에서 실타래 버튼 탭', size=11, color=PURPLE, weight='b', align='c')])
 
     # Column 2: 02 질의 재작성 (x=316, w=264)
     c2x, c2w = 316, 264
     rows = [R('ov/rw/bg', c2x, cy + 34, c2w, 332, prst='roundRect', radius=18, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD),
-            T('ov/rw/hd', c2x + 18, cy + 48, 220, 22, 'Query Rewriting', size=12, color=PURPLE, weight='b'),
-            T('ov/rw/hs', c2x + 18, cy + 70, 230, 18, '단서 순서대로 하위 질문 분해', size=9.5, color=SUB),
-            R('ov/rw/r1', c2x + 14, cy + 102, c2w - 28, 68, prst='roundRect', radius=12, fill=LAV, line=None)]
+            T('ov/rw/hd', c2x + 18, cy + 52, 220, 24, 'Query Rewriting', size=12.5, color=PURPLE, weight='b'),
+            R('ov/rw/r1', c2x + 14, cy + 96, c2w - 28, 56, prst='roundRect', radius=12, fill=LAV, line=None)]
     rows += numdot('ov/rw/n1', c2x + 32, cy + 124, 1, r=10, pt=8.5)
-    rows.append(T('ov/rw/t1', c2x + 48, cy + 110, c2w - 64, 24, '지은이네 집들이는 언제였지?', size=11, color=INK, weight='b', anchor='ctr'))
-    rows.append(T('ov/rw/s1', c2x + 48, cy + 138, c2w - 64, 20, '→ Hop 1에서 날짜 단서 탐색', size=9.5, color=SUB))
-    rows.append(R('ov/rw/r2', c2x + 14, cy + 190, c2w - 28, 76, prst='roundRect', radius=12, fill=BLUE_BG, line=None))
-    rows += numdot('ov/rw/n2', c2x + 32, cy + 214, 2, r=10, pt=8.5, fill=BLUE)
-    tk, tkw = chip('ov/rw/tk', c2x + 48, cy + 202, '3/15 (일)', 'fill', pt=9.5, h=22, padx=8)
+    rows.append(T('ov/rw/t1', c2x + 48, cy + 96, c2w - 64, 56, '지은이네 집들이는 언제였지?', size=11, color=INK, weight='b', anchor='ctr'))
+    rows.append(R('ov/rw/r2', c2x + 14, cy + 172, c2w - 28, 56, prst='roundRect', radius=12, fill=BLUE_BG, line=None))
+    rows += numdot('ov/rw/n2', c2x + 32, cy + 200, 2, r=10, pt=8.5, fill=BLUE)
+    tk, tkw = chip('ov/rw/tk', c2x + 48, cy + 189, '3/15 (일)', 'fill', pt=9.5, h=22, padx=8)
     rows += tk
-    rows.append(T('ov/rw/t2', c2x + 48 + tkw + 5, cy + 201, c2w - 64 - tkw, 24, '마셨던 와인은?', size=11, color=INK, weight='b', anchor='ctr'))
-    rows.append(T('ov/rw/s2', c2x + 48, cy + 234, c2w - 64, 20, '→ 빈칸(그날)에 찾은 날짜 대입', size=9.5, color=SUB))
-    rows.append(R('ov/rw/an', c2x + 14, cy + 286, c2w - 28, 62, prst='roundRect', radius=12, fill='F7F5FC', line=PURPLE2, line_w=1.2, dash='dash'))
-    rows.append(T('ov/rw/ant', c2x + 26, cy + 296, c2w - 52, 42, ['답: 배비치 소비뇽 블랑', '(Hop 2 완료 후 슬롯 채움)'], size=10, color=PURPLE, weight='b', lnspc=15))
+    rows.append(T('ov/rw/t2', c2x + 48 + tkw + 5, cy + 172, c2w - 64 - tkw, 56, '마셨던 와인은?', size=11, color=INK, weight='b', anchor='ctr'))
+    rows.append(T('ov/rw/anl', c2x + 22, cy + 266, 30, 30, '답', size=11, color=MUTE, weight='b', anchor='ctr'))
+    an_c, _ = chip('ov/rw/anc', c2x + 54, cy + 267, '배비치 소비뇽 블랑', 'fill', pt=10.5, h=28, padx=12)
+    rows += an_c
     s.add('ov/rw', stage_tag('ov/rw/tag', c2x, cy, '02', '질의 재작성') + rows)
 
     # Column 3: 03 연쇄 탐색 (x=606, w=330) — Hop 1 위, Hop 2 아래
     c3x, c3w = 606, 330
-    s.add('ov/hoptag', stage_tag('ov/hoptag', c3x, cy, '03', '연쇄 탐색 (Hop 1 → Hop 2)'))
+    s.add('ov/hoptag', stage_tag('ov/hoptag', c3x, cy, '03', '연쇄 탐색'))
 
-    def hop_box(key, x, y, w, h, n, q1, res_kind, res_label, res_sub):
+    def hop_box(key, x, y, w, h, n, res_kind, res_label, res_sub):
         out = [R(key + '/bg', x, y, w, h, prst='roundRect', radius=18, fill='FFFFFF', line=RING, line_w=1.8, shadow=SHADOW_CARD),
-               T(key + '/t', x + 16, y + 10, 220, 22, 'Reasoning Embedding', size=11.5, color=PURPLE, weight='b', anchor='ctr')]
-        hc, _ = chip(key + '/h', x + w - 14 - (tw('Hop %d' % n, 9.5, 'b') + 20), y + 10, 'Hop %d' % n, 'fill', pt=9.5, h=22, padx=10)
+               T(key + '/t', x + 18, y + 14, 220, 24, 'Reasoning Embedding', size=12, color=PURPLE, weight='b', anchor='ctr')]
+        hc, _ = chip(key + '/h', x + w - 16 - (tw('Hop %d' % n, 9.5, 'b') + 20), y + 14, 'Hop %d' % n, 'fill', pt=9.5, h=22, padx=10)
         out += hc
-        out.append(T(key + '/q', x + 16, y + 36, w - 30, 22, q1, size=10.5, color=SUB, anchor='ctr'))
-        out.append(R(key + '/r', x + 14, y + 64, w - 28, 76, prst='roundRect', radius=12, fill='F7F5FC', line=None))
-        out.append(P(key + '/ri', ICON[res_kind], x + 26, y + 88, 28, 28))
-        out.append(T(key + '/rt', x + 64, y + 72, w - 84, 22, res_label, size=11.5, color=INK, weight='b', anchor='ctr'))
-        out.append(T(key + '/rs', x + 64, y + 96, w - 84, 36, res_sub, size=9.5, color=SUB, lnspc=14))
+        out.append(R(key + '/r', x + 14, y + 52, w - 28, 86, prst='roundRect', radius=12, fill='F7F5FC', line=None))
+        out.append(P(key + '/ri', ICON[res_kind], x + 28, y + 79, 32, 32))
+        out.append(T(key + '/rt', x + 70, y + 66, w - 88, 24, res_label, size=11.5, color=INK, weight='b', anchor='ctr'))
+        out.append(T(key + '/rs', x + 70, y + 94, w - 88, 24, res_sub, size=10.5, color=SUB, anchor='ctr'))
         return out
 
-    s.add('ov/h1', hop_box('ov/h1', c3x, cy + 34, c3w, 154, 1, '① 지은이네 집들이는 언제였지?', 'talk',
-                           '지은 카톡 (3월 15일)', ['‘휴지 안 사 와도 돼’ → 집들이 초대 추론', '메타데이터에서 날짜 단서(3/15) 획득']))
-    s.add('ov/h2', hop_box('ov/h2', c3x, cy + 212, c3w, 154, 2, '② 3/15 (일) 마셨던 와인은? + 날짜 필터', 'gallery',
-                           '3/15 와인 사진 + OCR', ['date: "2026-03-15" 필터로 그날 사진만 남김', '라벨 OCR: BABICH SAUVIGNON BLANC']))
+    s.add('ov/h1', hop_box('ov/h1', c3x, cy + 34, c3w, 154, 1, 'talk',
+                           '지은 · 3월 15일 (일)', '‘휴지 안 사 와도 돼’'))
+    s.add('ov/h2', hop_box('ov/h2', c3x, cy + 212, c3w, 154, 2, 'gallery',
+                           '갤러리 · 3월 15일 20:14', 'BABICH SAUVIGNON BLANC'))
 
     # Column 4: 04 결과 제공 (x=962, w=264)
     c4x, c4w = 962, 264
+    bt_w = tw('입력하기', 11.5, 'b')
+    bt_cx = c4x + c4w / 2
     res = [R('ov/res/bg', c4x, cy + 34, c4w, 332, prst='roundRect', radius=18, fill='FFFFFF', line=RING, line_w=1.8, glow=(8, RING, 22), shadow=SHADOW_CARD),
-           R('ov/res/card', c4x + 14, cy + 50, c4w - 28, 92, prst='roundRect', radius=14, fill=LAV, line=None),
-           T('ov/res/l', c4x + 26, cy + 60, 200, 20, '✦ 자동 완성 추천', size=10, color=PURPLE, weight='b'),
+           R('ov/res/card', c4x + 14, cy + 50, c4w - 28, 92, prst='roundRect', radius=14, fill=LAV, line=None)] + \
+          star4_icon('ov/res/star', c4x + 31, cy + 70, r=5.0, color=PURPLE) + \
+          [T('ov/res/l', c4x + 41, cy + 60, 200, 20, '자동 완성 추천', size=10, color=PURPLE, weight='b'),
            T('ov/res/a', c4x + 26, cy + 84, c4w - 52, 44, '배비치 소비뇽 블랑', size=16.5, color=INK, weight='b', anchor='ctr'),
-           R('ov/res/btn', c4x + 14, cy + 154, c4w - 28, 38, prst='roundRect', radius=10, fill=PURPLE, line=None),
-           T('ov/res/btnt', c4x + 14, cy + 154, c4w - 28, 38, '✓  탭 한 번에 입력하기', size=11.5, color='FFFFFF', weight='b', align='c', anchor='ctr'),
-           T('ov/res/ml', c4x + 18, cy + 206, 200, 20, '함께 제시되는 근거 기록', size=10, color=SUB, weight='b'),
-           R('ov/res/m1', c4x + 14, cy + 230, c4w - 28, 54, prst='roundRect', radius=10, fill='F7F5FC', line=None),
-           P('ov/res/i1', ICON['talk'], c4x + 24, cy + 245, 24, 24),
-           T('ov/res/s1', c4x + 56, cy + 236, c4w - 76, 42, ['지은 카톡 (3월 15일)', '‘휴지 안 사 와도 돼’'], size=9.5, color=INK, lnspc=14),
-           R('ov/res/m2', c4x + 14, cy + 294, c4w - 28, 54, prst='roundRect', radius=10, fill='F7F5FC', line=None),
-           P('ov/res/i2', ICON['gallery'], c4x + 24, cy + 309, 24, 24),
-           T('ov/res/s2', c4x + 56, cy + 300, c4w - 76, 42, ['갤러리 와인 사진', '2026. 3. 15 20:14 촬영'], size=9.5, color=INK, lnspc=14)]
+           R('ov/res/btn', c4x + 14, cy + 154, c4w - 28, 38, prst='roundRect', radius=10, fill=PURPLE, line=None)] + \
+          check_icon('ov/res/chk', bt_cx - bt_w / 2 - 9, cy + 173, s=9.5, color='FFFFFF', w=2.0) + \
+          [T('ov/res/btnt', c4x + 26, cy + 154, c4w - 40, 38, '입력하기', size=11.5, color='FFFFFF', weight='b', align='c', anchor='ctr'),
+           T('ov/res/ml', c4x + 18, cy + 210, 200, 20, '연결된 기억', size=10, color=SUB, weight='b'),
+           P('ov/res/i1', ICON['talk'], c4x + 20, cy + 242, 22, 22),
+           T('ov/res/s1', c4x + 50, cy + 238, c4w - 64, 30, '지은  ‘휴지 안 사 와도 돼’ · 3/15', size=10, color=INK, anchor='ctr'),
+           P('ov/res/i2', ICON['gallery'], c4x + 20, cy + 282, 22, 22),
+           T('ov/res/s2', c4x + 50, cy + 278, c4w - 64, 30, '와인 사진  3월 15일 20:14', size=10, color=INK, anchor='ctr')]
     s.add('ov/res', stage_tag('ov/res/tag', c4x, cy, '04', '결과 제공') + res)
 
     # Bottom Bar: 00 데이터 색인 (x=54, y=566, w=1172, h=106)
     iy = 566
     idx = [R('ov/idx/bg', 54, iy, 1172, 106, prst='roundRect', radius=18, fill=LAV2, line=LINE2, line_w=1.2)]
-    idx += stage_tag('ov/idx/tag', 72, iy + 14, '00', '데이터 색인 (Hybrid Index)')
+    idx += stage_tag('ov/idx/tag', 72, iy + 14, '00', '데이터 색인')
     for i, ic in enumerate(['talk', 'gallery', 'note', 'cal', 'mail']):
         idx.append(P('ov/idx/a%d' % i, ICON[ic], 76 + i * 34, iy + 54, 26, 26))
-    cols = [('원문 (Text / OCR)', '박스 정리 다 했어! 이따 올 때…', BODY),
-            ('의미 벡터 (Vector)', '[0.86, −0.08, 0.33, …]', PURPLE),
-            ('메타데이터 (Filter)', '{ date: "2026-03-15", app, … }', INK)]
+    cols = [('원문 · OCR', '박스 정리 다 했어! 이따 올 때…', BODY),
+            ('의미 벡터', '[0.86, −0.08, 0.33, …]', PURPLE),
+            ('메타데이터', '{ date: "2026-03-15", app, … }', INK)]
     for i, (a, b, col) in enumerate(cols):
         cx_ = 330 + i * 295
         idx.append(T('ov/idx/l%d' % i, cx_, iy + 20, 270, 22, a, size=10.5, color=PURPLE if i else SUB, weight='b'))
@@ -1213,10 +1220,10 @@ def s_overview():
 
     # 좌 → 우 직관적 화살표 (01 → 02 → 03 Hop1 → 단서 대입 → 03 Hop2 → 04)
     s.add('ov/a1', thread('ov/a1', [(c1x + c1w + 2, cy + 190), (c2x - 2, cy + 190)], w=2.4, tail='triangle'))
-    s.add('ov/a2', thread('ov/a2', scurve((c2x + c2w + 2, cy + 136), (c3x - 2, cy + 110)), w=2.4, tail='triangle'))
-    s.add('ov/loop', thread('ov/loop', scurve((c3x - 2, cy + 148), (c2x + c2w + 2, cy + 214)), w=2.4, tail='triangle'))
-    s.add('ov/loopt', chip('ov/loopt', c3x - 13, cy + 166, '3/15 단서', 'white', pt=8.5, h=20, padx=7, align='c')[0])
-    s.add('ov/a3', thread('ov/a3', scurve((c2x + c2w + 2, cy + 244), (c3x - 2, cy + 286)), w=2.4, tail='triangle'))
+    s.add('ov/a2', thread('ov/a2', scurve((c2x + c2w + 2, cy + 124), (c3x - 2, cy + 110)), w=2.4, tail='triangle'))
+    s.add('ov/loop', thread('ov/loop', scurve((c3x - 2, cy + 148), (c2x + c2w + 2, cy + 196)), w=2.4, tail='triangle'))
+    s.add('ov/loopt', chip('ov/loopt', c3x - 13, cy + 162, '3/15 (일)', 'white', pt=8.5, h=20, padx=7, align='c')[0])
+    s.add('ov/a3', thread('ov/a3', scurve((c2x + c2w + 2, cy + 216), (c3x - 2, cy + 286)), w=2.4, tail='triangle'))
     s.add('ov/a4', thread('ov/a4', scurve((c3x + c3w + 2, cy + 290), (c4x - 2, cy + 190)), w=2.4, tail='triangle'))
     s.add('ov/u1', [line('ov/u1', (c3x + c3w / 2, iy), (c3x + c3w / 2, cy + 368), color=PURPLE2, w=1.8, dash='dash')])
     order = [('ov/dev', 0), ('ov/idx', 150), ('ov/q', 400), ('ov/a1', 650), ('ov/rw', 750), ('ov/hoptag', 950),
@@ -1234,9 +1241,8 @@ def s_overview():
 
 SLIDES = [s_hiw, s_ask, s_cloud, s_old, s_kw, s_emb, s_step, s_chain, s_idx, s_trig, s_split, s_hop1, s_hop2, s_deliver, s_overview]
 
-SOL_NOTES = ('방금 보신 세 장면이 Weave의 세 가지 경험입니다. 통화 중 흩어진 업무 기록을 한 번에 요약하는 기록 통합 검색, '
-             '떠오르는 단서만으로 이름을 찾아 주는 단서로 찾는 기억, 지금 상황에 필요한 기억을 먼저 건네는 먼저 건네는 기억입니다. '
-             '모두 따로 앱을 켜지 않고, 지금 보던 화면과 키보드 위에서 끝납니다.')
+SOL_NOTES = ('방금 보신 세 장면이 Weave의 세 가지 경험입니다. 기록 통합 검색, 단서로 찾는 기억, 먼저 건네는 기억. '
+             '모두 지금 보던 화면과 키보드 위에서 끝납니다.')
 
 
 # ------------------------------------------------------------------ 조립
@@ -1259,6 +1265,12 @@ def build(dst, auto=False, hold=1700):
     from pptx.opc.packuri import PackURI
     sol.part.partname = PackURI('/ppt/slides/slide1.xml')        # 새 장 이름(slide2…)과 겹치지 않게
     sol.notes_slide.notes_text_frame.text = SOL_NOTES
+    for c in sol._element.iter(q('a:srgbClr')):
+        v = c.get('val', '').upper()
+        if v == 'FBF0D8':
+            c.set('val', 'C6B3FF')
+        elif v == 'FDF6E7':
+            c.set('val', 'DED3FF')
     import appendix
     specs = [f() for f in SLIDES] + [f() for f in appendix.APPENDIX]
     report = []
@@ -1280,8 +1292,9 @@ def build(dst, auto=False, hold=1700):
             if start:
                 starts[key] = start
             pa.put(key, prims, alpha=alpha, xf=xf or Xf(), group=group)
-        if sp.bar:
+        if sp.badge:
             pa.put('top/badge', badge_prims(), group=False)
+        if sp.bar:
             for p in topbar_prims(sp.cur, sp.done):
                 pa.put(p[1], [p], group=False)
         # 효과

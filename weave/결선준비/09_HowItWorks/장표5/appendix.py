@@ -85,7 +85,7 @@ def a_divider():
     s.add('apx/d1', [caption('apx/d1', [[('Appendix', PURPLE)]], 640, 260, size=44)])
     s.add('apx/d2', [T('apx/d2', 200, 342, 880, 64,
                        ['단계별 모듈 역할 분담 · Reasoning Embedding 원리 · 삼성 PDE(지식 그래프)와의 보완 관계',
-                        '3가지 UX 공통 파이프라인 · 온디바이스 지연시간 및 자원 예산 · 주요 Q&A'],
+                        '3가지 UX 공통 파이프라인 · 주요 질의응답(Q&A)'],
                        size=14, color=SUB, align='c', lnspc=22)])
     return s
 
@@ -137,20 +137,20 @@ def a_rem():
     out = [R('apx/r/bg', x2, y, w, h, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD),
            T('apx/r/t', x2 + 22, y + 18, 340, 30, 'Reasoning Embedding (추론 임베딩)', size=14.5, color=PURPLE, weight='b', anchor='ctr'),
            T('apx/r/s', x2 + 22, y + 58, w - 44, 22, '단어가 안 겹쳐도 답의 단서가 될 기록을 가깝게 배치합니다', size=12, color=INK, weight='b')]
-    cx, cy = x2 + 150, y + 190
-    out.append(R('apx/r/near', cx - 92, cy - 70, 184, 140, prst='ellipse', fill=None, line=PURPLE2, line_w=1.5, dash='dash'))
+    cx, cy = x2 + 150, y + 178
+    out.append(R('apx/r/near', cx - 92, cy - 64, 184, 128, prst='ellipse', fill=None, line=PURPLE2, line_w=1.5, dash='dash'))
     out.append(R('apx/r/star', cx - 11, cy - 11, 22, 22, prst='star5', fill=PURPLE, line='FFFFFF', line_w=1.5))
-    out.append(T('apx/r/sl', cx - 60, cy + 12, 120, 18, '질문 ①', size=9.5, color=PURPLE, weight='b', align='c'))
-    out.append(R('apx/r/k0', x2 + 380, y + 230, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=LINE, line_w=1.0, dash='dash'))
-    out.append(P('apx/r/k0i', ICON['talk'], x2 + 388, y + 235, 20, 20, alpha=55))
-    out.append(T('apx/r/k0t', x2 + 412, y + 230, 90, 30, '지은 카톡', size=10, color=MUTE, anchor='ctr'))
-    out.append(T('apx/r/k0l', x2 + 372, y + 262, 140, 18, '일반 임베딩 (멈)', size=9, color=MUTE, align='c'))
+    out.append(T('apx/r/sl', cx - 60, cy + 12, 120, 18, '질문 ①', size=9.5, color=PURPLE, weight='m', align='c'))
+    out.append(R('apx/r/k0', x2 + 380, y + 202, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=LINE, line_w=1.0, dash='dash'))
+    out.append(P('apx/r/k0i', ICON['talk'], x2 + 388, y + 207, 20, 20, alpha=55))
+    out.append(T('apx/r/k0t', x2 + 412, y + 202, 90, 30, '지은 카톡', size=10, color=MUTE, anchor='ctr'))
+    out.append(T('apx/r/k0l', x2 + 372, y + 234, 140, 18, '일반 임베딩 (멂)', size=9, color=MUTE, align='c'))
     out.append(R('apx/r/k1', cx + 16, cy - 46, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=RING, line_w=1.8))
     out.append(P('apx/r/k1i', ICON['talk'], cx + 24, cy - 41, 20, 20))
     out.append(T('apx/r/k1t', cx + 48, cy - 46, 90, 30, '지은 카톡', size=10, color=INK, weight='b', anchor='ctr'))
-    out.append(C('apx/r/arr', [(x2 + 378, y + 238), (x2 + 330, y + 200), (cx + 180, cy - 40), (cx + 138, cy - 31)], w=1.8, color=PURPLE2,
+    out.append(C('apx/r/arr', [(x2 + 378, y + 210), (x2 + 330, y + 182), (cx + 180, cy - 40), (cx + 138, cy - 31)], w=1.8, color=PURPLE2,
                  dash='dash', tail='triangle'))
-    out.append(T('apx/r/q', x2 + 300, y + 112, 220, 40, ['‘박스 정리 다 했어!', '휴지 안 사 와도 돼’'], size=10, color=SUB, lnspc=14))
+    out.append(T('apx/r/q', x2 + 300, y + 106, 220, 40, ['‘박스 정리 다 했어!', '휴지 안 사 와도 돼’'], size=10, color=SUB, lnspc=14))
     out.append(T('apx/r/f', x2 + 22, y + 264, w - 44, 22, '동일 크기의 경량 임베딩 모델을 추론형 쌍(Query-Clue)으로 파인튜닝합니다', size=10.5, color=SUB))
     s.add('apx/r', out)
     # 아래: 논문 근거
@@ -230,10 +230,10 @@ def a_hops():
            T('apx/n/t', 92, 484, 600, 24, '왜 모든 카톡을 색인 시점에 미리 그래프로 변환하지 않나요?', size=13, color=PURPLE, weight='b'),
            T('apx/n/l', 92, 514, 1100, 70,
              ['• 사용자가 나중에 어떤 질문을 할지 모르는 상태에서 매일 쌓이는 모든 일상 메시지를 LLM으로 사전 해석하면 배터리·연산 부담이 과도합니다.',
-              '• 또한 그래프 기반 멀티홉 검색(HippoRAG)의 오류 분석에서도 전체 오류 100건 중 76건이 사전 개체·관계 추출(OpenIE/NER) 누락에서 발생했습니다¹.'],
+              '• 또한 그래프 기반 멀티홉 검색(HippoRAG)의 오류 분석에서도 질문과 문서에서 정보를 뽑는 단계(100건 중 76건)에서 가장 많이 막혔습니다¹.'],
              size=11.5, color=BODY, lnspc=18)]
     s.add('apx/n', out)
-    foot(s, '¹ Gutiérrez et al., "HippoRAG", NeurIPS 2024, Appendix F (MuSiQue 오류 100건 분석): 질의 개체 추출 오류 48건 + 문서 정보 추출(OpenIE) 누락 28건 = 76%.',
+    foot(s, '¹ Gutiérrez et al., "HippoRAG", NeurIPS 2024, Appendix F (MuSiQue 오류 100건 분석): 질의 개체 추출 오류(NER) 48건 + 문서 정보 추출 누락(OpenIE) 28건 = 76%.',
          y=612)
     return s
 
@@ -248,7 +248,7 @@ def a_compare():
             ['Weave (제안 방식)', ['추론형 임베딩(Reasoning Embedding)과 질의 재작성,', '메타데이터 필터를 결합해 암묵적 단서를 연쇄 탐색합니다'], '한국어 일상 기록에 맞춘 추론형 임베딩 파인튜닝 데이터가 필요합니다'],
             ['지식 그래프 + Weave 결합', '정형 관계(PDE)와 비정형 원문 추론(Weave)을 함께 활용합니다', '향후 삼성 PDE 위에서 가장 완성도 높은 온디바이스 검색이 됩니다']]
     table(s, 'apx/t', 70, 148, [240, 450, 450], ['접근 방식', '핵심 강점', '와인 질문 시나리오에서의 전제 조건 및 한계'], rows, row_h=80, hi=2)
-    foot(s, '그래프와 원문 벡터 검색을 상호보완적으로 결합할 때 멀티홉 성능이 극대화됨: Gutiérrez et al., HippoRAG (NeurIPS 2024); Han et al., "RAG vs. GraphRAG" (arXiv 2025).',
+    foot(s, '참고: 그래프 검색과 원문 벡터 검색은 각각 잘하는 질문이 다르며, 함께 쓰면 더 좋아진다는 결과 — Gutiérrez et al., HippoRAG (NeurIPS 2024); Han et al., "RAG vs. GraphRAG" (arXiv 2025).',
          y=540)
     return s
 
@@ -259,35 +259,14 @@ def a_ux():
                     '공항에서는 위치와 탑승권으로 Weave가 먼저 질문을 만들어 아내의 카톡과 링크를 이어 보낼 말을 추천합니다.')
     head(s, [('세 가지 UX 시나리오 모두 ', INK), ('동일한 5단계 파이프라인', PURPLE), ('으로 동작합니다', INK)],
          '00 데이터 색인 위에서 01 상황 인식 → 02 질의 재작성 → 03 연쇄 탐색 → 04 결과 제공으로 이어지는 공통 엔진')
-    rows = [[['UX 1  기억 통합 검색', '통화 중 업무 파악'], '통화 화면에서\n위로 쓸어 올려 검색', ['‘언제 어디서 회의?’ →', '‘최신 회의록·안건은?’'], ['캘린더 일정 → 최신 회의 노트', '→ 민수 님 이메일 연쇄 탐색'], ['핵심 3줄 요약 카드', '+ 연결된 원본 기록']],
+    rows = [[['UX 1  기록 통합 검색', '통화 중 업무 파악'], '통화 화면에서\n위로 쓸어 올려 검색', ['‘시연은 언제 어디서?’ →', '‘최종 순서와 자료는?’'], ['캘린더 일정 → 최신 회의 노트', '→ 민수 님 이메일 연쇄 탐색'], ['핵심 3줄 요약 카드', '+ 연결된 원본 기록']],
             [['UX 2  단서로 찾는 기억', '검색창 자동 완성'], '키보드 위\nWeave 실타래 버튼 탭', ['‘집들이는 언제였지?’ →', '‘[그날] 마셨던 와인은?’'], ['지은 카톡(3월 15일 추출)', '→ 3/15 갤러리 사진 + OCR'], ['배비치 소비뇽 블랑', '탭 한 번에 자동 완성']],
-            [['UX 3  먼저 건네는 기억', '공항 도착 선제 추천'], ['위치(공항) + 탑승권 +', '아내와의 카톡 맥락 감지'], ['상황 신호로 Weave가', '내부 질의를 자동 생성'], ['아내 카톡(‘갈색병 사다 줘’)', '→ 링크 프리뷰 정식 명칭 확인'], ['보낼 카톡 문구 선제 추천', '(에스티 로더 갈색병)']]]
+            [['UX 3  먼저 건네는 기억', '공항 도착 선제 추천'], ['위치(공항) + 탑승권 +', '아내와의 카톡 맥락 감지'], ['상황 신호로 Weave가', '내부 질의를 자동 생성'], ['아내 카톡(‘동생이 이 갈색병 좋대’)', '→ 링크 프리뷰 정식 명칭 확인'], ['보낼 카톡 문구 선제 추천', '(에스티 로더 갈색병)']]]
     table(s, 'apx/t', 70, 148, [230, 190, 230, 260, 230], ['시나리오', '01 상황 인식', '02 질의 재작성', '03 연쇄 탐색 (Hop 1 → 2)', '04 결과 제공'], rows,
           row_h=96, hi=1, pt=11)
     s.add('apx/n', [T('apx/n', 70, 488, 1140, 50,
                       ['• 중간 단서는 날짜(UX 2)뿐만 아니라 담당자 이름(UX 1, ‘민수 님’), 별칭·상품 링크(UX 3, ‘갈색병’ → 정식 제품명)까지 동일하게 이어집니다.',
                        '• 모든 시나리오에서 앱을 전환하지 않고 현재 보고 있던 화면·키보드 위에서 즉시 결과를 전달합니다.'], size=11.5, color=SUB, lnspc=18)])
-    return s
-
-
-def a_perf():
-    s = Slide('apx_perf', trans=('fade', 400), bar=False,
-              notes='온디바이스 실행 시간과 자원 예산입니다. 무거운 색인은 충전 중 유휴 시간에 미리 해 두고, 실시간 검색에서는 짧은 질의 분해와 경량 벡터 내적, 조건 필터만 수행해 1초 안에 응답합니다.')
-    head(s, [('온디바이스 ', INK), ('실시간 응답 지연시간과 메모리 예산', PURPLE), (' 설계', INK)],
-         '무거운 색인은 유휴 시간에 미리 끝내고, 검색 시점에는 꼭 필요한 경량 연산만 수행합니다', size=23)
-    rows = [['00 데이터 색인 (사전 작업)', '충전 중 · 기기 유휴 시 (WorkManager)', '실시간 지연 0 ms', '신규 메시지·사진 증분 임베딩 및 메타데이터 색인 (배터리 영향 최소화)'],
-            ['01 상황 인식 + 02 질의 재작성', '온디바이스 sLLM (짧은 하위 질문 생성)', '약 300 ~ 400 ms', '수십 토큰 이내의 구조화된 하위 질의 2개만 생성해 생성 지연 최소화'],
-            ['03 연쇄 탐색 (Hop 1 → Hop 2)', 'Reasoning Embedding + 메타데이터 필터', '약 150 ~ 250 ms', '수만 건 개인 기록 벡터 내적(< 15 ms) + 날짜 필터링 + 타겟 사진 1장 OCR'],
-            ['04 결과 제공 (전체 체감 시간)', '키보드·바텀시트 UI 즉시 렌더링', '총 0.6 ~ 0.9초 이내', '전체 기록을 LLM이 매번 읽지 않고 최종 후보 1~2건만 정제해 즉시 응답']]
-    table(s, 'apx/t', 70, 148, [250, 280, 190, 420], ['파이프라인 단계', '실행 시점 및 담당 엔진', '목표 지연시간', '온디바이스 최적화 핵심 설계'], rows, row_h=74, hi=3, pt=11)
-    out = [R('apx/p/bg', 70, 498, 1140, 116, prst='roundRect', radius=18, fill=LAV2, line=LINE2, line_w=1.0),
-           T('apx/p/t', 92, 512, 600, 24, '메모리(RAM) 및 전력 최적화 전략', size=13, color=PURPLE, weight='b'),
-           T('apx/p/l', 92, 540, 1100, 64,
-             ['• 모델 가중치 공유: 질의 재작성용 sLLM은 갤럭시 시스템 내장 온디바이스 LLM에 경량 LoRA 어댑터만 올려 추가 RAM 점유를 최소화합니다.',
-              '• 추론형 임베딩 경량화: Reasoning Embedding은 모델 크기를 키우지 않고 추론 데이터셋(Query-Clue 쌍) 파인튜닝과 INT4/INT8 양자화로 NPU/GPU에서 구동합니다.'],
-             size=11.5, color=BODY, lnspc=18)]
-    s.add('apx/p', out)
-    foot(s, '참고: Android WorkManager 충전·유휴 제약 조건(JobScheduler) 및 온디바이스 INT4 양자화 sLLM/Embedding 추론 파이프라인 기준.', y=630)
     return s
 
 
@@ -316,12 +295,12 @@ def q_sameday():
     s = Slide('apx_q_day', trans=('fade', 400), bar=False,
               notes='같은 날 찍었다는 이유만으로 그 집들이 와인이라고 정하지 않습니다. 메시지의 이따 올 때가 받은 날과 모임 날을 이어 주고, 사진의 시각과 장소와 내용이 뒷받침합니다.')
     head(s, [('Q. ', PURPLE), ('같은 날 찍은 사진이면 무조건 집들이 와인이라고 단정하나요?', INK)], size=23)
-    qcard(s, 'apx/q2', 70, 140, 600, 330, 'A. 날짜 하나로 단정하지 않고 다중 근거를 교차 확인합니다',
+    qcard(s, 'apx/q2', 70, 140, 600, 384, 'A. 날짜 하나로 단정하지 않고 다중 근거를 교차 확인합니다',
           ['• 메시지의 ‘이따 올 때’ 표현이 카톡 수신일과 모임 당일을 이어 주고,',
            '• 사진의 촬영 시각(저녁 8시), 위치 정보, 시각적 내용(식탁·와인병)이',
            '  그 모임에서 찍은 사진인지를 함께 뒷받침합니다.',
            '• 만약 같은 날 다른 와인 사진이 더 있거나 근거가 모호하면,',
-           '  단정하지 않고 후보 사진과 원문 출처를 함께 보여 주어 사용자가 고릅니다.'], pt=13)
+           '  단정하지 않고 후보 사진과 원문 출처를 함께 보여 주어 사용자가 고릅니다.'], pt=12.5)
     ev = [('talk', '‘이따 올 때’ (대화 맥락)', '카톡을 받은 날 = 집들이 모임 당일 (3월 15일)'),
           ('gallery', '저녁 8시 14분 (촬영 시각)', '오후 4시 12분 카톡 이후 저녁 모임 시간대에 촬영'),
           ('map', '지은이네 집 근처 (위치 메타데이터)', '사진 EXIF 위치 정보와 초대 장소의 일치'),
@@ -348,7 +327,7 @@ def q_apple():
            '  찾아 답하는 Personal Context를 발표하며 시장의 방향성을 입증했습니다.',
            '• 이는 온디바이스 개인 기록 검색이 스마트폰 AI의 다음 핵심 경쟁 축이라는',
            '  가장 확실한 시장 신호입니다.'],
-          ['Apple Siri AI 타임라인: 발표 후 영어·한국어 베타 순차 도입 중¹'], pt=13)
+          ['Apple Siri AI 타임라인: 발표 후 영어·한국어 베타 순차 도입 중¹'], pt=12.5)
     out = [R('apx/w/bg', 660, 140, 550, 380, prst='roundRect', radius=20, fill='FFFFFF', line=RING, line_w=1.8, shadow=SHADOW_CARD),
            T('apx/w/t', 684, 158, 500, 26, 'Weave만의 3가지 차별점', size=14, color=PURPLE, weight='b')]
     pts = [('삼성 키보드·화면 위에서 즉시 완결', '음성 비서를 따로 부르지 않고 검색창·통화·메신저 어디서든 키보드 버튼 하나로 동작합니다'),
@@ -368,16 +347,16 @@ def q_llm():
     s = Slide('apx_q_llm', trans=('fade', 400), bar=False,
               notes='LLM은 글을 토큰마다 계산하며 만들어 연산량이 많고, 수많은 기록을 매번 읽기 어렵습니다. 임베딩은 입력당 한 번 계산해 후보를 고르고, LLM은 질문을 나누거나 최종 문장을 다듬을 때만 씁니다.')
     head(s, [('Q. ', PURPLE), ('왜 처음부터 LLM에게 모든 기록을 읽히지 않고 임베딩을 쓰나요?', INK)])
-    qcard(s, 'apx/q4', 70, 140, 560, 330, 'A. 찾는 일은 가벼운 임베딩에, 나누고 다듬는 일만 sLLM에 맡깁니다',
+    qcard(s, 'apx/q4', 70, 140, 560, 350, 'A. 찾는 일은 가벼운 임베딩에, 나누고 다듬는 일만 sLLM에 맡깁니다',
           ['• LLM은 글자를 토큰마다 반복 생성(Autoregressive)하므로 연산량이 크고,',
            '  수만 건의 개인 기록을 매 질문마다 컨텍스트에 넣어 읽히기 어렵습니다.',
            '• 반면 임베딩은 기록당 미리 한 번만 계산해 두고 벡터 내적으로 즉시 찾으며,',
            '  sLLM은 질문을 쪼개거나(02) 최종 추려진 단서 1~2건을 읽을 때만 호출합니다.'],
-          ['기록 벡터는 충전 중이거나 기기가 쉴 때 백그라운드에서 미리 만들어 둡니다.'], pt=13)
+          ['기록 벡터는 충전 중이거나 기기가 쉴 때 백그라운드에서 미리 만들어 둡니다.'], pt=12.5)
     rows = [['출력 형태', '토큰을 하나씩 생성 (문장)', '고정 차원 의미 벡터 1개'],
-            ['연산 비용', '생성 토큰 수만큼 반복 연산 (무거움)', '입력당 단일 패스 + 내적 연산 (가벼움)'],
-            ['대량 기록 처리', '매 질문마다 원문을 읽어야 함', '미리 색인해 두고 수 밀리초 내 검색']]
-    table(s, 'apx/t', 660, 140, [140, 205, 205], ['구분', 'LLM 단독 처리', '임베딩 검색 (Weave)'], rows, row_h=78)
+            ['연산 비용', ['생성 토큰 수만큼 반복 연산', '(무거움)'], ['입력당 단일 패스 + 내적 연산', '(가벼움)']],
+            ['대량 기록 처리', '매 질문마다 원문을 읽어야 함', '미리 색인해 두고 즉시 검색']]
+    table(s, 'apx/t', 660, 140, [130, 210, 210], ['구분', 'LLM 단독 처리', '임베딩 검색 (Weave)'], rows, row_h=88, pt=11)
     return s
 
 
@@ -387,7 +366,7 @@ def q_data():
     head(s, [('Q. ', PURPLE), ('외부 앱 데이터 접근 권한과 사생활 보호는 어떻게 하나요?', INK)],
          '사용자가 허용한 기록만, 외부 서버 전송 없이 100% 기기 안에서 처리합니다')
     cards = [('데이터 접근 방식', ['• 삼성 기본 앱(갤러리·노트·캘린더·메일·월렛)은', '  사용자 동의 아래 기기 내 API로 연동합니다.', '• 카카오톡 등 외부 메신저는 사용자가 허용한', '  알림 텍스트(NotificationListener)만 색인합니다¹.'],
-              ['통화 음성은 상시 녹음·청취하지 않으며,', '사용자가 직접 실행할 때만 동작합니다.']),
+              ['통화 내용은 듣지도 저장하지도 않으며,', '통화 중 검색도 화면에서 직접 실행할 때만 동작합니다.']),
              ('배터리 및 발열 관리', ['• 초기 대량 색인은 기기가 충전 중이거나', '  유휴 상태일 때만 백그라운드로 수행합니다².', '• 실시간 사용 중에는 가벼운 벡터 검색과', '  추려진 단서 1~2건에 대한 sLLM만 실행합니다.'],
               ['평소 배터리 소모와 발열 영향을', '체감할 수 없는 수준으로 억제합니다.']),
              ('사생활 보호 및 제어권', ['• 모든 원본 기록과 색인(Hybrid Index)은', '  클라우드 전송 없이 기기 내부에만 저장됩니다.', '• 암호화 키는 Android Keystore 하드웨어', '  보안 영역으로 철저히 보호합니다³.'],
@@ -420,4 +399,4 @@ def a_credits():
     return s
 
 
-APPENDIX = [a_divider, a_roles, a_rem, a_kg, a_hops, a_compare, a_ux, a_perf, q_pde, q_sameday, q_apple, q_llm, q_data, a_credits]
+APPENDIX = [a_divider, a_roles, a_rem, a_kg, a_hops, a_compare, a_ux, q_pde, q_sameday, q_apple, q_llm, q_data, a_credits]

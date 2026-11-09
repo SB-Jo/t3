@@ -242,13 +242,30 @@ def topbar_prims(cur=None, done=(), alpha=100):
                           'todo': ('F1EEF8', 'C3BDD2', 'BDB7CC', 'sb')}[state]
         cy = y0 + hh / 2
         out.append(R('top/b%s' % no, x + 8, cy - 11, 22, 22, prst='ellipse', fill=bf, line=None))
-        out.append(T('top/bn%s' % no, x + 8, cy - 11, 22, 22, '✓' if state == 'done' else no, size=8, color=bt, weight='b',
-                     align='c', anchor='ctr'))
+        if state == 'done':
+            out += check_icon('top/bn%s' % no, x + 19, cy, s=9.5, color=bt, w=2.0)
+        else:
+            out.append(T('top/bn%s' % no, x + 8, cy - 11, 22, 22, no, size=8, color=bt, weight='b',
+                         align='c', anchor='ctr'))
         out.append(T('top/l%s' % no, x + 36, y0, w - 34, hh, ko, size=BAR_PT, color=lc, weight=lw, anchor='ctr'))
         if i < len(STAGES) - 1:
             gx = lay[i + 1][0] - x - w
             out.append(T('top/a%d' % i, x + w + gx / 2 - 11, y0, 22, hh, '→', size=10, color='C9C0E8', align='c', anchor='ctr'))
     return out
+
+
+def check_icon(name, cx, cy, s=11, color=PURPLE, w=2.2):
+    """벡터 체크(✓): 두 선분으로 그려 글꼴 대체 없이 또렷하게."""
+    p0 = (cx - s * 0.44, cy + s * 0.04)
+    p1 = (cx - s * 0.10, cy + s * 0.38)
+    p2 = (cx + s * 0.46, cy - s * 0.32)
+    return [line(name + '/a', p0, p1, color=color, w=w),
+            line(name + '/b', p1, p2, color=color, w=w)]
+
+
+def star4_icon(name, cx, cy, r=6.5, color=PURPLE):
+    """벡터 4각 별(✦): 글꼴 대체 없이 또렷하게."""
+    return [R(name, cx - r, cy - r, 2 * r, 2 * r, prst='star4', fill=color, line=None)]
 
 
 def caption(name, lines, x, y, size=24, align='c', w=None, lh=None, color=INK):
