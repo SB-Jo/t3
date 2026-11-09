@@ -65,7 +65,7 @@
   <div class="nm" data-x style="left:92px; top:174px;">기록 통합 검색</div>
   <div class="one" data-x style="left:48px; top:214px;">여러 앱에 흩어진 업무·일정 기록을 찾아 한 번에 요약합니다.</div>
 
-  <!-- 흩어진 기록: 11/3 회의록 → 11/10 회의록 → 메일 · 캘린더. 회의록의 '민수 님'이 민수 메일로 이어짐(다음 홉) -->
+  <!-- 흩어진 기록: 11/3 회의록 → 11/10 회의록 → 메일 · 캘린더. 회의록의 '민수님'이 민수 메일로 이어짐(다음 홉) -->
   <div class="card" id="note0" style="left:40px; top:258px; width:256px; height:82px;"></div>
   <img class="app" src="../../assets/icons/app-notes.png" style="left:54px; top:267px; width:18px; height:18px; border-radius:5px; z-index:6;">
   <div class="t-meta" data-x style="left:79px; top:268px;">삼성노트 · 11월 3일 (화)</div>
@@ -79,7 +79,7 @@
   <div class="inset" style="left:54px; top:410px; width:228px; height:64px; z-index:6;"></div>
   <div class="t12" data-x style="left:66px; top:415px;">제품 소개 빼고 <b style="color:#6B4EFF">문제 상황부터</b></div>
   <div class="t12" data-x style="left:66px; top:434px;"><b style="color:#6B4EFF">→ 라이브 데모 → 관람객 체험</b></div>
-  <div class="t12" data-x style="left:66px; top:453px;">자료는 <b style="color:#6B4EFF" id="minsu">민수 님</b>이 최종 정리 후 공유 예정</div>
+  <div class="t12" data-x style="left:66px; top:453px;">자료는 <b style="color:#6B4EFF" id="minsu">민수님</b>이 최종 정리 후 공유 예정</div>
   <img class="app" id="ic-mail" src="../../assets/icons/galaxy/samsung-email-blue.png" alt="" style="left:128px; top:512px; width:48px; height:48px; transform:rotate(7deg); z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
   <img class="app" id="ic-cal" src="../../assets/icons/galaxy/samsung-calendar.png" alt="" style="left:70px; top:612px; width:48px; height:48px; transform:rotate(-6deg); z-index:6; filter:drop-shadow(0 6px 10px rgba(60,40,120,.18));">
 
@@ -95,7 +95,7 @@
   <div class="lav" id="sum1" style="left:343px; top:348px; width:222px; height:76px;"></div>
   <svg class="app" viewBox="0 0 24 24" style="left:351px; top:354px; width:11px; height:11px; z-index:7;"><path d="M12 2.5c.6 4.6 2.9 6.9 7.5 7.5-4.6.6-6.9 2.9-7.5 7.5-.6-4.6-2.9-6.9-7.5-7.5 4.6-.6 6.9-2.9 7.5-7.5z" fill="#6B4EFF"/></svg>
   <div class="lab" data-x style="left:365px; top:351px; font-size:11px; line-height:15px;">요약</div>
-  <div class="ui-sum" data-x style="left:351px; top:369px;">시연은 <b>11월 19일(목) 오후 2시</b>, 수원 <b>3번 부스</b>예요.<br>순서는 <b>문제 상황, 라이브 데모, 관람객 체험</b>이에요.<br>최종본 Demo_Final.pptx는 <b>민수 님 메일</b>에 있어요.</div>
+  <div class="ui-sum" data-x style="left:351px; top:369px;">시연은 <b>11월 19일(목) 오후 2시</b>, 수원 <b>3번 부스</b>예요.<br>순서는 <b>문제 상황, 라이브 데모, 관람객 체험</b>이에요.<br>최종본 Demo_Final.pptx는 <b>민수님 메일</b>에 있어요.</div>
   <div class="ttl2" data-x style="left:345px; top:430px; font-size:11px;">연결된 기억</div>
   <div class="row" id="r1" style="left:343px; top:448px; width:222px; height:36px;"></div>
   <img class="app" src="../../assets/icons/app-notes.png" style="left:350px; top:456px; width:20px; height:20px; border-radius:5px; z-index:7;">
@@ -228,7 +228,7 @@ SC.run(async (sc) => {
   thread(back, [R('note').r + 2, R('note').cy], [phoneL - 1, R('r1').cy], { dash: '4 4' });
   thread(back, [R('ic-mail').r + 4, R('ic-mail').cy], [phoneL - 1, R('r2').cy], { dash: '4 4' });
   thread(back, [R('ic-cal').r + 4, R('ic-cal').cy], [phoneL - 1, R('r3').cy], { dash: '4 4' });
-  // 결선: 메모의 '민수 님' 바로 아래에서 민수 메일 아이콘까지는 실선(단서가 다음 기록으로 이어짐), 메일 → 캘린더는 점선(같은 일)
+  // 결선: 메모의 '민수님' 바로 아래에서 민수 메일 아이콘까지는 실선(단서가 다음 기록으로 이어짐), 메일 → 캘린더는 점선(같은 일)
   { const n = R('note'), m = R('ic-mail'), k = R('ic-cal'), mz = R('minsu');
     const S = [mz.cx, n.b + 1], M = [m.cx, m.cy], K = [k.cx, k.cy];
     const d1 = `M${S[0]} ${S[1]} C ${S[0]} ${S[1] + 30}, ${M[0] + 6} ${M[1] - 40}, ${M[0]} ${M[1]}`;

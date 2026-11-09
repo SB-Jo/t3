@@ -28,6 +28,9 @@ GitHub 저장소(gnueaj/t3)는 공개로 유지하므로 삼성 글꼴 파일은
 
 ## 2026-11-09 추가 (글꼴 시안: 한글 Korean Sans + 영문 Sharp Sans)
 
+같은 날 시안을 본 뒤 덱과 영상은 SamsungOne 그대로 가기로 했어요. 시안 파일은 작업 컴퓨터의 `11_중간본/이전판/SharpSans시안_1109/`에만 있어요.
+
+
 - `SamsungKoreanSans-Medium.woff2`, `SamsungKoreanSans-Bold.woff2`: https://www.samsung.com/sec/static/_font/_kor_sans/SamsungKoreanSans-Medium.woff2 , https://www.samsung.com/sec/static/_font/_kor_sans/SamsungKoreanSans-Bold.woff2
   - https://www.samsung.com/sec/static/_css/common.css 에 'Samsung Korea Sans'로 선언돼 있어요(주석 "21-11-01 NEW KOR font"). `.kor-sans`가 'Samsung Korea Sans', 'Samsung Sharp Sans' 순서로 써요.
   - 글꼴 정보: Samsung Korean Sans Medium·Bold, Copyright © 2021 Yoondesigngroup, 한글 2,350자, 영문 알파벳은 없어요(fontTools로 확인).
