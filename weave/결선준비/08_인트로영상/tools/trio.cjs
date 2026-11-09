@@ -21,11 +21,11 @@ const pngSize = f => { const b = fs.readFileSync(f); return [b.readUInt32BE(16),
   const m = await p0.evaluate(() => window.__marks), G = await p0.evaluate(() => window.__gif);
   await p0.close();
   const FW = 452, scale = G.w / FW;                    // 스프라이트 칸 크기로 바로 찍어 글자를 선명하게
-  // 구간: [시작, 끝, 칸 수]. 칸 수의 합이 G.n
+  // 구간: [시작, 끝, 칸 수]. 칸 수의 합이 G.n(v21: 30fps라 144칸, 빠르기는 20fps 때와 같음)
   const CLIPS = [
-    { dim: true, segs: [[m.tType + 0.4, m.tGo + 0.55, 38], [m.tSum + 0.9, m.tSum + 5.3, 58]] },                     // 입력 → 검색 → 연결된 기억 → 요약
-    { dim: false, segs: [[m.tZ + 0.7, m.tZ + 2.25, 34], [m.t2 + 0.85, m.t2 + 1.7, 18], [m.pTap3 - 0.25, m.pTap3 + 1.7, 44]] },   // 입력 → 답으로 바뀜 → 검색 결과
-    { dim: false, segs: [[m.tapW - 0.05, m.tapW + 1.6, 32], [m.tapI + 0.1, m.reply + 0.55, 64]] },                    // 추천 → 보내기 → 답장
+    { dim: true, segs: [[m.tType + 0.4, m.tGo + 0.55, 57], [m.tSum + 0.9, m.tSum + 5.3, 87]] },                     // 입력 → 검색 → 연결된 기억 → 요약
+    { dim: false, segs: [[m.tZ + 0.7, m.tZ + 2.25, 51], [m.t2 + 0.85, m.t2 + 1.7, 27], [m.pTap3 - 0.25, m.pTap3 + 1.7, 66]] },   // 입력 → 답으로 바뀜 → 검색 결과
+    { dim: false, segs: [[m.tapW - 0.05, m.tapW + 1.6, 48], [m.tapI + 0.1, m.reply + 0.55, 96]] },                    // 추천 → 보내기 → 답장
   ];
   const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: scale });
   const p = await ctx.newPage();

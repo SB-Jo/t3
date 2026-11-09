@@ -1,4 +1,4 @@
-/* Weave 결선 모션그래픽 v19 (2026-11-09) — Pain Points 뒤에 트는 세 시나리오 소개 영상.
+/* Weave 결선 모션그래픽 v21 (2026-11-09) — Pain Points 뒤에 트는 세 시나리오 소개 영상.
    오프닝(로고와 한 문장) → 1 기록 통합 검색(통화, 요약) → 2 단서로 찾는 기억(구글 창, 와인) → 3 먼저 건네는 기억(카톡 링크 미리보기) → 세 화면 → 로고.
    v11: 85초 → 약 2분. 한 번에 하나씩(제목 → 말풍선 → 생각 → 검색 → 기록 하나씩 → 요약을 크게 → 답변), 장면 카드는 별 없이 번호와 이름에 빛, 메일 버튼과 갤러리 삭제.
    v12: 120초 → 100초. 순서와 비트는 그대로 두고 머무는 시간과 비트 안의 간격만 줄임(v10보다 늘어난 34초 중 24초가 1에 몰려 있어서 1을 가장 많이 줄임).
@@ -10,6 +10,8 @@
    v17: 길이 그대로(118.3초). 02 처음 큰 글은 둘째 줄이 보라, 02 제목은 '기억 속 단서를 엮어,'가 보라, 갤러리 카드 제목은 처음부터(날짜만 건너온 뒤),
         03 탑승권을 0.5초 더 보여 줌, 03 제목 둘째 줄 '필요한 말을 먼저 추천합니다', 추천 시트의 'Weave'를 보라로, 끝 장면 GIF에서 검색 불러오기 줄을 뺌.
    v18: 첫 문장 '우리들의 흩어진 기억, Weave가 잇습니다', 01의 '민수님'(붙여 씀).
+   v21: 첫 문장 '일상 속 흩어진 기억, Weave가 이어 줍니다'(잇습니다 → 이어 줍니다). 끝 장면 세 화면을 30fps로(20fps는 끊겨 보임), 번호 원의 입체감을 줄임.
+        수미상관: 첫 문장을 끝 화면 한 줄 소개와 같은 글꼴로, 끝 화면의 '그때 그거? Weave got it!'을 빼고 한 줄 소개를 로고 아래 같은 간격·박자로.
    v20: 01 요약에서 돌아올 때 제목을 다시 띄우지 않고, 말풍선 + 휴대폰을 290px 왼쪽으로(묶음이 화면 가운데). 03 아내 카톡은 위 두 플로팅 묶음의 가운데에.
         음악은 북이 빠지는 마디 없이 다시 편집.
    v19: 첫 문장 '일상 속 흩어진 기억, Weave가 잇습니다'. 01 검색 뒤 기록이 하나씩 뜨는 구간을 1.2배 빠르게(SPD1, 1.8초 줄어 남는 시간은 03 답장 뒤에 붙음).
@@ -66,7 +68,7 @@ const LOGO_MIN = tReply + 2.1 + 0.35 + tTrioD;         // 답장을 읽을 시�
 const LOGO = D1 + Math.ceil((LOGO_MIN - D1) / BAR - 1e-6) * BAR;   // 로고는 곡의 마디 첫 박에(마지막 한 방)
 const tTrio = LOGO - tTrioD;                           // 세 화면이 모이는 때
 const DUR = LOGO + 5.5;                                // 끝 화면 5.5초
-const GIF = { w: 374, h: 777, cols: 12, fps: 20, n: 96, off: [0, 0.15, 0.3] };   // 끝 장면 스프라이트(tools/trio.cjs가 같은 값을 읽음)
+const GIF = { w: 374, h: 777, cols: 12, fps: 30, n: 144, off: [0, 0.15, 0.3] };   // v21: 20 → 30fps(60fps 영상에서 한 장이 세 프레임씩 머물러 끊겨 보였음)   // 끝 장면 스프라이트(tools/trio.cjs가 같은 값을 읽음)
 
 const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 1.0 } });
 const EV = [];
@@ -559,14 +561,13 @@ async function build() {
       if (im._f !== f) { im._f = f; im.style.transform = `translate(${-(f % GIF.cols) * GIF.w}px, ${-Math.floor(f / GIF.cols) * GIF.h}px)`; } }); });
   gsap.set('#logo .mark', { scale: 0.4, rotation: -30, opacity: 0 });
   gsap.set('#logo .word', { clipPath: 'inset(-50% 100% -50% -4%)', x: -30, autoAlpha: 0 });   // 감춰 두지 않으면 글자 그림자가 처음부터 옅게 비침
-  gsap.set(['#tag', '#sub'], { y: 24, opacity: 0 });
+  gsap.set('#sub', { y: 24, opacity: 0 });
   gsap.set('#fin', { opacity: 0 });
   tl.to('#logo .mark', { scale: 1, rotation: 0, opacity: 1, duration: 1.0, ease: 'back.out(1.6)' }, LOGO - 0.05); ev(LOGO, 'logo');
   tl.set('#logo .word', { autoAlpha: 1 }, LOGO + 0.25);
   tl.to('#logo .word', { clipPath: 'inset(-50% -5% -50% -4%)', x: 0, duration: 1.0, ease: 'expo.out' }, LOGO + 0.25);
   sweep('#logo .word', LOGO + 1.1, 1.3);
-  tl.to('#tag', { y: 0, opacity: 1, duration: 0.9, ease: 'expo.out' }, LOGO + 0.9);
-  tl.to('#sub', { y: 0, opacity: 1, duration: 0.9, ease: 'expo.out' }, LOGO + 1.4);
+  tl.to('#sub', { y: 0, opacity: 1, duration: 0.9, ease: 'expo.out' }, LOGO + 0.95);           // v21: 오프닝처럼 로고 글자 0.7초 뒤에 한 줄(수미상관)
   tl.to('#gai', { autoAlpha: 1, duration: 0.8, ease: 'power1.out' }, LOGO + 1.6);
   tl.to('#end', { scale: 1.02, duration: DUR - LOGO, ease: 'none' }, LOGO);
   tl.to('#fin', { opacity: 1, duration: 1.2, ease: 'power1.inOut' }, DUR - 1.2);
