@@ -1,5 +1,5 @@
 /* Weave 결선 모션그래픽 v21 (2026-11-09) — Pain Points 뒤에 트는 세 시나리오 소개 영상.
-   오프닝(로고와 한 문장) → 1 기록 통합 검색(통화, 요약) → 2 단서로 찾는 기억(구글 창, 와인) → 3 먼저 건네는 기억(카톡 링크 미리보기) → 세 화면 → 로고.
+   오프닝(로고와 한 문장) → 1 기록 통합 검색(통화, 요약) → 2 단서로 찾는 기억(구글 창, 와인) → 3 먼저 건네는 기억(카톡 링크 미리보기) → 로고.
    v11: 85초 → 약 2분. 한 번에 하나씩(제목 → 말풍선 → 생각 → 검색 → 기록 하나씩 → 요약을 크게 → 답변), 장면 카드는 별 없이 번호와 이름에 빛, 메일 버튼과 갤러리 삭제.
    v12: 120초 → 100초. 순서와 비트는 그대로 두고 머무는 시간과 비트 안의 간격만 줄임(v10보다 늘어난 34초 중 24초가 1에 몰려 있어서 1을 가장 많이 줄임).
    v13: 100초 → 107.5초. 장면 카드 빛은 이름에 한 번, 01 제목은 왼쪽 위로 옮겨 남음, 검색하면 연결된 기억이 바로 뜸, 02 검색어가 두 질문으로 갈라짐, 03 위치 → 탑승권 → 카톡 세 실, 끝 장면은 GIF처럼.
@@ -13,6 +13,8 @@
    v21: 첫 문장 '일상 속 흩어진 기억, Weave가 이어 줍니다'(잇습니다 → 이어 줍니다). 끝 장면 세 화면을 30fps로(20fps는 끊겨 보임), 번호 원의 입체감을 줄임.
         수미상관: 첫 문장을 끝 화면 한 줄 소개와 같은 글꼴(두 줄 모두 48px)로, 끝 화면의 '그때 그거? Weave got it!'을 빼고 한 줄 소개를 로고 아래 같은 간격·박자로.
         화질: 표지 영상처럼 4K(3840×2160)로 찍음. 끝 장면 세 화면은 두 배 화소 그림을 한 장씩 바꾸고, 다 그려진 뒤 찍음(__seek가 기다림).
+   v22: 끝 장면 세 화면을 뺌(다음 장 Solution과 겹치는 설명). 답장 뒤 휴대폰이 빠지면 곧바로 곡의 마지막 한 방에 로고(112.8 → 105.6초).
+        음악은 오프닝 뒤 북 없이 차오르는 두 마디(10–11)를 지나 9.6초 첫 말풍선에 터지고, 클라이맥스(32–39)를 끝까지 한 번 듣고 로고. 화질은 1440p(2560×1440).
    v20: 01 요약에서 돌아올 때 제목을 다시 띄우지 않고, 말풍선 + 휴대폰을 290px 왼쪽으로(묶음이 화면 가운데). 03 아내 카톡은 위 두 플로팅 묶음의 가운데에.
         음악은 북이 빠지는 마디 없이 다시 편집.
    v19: 첫 문장 '일상 속 흩어진 기억, Weave가 잇습니다'. 01 검색 뒤 기록이 하나씩 뜨는 구간을 1.2배 빠르게(SPD1, 1.8초 줄어 남는 시간은 03 답장 뒤에 붙음).
@@ -64,13 +66,9 @@ const g3 = tM3 + 1.75, tW = g3 + 2.0, tK = tW + 2.1, tL = tK + 2.45;  // 플로�
 const th3 = tL + 1.95;                                 // 위치와 카톡이 휴대폰으로 엮이는 실
 const pTapW = th3 + 2.1, pTapI = pTapW + 3.6, pTapS = pTapI + 1.6;    // Weave 버튼 · 입력하기 · 전송
 const tRead = pTapS + 1.05, tReply = pTapS + 2.1;      // 읽음(1이 사라짐) → 답장
-const tTrioD = 5.2;                                    // 세 화면이 머무는 시간(GIF처럼 움직임)
-const LOGO_MIN = tReply + 2.1 + 0.35 + tTrioD;         // 답장을 읽을 시간 + 휴대폰이 빠지는 시간 + 세 화면(로고가 마디에 맞아 남는 시간은 답장 뒤에 붙음)
+const LOGO_MIN = tReply + 1.9 + 0.35;                  // 답장을 읽을 시간 + 휴대폰이 빠지는 시간(v22: 세 화면 없이 곧바로 로고. 로고가 마디에 맞아 남는 시간은 답장 뒤에 붙음)
 const LOGO = D1 + Math.ceil((LOGO_MIN - D1) / BAR - 1e-6) * BAR;   // 로고는 곡의 마디 첫 박에(마지막 한 방)
-const tTrio = LOGO - tTrioD;                           // 세 화면이 모이는 때
 const DUR = LOGO + 5.5;                                // 끝 화면 5.5초
-const GIF = { w: 374, h: 777, fps: 30, n: 144, off: [0, 0.15, 0.3] };   // v21: 20 → 30fps(60fps 영상에서 한 장이 세 프레임씩 머물러 끊겨 보였음)   // 끝 장면 세 화면(tools/trio.cjs가 같은 값을 읽음)
-const gifSrc = (i, f) => `assets/img/trio/${i + 1}/f${String(f).padStart(3, '0')}.png`;
 
 const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 1.0 } });
 const EV = [];
@@ -90,7 +88,6 @@ const ctr = s => { const r = rectOf(s); return { x: r.left + r.width / 2, y: r.t
 const PH = '<span style="color:#9a96a6; font-weight:400">메시지 입력</span>';
 const QA = '지은이네 집들이 때 마셨던 와인', ANS = '배비치 소비뇽 블랑', MSGTX = '여보, 전에 말한 에스티 로더 갈색병<br>면세점에서 사 갈까?';
 const cont = [];                                       // 매 프레임 tl.seek 뒤에 부르는 함수들
-const pend = [];                                        // 아직 다 그려지지 않은 그림(__seek가 기다림)
 const seekAll = t => { tl.seek(t, false); for (const f of cont) f(t); };
 const when = (test, fn) => { let last; cont.push(t => { const v = test(t); if (v !== last) { last = v; fn(v); } }); };
 
@@ -268,7 +265,7 @@ async function build() {
     setD('#tQ2', `M${DT.qb.x} ${pb} C ${DT.qb.x} ${pb + 34}, ${DT.qb.x - 44} ${r2.top - 30}, ${DT.qb.x - 44} ${r2.top + 2}`); }   // 곧은 세로줄은 그라데이션이 안 그려져서 살짝 휜다
   gsap.set('.chap', { autoAlpha: 0 });
   gsap.set('.head', { autoAlpha: 0 });
-  gsap.set(['#fl1', '#fl2', '#fl3', '#fl4', '#fg', '#fw', '#fk', '#flLink', '#callQ', '#callA', '#flyChip', '#gai', '#tokA', '#tokC', '#qc1', '#qc2', '#trio'], { autoAlpha: 0 });
+  gsap.set(['#fl1', '#fl2', '#fl3', '#fl4', '#fg', '#fw', '#fk', '#flLink', '#callQ', '#callA', '#flyChip', '#gai', '#tokA', '#tokC', '#qc1', '#qc2'], { autoAlpha: 0 });
 
   /* ── 오프닝: 로고와 한 문장(끝 화면과 같은 로고) ── */
   gsap.set('#op .mark', { scale: 0.4, rotation: -30, opacity: 0 });
@@ -552,16 +549,7 @@ async function build() {
   reveal('#mReply', tReply); ev(tReply, 'msg');
 
   /* ── 끝 화면 (LOGO ~ DUR): 로고·문구를 충분히 읽을 수 있게 ── */
-  tl.to(phone, { y: '+=70', scale: '-=0.15', autoAlpha: 0, filter: 'blur(6px)', duration: 0.5, ease: 'power3.in' }, tTrio - 0.35);
-  // 세 화면이 나란히 모여 5쪽 Solution으로 이어진다
-  gsap.set('#trio .tp', { y: 90, opacity: 0, scale: 0.94 });
-  tl.set('#trio', { autoAlpha: 1 }, tTrio - 0.05);
-  tl.to('#trio .tp', { y: 0, opacity: 1, scale: 1, duration: 0.85, stagger: 0.16, ease: 'expo.out' }, tTrio);
-  tl.to('#trio', { opacity: 0, y: -30, filter: 'blur(8px)', duration: 0.45, ease: 'power2.in' }, LOGO - 0.42);
-  const gifs = $$('#trio .gif img');                                                          // 옛 데모 GIF처럼: 저마다 30fps로 넘어가고(거의 실제 빠르기), 시작이 조금씩 어긋난다
-  cont.push(t => { if (t < tTrio - 0.3 || t > LOGO + 0.1) return;
-    gifs.forEach((im, i) => { const f = clamp(Math.floor((t - tTrio - GIF.off[i]) * GIF.fps), 0, GIF.n - 1);
-      if (im._f !== f) { im._f = f; im.src = gifSrc(i, f); pend.push(im.decode().catch(() => {})); } }); });
+  tl.to(phone, { y: '+=70', scale: '-=0.15', autoAlpha: 0, filter: 'blur(6px)', duration: 0.5, ease: 'power3.in' }, LOGO - 0.35);   // v22: 세 화면 없이 곧바로 로고
   gsap.set('#logo .mark', { scale: 0.4, rotation: -30, opacity: 0 });
   gsap.set('#logo .word', { clipPath: 'inset(-50% 100% -50% -4%)', x: -30, autoAlpha: 0 });   // 감춰 두지 않으면 글자 그림자가 처음부터 옅게 비침
   gsap.set('#sub', { y: 24, opacity: 0 });
@@ -652,12 +640,11 @@ async function build() {
 
   window.__events = EV.sort((a, b) => a.t - b.t);
   window.__taps = { p1, p2, p3, pW, pI, pS, h0, pGo, lift };
-  window.__gif = GIF;
-  window.__marks = { pTap3, tZ, tW, tRead, logo: LOGO, logoMin: LOGO_MIN, trio: tTrio, x1: X1, x2: X2, drop: D1, bar: BAR, ch1: C1, p0: P0, pTap1, c1, c2, c3, c4, t2: T2, ch2: C2, s2, tCall, tFocus, dragT, tType, tGo, tSmall, tRec, rec: REC, tWoven, tSum, tBack, tAns, ch3: C3, s3, tChat, tM2, tM3, g3, tK, tL, th3, wvGlow, tapW: pTapW, tapI: pTapI, tapS: pTapS, reply: tReply, dur: DUR };
+  window.__marks = { pTap3, tZ, tW, tRead, logo: LOGO, logoMin: LOGO_MIN, x1: X1, x2: X2, drop: D1, bar: BAR, ch1: C1, p0: P0, pTap1, c1, c2, c3, c4, t2: T2, ch2: C2, s2, tCall, tFocus, dragT, tType, tGo, tSmall, tRec, rec: REC, tWoven, tSum, tBack, tAns, ch3: C3, s3, tChat, tM2, tM3, g3, tK, tL, th3, wvGlow, tapW: pTapW, tapI: pTapI, tapS: pTapS, reply: tReply, dur: DUR };
   seekAll(0);
   return true;
 }
 
 window.__DURATION = DUR;
-window.__seek = t => { seekAll(t); return Promise.all(pend.splice(0)); };
+window.__seek = t => seekAll(t);
 window.__ready = build();

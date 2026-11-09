@@ -2,10 +2,10 @@
 // 사용:
 //   node tools/render.cjs --events                       → out/events.json (효과음 시점, music.py 입력)
 //   node tools/render.cjs --stills 0.5,3,7.5             → out/stills/t00.50.png …
-//   node tools/render.cjs --fps 60 --jobs 8 [--blur] [--audio out/bgm.wav] [--from 0 --to 28] [--out out/weave_intro.mp4] [--scale 2] [--crf 14] [--keep]
-//     --scale 2 : 표지 영상처럼 CSS 1920×1080 화면을 두 배 화소(3840×2160)로 찍음(기본값, 1이면 1920×1080)
-//     --crf     : 기본 4K 20(약 49MB, 중간본 덱이 100MB 안에 들게. 14면 107MB), 1080p 14
-//     참조 프레임 4장 + 레벨 5.2(4K60)/4.2(1080p60): -tune animation이 참조를 두 배로 늘려 레벨 6.0이 되면 재생기가 못 열 수 있음
+//   node tools/render.cjs --fps 60 --jobs 10 [--blur] [--audio out/bgm.wav] [--from 0 --to 28] [--out out/weave_intro.mp4] [--scale 2] [--crf 18] [--keep]
+//     --scale   : CSS 1920×1080 화면을 몇 배 화소로 찍을지. 기본 4/3 = 2560×1440(v22: 4K는 찍는 데 한 시간이 넘어 중간 크기로), 2 = 3840×2160, 1 = 1920×1080
+//     --crf     : 기본 1440p 18, 4K 20(약 49MB, 중간본 덱이 100MB 안에 들게. 14면 107MB), 1080p 14
+//     참조 프레임 4장 + 레벨 5.2(4K60)/5.1(1440p60)/4.2(1080p60): -tune animation이 참조를 두 배로 늘려 레벨 6.0이 되면 재생기가 못 열 수 있음
 //     --jobs N : 브라우저 N개가 프레임을 나눠 찍음(out/_frames/*.jpg, 끝나면 지움)
 //     --blur   : 두 배 빠르기로 찍어 이웃 프레임을 섞음(움직임 흐림, 셔터 180°)
 // 환경: ~/.cache/weave-tools (node/playwright-core, bin/ffmpeg), ~/.cache/ms-playwright/chromium_headless_shell-1243
@@ -18,7 +18,7 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'out');
 const FR = path.join(OUT, '_frames');
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i < 0 ? d : (process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : true); };
-const SCALE = Number(arg('--scale', 2));
+const SCALE = String(arg('--scale', '4/3')).split('/').map(Number).reduce((a, b) => a / b);   // '4/3'처럼 분수로도
 const run = (cmd, args) => new Promise((res, rej) => { const p = spawn(cmd, args, { stdio: 'inherit' }); p.on('close', c => c === 0 ? res() : rej(new Error(`${cmd} ${c}`))); });
 
 async function openPage(debug = false) {
@@ -86,8 +86,8 @@ async function openPage(debug = false) {
     const vf = [];
     if (sub > 1) vf.push('tmix=frames=2:weights=1 1', `fps=${fps}`);
     vf.push('scale=in_range=full:out_range=tv', 'format=yuv420p');
-    ff.push('-vf', vf.join(','), '-c:v', 'libx264', '-preset', 'slow', '-crf', String(arg('--crf', SCALE > 1 ? 20 : 14)), '-profile:v', 'high', '-tune', 'animation',
-      '-refs', '4', '-level:v', SCALE > 1 ? '5.2' : '4.2',
+    ff.push('-vf', vf.join(','), '-c:v', 'libx264', '-preset', 'slow', '-crf', String(arg('--crf', SCALE > 1.5 ? 20 : SCALE > 1 ? 18 : 14)), '-profile:v', 'high', '-tune', 'animation',
+      '-refs', '4', '-level:v', SCALE > 1.5 ? '5.2' : SCALE > 1 ? '5.1' : '4.2',
       '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709', '-color_range', 'tv', '-movflags', '+faststart');
     if (audio) ff.push('-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '256k', '-t', String(to - from));
     ff.push(out);
