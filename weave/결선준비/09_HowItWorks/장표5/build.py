@@ -646,17 +646,10 @@ IDX = (500, 232, 724, 300)
 def s_idx():
     s = Slide('idx', trans=('morph', 1000), cur='00',
               notes='먼저 Weave는 평소에 기록을 색인해 둡니다. (클릭) 문장의 뜻은 벡터로, 날짜와 앱 같은 정보는 메타데이터로 나눠 저장합니다.')
-    s.add('idx/cap', [caption('idx/cap', [[('단서를 즉시 이어 찾도록, ', INK), ('평소에 기록을 색인', PURPLE), ('해 둡니다', INK)]], 640, 86, size=25)])
-    s.add('idx/cap2', [caption('idx/cap2', [[('글자와 사진 라벨은 원문·벡터로, 날짜와 앱은 메타데이터로', SUB)]], 640, 132, size=17)])
+    s.add('idx/cap', [caption('idx/cap', [[('Weave는 ', INK), ('평소에 기록을 색인', PURPLE), ('해 둡니다', INK)]], 640, 86, size=25)])
+    s.add('idx/cap2', [caption('idx/cap2', [[('뜻은 벡터로, 날짜와 앱은 메타데이터로', SUB)]], 640, 132, size=17)])   # 노트와 같은 말
     talk = chain_talk(56, 252, 360)
     s.add('ch/talk', talk[0])
-    apps = []
-    ax = 56
-    for ic, lb in (('gallery', '갤러리'), ('note', '삼성노트'), ('cal', '캘린더'), ('mail', '이메일')):
-        c_, cw_, _ = mini_chip('idx/a_' + ic, ax, 456, ic, lb, pt=9.5, alpha=85)
-        apps += c_
-        ax += cw_ + 6
-    s.add('idx/apps', apps)
     x, y, w, h = IDX
     s.add('idx/st2', [R('idx/st2', x + 20, y + 20, w, h, prst='roundRect', radius=22, fill='FFFFFF', alpha=50, line=LINE, line_w=1)])
     s.add('idx/st1', [R('idx/st1', x + 10, y + 10, w, h, prst='roundRect', radius=22, fill='FFFFFF', alpha=75, line=LINE, line_w=1)])
@@ -680,7 +673,7 @@ def s_idx():
     s.add('idx/r1', [T('idx/r1', x + 150, rows_y[1], w - 170, 34, vec, size=15, color=PURPLE, weight='m', anchor='ctr')])
     s.add('idx/l2', [T('idx/l2', x + 30, rows_y[2], 110, 34, '메타데이터', size=12.5, color=PURPLE, weight='b', anchor='ctr')])
     s.add('idx/r2', [T('idx/r2', x + 150, rows_y[2], w - 170, 34, meta, size=15, color=INK, weight='m', anchor='ctr')])
-    s.on(['idx/st2', 'idx/st1', 'idx/apps'], 'fade_in', 200, 500)
+    s.on(['idx/st2', 'idx/st1'], 'fade_in', 200, 500)
     s.on('idx/card', 'rise', 250, 550, dy=14)
     s.on('idx/arr', 'wipe_in', 500, 450)
     s.on(['idx/l0', 'idx/r0'], 'fade_in', 750, 400)
@@ -1084,7 +1077,7 @@ def s_deliver():
     bt_cx = sx + sw / 2
     out = [R('dl/sheet/bg', sx, sy, sw, sh, prst='roundRect', radius=24, fill='FFFFFF', line=LINE2, line_w=1.4, shadow=SHADOW_LIFT),
            R('dl/sheet/card', sx + 18, sy + 18, sw - 36, 96, prst='roundRect', radius=16, fill=LAV, line=None)] + \
-          star4_icon('dl/sheet/star', sx + 42, sy + 41, r=5.5, color=PURPLE) + \
+          star4_icon('dl/sheet/star', sx + 42, sy + 40, r=6.0, color=PURPLE) + \
           [T('dl/sheet/lab', sx + 53, sy + 30, 300, 22, '자동 완성 추천', size=11.5, color=PURPLE, weight='b'),
            T('dl/sheet/ans', sx + 36, sy + 56, sw - 72, 44, ans, size=24, color=INK, weight='b', anchor='ctr'),
            R('dl/sheet/btn', sx + 18, by_, sw - 36, 50, prst='roundRect', radius=14, fill=PURPLE, line=None, shadow=(14, 4, '6B4EFF', 24))] + \
@@ -1190,7 +1183,7 @@ def s_overview():
     bt_cx = c4x + c4w / 2
     res = [R('ov/res/bg', c4x, cy + 34, c4w, 332, prst='roundRect', radius=18, fill='FFFFFF', line=RING, line_w=1.8, glow=(8, RING, 22), shadow=SHADOW_CARD),
            R('ov/res/card', c4x + 14, cy + 50, c4w - 28, 92, prst='roundRect', radius=14, fill=LAV, line=None)] + \
-          star4_icon('ov/res/star', c4x + 31, cy + 70, r=5.0, color=PURPLE) + \
+          star4_icon('ov/res/star', c4x + 31, cy + 69, r=5.5, color=PURPLE) + \
           [T('ov/res/l', c4x + 41, cy + 60, 200, 20, '자동 완성 추천', size=10, color=PURPLE, weight='b'),
            T('ov/res/a', c4x + 26, cy + 84, c4w - 52, 44, '배비치 소비뇽 블랑', size=16.5, color=INK, weight='b', anchor='ctr'),
            R('ov/res/btn', c4x + 14, cy + 154, c4w - 28, 38, prst='roundRect', radius=10, fill=PURPLE, line=None)] + \
@@ -1246,6 +1239,9 @@ SOL_NOTES = ('방금 보신 세 장면이 Weave의 세 가지 경험입니다. �
 
 
 # ------------------------------------------------------------------ 조립
+BLUR_SOL = 22                                   # 2쪽 'How it works?' 뒤 솔루션 장은 조금 더 흐리게(11-09 사용자 요청, 16 → 22)
+
+
 def blur_png(src, dst, radius=16, veil=0.32):
     im = Image.open(src).convert('RGB').resize((1920, 1080), Image.LANCZOS)
     im = im.filter(ImageFilter.GaussianBlur(radius))
@@ -1265,12 +1261,14 @@ def build(dst, auto=False, hold=1700):
     from pptx.opc.packuri import PackURI
     sol.part.partname = PackURI('/ppt/slides/slide1.xml')        # 새 장 이름(slide2…)과 겹치지 않게
     sol.notes_slide.notes_text_frame.text = SOL_NOTES
+    # 솔루션 장 오른쪽 위 노란 빛(Shape 1: FFE282 → FFEEB9 → FFFAEB)을 왼쪽 아래 보라 빛(Shape 2)과 같은 색·세기로
+    GLOW = {'FFE282': ('BAA6FF', 34000), 'FFEEB9': ('DCD0FF', 16000), 'FFFAEB': ('F8F5FF', 0)}
     for c in sol._element.iter(q('a:srgbClr')):
         v = c.get('val', '').upper()
-        if v == 'FBF0D8':
-            c.set('val', 'C6B3FF')
-        elif v == 'FDF6E7':
-            c.set('val', 'DED3FF')
+        if v in GLOW:
+            c.set('val', GLOW[v][0])
+            for a in c.findall(q('a:alpha')):
+                a.set('val', str(GLOW[v][1]))
     import appendix
     specs = [f() for f in SLIDES] + [f() for f in appendix.APPENDIX]
     report = []
@@ -1378,7 +1376,7 @@ def main():
         build(tmp)
         pngs = render_c.png(tmp, OUT / '_pass1_png')
         names = ['sol'] + [f.__name__[2:] for f in SLIDES]
-        blur_png(pngs[names.index('sol')], OUT / 'blur_sol.png')
+        blur_png(pngs[names.index('sol')], OUT / 'blur_sol.png', radius=BLUR_SOL)
         blur_png(pngs[names.index('emb')], OUT / 'blur_emb.png')
         tmp.unlink()
     report, secs = build(DST)

@@ -1,4 +1,4 @@
-/* Weave 결선 모션그래픽 v15 (2026-11-07 7차 피드백) — Pain Points 뒤에 트는 세 시나리오 소개 영상.
+/* Weave 결선 모션그래픽 v19 (2026-11-09) — Pain Points 뒤에 트는 세 시나리오 소개 영상.
    오프닝(로고와 한 문장) → 1 기록 통합 검색(통화, 요약) → 2 단서로 찾는 기억(구글 창, 와인) → 3 먼저 건네는 기억(카톡 링크 미리보기) → 세 화면 → 로고.
    v11: 85초 → 약 2분. 한 번에 하나씩(제목 → 말풍선 → 생각 → 검색 → 기록 하나씩 → 요약을 크게 → 답변), 장면 카드는 별 없이 번호와 이름에 빛, 메일 버튼과 갤러리 삭제.
    v12: 120초 → 100초. 순서와 비트는 그대로 두고 머무는 시간과 비트 안의 간격만 줄임(v10보다 늘어난 34초 중 24초가 1에 몰려 있어서 1을 가장 많이 줄임).
@@ -9,6 +9,9 @@
         02 갤러리 카드는 날짜가 건너온 뒤에 날짜와 사진이 뜸, 01과 03 제목은 02처럼 걷힘(03 빛 없음), 로고 글자 끝을 진하게, 세 화면 번호에 입체감.
    v17: 길이 그대로(118.3초). 02 처음 큰 글은 둘째 줄이 보라, 02 제목은 '기억 속 단서를 엮어,'가 보라, 갤러리 카드 제목은 처음부터(날짜만 건너온 뒤),
         03 탑승권을 0.5초 더 보여 줌, 03 제목 둘째 줄 '필요한 말을 먼저 추천합니다', 추천 시트의 'Weave'를 보라로, 끝 장면 GIF에서 검색 불러오기 줄을 뺌.
+   v18: 첫 문장 '우리들의 흩어진 기억, Weave가 잇습니다', 01의 '민수님'(붙여 씀).
+   v19: 첫 문장 '일상 속 흩어진 기억, Weave가 잇습니다'. 01 검색 뒤 기록이 하나씩 뜨는 구간을 1.2배 빠르게(SPD1, 1.8초 줄어 남는 시간은 03 답장 뒤에 붙음).
+        음악은 곡 순서대로 흐르게 다시 편집(tools/music.py).
    순서와 장면 이름은 5쪽 Solution과 같다. 코드 안의 01·02·03 표시는 옛 이름(01 = 와인, 02 = 통화, 03 = 카톡)으로 남겨 두었다.
    이전: Weave 결선 인트로 v8 — GSAP 타임라인 하나(paused)를 시간 t로 탐색해 프레임을 찍는다.
    window.__seek(t), window.__DURATION, window.__events(효과음 시점 → tools/music.py), window.__ready, window.__taps, window.__marks, window.__probe(t)
@@ -38,9 +41,10 @@ const C2 = D1 + 0.05, s2 = C2 + CH;                    // 카드, 시작(제목�
 const tCall = s2 + 2.5;                                // 재웅 선배 말풍선(글자는 한 글자씩)
 const tFocus = tCall + 3.7, dragT = tFocus + 1.2, dragD = 1.1;    // 말풍선을 걷고 손잡이로, 위로 끌기(형광펜 뒤 약 0.8초 머묾)
 const tType = dragT + dragD + 0.1, tGo = tType + 1.8;  // 검색창을 크게 보며 입력, 손으로 검색 버튼
-const tSmall = tGo + 0.45, tRec = tSmall + 1.1;        // 누른 순간 연결된 기억이 뜨고 화면이 작아짐, 하나씩 크게 보기 시작
-const REC = [0, 2.5, 4.6, 7.5].map(d => tRec + d);     // 기록 네 개를 실로 이어 하나씩 크게
-const tWoven = tRec + 9.0, tSum = tWoven + 0.75;       // 네 기록을 실로 엮음, 요약을 크게
+const SPD1 = 1.2;                                      // v19: 검색 뒤 기록이 실로 이어지며 하나씩 뜨는 구간을 1.2배 빠르게(요약이 다시 보여 주므로)
+const tSmall = tGo + 0.45, tRec = tSmall + 1.1 / SPD1; // 누른 순간 연결된 기억이 뜨고 화면이 작아짐, 하나씩 크게 보기 시작
+const REC = [0, 2.5, 4.6, 7.5].map(d => tRec + d / SPD1);   // 기록 네 개를 실로 이어 하나씩 크게
+const tWoven = tRec + 9.0 / SPD1, tSum = tWoven + 0.75 / SPD1;   // 네 기록을 실로 엮음, 요약을 크게
 const tBack = tSum + 6.1, tAns = tBack + 1.05, X2 = tAns + 4.8;   // 작아지고 말풍선이 돌아옴, 답변(한 글자씩), 장면 끝
 // 2 와인
 const C1 = X2 + 0.35, P0 = C1 + CH;                    // 카드, 휴대폰 등장(왼쪽에 큰 글)
@@ -396,7 +400,7 @@ async function build() {
   typeIn($('#qB'), '삼성기술전 시연 내용', tType, 9);
   // 손으로 검색 버튼을 누른 다음에야 화면이 작아진다
   tl.fromTo('#wB .go', { boxShadow: '0 0 0 0 rgba(107,78,255,.6)' }, { boxShadow: '0 0 0 12px rgba(107,78,255,0)', duration: 0.6, ease: 'power2.out', immediateRender: false }, tGo + 0.05);
-  cam(tSmall, R2, 1.05);
+  cam(tSmall, R2, 1.05 / SPD1);
   const rowsB = ['#b1', '#b2', '#b3', '#b4'], FL = ['#fl1', '#fl2', '#fl3', '#fl4'];
   gsap.set(rowsB, { opacity: 0, y: 14 }); gsap.set(['#sgB', '#ttlB'], { opacity: 0, y: 10 });
   // 검색을 누른 순간 요약 자리와 연결된 기억이 바로 뜬다(앱은 빠르다)
@@ -407,19 +411,19 @@ async function build() {
   REC.forEach((t, i) => {
     tl.fromTo(rowsB[i], { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 2.5px rgba(107,78,255,.75)', duration: 0.3, immediateRender: false }, t);
     tl.to(rowsB[i], { boxShadow: '0 0 0 0 rgba(107,78,255,0)', duration: 0.35 }, (REC[i + 1] || tWoven) - 0.1);
-    tl.to(FL[i], { autoAlpha: 1, scale: 1, x: 0, duration: 0.7, ease: 'back.out(1.2)' }, t + 0.3);
-    if (i) tl.to(FL[i - 1], { opacity: 0.5, duration: 0.4 }, t + 0.25);
+    tl.to(FL[i], { autoAlpha: 1, scale: 1, x: 0, duration: 0.7 / SPD1, ease: 'back.out(1.2)' }, t + 0.3 / SPD1);
+    if (i) tl.to(FL[i - 1], { opacity: 0.5, duration: 0.4 / SPD1 }, t + 0.25 / SPD1);
   });
-  mark('#mk1', REC[0] + 1.05, 0.55); mark('#mk4', REC[0] + 1.6, 0.45);                       // 언제 어디서
-  mark('#mk6', REC[1] + 0.95, 0.8);                                                           // 그때의 시연 순서 전체
-  mark('#mk2', REC[2] + 1.0, 1.0);                                                            // 바뀐 순서
-  mark('#mk3', REC[2] + 2.2, 0.45);
-  mark('#mk5', REC[3] + 1.0, 0.55);                                                           // 최종본 파일
+  mark('#mk1', REC[0] + 1.05 / SPD1, 0.55 / SPD1); mark('#mk4', REC[0] + 1.6 / SPD1, 0.45 / SPD1);                       // 언제 어디서
+  mark('#mk6', REC[1] + 0.95 / SPD1, 0.8 / SPD1);                                                           // 그때의 시연 순서 전체
+  mark('#mk2', REC[2] + 1.0 / SPD1, 1.0 / SPD1);                                                            // 바뀐 순서
+  mark('#mk3', REC[2] + 2.2 / SPD1, 0.45 / SPD1);
+  mark('#mk5', REC[3] + 1.0 / SPD1, 0.55 / SPD1);                                                           // 최종본 파일
   // 네 기록이 다 나오면 밝아지고 왼쪽에서 실로 엮인다
   tl.to(['#fl1', '#fl2', '#fl3'], { opacity: 1, duration: 0.4 }, tWoven);
   const L1 = FL.map(k => ({ x: FLR[k].left + 2, y: FLR[k].top + FLR[k].height / 2 }));
   const xb = L1[0].x - 70;
-  curve('flc', `M${L1[0].x} ${L1[0].y}` + [1, 2, 3].map(i => ` C ${xb} ${L1[i - 1].y}, ${xb} ${L1[i].y}, ${L1[i].x} ${L1[i].y}`).join(''), tWoven - 0.1, 0.6, 5.5);
+  curve('flc', `M${L1[0].x} ${L1[0].y}` + [1, 2, 3].map(i => ` C ${xb} ${L1[i - 1].y}, ${xb} ${L1[i].y}, ${L1[i].x} ${L1[i].y}`).join(''), tWoven - 0.1, 0.6 / SPD1, 5.5);
   // 요약: 카드를 걷고 요약 상자를 화면 가운데에 크게. 세 문장이 읽는 속도로 한 줄씩
   tl.to([...FL, '#flc'], { autoAlpha: 0, x: -30, duration: 0.45, ease: 'power2.in', stagger: 0.03 }, tSum);
   const sumPose = camPose(2.85, B['#sgB'], { x: 960, y: 462 });
@@ -626,7 +630,7 @@ async function build() {
   handIn(pGo.x, pGo.y, tGo, 0.65); press(pGo.x, pGo.y, tGo, '#wB .go'); handOut(tGo + 0.2);
   // 1: 기록마다 휴대폰 속 줄 → 왼쪽 큰 카드로 실이 한 가닥씩. 다음 기록이 오면 앞의 실은 옅어지고, 요약 전에 걷힘
   const tb = FL.map((k, i) => curve(`tb${i}`, bez({ x: rb[i].left + 8, y: rb[i].top + rb[i].height / 2 }, { x: FLR[k].right - 2, y: FLR[k].top + FLR[k].height / 2 }, 0.55), REC[i] + 0.06, 0.5));
-  tb.forEach((g, i) => { if (REC[i + 1]) tl.to(g, { opacity: 0.3, duration: 0.4 }, REC[i + 1] + 0.25); });
+  tb.forEach((g, i) => { if (REC[i + 1]) tl.to(g, { opacity: 0.3, duration: 0.4 / SPD1 }, REC[i + 1] + 0.25 / SPD1); });
   tl.to(tb, { opacity: 1, duration: 0.4 }, tWoven);
   tl.to(tb, { autoAlpha: 0, duration: 0.4 }, tSum);
   // 3: 위치와 아내 카톡이 휴대폰 오른쪽 키보드 도구줄 높이로 모인다(탑승권은 위치에 이어져 있음)

@@ -33,8 +33,8 @@ def cell(name, x, y, w, h, text, size=11.5, color=INK, weight='r', align='l', lh
     return T(name, x, y + (h - th) / 2, w, th + 4, lines, size=size, color=color, weight=weight, align=align, lnspc=lh * 0.75)
 
 
-def table(s, key, x, y, cols, header, rows, row_h=70, hi=None, pt=11.5, head_pt=11, first_bold=True):
-    """카드 표. cols = 칸 폭 목록, rows = [[칸 글(문자열이나 줄 목록)]]. hi = 강조할 줄 번호."""
+def table(s, key, x, y, cols, header, rows, row_h=70, hi=None, pt=11.5, head_pt=11, first_bold=True, nums=False):
+    """카드 표. cols = 칸 폭 목록, rows = [[칸 글(문자열이나 줄 목록)]]. hi = 강조할 줄 번호. nums = 첫 칸 앞에 숫자 동그라미."""
     w = sum(cols)
     hh = 40
     h = hh + row_h * len(rows)
@@ -57,24 +57,37 @@ def table(s, key, x, y, cols, header, rows, row_h=70, hi=None, pt=11.5, head_pt=
             col = INK if j == 0 else BODY
             if hi is not None and i == hi and j == 0:
                 col = PURPLE
-            out.append(cell(key + '/c%d_%d' % (i, j), cx + 18, ry, cw - 28, row_h, t, size=pt, color=col, weight=wt))
+            ind = 26 if (nums and j == 0) else 0
+            if ind:
+                out += numdot(key + '/n%d' % i, cx + 28, ry + row_h / 2, i + 1, r=10, pt=9)
+            out.append(cell(key + '/c%d_%d' % (i, j), cx + 18 + ind, ry, cw - 28 - ind, row_h, t, size=pt, color=col, weight=wt))
             cx += cw
     s.add(key, out)
     return h
 
 
-def qcard(s, key, x, y, w, h, q, a_lines, sub_lines=None, pt=12):
+def qcard_h(a_lines, sub_lines=None, pt=12):
+    """질문 카드가 글을 담는 데 필요한 높이."""
+    lh, sh = pt * 1.33 * 1.4, (pt - 1.5) * 1.33 * 1.4
+    return 56 + lh * len(a_lines) + (14 + sh * len(sub_lines) + 22 if sub_lines else 0) + 22
+
+
+def qcard(s, key, x, y, w, h, q, a_lines, sub_lines=None, pt=12, sub_bottom=False):
+    """질문 카드. h=None이면 글에 맞춘 높이. sub_bottom이면 회색 덧붙임을 카드 아래쪽에 붙인다(옆 칸에 맞춰 키운 카드). 돌려줌: 높이."""
+    h = qcard_h(a_lines, sub_lines, pt) if h is None else h
     out = [R(key + '/bg', x, y, w, h, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD),
            T(key + '/q', x + 22, y + 18, w - 44, 26, q, size=14, color=PURPLE, weight='b')]
     lh = pt * 1.33 * 1.4
     out.append(T(key + '/a', x + 22, y + 56, w - 44, lh * len(a_lines) + 6, a_lines, size=pt, color=INK, lnspc=lh * 0.75))
     if sub_lines:
-        sy = y + 56 + lh * len(a_lines) + 14
+        sub_h = (pt - 1.5) * 1.33 * 1.4 * len(sub_lines) + 22
+        sy = y + h - 16 - sub_h if sub_bottom else y + 56 + lh * len(a_lines) + 14
         out.append(R(key + '/sbg', x + 16, sy, w - 32, (pt - 1.5) * 1.33 * 1.4 * len(sub_lines) + 22, prst='roundRect', radius=12,
                      fill='F7F5FC', line=None))
         out.append(T(key + '/s', x + 30, sy + 11, w - 60, (pt - 1.5) * 1.33 * 1.4 * len(sub_lines) + 4, sub_lines, size=pt - 1.5,
                      color=SUB, lnspc=(pt - 1.5) * 1.33 * 1.4 * 0.75))
     s.add(key, out)
+    return h
 
 
 # ------------------------------------------------------------------ 장표 목록
@@ -144,7 +157,7 @@ def a_rem():
     out.append(R('apx/r/k0', x2 + 380, y + 202, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=LINE, line_w=1.0, dash='dash'))
     out.append(P('apx/r/k0i', ICON['talk'], x2 + 388, y + 207, 20, 20, alpha=55))
     out.append(T('apx/r/k0t', x2 + 412, y + 202, 90, 30, '지은 카톡', size=10, color=MUTE, anchor='ctr'))
-    out.append(T('apx/r/k0l', x2 + 372, y + 234, 140, 18, '일반 임베딩 (멂)', size=9, color=MUTE, align='c'))
+    out.append(T('apx/r/k0l', x2 + 372, y + 234, 140, 18, '일반 임베딩에서는 멀리', size=9, color=MUTE, align='c'))
     out.append(R('apx/r/k1', cx + 16, cy - 46, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=RING, line_w=1.8))
     out.append(P('apx/r/k1i', ICON['talk'], cx + 24, cy - 41, 20, 20))
     out.append(T('apx/r/k1t', cx + 48, cy - 46, 90, 30, '지은 카톡', size=10, color=INK, weight='b', anchor='ctr'))
@@ -221,11 +234,12 @@ def a_hops():
                     '문제는 지은이의 카톡이 집들이 초대라는 사실이 그래프에 들어 있을 가능성이 낮다는 점입니다.')
     head(s, [('지식 그래프만으로 막히는 곳은 ', INK), ('첫 번째 암묵적 단서(Hop 1)', PURPLE), ('입니다', INK)],
          '와인 시나리오를 Hop별로 분해해 본 지식 그래프 단독 방식 vs Weave 보완 방식')
-    rows = [['① 집들이 날짜 찾기', '지은이네 집들이 = 3월 15일', ['‘집들이’라는 단어도, 캘린더 일정도 없어', '수신 시점에 집들이 이벤트로 추출되기 어렵습니다'],
+    rows = [['집들이 날짜 찾기', '지은이네 집들이 = 3월 15일', ['‘집들이’라는 단어도, 캘린더 일정도 없어', '수신 시점에 집들이 이벤트로 추출되기 어렵습니다'],
              ['‘박스 정리 다 했어, 휴지 안 사 와도 돼’를', '질의 시점에 집들이 초대로 추론해 찾아냅니다']],
-            ['② 그날 사진 추리기', '3월 15일 저녁 촬영 사진', '날짜·시간 조건 매칭이므로 그래프도 잘합니다', '메타데이터 필터(date: 2026-03-15)로 즉시 거릅니다'],
-            ['③ 와인 이름 읽기', '와인병 라벨 텍스트', 'OCR 텍스트가 색인돼 있으면 조회 가능합니다', '온디바이스 OCR + sLLM으로 라벨에서 이름을 읽습니다']]
-    table(s, 'apx/t', 70, 148, [200, 240, 350, 350], ['탐색 단계', '필요한 사실', '지식 그래프 단독', 'Weave (하이브리드 연쇄 탐색)'], rows, row_h=84, hi=0)
+            ['그날 사진 추리기', '3월 15일 저녁 촬영 사진', '날짜·시간 조건 매칭이므로 그래프도 잘합니다', '메타데이터 필터(date: 2026-03-15)로 즉시 거릅니다'],
+            ['와인 이름 읽기', '와인병 라벨 텍스트', 'OCR 텍스트가 색인돼 있으면 조회 가능합니다', '온디바이스 OCR + sLLM으로 라벨에서 이름을 읽습니다']]
+    table(s, 'apx/t', 70, 148, [200, 240, 350, 350], ['탐색 단계', '필요한 사실', '지식 그래프 단독', 'Weave (하이브리드 연쇄 탐색)'], rows, row_h=84, hi=0,
+          nums=True)
     out = [R('apx/n/bg', 70, 468, 1140, 122, prst='roundRect', radius=18, fill=LAV2, line=LINE2, line_w=1.0),
            T('apx/n/t', 92, 484, 600, 24, '왜 모든 카톡을 색인 시점에 미리 그래프로 변환하지 않나요?', size=13, color=PURPLE, weight='b'),
            T('apx/n/l', 92, 514, 1100, 70,
@@ -295,7 +309,7 @@ def q_sameday():
     s = Slide('apx_q_day', trans=('fade', 400), bar=False,
               notes='같은 날 찍었다는 이유만으로 그 집들이 와인이라고 정하지 않습니다. 메시지의 이따 올 때가 받은 날과 모임 날을 이어 주고, 사진의 시각과 장소와 내용이 뒷받침합니다.')
     head(s, [('Q. ', PURPLE), ('같은 날 찍은 사진이면 무조건 집들이 와인이라고 단정하나요?', INK)], size=23)
-    qcard(s, 'apx/q2', 70, 140, 600, 384, 'A. 날짜 하나로 단정하지 않고 다중 근거를 교차 확인합니다',
+    qcard(s, 'apx/q2', 70, 140, 600, 322, 'A. 날짜 하나로 단정하지 않고 다중 근거를 교차 확인합니다',
           ['• 메시지의 ‘이따 올 때’ 표현이 카톡 수신일과 모임 당일을 이어 주고,',
            '• 사진의 촬영 시각(저녁 8시), 위치 정보, 시각적 내용(식탁·와인병)이',
            '  그 모임에서 찍은 사진인지를 함께 뒷받침합니다.',
@@ -312,8 +326,9 @@ def q_sameday():
                 P('apx/ev%d/ic' % i, ICON[ic], 720, y + 19, 32, 32),
                 T('apx/ev%d/a' % i, 768, y + 12, 420, 24, a, size=13, color=INK, weight='b'),
                 T('apx/ev%d/b' % i, 768, y + 38, 420, 20, b, size=11, color=SUB)]
-    out.append(R('apx/ev/ans', 700, 480, 510, 44, prst='roundRect', radius=14, fill=PURPLE, line=None))
-    out.append(T('apx/ev/anst', 700, 480, 510, 44, '다중 근거 일치  →  배비치 소비뇽 블랑 (출처 함께 제시)', size=13, color='FFFFFF', weight='b', align='c', anchor='ctr'))
+    out.append(R('apx/ev/ans', 86, 140 + 322 - 16 - 44, 568, 44, prst='roundRect', radius=14, fill=PURPLE, line=None))
+    out.append(T('apx/ev/anst', 86, 140 + 322 - 16 - 44, 568, 44, '다중 근거 일치  →  배비치 소비뇽 블랑 (출처 함께 제시)', size=13, color='FFFFFF', weight='b',
+                 align='c', anchor='ctr'))
     s.add('apx/ev', out)
     return s
 
@@ -322,13 +337,13 @@ def q_apple():
     s = Slide('apx_q_apple', trans=('fade', 400), bar=False,
               notes='Apple은 iOS 27의 Siri AI가 기기 안 Spotlight 색인으로 메시지, 메일, 사진 속 개인 맥락을 찾아 답한다고 발표했습니다.')
     head(s, [('Q. ', PURPLE), ('Apple Siri(Personal Context)도 개인 기록을 찾지 않나요?', INK)])
-    qcard(s, 'apx/q3', 70, 140, 560, 380, 'A. 빅테크가 검증한 핵심 방향이며, Weave는 ‘연쇄 추론과 키보드 UX’에 집중합니다',
+    qcard(s, 'apx/q3', 70, 140, 560, 356, 'A. 방향은 같고 Weave는 연쇄 탐색과 키보드에 집중합니다',
           ['• Apple도 기기 내 Spotlight 색인으로 메시지·메일·사진 속 개인 맥락을',
            '  찾아 답하는 Personal Context를 발표하며 시장의 방향성을 입증했습니다.',
            '• 이는 온디바이스 개인 기록 검색이 스마트폰 AI의 다음 핵심 경쟁 축이라는',
            '  가장 확실한 시장 신호입니다.'],
-          ['Apple Siri AI 타임라인: 발표 후 영어·한국어 베타 순차 도입 중¹'], pt=12.5)
-    out = [R('apx/w/bg', 660, 140, 550, 380, prst='roundRect', radius=20, fill='FFFFFF', line=RING, line_w=1.8, shadow=SHADOW_CARD),
+          ['Apple Siri AI 타임라인: 발표 후 영어·한국어 베타 순차 도입 중¹'], pt=12.5, sub_bottom=True)
+    out = [R('apx/w/bg', 660, 140, 550, 356, prst='roundRect', radius=20, fill='FFFFFF', line=RING, line_w=1.8, shadow=SHADOW_CARD),
            T('apx/w/t', 684, 158, 500, 26, 'Weave만의 3가지 차별점', size=14, color=PURPLE, weight='b')]
     pts = [('삼성 키보드·화면 위에서 즉시 완결', '음성 비서를 따로 부르지 않고 검색창·통화·메신저 어디서든 키보드 버튼 하나로 동작합니다'),
            ('끊어진 단서를 잇는 멀티홉 연쇄 탐색', '단어가 안 겹치는 일상 대화(Hop 1)에서 단서를 뽑아 다음 검색(Hop 2)으로 잇는 추론에 특화됩니다'),
@@ -339,7 +354,7 @@ def q_apple():
         out.append(T('apx/w/a%d' % i, 722, y, 470, 26, a, size=13, color=INK, weight='b'))
         out.append(T('apx/w/b%d' % i, 722, y + 30, 470, 44, b, size=11.5, color=BODY, wrap=True))
     s.add('apx/w', out)
-    foot(s, '¹ Apple Newsroom: Personal Context & Spotlight 온디바이스 색인 발표 자료. Siri AI는 기기 내 모델과 Private Cloud Compute를 병행 사용.', y=548)
+    foot(s, '¹ Apple Newsroom: Personal Context & Spotlight 온디바이스 색인 발표 자료. Siri AI는 기기 내 모델과 Private Cloud Compute를 병행 사용.', y=514)
     return s
 
 
@@ -347,12 +362,12 @@ def q_llm():
     s = Slide('apx_q_llm', trans=('fade', 400), bar=False,
               notes='LLM은 글을 토큰마다 계산하며 만들어 연산량이 많고, 수많은 기록을 매번 읽기 어렵습니다. 임베딩은 입력당 한 번 계산해 후보를 고르고, LLM은 질문을 나누거나 최종 문장을 다듬을 때만 씁니다.')
     head(s, [('Q. ', PURPLE), ('왜 처음부터 LLM에게 모든 기록을 읽히지 않고 임베딩을 쓰나요?', INK)])
-    qcard(s, 'apx/q4', 70, 140, 560, 350, 'A. 찾는 일은 가벼운 임베딩에, 나누고 다듬는 일만 sLLM에 맡깁니다',
+    qcard(s, 'apx/q4', 70, 140, 560, 40 + 88 * 3, 'A. 찾는 일은 가벼운 임베딩에, 나누고 다듬는 일만 sLLM에 맡깁니다',
           ['• LLM은 글자를 토큰마다 반복 생성(Autoregressive)하므로 연산량이 크고,',
            '  수만 건의 개인 기록을 매 질문마다 컨텍스트에 넣어 읽히기 어렵습니다.',
            '• 반면 임베딩은 기록당 미리 한 번만 계산해 두고 벡터 내적으로 즉시 찾으며,',
            '  sLLM은 질문을 쪼개거나(02) 최종 추려진 단서 1~2건을 읽을 때만 호출합니다.'],
-          ['기록 벡터는 충전 중이거나 기기가 쉴 때 백그라운드에서 미리 만들어 둡니다.'], pt=12.5)
+          ['기록 벡터는 충전 중이거나 기기가 쉴 때 백그라운드에서 미리 만들어 둡니다.'], pt=12.5, sub_bottom=True)
     rows = [['출력 형태', '토큰을 하나씩 생성 (문장)', '고정 차원 의미 벡터 1개'],
             ['연산 비용', ['생성 토큰 수만큼 반복 연산', '(무거움)'], ['입력당 단일 패스 + 내적 연산', '(가벼움)']],
             ['대량 기록 처리', '매 질문마다 원문을 읽어야 함', '미리 색인해 두고 즉시 검색']]
@@ -368,13 +383,14 @@ def q_data():
     cards = [('데이터 접근 방식', ['• 삼성 기본 앱(갤러리·노트·캘린더·메일·월렛)은', '  사용자 동의 아래 기기 내 API로 연동합니다.', '• 카카오톡 등 외부 메신저는 사용자가 허용한', '  알림 텍스트(NotificationListener)만 색인합니다¹.'],
               ['통화 내용은 듣지도 저장하지도 않으며,', '통화 중 검색도 화면에서 직접 실행할 때만 동작합니다.']),
              ('배터리 및 발열 관리', ['• 초기 대량 색인은 기기가 충전 중이거나', '  유휴 상태일 때만 백그라운드로 수행합니다².', '• 실시간 사용 중에는 가벼운 벡터 검색과', '  추려진 단서 1~2건에 대한 sLLM만 실행합니다.'],
-              ['평소 배터리 소모와 발열 영향을', '체감할 수 없는 수준으로 억제합니다.']),
+              ['평소 배터리와 발열 부담을 줄입니다.']),
              ('사생활 보호 및 제어권', ['• 모든 원본 기록과 색인(Hybrid Index)은', '  클라우드 전송 없이 기기 내부에만 저장됩니다.', '• 암호화 키는 Android Keystore 하드웨어', '  보안 영역으로 철저히 보호합니다³.'],
               ['앱별 색인 허용/차단 및 인덱스 초기화를', '언제든 사용자가 직접 제어할 수 있습니다.'])]
+    ch = max(qcard_h(a, b, 12) for _, a, b in cards)
     for i, (t, a, b) in enumerate(cards):
-        qcard(s, 'apx/d%d' % i, 70 + i * 386, 150, 368, 340, t, a, b, pt=12)
+        qcard(s, 'apx/d%d' % i, 70 + i * 386, 150, 368, ch, t, a, b, pt=12, sub_bottom=True)
     foot(s, '¹ Android Developers, "NotificationListenerService"   ² Android Developers, "WorkManager: Define work requests (RequiresCharging, RequiresDeviceIdle)"   '
-            '³ Android Developers, "Android Keystore system"', y=512)
+            '³ Android Developers, "Android Keystore system"', y=150 + ch + 18)
     return s
 
 
@@ -395,7 +411,7 @@ def a_credits():
                 T('apx/cr%d/a' % i, 184, y, 200, 52, a, size=12, color=PURPLE, weight='b', anchor='ctr'),
                 T('apx/cr%d/b' % i, 390, y, 720, 52, b, size=11, color=BODY, anchor='ctr')]
     s.add('apx/cr', out)
-    s.add('apx/cr_n', [T('apx/cr_n', 160, 500, 960, 40, '배비치 소비뇽 블랑 사진, 건배 사진 및 UI 화면은 자체 제작 에셋입니다.', size=11, color=SUB, align='c')])
+    s.add('apx/cr_n', [T('apx/cr_n', 160, 500, 960, 40, '배비치 소비뇽 블랑 사진과 UI 화면은 자체 제작 에셋입니다.', size=11, color=SUB, align='c')])
     return s
 
 

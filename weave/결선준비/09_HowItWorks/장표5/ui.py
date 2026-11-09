@@ -3,6 +3,7 @@
 좌표는 덱과 같은 1280×720 px. 모든 도형 이름은 '!!키'라서 다음 장에 같은 이름이 있으면 모핑이 위치·크기·투명도를 잇는다.
 부품 하나 = 원시 도형 목록. 여러 도형이면 PowerPoint 묶음 하나로 넣어 효과도 묶음 하나에 건다.
 """
+import copy
 import itertools
 import math
 from pathlib import Path
@@ -115,7 +116,8 @@ class Painter:
                            fill=o.get('fill', 'FFFFFF'), alpha=None if fa is None or fa >= 99.9 else fa,
                            line=o.get('line'), line_w=max(0.5, o.get('line_w', 0.75) * s),
                            line_alpha=None if la >= 99.9 else la, dash=o.get('dash'), shadow=shadow, glow=glow,
-                           grad_fill=o.get('grad'), soft=o.get('soft'))
+                           grad_fill=o.get('grad'), soft=o.get('soft'),
+                           custom_path=copy.deepcopy(o['custom_path']) if o.get('custom_path') is not None else None)
         if kind == 'text':
             _, _, x, y, w, h, paras, o = p
             ta = o.get('alpha', 100) * a
@@ -264,8 +266,20 @@ def check_icon(name, cx, cy, s=11, color=PURPLE, w=2.2):
 
 
 def star4_icon(name, cx, cy, r=6.5, color=PURPLE):
-    """벡터 4각 별(✦): 글꼴 대체 없이 또렷하게."""
-    return [R(name, cx - r, cy - r, 2 * r, 2 * r, prst='star4', fill=color, line=None)]
+    """벡터 4각 별(✦): 글꼴의 ✦처럼 네 변이 가운데로 오목하게 휜 모양(2차 베지어, 조절점 = 가운데).
+    prstGeom 'star4'는 허리가 너무 가늘어 작게 쓰면 '+'처럼 보인다."""
+    cg = etree.Element(q('a:custGeom'))
+    for t in ('a:avLst', 'a:gdLst', 'a:ahLst', 'a:cxnLst'):
+        etree.SubElement(cg, q(t))
+    etree.SubElement(cg, q('a:rect'), l='l', t='t', r='r', b='b')
+    path = etree.SubElement(etree.SubElement(cg, q('a:pathLst')), q('a:path'), w='1000', h='1000')
+    etree.SubElement(etree.SubElement(path, q('a:moveTo')), q('a:pt'), x='500', y='0')
+    for x, y in ((1000, 500), (500, 1000), (0, 500), (500, 0)):
+        qb = etree.SubElement(path, q('a:quadBezTo'))
+        etree.SubElement(qb, q('a:pt'), x='500', y='500')
+        etree.SubElement(qb, q('a:pt'), x=str(x), y=str(y))
+    etree.SubElement(path, q('a:close'))
+    return [R(name, cx - r, cy - r, 2 * r, 2 * r, fill=color, line=None, custom_path=cg)]
 
 
 def caption(name, lines, x, y, size=24, align='c', w=None, lh=None, color=INK):
