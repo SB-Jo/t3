@@ -100,8 +100,39 @@ def _fit_crop(img, bw, bh):
 LINK_H = 66
 
 
-def frag_w(title, meta):
-    return FRAG_PAD + FRAG_IC + FRAG_GAP + max(tw(title, FRAG_PT, 'b'), tw(meta, FRAG_PT2)) + 22
+def frag_w(title, meta, scale=1.0):
+    pad = round(FRAG_PAD * scale)
+    ic = round(FRAG_IC * scale)
+    gap = round(FRAG_GAP * scale)
+    pt1 = FRAG_PT * scale
+    pt2 = FRAG_PT2 * scale
+    return pad + ic + gap + max(tw(title, pt1, 'b'), tw(meta, pt2)) + round(22 * scale)
+
+
+def reject_prims(name, box, label, where='ctr', pt=10.5, veil_alpha=68, radius=12):
+    """클릭 시 카드를 흐리게 덮는 반투명 베일 + 빨간색 X 배지."""
+    bx, by, bw, bh = box
+    txt = label if label.startswith('✕') else ('✕  ' + label)
+    pw = tw(txt, pt, 'b') + 26
+    ph = 28 if pt >= 10 else 25
+    if where == 'ctr':
+        px, py = bx + (bw - pw) / 2, by + (bh - ph) / 2
+    elif where == 'br':
+        px, py = bx + bw - pw - 6, by + bh - ph + 6
+    elif where == 'tr':
+        px, py = bx + bw - pw - 6, by - ph / 2
+    else:
+        px, py = bx + (bw - pw) / 2, by + bh - ph / 2 - 4
+    out = []
+    if veil_alpha and veil_alpha > 0:
+        out.append(R(name + '/veil', bx - 1, by - 1, bw + 2, bh + 2, prst='roundRect', radius=radius,
+                     fill='F6F4FA', alpha=veil_alpha, line='ECA8A8', line_w=1.2, dash='dash'))
+    out += [
+        R(name + '/bg', px, py, pw, ph, prst='roundRect', radius=ph / 2, fill='FFF2F2', line='E03131', line_w=1.5,
+          shadow=L.SHADOW_SOFT),
+        T(name + '/t', px, py, pw, ph, txt, size=pt, color='C92A2A', weight='b', align='c', anchor='ctr'),
+    ]
+    return out
 
 
 def bottle_prims(name, x, y, s):
@@ -120,30 +151,40 @@ def bottle_prims(name, x, y, s):
             R(name + '/shine', bx + bw * 0.1, by + bh * 0.08, bw * 0.09, bh * 0.78, prst='roundRect', fill='FFFFFF', alpha=22, line=None)]
 
 
-def card_prims(key, kind, x, y, w, title, meta='', lines=(), img=None, icon=None, body_pt=9.5, img_h=None, style='base', link=None):
-    """기록 카드. kind: talk·note·mail·cal·shot·photo·pay·call·sms·frag(작은 조각)·link(링크 미리보기 대화).
+def card_prims(key, kind, x, y, w, title, meta='', lines=(), img=None, icon=None, body_pt=9.5, img_h=None, style='base', link=None,
+               scale=1.0, photos4=None):
+    """기록 카드. kind: talk·note·mail·cal·shot·photo·photos4·pay·call·sms·frag(작은 조각)·link(링크 미리보기 대화).
     돌려줌: (원시 목록, 높이, 글자 자리 정보)."""
-    ic = icon or {'photo': 'gallery', 'shot': 'gallery', 'pay': 'talk', 'call': 'phone', 'sms': 'talk', 'pass': 'wallet',
-                  'wpay': 'wallet', 'link': 'talk'}.get(kind, kind)
+    ic = icon or {'photo': 'gallery', 'photos4': 'gallery', 'shot': 'gallery', 'pay': 'talk', 'call': 'phone', 'sms': 'talk',
+                  'pass': 'wallet', 'wpay': 'wallet', 'link': 'talk'}.get(kind, kind)
     isz = 22
     tx0 = x + 12 + isz + 9
     out = []
     lines = list(lines)
     border = {'base': (LINE, 0.9, None), 'gray': (GRAY_LINE, 1.5, None), 'weave': (RING, 2.2, None)}[style]
-    if kind == 'frag':     # 인트로처럼 흩어져 떠 있는 작은 조각: 아이콘 + 제목 + 한 줄
-        w = frag_w(title, meta)
-        h = FRAG_H
-        tx = x + FRAG_PAD + FRAG_IC + FRAG_GAP
-        ty1, ty2 = y + 9, y + 33
-        out += [R(key + '/bg', x, y, w, h, prst='roundRect', radius=16, fill='FFFFFF', line=border[0], line_w=border[1],
+    if kind == 'frag':     # 인트로처럼 흩어져 떠 있는 작은 조각: 아이콘 + 제목 + 한 줄 (scale 배율 지원)
+        w = frag_w(title, meta, scale=scale)
+        h = round(FRAG_H * scale)
+        pad = round(FRAG_PAD * scale)
+        fic = round(FRAG_IC * scale)
+        fgap = round(FRAG_GAP * scale)
+        pt1 = FRAG_PT * scale
+        pt2 = FRAG_PT2 * scale
+        tx = x + pad + fic + fgap
+        ty1 = y + round(9 * scale)
+        ty2 = y + round(33 * scale)
+        out += [R(key + '/bg', x, y, w, h, prst='roundRect', radius=round(16 * scale), fill='FFFFFF', line=border[0], line_w=border[1],
                   shadow=L.SHADOW_SOFT, glow=(12, RING, 28) if style == 'weave' else None),
-                P(key + '/ic', ICON[ic], x + FRAG_PAD, y + (h - FRAG_IC) / 2, FRAG_IC, FRAG_IC),
-                T(key + '/title', tx, ty1, w - (tx - x) - 6, 23, title, size=FRAG_PT, color=INK, weight='b'),
-                T(key + '/meta', tx, ty2, w - (tx - x) - 6, 18, meta, size=FRAG_PT2, color=MUTE)]
-        return out, h, {'title': (tx, ty1, title, FRAG_PT, 'b'), 'meta': (tx, ty2, meta, FRAG_PT2, 'r')}
+                P(key + '/ic', ICON[ic], x + pad, y + (h - fic) / 2, fic, fic),
+                T(key + '/title', tx, ty1, w - (tx - x) - 6, round(23 * scale), title, size=pt1, color=INK, weight='b'),
+                T(key + '/meta', tx, ty2, w - (tx - x) - 6, round(18 * scale), meta, size=pt2, color=MUTE)]
+        return out, h, {'title': (tx, ty1, title, pt1, 'b'), 'meta': (tx, ty2, meta, pt2, 'r')}
     if kind == 'link':
         bub = (len(lines) * 17 + 10 + 8) if lines else 0
         h = 34 + bub + LINK_H + 12
+    elif kind == 'photos4':
+        cell_h = img_h or 68
+        h = 40 + cell_h * 2 + 8 + 10
     elif kind == 'photo':
         ih = img_h or round((w - 20) * 0.62)
         h = 40 + ih + 10
@@ -160,7 +201,24 @@ def card_prims(key, kind, x, y, w, title, meta='', lines=(), img=None, icon=None
         mw = tw(meta, 8.5) + 2
         out.append(T(key + '/meta', x + w - 12 - mw, y + 13, mw + 2, 16, meta, size=8.5, color=MUTE))
     pos = {}
-    if kind == 'photo':
+    if kind == 'photos4':
+        cell_h = img_h or 68
+        cell_w = (w - 20 - 8) / 2
+        items4 = photos4 or [('photo-white.jpg', '26. 3. 15'), ('photo-red.jpg', '26. 2. 14'),
+                             ('photo-bar.jpg', '26. 3. 20'), ('photo-cheers.jpg', '25. 12. 24')]
+        for idx, (pimg, pdt) in enumerate(items4[:4]):
+            gx = x + 10 + (idx % 2) * (cell_w + 8)
+            gy = y + 40 + (idx // 2) * (cell_h + 8)
+            out.append(P('%s/img%d' % (key, idx), pimg, gx, gy, cell_w, cell_h, radius=6, crop=_fit_crop(pimg, cell_w, cell_h)))
+            if pdt:
+                dw = tw(pdt, 7.5, 'b') + 10
+                out.append(R('%s/dtbg%d' % (key, idx), gx + 5, gy + cell_h - 19, dw, 15, prst='roundRect', radius=4,
+                             fill='1C1A24', alpha=72, line=None))
+                out.append(T('%s/dt%d' % (key, idx), gx + 5, gy + cell_h - 19, dw, 15, pdt, size=7.5, color='FFFFFF',
+                             weight='b', align='c', anchor='ctr'))
+            pos['img%d' % idx] = (gx, gy, cell_w, cell_h)
+        pos['img'] = (x + 10, y + 40, w - 20, cell_h * 2 + 8)
+    elif kind == 'photo':
         out.append(P(key + '/img', img, x + 10, y + 40, w - 20, ih, radius=8, crop=_fit_crop(img, w - 20, ih)))
         pos['img'] = (x + 10, y + 40, w - 20, ih)
     elif kind in ('talk', 'link') and lines:

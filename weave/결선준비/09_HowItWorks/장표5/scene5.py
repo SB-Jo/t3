@@ -169,9 +169,9 @@ def fit_pt(text, maxw, pt=9.5, weight='b', lo=7.5):
     return pt
 
 
-# ------------------------------------------------------------------ 위 띠(01~04)
-STAGES = [('01', '맥락 감지'), ('02', '질의 분해·재작성'), ('03', '연쇄 탐색'), ('04', '정답 전달')]
-STAGES0 = [('00', '온디바이스 색인')] + STAGES        # 00판: 기록을 미리 벡터 + 메타데이터로 저장하는 단계까지
+# ------------------------------------------------------------------ 위 띠(00~04)
+STAGES = [('01', '상황 인식'), ('02', '질의 재작성'), ('03', '연쇄 탐색'), ('04', '결과 제공')]
+STAGES0 = [('00', '데이터 색인')] + STAGES        # 00판: 기록을 미리 벡터 + 메타데이터로 저장하는 단계까지
 
 
 def bar_layout(stages=STAGES):
@@ -187,7 +187,17 @@ def bar_layout(stages=STAGES):
 
 
 def topbar_prims(h):
-    """h = dict(cur, done, loop, loop_on, all)."""
+    """h = dict(cur, done, loop, loop_on, all, intro0)."""
+    h = h or {}
+    if h.get('intro0'):
+        cw, ch = 540, 136
+        cx0, cy0 = 640 - cw / 2, 360 - ch / 2
+        return [
+            R('top/chip', cx0, cy0, cw, ch, prst='roundRect', radius=68, fill=PURPLE, line='FFFFFF', line_w=2.5,
+              shadow=S.L.SHADOW_LIFT, glow=(24, RING, 42)),
+            T('top/chip_t', cx0, cy0, cw, ch, 'How it works?', size=52, color='FFFFFF', weight='b', align='c',
+              anchor='ctr', spc=-0.5),
+        ]
     y0, hh = 16, 40
     cw = tw('HOW IT WORKS', 10.5, 'sb') + 32
     out = [R('top/chip', 40, y0 + 6, cw, 28, prst='roundRect', fill=PURPLE, line=None),
@@ -376,7 +386,7 @@ def deliver_sheet(sc, a, groups, n_src, x, w, kind, ky, msg_end):
             ry += 22
         ry += 6
     sc.put('ans', card)
-    sc.put('ui.tap2', [P('ui.tap2/h', 'touch-tap.png', x + w - 78, by + 18, 28, 40)])
+    sc.put('ui.tap2', [P('ui.tap2/h', 'touch-tap.png', x + w - 92, by + 10, 56, 80)])
 
 
 def bubble_prims(name, by, msg, tm, mine, pt=10.5):
@@ -413,21 +423,30 @@ def phone_items(sc):
             tl = wrap(txt, 11, w - 92, 'r')[:2]
             hh = 46 if len(tl) == 1 else 62
             by = y + (72 if style in ('up', 'up_done') else 106)      # 'up' = 전달 카드가 올라올 때 검색창이 가려지지 않게 위로
-            return [R('ui.sbox/bg', x + 18, by, w - 36, hh, prst='roundRect', radius=23, fill='FFFFFF', line='DADCE0', line_w=1.2,
-                      shadow=S.L.SHADOW_SOFT),
-                    R('ui.sbox/lens', x + 34, by + hh / 2 - 8, 13, 13, prst='ellipse', fill=None, line='9AA0A6', line_w=1.8),
-                    R('ui.sbox/lens2', x + 44, by + hh / 2 + 3, 6, 2, fill='9AA0A6', line=None),
-                    T('ui.sbox/t', x + 58, by, w - 92, hh, tl, size=11, color=INK, anchor='ctr', lnspc=12)]
+            cy_l = by + hh / 2
+            out = [R('ui.sbox/bg', x + 18, by, w - 36, hh, prst='roundRect', radius=23, fill='FFFFFF', line='DADCE0', line_w=1.2,
+                     shadow=S.L.SHADOW_SOFT),
+                   R('ui.sbox/lens', x + 33, cy_l - 8, 12, 12, prst='ellipse', fill=None, line='9AA0A6', line_w=1.8),
+                   C('ui.sbox/lens2', [(x + 43.5, cy_l + 2.5), (x + 45.2, cy_l + 4.2), (x + 46.8, cy_l + 5.8), (x + 48.5, cy_l + 7.5)],
+                     w=2.0, color='9AA0A6'),
+                   T('ui.sbox/t', x + 58, by, w - 92, hh, tl, size=11, color=INK, anchor='ctr', lnspc=12)]
+            if style != 'done':
+                last_w = tw(tl[-1], 11, 'r')
+                cur_y = (cy_l - 7.5) if len(tl) == 1 else (cy_l + 1.5)
+                out.append(R('ui.sbox/cur', x + 58 + last_w + 2.5, cur_y, 1.8, 15, fill=PURPLE, line=None))
+            return out
         sc.put('ui.sbox', sbox)
         tl_q = wrap(ui['query'], 11, w - 92, 'r')[:2]
         tl_done = wrap(ui['answer_q'], 11, w - 92, 'b')[:2]
         hh_d = 46 if len(tl_q) == 1 else 62
         by_d = y + 72
+        cy_d = by_d + hh_d / 2
         sc.put('ui.sbox.done', [R('ui.sbox.done/bg', x + 18, by_d, w - 36, hh_d, prst='roundRect', radius=23, fill='FFFFFF', line=RING,
                                   line_w=1.8, shadow=S.L.SHADOW_SOFT, glow=(6, RING, 22)),
-                                R('ui.sbox.done/lens', x + 34, by_d + hh_d / 2 - 8, 13, 13, prst='ellipse', fill=None, line=PURPLE,
+                                R('ui.sbox.done/lens', x + 33, cy_d - 8, 12, 12, prst='ellipse', fill=None, line=PURPLE,
                                   line_w=1.8),
-                                R('ui.sbox.done/lens2', x + 44, by_d + hh_d / 2 + 3, 6, 2, fill=PURPLE, line=None),
+                                C('ui.sbox.done/lens2', [(x + 43.5, cy_d + 2.5), (x + 45.2, cy_d + 4.2), (x + 46.8, cy_d + 5.8),
+                                                         (x + 48.5, cy_d + 7.5)], w=2.0, color=PURPLE),
                                 T('ui.sbox.done/t', x + 58, by_d, w - 92, hh_d, tl_done, size=11.5, color=PURPLE, weight='b',
                                   anchor='ctr', lnspc=12)])
         res = []
@@ -524,7 +543,7 @@ def phone_items(sc):
                     T('ui.on/badge_t', x + 48, ky, 16, 16, '1', size=7, color='FFFFFF', weight='b', align='c', anchor='ctr')]
         return out
     sc.put('ui.on', on)
-    sc.put('ui.tap', [P('ui.tap/h', 'touch-tap.png', x + 34, ky + 14, 28, 40)])
+    sc.put('ui.tap', [P('ui.tap/h', 'touch-tap.png', x + 28, ky + 12, 56, 80)])
     # 건네기 카드
     a = sp['deliver']
     groups = []                       # [(아이콘, [줄])] — 이어지는 같은 앱 근거는 아이콘 하나 아래로 묶음
@@ -1022,10 +1041,10 @@ def iso_date(text, with_time=False, year=2026):
 
 
 def meta_text(date, app, lines=2):
-    """메타데이터를 실제 형식으로: { date: "2026-03-12", app: "kakaotalk" } (두 줄이면 줄을 나눔)."""
+    """메타데이터를 실제 형식으로: { date: "2026-03-12", app: "kakaotalk", ... } (두 줄이면 줄을 나눔)."""
     if lines == 1:
-        return ['{ date: "%s", app: "%s" }' % (date, app)]
-    return ['{ date: "%s",' % date, '  app: "%s" }' % app]
+        return ['{ date: "%s", app: "%s", ... }' % (date, app)]
+    return ['{ date: "%s",' % date, '  app: "%s", ... }' % app]
 
 
 def month_day(text):
@@ -1047,6 +1066,9 @@ def underline_prims(name, rect, color=PURPLE2):
 
 # ------------------------------------------------------------------ 시나리오 → 장면
 def build(spec):
+    if spec.get('v2'):
+        import v2_builder
+        return v2_builder.build_v2(spec)
     sc = Scene(spec)
     REC = spec['records']
     for k, c in REC.items():
