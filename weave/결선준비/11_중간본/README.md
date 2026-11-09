@@ -48,6 +48,36 @@
 - 삼성 글꼴 파일은 공개 저장소에 올리지 않아요(`../.gitignore`, 받는 곳은 `06_에셋/글꼴/SOURCES.md`).
 - 받는 사람이 글꼴 없이 보게 하려면 `--embed-fonts`로 글꼴을 파일 안에 넣어 저장해요. 용량이 늘고, 삼성 글꼴이 파일에 들어가므로 공개 저장소에는 올리지 마세요.
 
+## 글꼴 시안: Korean Sans + Sharp Sans (2026-11-09)
+
+`brand_fonts.py`가 중간본은 그대로 두고 **`02_PPT/Weave_결선_중간본_SharpSans.pptx`**를 만들어요. 한글은 Samsung Korean Sans, 영문과 숫자는 Samsung Sharp Sans예요. 글은 한 글자도 바꾸지 않았어요. 쪽별 PNG는 `png_SharpSans/`, 한눈에는 `한눈에_SharpSans.png`예요.
+
+- 굵기 짝
+  - 굵게(SamsungOneKorean 700 자리): Korean Sans Bold + Sharp Sans Bold
+  - 보통(400, 500 자리): Korean Sans Medium + Sharp Sans Medium. Korean Sans에는 Medium과 Bold만 있고, Sharp Sans Regular는 Medium 한글 옆에서 너무 가늘어요.
+- 그대로 둔 것: 손글씨 강조(Nanum Pen Script), 표지 제목(Samsung Sharp Sans Bold)
+- 두 글꼴 중 한쪽 모양이 어색한 글자는 다른 글꼴로 썼어요.
+  - ①~⑤: SamsungOne 400. Korean Sans 것은 작고 뒤 글자에 붙어요.
+  - ~: SamsungOne. Sharp Sans 것은 위로 떠서 '1~2B'가 '1˜2B'처럼 보여요.
+  - ‘ ’ “ ”: Sharp Sans. Korean Sans 작은따옴표는 쉼표처럼 작게 나와요.
+- 글이 넓어져 어긋난 자리
+  - 1쪽 표지 팀 이름: 넓어진 'Samsung Research'에 맞춰 밑줄 길이와 팀 간격을 다시 쟀어요.
+  - 13~16쪽: 'Query Rewriting' 옆 '질의 분해·재작성'을 넓어진 만큼 오른쪽으로 옮겼어요.
+  - 15쪽 와인 라벨 알약과 25쪽 'Query Rewriting': 알약과 카드 끝에 닿아서 원래 폭에 맞게 글자를 조금 줄였어요.
+  - 18쪽 'Personal Data Engine': 두 줄로 꺾여 아래 글과 겹쳐서, 상자를 넓혀 한 줄로 했어요.
+  - 27쪽 추론 유형: 영문 이름 옆 한글 설명 다섯 개를 넓어진 만큼 옮겼어요.
+- 이 판을 제대로 보려면 아래 글꼴이 설치돼 있어야 해요. 이 컴퓨터에는 설치해 뒀어요(파일은 `~/.cache/weave-tools/fonts`).
+  - Samsung Korean Sans: 웹 글꼴 Medium과 Bold를 한 가족으로 묶었어요(보통 = Medium, 굵게 = Bold).
+  - Samsung Sharp Sans(Regular, Bold), Samsung Sharp Sans Medium
+  - SamsungOneKorean 400, 700(원 숫자와 물결표), Nanum Pen Script
+
+```bash
+~/.cache/weave-tools/venv/bin/python brand_fonts.py           # 변환 → PowerPoint로 png_SharpSans/, 한눈에_SharpSans.png
+~/.cache/weave-tools/venv/bin/python brand_fonts.py --no-png
+```
+
+- PowerPoint 잠금은 `render_c.py`가 스스로 잡아요. `flock`으로 감싸면 멈춰요.
+
 ## 다시 만들기
 
 ```bash

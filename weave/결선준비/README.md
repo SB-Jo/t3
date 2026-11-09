@@ -14,7 +14,7 @@
 | `08_인트로영상/` | 결선 모션그래픽 영상 v17(118초, `Weave_모션그래픽.mp4`)·소스·음악 라이선스·참고 영상 목록(그 폴더의 README) |
 | `09_HowItWorks/` | `장표5/`: How it Works 빌더(지금 쓰는 판), `리서치/`, `논문스터디/` |
 | `10_표지영상/` | 표지 반복 영상 `표지_루프.mp4`, 포스터, 소스 |
-| `11_중간본/` | 중간본 덱 빌드 `build_deck.py`, 쪽별 PNG, `한눈에.png`, `문구_변경목록.md`. 결과는 `02_PPT/Weave_결선_중간본.pptx` |
+| `11_중간본/` | 중간본 덱 빌드 `build_deck.py`, 쪽별 PNG, `한눈에.png`, `문구_변경목록.md`. 결과는 `02_PPT/Weave_결선_중간본.pptx`. 글꼴 시안(한글 Samsung Korean Sans + 영문 Samsung Sharp Sans)은 `brand_fonts.py` → `02_PPT/Weave_결선_중간본_SharpSans.pptx` |
 | `12_설문/` | 소비자 설문 결과(휴대폰 번호를 뺀 CSV와 xlsx) |
 
 ## 저장소에 두는 것 (2026-11-06)
