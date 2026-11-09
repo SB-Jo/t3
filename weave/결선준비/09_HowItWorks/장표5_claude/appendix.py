@@ -10,7 +10,6 @@ GRAY = '8E88A0'
 
 
 def apx_badge(s):
-    return                     # 11-09: 뱃지는 모두 뺌
     cw = tw('APPENDIX', 10.5, 'sb') + 32
     s.add('apx/badge', [T('apx/badge', 40, 22, cw, 28, 'APPENDIX', size=10.5, color='FFFFFF', weight='sb', align='c', anchor='ctr',
                           spc=0.5, fill=PURPLE, radius=14)])

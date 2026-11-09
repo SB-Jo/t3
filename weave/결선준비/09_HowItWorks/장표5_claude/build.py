@@ -76,7 +76,7 @@ class Slide:
     def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, badge=None, cur=None, done=(), bg=True):
         self.key, self.notes, self.advance = key, notes, advance
         self.trans = (trans[0], round(trans[1] * SPEED)) if trans else trans
-        self.bar, self.badge, self.cur, self.done, self.bg = bar, False, cur, set(done), bg   # 뱃지는 모두 뺌(11-09)
+        self.bar, self.badge, self.cur, self.done, self.bg = bar, (bar if badge is None else badge), cur, set(done), bg
         self.items = []
         self.groups = [[]]
 
@@ -231,6 +231,9 @@ def phone_prims(key, alpha=100):
 def s_ask():
     s = Slide('ask', trans=('morph', 1000), bar=False, badge=True,
               notes='집들이 때 마셨던 와인이 맛있어서 다시 사려는데, 이름이 떠오르지 않습니다.')
+    bx, by, bw, bh = BADGE_BOX                     # 앞 장의 큰 'How it works?'가 왼쪽 위 뱃지 자리로 줄어듦(모핑)
+    s.add('hiw/big', [T('hiw/big', bx, by - 4, bw, bh + 8, [[('How it ', {'color': INK}), ('works?', {'color': PURPLE})]],
+                        size=10.5, weight='b', align='c', anchor='ctr', alpha=0)])
     s.add('ask/phone', phone_prims('ask/phone'))
     pill, txt, cur, _ = search_pill('ask/sp', 188, 318, 560, 84, QUERY, pt=19)
     s.add('ask/sp', pill)
@@ -380,8 +383,10 @@ KW_KEYS = ['kw/t1', 'kw/t2', 'kw/t3', 'kw/c1', 'kw/c2', 'kw/c3', 'kw/gal', 'kw/p
 
 def s_kw():
     s = Slide('kw', trans=('morph', 900), bar=False, badge=True,
-              notes=('키워드 검색은 질문 속 단어로 기록을 찾습니다. (클릭) 지은이네로는 주소 메모가, (클릭) 집들이로는 다른 사람의 집들이 일정이, '
-                    '(클릭) 와인으로는 지난 연말 와인 결제 내역이 나옵니다. (클릭) 정작 그날 와인 사진에는 와인이라는 글자가 없어 닿지 못합니다.'))
+              notes=('키워드 검색은 질문 속 단어로 기록을 찾습니다. (클릭) 지은이네로는 주소 메모가 나오지만 (클릭) 와인 이야기는 없습니다. '
+                    '(클릭) 집들이로는 다른 사람의 집들이 일정이 나오고, (클릭) 이것도 아닙니다. '
+                    '(클릭) 와인으로는 지난 연말 와인 결제 내역이 나오지만 (클릭) 다른 날 산 와인입니다. '
+                    '(클릭) 정작 그날 와인 사진에는 와인이라는 글자가 없어서 (클릭) 키워드로는 닿지 못합니다.'))
     s.add('old/title', [old_title(78, 30)])
     parts, _ = kw_parts()
     pm = dict(parts)
@@ -389,18 +394,20 @@ def s_kw():
         s.add(k, pm[k])
     s.on('kw/panel', 'rise', 100, 500, dy=14)
     s.on('kw/q', 'fade_in', 300, 400)
-    for n in (1, 2, 3):          # 클릭 1~3: 단어 → 실 → 결과 → 같은 단어 → ✕
+    for n in (1, 2, 3):          # 단어 → 실 → 결과 → 같은 단어, 다음 클릭에 ✕(발표자가 누름)
         s.click()
         s.on('kw/h%d' % n, 'wipe_in', 0, 380)
         s.on('kw/t%d' % n, 'wipe_in', 300, 450, dir='down')
         s.on('kw/c%d' % n, 'rise', 650, 450, dy=14)
         s.on('kw/m%d' % n, 'wipe_in', 1000, 300)
-        s.on('kw/x%d' % n, 'zoom_in', 1350, 300, **{'from': 0.8})
-        s.on(['kw/c%d' % n, 'kw/m%d' % n], 'dim', 1350, 350, to=0.45)
-    s.click()                    # 4: 실이 닿지 않는 그날 사진들
+        s.click()
+        s.on('kw/x%d' % n, 'zoom_in', 0, 300, **{'from': 0.8})
+        s.on(['kw/c%d' % n, 'kw/m%d' % n], 'dim', 0, 350, to=0.45)
+    s.click()                    # 실이 닿지 않는 그날 사진들, 다음 클릭에 ✕
     s.on('kw/gal', 'rise', 0, 450, dy=14)
-    s.on('kw/x4', 'zoom_in', 600, 300, **{'from': 0.8})
-    s.on('kw/gal', 'dim', 600, 350, to=0.45)
+    s.click()
+    s.on('kw/x4', 'zoom_in', 0, 300, **{'from': 0.8})
+    s.on('kw/gal', 'dim', 0, 350, to=0.45)
     return s
 
 
@@ -414,7 +421,7 @@ STAR = (884, 492)
 def s_emb():
     s = Slide('emb', trans=('morph', 1000), bar=False, badge=True,
               notes=('임베딩 검색은 (클릭) 질문 전체를 벡터로 바꿔서 (클릭) 기록이 놓인 공간에서 (클릭) 가장 가까운 기록을 찾습니다. '
-                    '하지만 가까운 건 와인 메모와 다른 날 와인 사진입니다.'))
+                    '(클릭) 하지만 가까운 건 와인 메모와 다른 날 와인 사진입니다.'))
     s.add('old/title', [old_title(78, 30)])
     parts, _ = kw_parts()
     pm = dict(parts)
@@ -453,6 +460,9 @@ def s_emb():
         r_ = 3.2 + rnd.random() * 2.4
         dots.append(R('em/dot%d' % i, x_ - r_, y_ - r_, 2 * r_, 2 * r_, prst='ellipse', fill='CBC0EC', alpha=80, line=None))
     s.add('em/dots', dots)
+    # 가까운 원(점선)은 기록 카드보다 먼저 그려 카드 글자 위로 지나가지 않게. 물결 원은 뺌
+    s.add('em/near', [R('em/near', STAR[0] - 132, STAR[1] - 108, 264, 216, prst='ellipse', fill=None, line=PURPLE2, line_w=1.8,
+                        dash='dash')])
     far = [('em/r_mail', 'mail', '관리비 고지서', sx + 24, sy + 40), ('em/r_cal', 'cal', '팀 회식', sx + 460, sy + 50),
            ('em/r_talk2', 'talk', '택배', sx + 30, sy + 266), ('em/r_note', 'note', '지은이네 주소', sx + 440, sy + 272),
            ('em/r_jieun', 'talk', '지은', sx + 492, sy + 150)]
@@ -463,9 +473,6 @@ def s_emb():
     pic, pw2, ph2 = mini_chip('em/r_pic', STAR[0] + 48, STAR[1] - 8, 'gallery', '와인 사진', '2026. 1. 9', img=PH['glass'][0])
     s.add('em/r_memo', memo)
     s.add('em/r_pic', pic)
-    # 질문 별과 가까운 원(물결 원은 뺌)
-    s.add('em/near', [R('em/near', STAR[0] - 132, STAR[1] - 108, 264, 216, prst='ellipse', fill=None, line=PURPLE2, line_w=1.8,
-                        dash='dash')])
     s.add('em/star', star('em/star', *STAR) + [T('em/star/l', STAR[0] - 30, STAR[1] + 18, 60, 18, '질문', size=9.5, color=PURPLE,
                                                  weight='b', align='c')])
     memo_box = (STAR[0] - 182, STAR[1] - 64, mw, mh)
@@ -488,13 +495,14 @@ def s_emb():
     s.on('em/dots', 'fade_in', 250, 500)
     for i, k in enumerate(['em/r_memo', 'em/r_pic', 'em/r_jieun', 'em/r_note', 'em/r_cal', 'em/r_mail', 'em/r_talk2']):
         s.on(k, 'zoom_in', 350 + i * 90, 400, **{'from': 0.7})
-    s.click()   # 3: 질문 별이 공간에 앉고, 가장 가까운 두 기록 → ✕
+    s.click()   # 3: 질문 별이 공간에 앉고 가장 가까운 두 기록
     vx_, vy_ = px + 80 + tw(vec, 15) / 2, vy + 15
     s.on('em/star', 'fly', 0, 800, dx=vx_ - STAR[0], dy=vy_ - STAR[1], bend=0.12)
     s.on('em/near', 'zoom_in', 750, 450, **{'from': 0.4})
     s.on(['em/k1', 'em/k2'], 'zoom_in', 1150, 350, **{'from': 1.12})
-    s.on(['em/x1', 'em/x2'], 'zoom_in', 1500, 300, **{'from': 0.8})
-    s.on(['em/r_memo', 'em/r_pic', 'em/k1', 'em/k2'], 'dim', 1500, 380, to=0.45)
+    s.click()   # 4: ✕(발표자가 누름)
+    s.on(['em/x1', 'em/x2'], 'zoom_in', 0, 300, **{'from': 0.8})
+    s.on(['em/r_memo', 'em/r_pic', 'em/k1', 'em/k2'], 'dim', 0, 380, to=0.45)
     return s
 
 
@@ -757,7 +765,9 @@ H1_CARD = (944, 300, 286)
 
 def s_hop1():
     s = Slide('hop1', trans=('morph', 1100), cur='03', done={'00', '01', '02'},
-              notes=('Reasoning Embedding은 휴지 안 사 와도 돼가 집들이 초대라는 걸 알아보고, (클릭) 지은이의 카톡을 가장 가까이 둡니다. '
+              notes=('첫 질문을 일반 임베딩으로 찾으면, 다른 사람의 집들이 일정이나 주소 메모처럼 단어가 겹치는 기록이 가깝습니다. '
+                    '(클릭) 하지만 둘 다 답이 아닙니다. '
+                    '(클릭) Reasoning Embedding으로 바꾸면, 휴지 안 사 와도 돼가 집들이 초대라는 걸 알아보고 지은이의 카톡을 가장 가까이 둡니다. '
                     '(클릭) 이 카톡을 받은 날, 3월 15일이 다음 단서가 됩니다.'))
     card_, q_, r1, r2, an, (r1y, r2y, ay) = qr_small('hop1')
     for p_ in card_:
@@ -773,6 +783,18 @@ def s_hop1():
     s.add('h1/cap', [caption('h1/cap', [[('Reasoning Embedding', PURPLE), ('은 단어가 달라도 단서가 될 기록을 가깝게 둡니다', INK)]], 640, 80, size=21.5)])
     sx, sy, sw, sh = H1_SPACE
     s.add('h1/space', [R('h1/space/bg', sx, sy, sw, sh, prst='roundRect', radius=22, fill='FFFFFF', alpha=88, line=LINE2, line_w=1.2)])
+    tx0, ty0 = sx + 20, sy + 16
+    wa, wb = tw('일반 임베딩', 11, 'b') + 28, tw('Reasoning Embedding', 11, 'b') + 28
+    s.add('h1/togbg', [R('h1/tog/bg', tx0, ty0, wa + wb + 8, 36, prst='roundRect', fill='F1EEF8', line=None)])
+    s.add('h1/togA', [R('h1/togA/k', tx0 + 4, ty0 + 4, wa, 28, prst='roundRect', fill='8E88A0', line=None),
+                      T('h1/togA/a', tx0 + 4, ty0 + 4, wa, 28, '일반 임베딩', size=11, color='FFFFFF', weight='b', align='c', anchor='ctr'),
+                      T('h1/togA/b', tx0 + 4 + wa, ty0 + 4, wb, 28, 'Reasoning Embedding', size=11, color=MUTE, weight='b', align='c',
+                        anchor='ctr')])
+    s.add('h1/togB', [R('h1/togB/bgc', tx0 + 2, ty0 + 2, wa + wb + 4, 32, prst='roundRect', fill='F1EEF8', line=None),
+                      R('h1/togB/k', tx0 + 4 + wa, ty0 + 4, wb, 28, prst='roundRect', fill=PURPLE, line=None, glow=(8, RING, 30)),
+                      T('h1/togB/a', tx0 + 4, ty0 + 4, wa, 28, '일반 임베딩', size=11, color=MUTE, weight='b', align='c', anchor='ctr'),
+                      T('h1/togB/b', tx0 + 4 + wa, ty0 + 4, wb, 28, 'Reasoning Embedding', size=11, color='FFFFFF', weight='b', align='c',
+                        anchor='ctr')])
     rnd = random.Random(23)
     dots = []
     for i in range(30):
@@ -798,11 +820,14 @@ def s_hop1():
     d2, d2w, d2h = mini_chip('h1/d2', d2f[0], d2f[1], 'note', '지은이네 주소', '경기도 수원시…')
     kk, kw_, kh_ = mini_chip('h1/k', kf[0], kf[1], 'talk', '지은', '박스 정리 다 했어!…')
     off = lambda a, b: (a[0] - b[0], a[1] - b[1])
-    s.add('h1/d1', d1, alpha=60)
-    s.add('h1/d2', d2, alpha=60)
+    s.add('h1/d1', d1, start=off(d1i, d1f))
+    s.add('h1/d2', d2, start=off(d2i, d2f))
     s.add('h1/k', kk, start=off(ki, kf))
     s.add('h1/star', star('h1/star', *H1_STAR))
     s.add('h1/starl', chip('h1/starl', H1_STAR[0] + 20, H1_STAR[1] - 44, '질문 ①', 'soft', pt=9.5, h=22, padx=8, weight='m')[0])
+    # ✕는 일반 임베딩에서 가까운 두 기록의 처음 자리 옆. 클릭하면 나오고, Reasoning Embedding으로 바꾸면 사라짐(temp: 정적 보기엔 없음)
+    s.add('h1/x1', xmark('h1/x1', d1i[0] + d1w + 18, d1i[1] + d1h / 2, s=22, w=4), temp=True)
+    s.add('h1/x2', xmark('h1/x2', d2i[0] + d2w + 18, d2i[1] + d2h / 2, s=22, w=4), temp=True)
     s.add('h1/kring', [ring_box('h1/kring', (kf[0], kf[1], kw_, kh_), pad=4, radius=14, w=2.4)])
     cx_, cy_, cw_ = H1_CARD
     talk = card('h1/card', 'talk', cx_, cy_, cw_, '지은', '카카오톡 · 3월 15일 (일) 오후 4:12', ['박스 정리 다 했어! 이따 올 때', '휴지 안 사 와도 돼'],
@@ -816,15 +841,23 @@ def s_hop1():
     tok, tw_ = chip('h1/tok', cx_ + cw_ - 104, cy_ - 42, '3/15 (일)', 'fill', pt=12, h=30, padx=12)
     s.add('h1/tok', tok)
     # 효과
-    s.on('h1/k', 'fade_in', 0, 300)
-    s.on('h1/k', 'goto', 0)
+    s.on(['h1/d1', 'h1/d2', 'h1/k'], 'fade_in', 0, 300)
+    s.on(['h1/d1', 'h1/d2', 'h1/k'], 'goto', 0)
     s.on('h1/cap', 'rise', 200, 500, dy=14)
     s.on('h1/re', 'rise', 300, 500, dy=14)
     s.on('h1/c', 'wipe_in', 600, 400, dir='down')
-    s.click()   # 1: Reasoning Embedding이 지은 카톡을 질문 곁으로
-    s.on('h1/k', 'fly', 0, 1000, dx=ki[0] - kf[0], dy=ki[1] - kf[1], bend=0.15, show=False, fade=False)
-    s.on('h1/kring', 'zoom_in', 1050, 400, **{'from': 1.15})
-    s.click()   # 2: 카톡을 읽어 날짜 단서
+    s.click()   # 1: 일반 임베딩에서 가까운 두 기록 → ✕(발표자가 누름)
+    s.on(['h1/x1', 'h1/x2'], 'jump', 0)
+    s.on(['h1/x1', 'h1/x2'], 'zoom_in', 0, 320, **{'from': 0.8})
+    s.click()   # 2: Reasoning Embedding으로 바꾸면 자리가 바뀜
+    s.on(['h1/x1', 'h1/x2'], 'fade_out', 0, 250)
+    s.on('h1/togB', 'fade_in', 100, 350)
+    s.on('h1/d1', 'fly', 350, 1000, dx=d1i[0] - d1f[0], dy=d1i[1] - d1f[1], bend=0.1, show=False, fade=False)
+    s.on('h1/d2', 'fly', 350, 1000, dx=d2i[0] - d2f[0], dy=d2i[1] - d2f[1], bend=-0.1, show=False, fade=False)
+    s.on(['h1/d1', 'h1/d2'], 'dim', 1000, 400, to=0.4)
+    s.on('h1/k', 'fly', 450, 1100, dx=ki[0] - kf[0], dy=ki[1] - kf[1], bend=0.15, show=False, fade=False)
+    s.on('h1/kring', 'zoom_in', 1550, 400, **{'from': 1.15})
+    s.click()   # 3: 카톡을 읽어 날짜 단서
     s.on('h1/link', 'wipe_in', 0, 350)
     s.on('h1/card', 'zoom_in', 200, 500, **{'from': 0.8})
     s.on('h1/h1', 'wipe_in', 750, 350)
@@ -1169,7 +1202,7 @@ def sol_steps(prs, sol, layout, note_tpl):
     """솔루션 장을 세 장으로 나눠 하나씩 모은다(모핑, 클릭 두 번).
     ① UX 1을 가운데 조금 크게 → ② UX 1은 왼쪽 자리로, UX 2는 오른쪽 칸 가운데에 → ③ UX 2는 오른쪽 위로, UX 3은 오른쪽 아래에(완성).
     한 장짜리 그래픽 그림을 UX마다 잘라 그 UX 글상자와 같이 옮기고, 이름(!!sol/…)이 같아서 모핑이 장 사이를 잇는다.
-    머리 칩(SOLUTION: WEAVE ASSIST)과 부제는 뺀다. 돌려줌: 세 장(③은 원래 솔루션 장)."""
+    가운데 머리 칩과 부제는 빼고, 같은 글의 뱃지를 왼쪽 위(How it Works 뱃지 자리)에 둔다. 돌려줌: 세 장(③은 원래 솔루션 장)."""
     E = 9525
     art = next(sh for sh in sol.shapes if sh.shape_type == 13 and sh.width > 1200 * E)
     art_rid = art._element.xpath('.//a:blip/@r:embed')[0]
@@ -1222,6 +1255,9 @@ def sol_steps(prs, sol, layout, note_tpl):
             for name, el in texts[ux]:
                 _move(put(name, el), c0, c1, sc)
         put(*title)
+        sb = 'SOLUTION: WEAVE ASSIST'                              # 뱃지: How it Works·Appendix와 같은 자리·모양
+        pa.put('sol/badge', [T('sol/badge', 40, 22, tw(sb, 10.5, 'sb') + 32, 28, sb, size=10.5, color='FFFFFF', weight='sb', align='c',
+                               anchor='ctr', spc=0.5, fill=PURPLE, radius=14)], group=False)
         for n, c in enumerate(tree.iter(q('p:cNvPr')), 2):        # 도형 번호를 새로(복사한 것과 겹치지 않게)
             c.set('id', str(n))
         if slide is not sol:
