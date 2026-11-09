@@ -10,6 +10,8 @@
    v17: 길이 그대로(118.3초). 02 처음 큰 글은 둘째 줄이 보라, 02 제목은 '기억 속 단서를 엮어,'가 보라, 갤러리 카드 제목은 처음부터(날짜만 건너온 뒤),
         03 탑승권을 0.5초 더 보여 줌, 03 제목 둘째 줄 '필요한 말을 먼저 추천합니다', 추천 시트의 'Weave'를 보라로, 끝 장면 GIF에서 검색 불러오기 줄을 뺌.
    v18: 첫 문장 '우리들의 흩어진 기억, Weave가 잇습니다', 01의 '민수님'(붙여 씀).
+   v20: 01 요약에서 돌아올 때 제목을 다시 띄우지 않고, 말풍선 + 휴대폰을 290px 왼쪽으로(묶음이 화면 가운데). 03 아내 카톡은 위 두 플로팅 묶음의 가운데에.
+        음악은 북이 빠지는 마디 없이 다시 편집.
    v19: 첫 문장 '일상 속 흩어진 기억, Weave가 잇습니다'. 01 검색 뒤 기록이 하나씩 뜨는 구간을 1.2배 빠르게(SPD1, 1.8초 줄어 남는 시간은 03 답장 뒤에 붙음).
         음악은 곡 순서대로 흐르게 다시 편집(tools/music.py).
    순서와 장면 이름은 5쪽 Solution과 같다. 코드 안의 01·02·03 표시는 옛 이름(01 = 와인, 02 = 통화, 03 = 카톡)으로 남겨 두었다.
@@ -248,6 +250,8 @@ async function build() {
   stage(0);
   { const G = 14; let H = -G; for (const k of ['#fl1', '#fl2', '#fl3', '#fl4']) H += rectOf(k).height + G;   // 네 기록을 화면 세로 가운데에 쌓음
     let y = (1080 - H) / 2; for (const k of ['#fl1', '#fl2', '#fl3', '#fl4']) { $(k).style.top = `${y}px`; y += rectOf(k).height + G; } }
+  { const a = rectOf('#fg'), b = rectOf('#fw'), k = rectOf('#fk'), el = $('#fk');          // v20: 아내 카톡을 위 두 플로팅(위치 → 탑승권) 묶음의 가운데에
+    el.style.left = `${el.offsetLeft + (a.left + b.right) / 2 - (k.left + k.width / 2)}px`; }
   const natMore = rectOf('#kkMore').height;
   const FLR = {}; for (const k of ['#fl1', '#fl2', '#fl3', '#fl4', '#fg', '#fw', '#fk']) FLR[k] = rectOf(k);
   const DT = { a: ctr('#dtA'), b: ctr('#dtB'), g: ctr('#gpsDj'), k: ctr('#kkDj'), qa: ctr('#qa1'), qb: ctr('#qa2'), pill: ctr('#pill'), p1: ctr('#pen1'), p2: ctr('#pen2') };   // 같은 단서(날짜·면세점)와 검색어 조각의 자리
@@ -369,9 +373,6 @@ async function build() {
   tl.to(phone, { x: R2.x, duration: 1.05, ease: 'power3.out' }, s2);
   titleIn('#hdB', s2 + 0.4);                                                                  // 제목만 먼저
   headOut('#hdB', tFocus);                                                                    // 검색창을 키우는 동안만 걷힘(02, 03 제목과 같은 걷힘)
-  tl.set('#hdB', { autoAlpha: 1 }, tBack + 0.5);                                              // 확대가 풀리면 다시
-  tl.fromTo('#hdB > *', { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', immediateRender: false }, tBack + 0.5);
-  headOut('#hdB', X2);
   cont.push(t => { const v = 48 + Math.floor(clamp(t - s2, 0, 200)); $('#ctime').textContent = `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`; });
   // 재웅 선배가 말한다: 말풍선이 뜨고 한 글자씩, 끝나면 물어보는 것에 형광펜
   tl.fromTo('#callQ', { autoAlpha: 0, x: -24, scale: 0.96, transformOrigin: '100% 60%' }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tCall);
@@ -443,14 +444,16 @@ async function build() {
   // 작아진 다음에 통화 말풍선이 돌아오고, 답변이 한 줄씩
   tl.to('#sgB', { boxShadow: '0 0 0 0px rgba(107,78,255,0)', duration: 0.4 }, tBack);
   tl.to(['#wB .wpill', '#ttlB', '#b1', '#b2', '#b3', '#b4'], { opacity: 1, duration: 0.5 }, tBack + 0.1);
-  cam(tBack, R2, 0.9);
-  tl.to('#callQ', { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power2.out' }, tBack + 0.6);
-  tl.fromTo('#callA', { autoAlpha: 0, x: -20, scale: 0.96, transformOrigin: '100% 50%' }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tAns);
+  const ANS_DX = 290;                                                                         // v20: 제목 없이 말풍선 + 휴대폰 묶음을 화면 가운데로
+  cam(tBack, { ...R2, x: R2.x - ANS_DX }, 0.9);
+  tl.set('#callQ', { x: -ANS_DX - 24 }, tBack + 0.55);
+  tl.to('#callQ', { autoAlpha: 1, x: -ANS_DX, duration: 0.5, ease: 'power2.out' }, tBack + 0.6);
+  tl.fromTo('#callA', { autoAlpha: 0, x: -ANS_DX - 20, scale: 0.96, transformOrigin: '100% 50%' }, { autoAlpha: 1, x: -ANS_DX, scale: 1, duration: 0.7, ease: 'back.out(1.4)', immediateRender: false }, tAns);
   const ta = typeChars($('#callA .q'), tAns + 0.3, 20);                                       // 문장이 길어진 만큼 조금 빠르게(초당 18 → 20자)
   ['#ua1', '#ua1b', '#ua2', '#ua2b', '#ua3'].forEach(k => { const [a, b] = ta.spanOf(k); mark(k, a, Math.max(0.2, b - a + 0.06)); });   // 글자가 써지는 대로 형광펜이 함께
 
   /* ── 3 먼저 건네기: 휴대폰 왼쪽. 제목 → 대화 → 위치 → 탑승권 → 아내 카톡 → 링크 미리보기 → 실 → Weave 버튼 → 추천 → 답장 ── */
-  tl.to(['#callQ', '#callA'], { autoAlpha: 0, x: -30, duration: 0.45, ease: 'power2.in', stagger: 0.03 }, X2);
+  tl.to(['#callQ', '#callA'], { autoAlpha: 0, x: '-=30', duration: 0.45, ease: 'power2.in', stagger: 0.03 }, X2);
   tl.to(phone, { x: '+=420', autoAlpha: 0, filter: 'blur(6px)', duration: 0.45, ease: 'power3.in' }, X2 + 0.05);
   chapIn('#ch3', C3); chapOut('#ch3', C3 + CH);
   tl.set('#scrA', { xPercent: -100 }, C3 + 0.3); tl.set('#scrC', { xPercent: 0 }, C3 + 0.3);
