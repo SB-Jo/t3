@@ -9,6 +9,7 @@
 - **`HowItWorks_Argon.pptx`**를 기준으로 고쳐요. Argon이 만든 판이고, 빌더는 `장표5/build.py`(본문 16장)와 `장표5/appendix.py`(Appendix 13장)예요.
   - 다시 만들기: `cd 장표5 && ~/.cache/weave-tools/venv/bin/python build.py --png`(흐린 그림을 그대로 쓰려면 `--skip-blur`). PowerPoint 잠금은 `render_c.py`가 스스로 잡으니 `flock`으로 감싸지 않아요.
   - 1쪽 솔루션 장은 `02_PPT/Weave_결선_중간본.pptx`의 5쪽을 가져와요. 중간본 솔루션 장을 고쳤으면 흐린 그림(2쪽)까지 다시 만들도록 `--skip-blur` 없이 빌드해요.
+- 중간본 덱(`02_PPT/Weave_결선_중간본.pptx`, `11_중간본/build_deck.py`)의 How it Works(6~20쪽)와 Appendix(28~40쪽)도 같은 장이에요(15차부터). `build.py`의 `add_slides`와 `fix_solution`을 중간본 빌더가 불러서 그려요. 그래서 `장표5`를 고친 뒤에는 두 파일을 모두 다시 만들어요.
 - `HowItWorks_Claude.pptx`(`Claude/`)는 비교용으로만 남겨 둬요.
 
 ## 폴더

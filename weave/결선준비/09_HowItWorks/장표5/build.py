@@ -1248,18 +1248,8 @@ def blur_png(src, dst, radius=16, veil=0.32):
     Image.blend(im, Image.new('RGB', im.size, (250, 248, 255)), veil).save(dst)
 
 
-def build(dst, auto=False, hold=1700):
-    prs = Presentation(str(DECK))
-    sol = prs.slides[SOL_INDEX]
-    layout = prs.slides[SOL_INDEX + 1].slide_layout
-    note_tpl = [copy.deepcopy(sh._element) for sh in prs.slides[SOL_INDEX + 1].notes_slide.placeholders]
-    lst = prs.slides._sldIdLst
-    for i, sid in enumerate(list(lst)):
-        if i != SOL_INDEX:
-            prs.part.drop_rel(sid.get(q('r:id')))
-            lst.remove(sid)
-    from pptx.opc.packuri import PackURI
-    sol.part.partname = PackURI('/ppt/slides/slide1.xml')        # 새 장 이름(slide2…)과 겹치지 않게
+def fix_solution(sol):
+    """솔루션 장: 노트를 SOL_NOTES로 바꾸고, 오른쪽 위 노란 빛을 보라로. 중간본 조립(11_중간본/build_deck.py)도 이걸 부른다."""
     sol.notes_slide.notes_text_frame.text = SOL_NOTES
     # 솔루션 장 오른쪽 위 노란 빛(Shape 1: FFE282 → FFEEB9 → FFFAEB)을 왼쪽 아래 보라 빛(Shape 2)과 같은 색·세기로
     GLOW = {'FFE282': ('BAA6FF', 34000), 'FFEEB9': ('DCD0FF', 16000), 'FFFAEB': ('F8F5FF', 0)}
@@ -1269,10 +1259,11 @@ def build(dst, auto=False, hold=1700):
             c.set('val', GLOW[v][0])
             for a in c.findall(q('a:alpha')):
                 a.set('val', str(GLOW[v][1]))
-    import appendix
-    specs = [f() for f in SLIDES] + [f() for f in appendix.APPENDIX]
-    report = []
-    secs = [6.0]
+
+
+def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
+    """specs를 prs 끝에 한 장씩 그려 넣는다(도형, 효과, 전환, 노트). 중간본 조립도 이걸 불러 HowItWorks_Argon.pptx와 같은 장을 만든다."""
+    slides, report, secs = [], [], []
     for sp in specs:
         slide = prs.slides.add_slide(layout)
         for ph in list(slide.placeholders):
@@ -1341,9 +1332,28 @@ def build(dst, auto=False, hold=1700):
                 ns.shapes._spTree.append(copy.deepcopy(e))
         ns.notes_text_frame.text = sp.notes
         report.append((sp.key, sp.clicks(), sp.notes.count('(클릭)'), len(pa.spids)))
+        slides.append(slide)
+    return slides, report, secs
+
+
+def build(dst, auto=False, hold=1700):
+    prs = Presentation(str(DECK))
+    sol = prs.slides[SOL_INDEX]
+    layout = prs.slides[SOL_INDEX + 1].slide_layout
+    note_tpl = [copy.deepcopy(sh._element) for sh in prs.slides[SOL_INDEX + 1].notes_slide.placeholders]
+    lst = prs.slides._sldIdLst
+    for i, sid in enumerate(list(lst)):
+        if i != SOL_INDEX:
+            prs.part.drop_rel(sid.get(q('r:id')))
+            lst.remove(sid)
+    from pptx.opc.packuri import PackURI
+    sol.part.partname = PackURI('/ppt/slides/slide1.xml')        # 새 장 이름(slide2…)과 겹치지 않게
+    fix_solution(sol)
+    import appendix
+    _, report, secs = add_slides(prs, layout, note_tpl, [f() for f in SLIDES] + [f() for f in appendix.APPENDIX], auto, hold)
     samsung_fonts.remap_prs(prs)
     prs.save(str(dst))
-    return report, secs
+    return report, [6.0] + secs
 
 
 def sheet(pngs, dst, labels, cols=4, w=520):
