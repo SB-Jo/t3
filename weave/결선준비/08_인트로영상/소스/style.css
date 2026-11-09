@@ -618,5 +618,5 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* 03: 추천 시트 맨 위 'Weave'를 보라로(실타래 아이콘과 같은 색) */
 #wC .row .ttl { color: var(--purple); }
 /* v21 수미상관: 첫 문장(#opSub)은 끝 화면 한 줄 소개(#sub)와 같은 글꼴, 끝 화면은 '그때 그거?' 줄 없이 로고 아래 44px(오프닝과 같은 간격)에 한 줄 */
-#opSub { font-size: 33px; font-weight: 400; color: var(--gray); letter-spacing: -0.02em; }
-#sub { top: 560px; }
+#opSub { font-size: 40px; font-weight: 400; color: var(--gray); letter-spacing: -0.02em; }
+#sub { top: 560px; font-size: 40px; }   /* 33px는 작아 보여서 두 줄 모두 40px */
