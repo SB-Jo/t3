@@ -302,7 +302,7 @@ def chip(name, x, y, label, style='outline', pt=10, h=26, padx=12, weight='b', i
 
 
 def qbadge(name, cx, y, label, pt=13):
-    """인포그래픽의 단서 질문 말풍선(보라 알약 + 아래 꼬리)."""
+    """모션그래픽의 단서 질문 말풍선(보라 알약 + 아래 꼬리)."""
     w = tw(label, pt, 'b') + 34
     h = pt * 1.33 + 18
     x = cx - w / 2
@@ -332,7 +332,7 @@ def xmark(name, cx, cy, s=40, w=5.5):
 
 
 def hl_band(name, x, y, text, sub, pt, weight='r', start=0, kind='low', color=HL, alpha=34):
-    """글자 위 형광펜(인포그래픽처럼 글자 아래쪽 반). x, y = 글 상자 왼쪽 위."""
+    """글자 위 형광펜(모션그래픽처럼 글자 아래쪽 반). x, y = 글 상자 왼쪽 위."""
     i = text.index(sub, start)
     ox, w = tw(text[:i], pt, weight), tw(sub, pt, weight)
     S = pt * 4 / 3
@@ -367,7 +367,7 @@ def numdot(name, cx, cy, n, r=13, fill=PURPLE, pt=10):
 # ------------------------------------------------------------------ 기록 카드
 def card(key, kind, x, y, w, title, meta='', lines=(), pt=11.5, title_pt=13.5, meta_pt=9.5, bubble=None, style='base',
          img=None, img_h=None, img_focus=(0.5, 0.5), meta_under=True, icon=None):
-    """인포그래픽과 같은 기록 카드: 앱 아이콘 + 제목 + (앱 · 날짜) + 본문(말풍선이면 회색 상자).
+    """모션그래픽과 같은 기록 카드: 앱 아이콘 + 제목 + (앱 · 날짜) + 본문(말풍선이면 회색 상자).
     돌려줌: (원시 목록, 높이, 자리 dict). 자리 dict: 'title', 'meta', 0.. = (x, y, 글, pt, 굵기)."""
     isz = 34
     pad = 16

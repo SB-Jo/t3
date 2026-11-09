@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """결선 중간본 덱 조립. 원본 02_PPT/Weave_결선.pptx는 고치지 않고, 새 파일 02_PPT/Weave_결선_중간본.pptx를 만든다.
 
-본편: 표지(반복 영상) → Motivation → Pain Points → 인포그래픽 영상(세 시나리오) → Solution
+본편: 표지(반복 영상) → Motivation → Pain Points → 모션그래픽 영상(세 시나리오) → Solution
       → How it Works(장표5 A1 덱용 00판, --hiw a1_deck이면 00 없는 판) → Why Samsung → Why Now → 차별화 → 기대효과 1~3 → END
 부록: 파이프라인, 관련 연구, Reasoning Embedding, UX 1~3 상세, 비교, Q&A 2장
 참고(발표에서 안 씀): 구분 장 → 앱 데모, 이전 표지, 만화, 이전 시나리오 1~3, 이전 How it Works
@@ -12,7 +12,7 @@
   python build_deck.py --team-style side      표지 팀 이름을 '이름 둘 | 팀 두 줄'로
   python build_deck.py --embed-fonts          글꼴을 pptx 안에 넣어 저장(받는 사람이 글꼴 없이도 보게, 용량 늘어남)
 
-영상은 PowerPoint(COM)로 넣는다: 표지 = 자동 재생 + 끝나면 반복, 인포그래픽 = 자동 재생 한 번.
+영상은 PowerPoint(COM)로 넣는다: 표지 = 자동 재생 + 끝나면 반복, 모션그래픽 = 자동 재생 한 번.
 열려 있는 PowerPoint 창은 건드리지 않는다(C:\\Temp 사본을 창 없이 열고 그 사본만 닫음).
 """
 import argparse
@@ -36,7 +36,7 @@ HIW = ROOT / '09_HowItWorks' / '장표5'
 SOL = ROOT / '07_소스' / 'slides' / 'p05_결선' / 'apply_solution.py'
 APX = ROOT / '07_소스' / 'slides' / 'appendix_결선' / 'apply_appendix.py'
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'
-INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_인포그래픽.mp4'
+INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'
 VENV_PY = Path.home() / '.cache' / 'weave-tools' / 'venv' / 'bin' / 'python'
 
 sys.path.insert(0, str(HIW))
@@ -144,7 +144,7 @@ def cover_text(slide, team_style='under'):
             x = lx + 11 + tw_ + 36
 
 
-INFO_NOTES = ('인포그래픽 영상입니다(1분 58초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
+INFO_NOTES = ('모션그래픽 영상입니다(1분 58초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
               '마지막 로고가 뜨면 무대 중앙으로 돌아와 다음 장으로 넘어갑니다. '
               '현장 음향이 작을 때만 장면 카드가 뜰 때 한 문장씩 얹습니다. '
               '첫째, 급한 통화 중에도 앱을 뒤질 필요 없이, 아래에서 쓸어 올리면 끝납니다. '
@@ -305,7 +305,7 @@ $pres = $app.Presentations.Open($Pptx, 0, 0, 0)
 try {
   $W = $pres.PageSetup.SlideWidth; $H = $pres.PageSetup.SlideHeight
   $log = @()
-  foreach ($job in @(@($CoverIdx, $CoverMp4, "Cover loop video", -1, $CoverPoster), @($IntroIdx, $IntroMp4, "Infographic video", 0, $IntroPoster))) {
+  foreach ($job in @(@($CoverIdx, $CoverMp4, "Cover loop video", -1, $CoverPoster), @($IntroIdx, $IntroMp4, "Motion graphic video", 0, $IntroPoster))) {
     if (-not $job[1]) { continue }
     $s = $pres.Slides.Item($job[0])
     $v = $s.Shapes.AddMediaObject2($job[1], 0, -1, 0, 0, $W, $H)
@@ -357,7 +357,7 @@ def add_media(pptx, cover_idx, intro_idx, embed_fonts=False):
     else:
         print('   ! 표지 영상이 아직 없음:', COVER_MP4)
     shutil.copyfile(INTRO_MP4, tmpd / 'intro.mp4')
-    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 인포그래픽 미리보기 그림 = 오프닝 로고(3초, 빛이 다 지나간 뒤)
+    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 모션그래픽 미리보기 그림 = 오프닝 로고(3초, 빛이 다 지나간 뒤)
     subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '3.4', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
                    check=True)
     args += ['-IntroMp4', render2.winpath(tmpd / 'intro.mp4'), '-IntroPoster', render2.winpath(tmpd / 'intro.png')]
@@ -421,13 +421,13 @@ def main():
     S.Painter(hiw[hy[0]]).prim(S.T('hiw/reason_note', 86, 664, 1100, 20, HYBRID_NOTE, size=10, color='8E88A0', anchor='ctr'))
     S.morph_transition(hiw[0], 1000)          # 솔루션 → How it Works 첫 장은 부드럽게(겹치는 도형이 없어 페이드처럼)
 
-    # 3. 새 표지(영상은 4단계에서), 인포그래픽 영상 장, 참고 구분 장
+    # 3. 새 표지(영상은 4단계에서), 모션그래픽 영상 장, 참고 구분 장
     cover = blank_slide(prs, layout, COVER_NOTES)
     cover_text(cover, a.team_style)
     info = blank_slide(prs, layout, INFO_NOTES)     # 바탕은 영상이 깖(도형 바탕을 그리면 영상이 그 뒤로 숨음)
     ref = text_slide(prs, layout, 'REFERENCE', ['참고 · 발표에서 쓰지 않는 장표',
                                                 '앱 데모, 이전 표지, 만화, 이전 시나리오 1~3, 이전 How it Works',
-                                                '새 구성(표지 영상, 인포그래픽, 솔루션, How it Works)으로 바뀌기 전 장표입니다.'],
+                                                '새 구성(표지 영상, 모션그래픽, 솔루션, How it Works)으로 바뀌기 전 장표입니다.'],
                      '참고용 구분 장. 이 뒤의 장표는 발표에서 쓰지 않습니다.')
 
     new_app = orig[19:26]                                  # 파이프라인, 관련 연구, Reasoning Embedding, UX 1~3 상세, 비교

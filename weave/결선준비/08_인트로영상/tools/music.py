@@ -1,4 +1,4 @@
-"""Weave 인포그래픽 v16 배경음악 — 기존 곡(Mixkit, 무료 상업 이용 가능)을 영상에 맞춰 편집하고, 꼭 필요한 순간에만 작은 효과음을 얹는다 (48kHz 스테레오)
+"""Weave 모션그래픽 v16 배경음악 — 기존 곡(Mixkit, 무료 상업 이용 가능)을 영상에 맞춰 편집하고, 꼭 필요한 순간에만 작은 효과음을 얹는다 (48kHz 스테레오)
 
 사용: ~/.cache/weave-tools/venv/bin/python tools/music.py            → out/bgm.wav(음악+효과음), out/bgm_music.wav, out/bgm_sfx.wav  (기본 곡)
 입력: out/events.json(효과음 시점, node tools/render.cjs --events), ~/.cache/weave-tools/music/<번호>.mp3

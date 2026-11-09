@@ -11,4 +11,4 @@
 | photo-seaside.jpg | https://commons.wikimedia.org/wiki/File:Enjoying_a_bottle_of_red_wine_(Unsplash).jpg | Jez Timms (Unsplash) | CC0 |
 | photo-homedinner.jpg | https://commons.wikimedia.org/wiki/File:Special_foods_%26_cuisines_in_Chongqing_-_Family_Dinner_3rd.jpg | Jason M. C. Han | CC BY-SA 4.0 |
 
-나머지(photo-babich.png = 표지·인포그래픽의 배비치 사진, keyboard.png·hand.png = 10_표지영상 소스에서 찍은 것, 앱 아이콘)는 기존 에셋이에요.
+나머지(photo-babich.png = 표지·모션그래픽의 배비치 사진, keyboard.png·hand.png = 10_표지영상 소스에서 찍은 것, 앱 아이콘)는 기존 에셋이에요.
