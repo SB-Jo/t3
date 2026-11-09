@@ -1022,7 +1022,7 @@ SHEET = (70, 236, 560, 340)
 
 def s_deliver():
     s = Slide('deliver', trans=('morph', 1000), cur='04', done={'00', '01', '02', '03'},
-              notes='찾은 이름은 근거 기록과 함께 건네고, 입력하기를 누르면 검색창에 바로 들어갑니다.')
+              notes='찾은 이름은 근거 기록과 함께 건네고, 입력하기를 누르면 검색창에 바로 들어갑니다. 색인부터 연쇄 탐색까지 이 모든 과정은 기기 안에서 이뤄집니다.')
     x, y, w, h = DL_SP
     pill, txt, cur, tx0 = search_pill('dl/sp', x, y, w, h, QUERY, pt=16.5)
     s.add('dl/sp', pill)
@@ -1053,8 +1053,15 @@ def s_deliver():
     hw = 170 * 773 / 960
     bx, by2 = sx + sw - 120, by_ + 25
     s.add('dl/hand', [P('dl/hand', str(AS / 'hand.png'), bx - hw * 0.388, by2 - 170 * 0.015 + 6, hw, 170)])
-    s.add('dl/cap', [caption('dl/cap', [[('찾은 이름을 근거와 함께 건네고', INK)], [('탭 한 번에 검색창을 채웁니다', PURPLE)]], 690, 330, size=28,
+    s.add('dl/cap', [caption('dl/cap', [[('찾은 이름을 근거와 함께 건네고', INK)], [('탭 한 번에 검색창을 채웁니다', PURPLE)]], 690, 296, size=28,
                              align='l')])
+    fx, fy, fw_, fh_ = 690, 412, 476, 62
+    s.add('dl/fin', [R('dl/fin/bg', fx, fy, fw_, fh_, prst='roundRect', radius=16, fill=LAV, line=LINE2, line_w=1.2, shadow=SHADOW_SOFT),
+                     R('dl/fin/ic', fx + 16, fy + 15, 32, 32, prst='ellipse', fill=PURPLE, line=None),
+                     R('dl/fin/ph', fx + 26.5, fy + 23, 11, 16, prst='roundRect', radius=3, fill=None, line='FFFFFF', line_w=1.6),
+                     R('dl/fin/ph2', fx + 30, fy + 36, 4, 1.4, fill='FFFFFF', line=None),
+                     T('dl/fin/t1', fx + 60, fy + 10, fw_ - 76, 22, '00 색인부터 04 결과 제공까지 모든 과정은 기기 안에서', size=12.5, color=PURPLE, weight='b', anchor='ctr'),
+                     T('dl/fin/t2', fx + 60, fy + 32, fw_ - 76, 20, '외부 서버 전송 없이 스마트폰 안에서 안전하게 완결됩니다', size=10.5, color=SUB, weight='m', anchor='ctr')])
     s.on('dl/q', 'jump', 0)
     s.on('dl/sheet', 'rise', 150, 550, dy=16)
     s.on('dl/cap', 'rise', 450, 550, dy=16)
@@ -1064,12 +1071,13 @@ def s_deliver():
     s.on('dl/q2', 'type', 2250, 1, ms=60, n=len(ans))
     s.on('dl/cur', 'appear', 2250 + 60 * len(ans) + 40, 1)
     s.on('dl/cur', 'blink', 2250 + 60 * len(ans) + 80, 1000)
+    s.on('dl/fin', 'rise', 2250 + 60 * len(ans) + 120, 500, dy=14)
     return s
 
 
-# ------------------------------------------------------------------ 9. 한눈에 보기 (4열 좌→우 직관적 파이프라인)
+# ------------------------------------------------------------------ 9. 한눈에 보기 (Appendix 이동: 4열 좌→우 직관적 파이프라인)
 def s_overview():
-    s = Slide('overview', trans=('morph', 800), done={'00', '01', '02', '03', '04'},
+    s = Slide('overview', trans=('fade', 450), done={'00', '01', '02', '03', '04'},
               notes='정리하면, Weave는 평소에 기록을 색인해 두고, 검색하다 막히면 질문을 나눈 뒤 찾은 단서로 다시 묻습니다. '
                     '이 모든 과정은 기기 안에서 이뤄집니다.')
     tagw = tw('모든 단계가 기기 안에서', 10.5, 'b') + 48
@@ -1178,19 +1186,10 @@ def s_overview():
     s.add('ov/a3', thread('ov/a3', scurve((c2x + c2w + 2, cy + 216), (c3x - 2, cy + 286)), w=2.4, tail='triangle'))
     s.add('ov/a4', thread('ov/a4', scurve((c3x + c3w + 2, cy + 290), (c4x - 2, cy + 190)), w=2.4, tail='triangle'))
     s.add('ov/u1', [line('ov/u1', (c3x + c3w / 2, iy), (c3x + c3w / 2, cy + 368), color=PURPLE2, w=1.8, dash='dash')])
-    order = [('ov/dev', 0), ('ov/idx', 150), ('ov/q', 400), ('ov/a1', 650), ('ov/rw', 750), ('ov/hoptag', 950),
-             ('ov/a2', 1000), ('ov/h1', 1100), ('ov/u1', 1300), ('ov/loop', 1450), ('ov/loopt', 1650),
-             ('ov/a3', 1750), ('ov/h2', 1850), ('ov/a4', 2150), ('ov/res', 2250)]
-    wipes = {'ov/a1': 'left', 'ov/a2': 'left', 'ov/a3': 'left', 'ov/a4': 'left', 'ov/u1': 'up', 'ov/loop': 'right'}
-    for k, d in order:
-        if k in wipes:
-            s.on(k, 'wipe_in', d, 400, dir=wipes[k])
-        else:
-            s.on(k, 'rise', d, 450, dy=12)
     return s
 
 
-SLIDES = [s_hiw, s_ask, s_cloud, s_old, s_kw, s_emb, s_step, s_chain, s_idx, s_trig, s_split, s_hop1, s_hop2, s_deliver, s_overview]
+SLIDES = [s_hiw, s_ask, s_cloud, s_old, s_kw, s_emb, s_step, s_chain, s_idx, s_trig, s_split, s_hop1, s_hop2, s_deliver]
 
 SOL_NOTES = ('방금 보신 세 장면이 Weave의 세 가지 경험입니다. 기록 통합 검색, (클릭) 단서로 찾는 기억, (클릭) 먼저 건네는 기억. '
              '모두 지금 보던 화면과 키보드 위에서 끝납니다.')
@@ -1206,8 +1205,38 @@ def blur_png(src, dst, radius=16, veil=0.32):
     Image.blend(im, Image.new('RGB', im.size, (250, 248, 255)), veil).save(dst)
 
 
+def _classify_sol_text(x, y, txt):
+    if x < 611:
+        if y < 200 or (x >= 310 and y < 255) or '위로 올려' in txt:
+            return 'sol1_base'
+        if x < 310:
+            return 'sol1_recs'
+        if '쓱' in txt:
+            return 'sol1_swipe'
+        if '삼성기술전 시연 내용' in txt:
+            return 'sol1_q'
+        return 'sol1_res'
+    elif y < 398:
+        if y < 190:
+            return 'sol2_base'
+        if '지은이네' in txt:
+            return 'sol2_type'
+        if '톡' in txt:
+            return 'sol2_tap'
+        return 'sol2_card'
+    else:
+        if y < 480:
+            return 'sol3_base'
+        if x < 880 and y < 525:
+            return 'sol3_ctx'
+        if '반짝' in txt:
+            return 'sol3_glow'
+        return 'sol3_card'
+
+
 def fix_solution(sol, auto=False, hold=1700):
-    """솔루션 장: 노트를 SOL_NOTES로 바꾸고, 배지·부제 제거 및 UX 1→2→3 순차 빌드업 애니메이션을 건다."""
+    """솔루션 장: 노트를 SOL_NOTES로 바꾸고, 배지·부제 제거 및 모션그래픽급 스포트라이트→도킹 애니메이션을 건다."""
+    import json
     sol.notes_slide.notes_text_frame.text = SOL_NOTES
     GLOW = {'FFE282': ('BAA6FF', 34000), 'FFEEB9': ('DCD0FF', 16000), 'FFFAEB': ('F8F5FF', 0)}
     for c in sol._element.iter(q('a:srgbClr')):
@@ -1218,62 +1247,103 @@ def fix_solution(sol, auto=False, hold=1700):
                 a.set('val', str(GLOW[v][1]))
 
     tree = sol.shapes._spTree
-    art_rId = None
-    ux_texts = [[], [], []]
+    # 기존 !!sol 그룹이 있으면 먼저 안의 Weave text 도형을 꺼내고 제거 (멱등성 보장)
+    part_texts = {}
+    for sp in list(sol._element.iter(q('p:sp'))):
+        cNvPr = sp.find('.//' + q('p:cNvPr'))
+        if cNvPr is None:
+            continue
+        nm = cNvPr.get('name', '')
+        if nm.startswith('Weave text '):
+            x, y, w, h = L.box_of(sp)
+            txt = ''.join(t.text or '' for t in sp.iter(q('a:t'))).strip()
+            p = _classify_sol_text(x, y, txt)
+            sp.getparent().remove(sp)
+            part_texts.setdefault(p, []).append(sp)
+
     for el_ in list(tree):
         cNvPr = el_.find('.//' + q('p:cNvPr'))
         if cNvPr is None:
             continue
         nm = cNvPr.get('name', '')
-        if nm in ('Header chip', 'Header subtitle'):
+        if nm in ('Header chip', 'Header subtitle', 'sol/rule/v', 'sol/rule/h') or nm.startswith('Weave graphics layer') or nm.startswith('!!sol'):
             tree.remove(el_)
         elif nm == 'Header title':
             off = el_.find('.//' + q('a:off'))
             if off is not None:
                 off.set('y', str(L.E(36)))
-        elif nm.startswith('Weave graphics layer'):
-            blip = el_.find('.//' + q('a:blip'))
-            if blip is not None:
-                art_rId = blip.get(q('r:embed'))
-            tree.remove(el_)
-        elif nm.startswith('Weave text '):
-            x, y, w, h = L.box_of(el_)
-            tree.remove(el_)
-            if x < 611:
-                ux_texts[0].append(el_)
-            elif y < 398:
-                ux_texts[1].append(el_)
-            else:
-                ux_texts[2].append(el_)
 
-    if art_rId:
-        tree.append(L.shape(9001, 'sol/rule/v', 611, 124, 1, 556, fill='ECE8F4', line=None))
-        tree.append(L.shape(9002, 'sol/rule/h', 636, 398, 604, 1, fill='ECE8F4', line=None))
-        p1 = L.picture(9011, 'sol/ux1/pic', art_rId, 0, 116, 608, 604, crop=(0, 116 / 720, (1280 - 608) / 1280, 0))
-        p2 = L.picture(9012, 'sol/ux2/pic', art_rId, 614, 116, 666, 280, crop=(614 / 1280, 116 / 720, 0, (720 - 396) / 720))
-        p3 = L.picture(9013, 'sol/ux3/pic', art_rId, 614, 400, 666, 320, crop=(614 / 1280, 400 / 720, 0, 0))
-        g1 = L.group(9101, '!!sol/ux1', [p1] + ux_texts[0])
-        g2 = L.group(9102, '!!sol/ux2', [p2] + ux_texts[1])
-        g3 = L.group(9103, '!!sol/ux3', [p3] + ux_texts[2])
-        tree.extend([g1, g2, g3])
+    sol_dir = AS / 'sol'
+    meta = json.loads((sol_dir / 'layers.json').read_text(encoding='utf-8'))
 
-        for tm in list(sol._element.findall(q('p:timing'))):
-            sol._element.remove(tm)
-        tl = M.Timeline()
-        tl.step()
-        tl.add('rise', 9101, delay=150, dur=480, dy=14)
-        tl.step()
-        tl.add('rise', 9102, delay=0, dur=480, dy=14)
-        tl.step()
-        tl.add('rise', 9103, delay=0, dur=480, dy=14)
-        sp_ids = {int(e.find(q('p:nvSpPr')).find(q('p:cNvPr')).get('id')) for e in sol._element.iter(q('p:sp'))}
-        sp_ids |= {int(e.find(q('p:nvPicPr')).find(q('p:cNvPr')).get('id')) for e in sol._element.iter(q('p:pic'))}
-        sp_ids |= {int(e.find(q('p:nvGrpSpPr')).find(q('p:cNvPr')).get('id')) for e in sol._element.iter(q('p:grpSp'))}
-        if auto:
-            holds = [500, hold, hold]
-            sol._element.append(tl.xml(sp_ids, auto=(150, holds)))
-        else:
-            sol._element.append(tl.xml(sp_ids, first_auto=True))
+    tree.append(L.shape(9001, 'sol/rule/v', 611, 124, 1, 556, fill='ECE8F4', line=None))
+    tree.append(L.shape(9002, 'sol/rule/h', 636, 398, 604, 1, fill='ECE8F4', line=None))
+
+    ORDER = [
+        ('sol1_base', 9101), ('sol1_recs', 9102), ('sol1_sheet', 9103),
+        ('sol1_q', 9104), ('sol1_res', 9105), ('sol1_swipe', 9106),
+        ('sol2_base', 9201), ('sol2_type', 9202), ('sol2_tap', 9203),
+        ('sol2_card', 9204), ('sol2_ok', 9205),
+        ('sol3_base', 9301), ('sol3_ctx', 9302), ('sol3_glow', 9303),
+        ('sol3_card', 9304), ('sol3_ok', 9305),
+    ]
+    for idx, (pname, gid) in enumerate(ORDER):
+        m = meta[pname]
+        _, rId = sol.part.get_or_add_image_part(str(sol_dir / f'{pname}.png'))
+        pic = L.picture(9020 + idx, f'sol/{pname}/pic', rId, m['x'], m['y'], m['w'], m['h'])
+        grp = L.group(gid, f'!!sol/{pname}', [pic] + part_texts.get(pname, []))
+        tree.append(grp)
+
+    for tm in list(sol._element.findall(q('p:timing'))):
+        sol._element.remove(tm)
+
+    tl = M.Timeline()
+
+    def enter_at(spid, delay, dur=420, dx=0, dy=14, base=(0, 0), bend=0.0):
+        tl.add('appear', spid, delay=delay, dur=1)
+        tl.add('fly', spid, delay=delay, dur=dur, dx=dx, dy=dy, bend=bend, base=base, show=True, fade=True)
+
+    # Step 0 (슬라이드 진입 시 자동): UX 1이 화면 중앙(dx=+325)에 떠서 슬라이드 업 → 검색어 입력 → 흩어진 기록 연결 및 요약
+    UX1_CENTER = (325, 0)
+    tl.step()
+    enter_at(9101, delay=80, dur=450, dx=0, dy=18, base=UX1_CENTER)     # 통화 화면 등장
+    enter_at(9106, delay=460, dur=420, dx=0, dy=30, base=UX1_CENTER)    # 손가락 위로 '쓱!' 슬라이드
+    enter_at(9103, delay=800, dur=460, dx=0, dy=64, base=UX1_CENTER)    # Weave 검색 시트 위로 슬라이드 업
+    enter_at(9104, delay=1180, dur=360, dx=-14, dy=0, base=UX1_CENTER)  # '삼성기술전 시연 내용' 검색어 입력
+    enter_at(9102, delay=1460, dur=440, dx=18, dy=12, base=UX1_CENTER)  # 왼쪽 흩어진 앱 기록들 등장
+    enter_at(9105, delay=1800, dur=480, dx=0, dy=16, base=UX1_CENTER)   # 보라색 실 연결 + 요약 및 연결된 기억 완성
+
+    # Step 1 (클릭 1): UX 1이 왼쪽으로 도킹 + UX 2가 오른쪽 중앙(dy=+116)에 떠서 단서 타이핑 → 실타래 탭 → 추천 카드 → 입력하기
+    UX2_CENTER = (0, 116)
+    tl.step()
+    for gid in (9101, 9102, 9103, 9104, 9105, 9106):
+        tl.add('fly', gid, delay=0, dur=680, dx=UX1_CENTER[0], dy=UX1_CENTER[1], bend=0.0, base=(0, 0), show=False, fade=False)
+    tl.add('fade_in', 9001, delay=340, dur=340)                         # 세로 구분선 등장
+    enter_at(9201, delay=280, dur=440, dx=0, dy=18, base=UX2_CENTER)    # UX 2 헤더 + 빈 검색창 + 키보드 등장
+    enter_at(9202, delay=660, dur=400, dx=-14, dy=8, base=UX2_CENTER)   # 두 손 타이핑 + 단서 질의 입력
+    enter_at(9203, delay=1040, dur=380, dx=-12, dy=14, base=UX2_CENTER) # 실타래 버튼 '톡!' 탭 + 화살표
+    enter_at(9204, delay=1360, dur=450, dx=-24, dy=0, base=UX2_CENTER)  # '배비치 소비뇽 블랑' 추천 카드 슬라이드
+    enter_at(9205, delay=1740, dur=360, dx=14, dy=18, base=UX2_CENTER)  # '입력하기' 탭
+
+    # Step 2 (클릭 2): UX 2가 오른쪽 위로 도킹 + UX 3이 오른쪽 아래에 떠서 맥락 인식 → 실타래 반짝 탭 → 추천 카드 → 입력하기
+    tl.step()
+    for gid in (9201, 9202, 9203, 9204, 9205):
+        tl.add('fly', gid, delay=0, dur=680, dx=UX2_CENTER[0], dy=UX2_CENTER[1], bend=0.0, base=(0, 0), show=False, fade=False)
+    tl.add('fade_in', 9002, delay=340, dur=340)                         # 가로 구분선 등장
+    enter_at(9301, delay=280, dur=440, dx=0, dy=18, base=(0, 0))        # UX 3 헤더 + 기본 키보드 등장
+    enter_at(9302, delay=640, dur=380, dx=0, dy=12, base=(0, 0))        # 공항·탑승권 맥락 칩 등장
+    enter_at(9303, delay=980, dur=400, dx=-10, dy=12, base=(0, 0))      # 실타래 버튼 보라색 점등('반짝!' + 배지 1) 및 탭
+    enter_at(9304, delay=1320, dur=450, dx=-24, dy=0, base=(0, 0))      # 갈색병 추천 카드 슬라이드
+    enter_at(9305, delay=1700, dur=360, dx=14, dy=18, base=(0, 0))      # '입력하기' 탭
+
+    sp_ids = {int(e.find(q('p:nvSpPr')).find(q('p:cNvPr')).get('id')) for e in sol._element.iter(q('p:sp'))}
+    sp_ids |= {int(e.find(q('p:nvPicPr')).find(q('p:cNvPr')).get('id')) for e in sol._element.iter(q('p:pic'))}
+    sp_ids |= {int(e.find(q('p:nvGrpSpPr')).find(q('p:cNvPr')).get('id')) for e in sol._element.iter(q('p:grpSp'))}
+    if auto:
+        holds = [500, hold, hold]
+        sol._element.append(tl.xml(sp_ids, auto=(150, holds)))
+    else:
+        sol._element.append(tl.xml(sp_ids, first_auto=True))
 
 
 def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):

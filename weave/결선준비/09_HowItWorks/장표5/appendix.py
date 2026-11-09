@@ -2,7 +2,7 @@
 How it Works 본문과 동일한 디자인 시스템·배경·카드·글꼴을 사용하며,
 임원·비전공자도 한눈에 읽히는 본문 + 전공자·엔지니어를 위한 검증된 학술·시스템 각주를 함께 제공한다.
 """
-from build import (AS, BLUE, BLUE_BG, PH, QUERY, Slide)
+from build import (AS, BLUE, BLUE_BG, PH, QUERY, Slide, s_overview)
 from ui import (BODY, ICON, INK, LAV, LAV2, LINE, LINE2, MUTE, PURPLE, PURPLE2, RED, RING, SUB, SHADOW_CARD, SHADOW_SOFT, C, P, R, T,
                 caption, chip, crop_fit, line, numdot, scurve, thread, tw)
 
@@ -412,4 +412,4 @@ def a_credits():
     return s
 
 
-APPENDIX = [a_divider, a_roles, a_rem, a_kg, a_hops, a_compare, a_ux, q_pde, q_sameday, q_apple, q_llm, q_data, a_credits]
+APPENDIX = [a_divider, s_overview, a_roles, a_rem, a_kg, a_hops, a_compare, a_ux, q_pde, q_sameday, q_apple, q_llm, q_data, a_credits]
