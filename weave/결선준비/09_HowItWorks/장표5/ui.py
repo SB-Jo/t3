@@ -14,7 +14,7 @@ import hiw_lib as L
 from hiw_lib import q
 
 HERE = Path(__file__).resolve().parent
-AS = HERE / 'assets'
+AS = HERE.parent / '장표5' / 'assets'   # 그림은 Argon판 것을 읽기만 함
 
 INK, INK2, BODY, SUB, MUTE = '1C1A24', '2B2640', '4E4A57', '6A6474', '8E88A0'
 LINE, LINE2 = 'E6E0F5', 'CFC3FF'

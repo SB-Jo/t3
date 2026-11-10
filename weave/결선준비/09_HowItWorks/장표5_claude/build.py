@@ -76,7 +76,7 @@ class Slide:
     def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, badge=None, cur=None, done=(), bg=True):
         self.key, self.notes, self.advance = key, notes, advance
         self.trans = (trans[0], round(trans[1] * SPEED)) if trans else trans
-        self.bar, self.badge, self.cur, self.done, self.bg = bar, (bar if badge is None else badge), cur, set(done), bg
+        self.bar, self.badge, self.cur, self.done, self.bg = bar, False, cur, set(done), bg
         self.items = []
         self.groups = [[]]
 
@@ -231,9 +231,6 @@ def phone_prims(key, alpha=100):
 def s_ask():
     s = Slide('ask', trans=('morph', 1000), bar=False, badge=True,
               notes='집들이 때 마셨던 와인이 맛있어서 다시 사려는데, 이름이 떠오르지 않습니다.')
-    bx, by, bw, bh = BADGE_BOX                     # 앞 장의 큰 'How it works?'가 왼쪽 위 뱃지 자리로 줄어듦(모핑)
-    s.add('hiw/big', [T('hiw/big', bx, by - 4, bw, bh + 8, [[('How it ', {'color': INK}), ('works?', {'color': PURPLE})]],
-                        size=10.5, weight='b', align='c', anchor='ctr', alpha=0)])
     s.add('ask/phone', phone_prims('ask/phone'))
     pill, txt, cur, _ = search_pill('ask/sp', 188, 318, 560, 84, QUERY, pt=19)
     s.add('ask/sp', pill)
@@ -301,7 +298,7 @@ def s_cloud():
     s.add('cl_photo', photo[0], alpha=72)
     # 첫 문장은 잠깐만(temp: 화면 밖에 두고 장이 열리면 제자리로) → 클릭하면 둘째 문장으로 바뀜. 정적 보기·모핑엔 둘째 문장만
     s.add('cl_t1', [caption('cl_t1', [[('정답은 분명 ', INK), ('기기 안', PURPLE), ('에 있습니다', INK)]], 640, 308, size=32)], temp=True)
-    s.add('cl_t2', [caption('cl_t2', [[('그러나, ', INK), ('여러 앱에 흩어져 있는 단서들', PURPLE)]], 640, 308, size=32)])
+    s.add('cl_t2', [caption('cl_t2', [[('하지만 단서는 ', INK), ('여러 앱에 흩어져 있습니다', PURPLE)]], 640, 308, size=32)])
     keys = order[:]
     random.Random(7).shuffle(keys)
     keys = ['cl_talk', 'cl_photo'] + keys[:5] + ['cl_photo2'] + keys[5:]
@@ -551,7 +548,7 @@ def s_chain():
     s.add('ch/pring', [ring_box('ch/pring', spots[wi], pad=4, radius=12, w=3.0)])
     ans, _ = chip('ch/ans', cx_ + cw_ / 2, cy_ + gal[1] + 16, '배비치 소비뇽 블랑', 'fill', pt=13, h=34, padx=16, align='c')
     s.add('ch/ans', ans)
-    s.add('ch/bridge', [caption('ch/bridge', [[('이 중간 단서를 ', INK), ('Weave는 어떻게 찾아낼까요?', PURPLE)]], 640, 600, size=26)])
+    s.add('ch/bridge', [caption('ch/bridge', [[('빠진 중간 단서, ', INK), ('Weave는 어떻게 찾아낼까요?', PURPLE)]], 640, 600, size=26)])
     s.on('ch/sp', 'rise', 150, 500, dy=14)
     s.on('ch/l1', 'wipe_in', 450, 400)
     s.on('ch/gap', 'rise', 600, 500, dy=14)
@@ -569,8 +566,8 @@ IDX = (500, 232, 724, 300)
 
 def s_idx():
     s = Slide('idx', trans=('morph', 1000), cur='00',
-              notes='먼저 Weave는 평소에 기록을 색인해 둡니다. (클릭) 문장의 뜻은 벡터로, 날짜와 앱 같은 정보는 메타데이터로 나눠 저장합니다.')
-    s.add('idx/cap', [caption('idx/cap', [[('Weave는 ', INK), ('평소에 기록을 색인', PURPLE), ('해 둡니다', INK)]], 640, 86, size=25)])
+              notes='먼저 Weave는 여러 앱의 기록을 미리 찾기 쉽게 정리해 둡니다. (클릭) 문장의 뜻은 벡터로, 날짜와 앱 같은 정보는 메타데이터로 나눠 저장합니다.')
+    s.add('idx/cap', [caption('idx/cap', [[('여러 앱의 기록을 ', INK), ('미리 찾기 쉽게 정리', PURPLE), ('해 둡니다', INK)]], 640, 86, size=25)])
     talk = chain_talk(56, 252, 360)
     s.add('ch/talk', talk[0])
     x, y, w, h = IDX
@@ -629,7 +626,7 @@ def trig_parts(alpha=100):
 
 def s_trig():
     s = Slide('trig', trans=('morph', 1000), cur='01', done={'00'},
-              notes='그리고 검색하다 막히면 (클릭) 키보드의 실타래 버튼을 누릅니다. Weave는 검색창의 질문을 그대로 받아 옵니다.')
+              notes='그리고 기억이 잘 나지 않을 땐 (클릭) 키보드의 실타래 버튼을 누릅니다. Weave는 검색창의 질문을 그대로 받아 옵니다.')
     parts, txt, cur, tx0 = trig_parts()
     pm = dict(parts)
     s.add('tr/sp', pm['tr/sp'])
@@ -639,7 +636,7 @@ def s_trig():
     s.add('tr/hand', pm['tr/hand'])
     x, y, w, h = TR_SP
     s.add('tr/qhl', [hl_band('tr/qhl', tx0, y + (h - 17.5 * 4 / 3 * 1.4) / 2 + 3, QUERY, QUERY, 17.5, kind='low', alpha=34)])
-    s.add('tr/cap', [caption('tr/cap', [[('검색하다 막히면', INK)], [('실타래 버튼을 누릅니다', PURPLE)]], 64, 340, size=30, align='l')])
+    s.add('tr/cap', [caption('tr/cap', [[('기억이 잘 나지 않을 땐', INK)], [('키보드의 실타래 버튼을 누릅니다', PURPLE)]], 64, 340, size=30, align='l')])
     s.on('tr/cap', 'rise', 300, 550, dy=16)
     s.click()
     s.on('tr/hand', 'fly', 0, 700, dx=170, dy=230, bend=0.1)
@@ -664,7 +661,7 @@ def qr_full():
 
 def s_split():
     s = Slide('split', trans=('morph', 1000), cur='02', done={'00', '01'},
-              notes='Weave는 이 질문을 단서 순서대로 둘로 나눕니다. (클릭) 지은이네 집들이가 언제였는지 먼저 묻고, '
+              notes='Weave는 복잡한 질문을 단계별 질문 두 개로 나눕니다. (클릭) 지은이네 집들이가 언제였는지 먼저 묻고, '
                     '마셨던 와인은 그날을 빈칸으로 남겨 둡니다.')
     parts, txt, cur, tx0 = trig_parts()
     pm = dict(parts)
@@ -692,7 +689,7 @@ def s_split():
     s.add('sp/r2', [R('sp/r2/bg', qx + 22, r2y, qw - 44, 58, prst='roundRect', radius=14, fill=BLUE_BG, line=None)] +
           numdot('sp/r2/n', qx + 50, r2y + 29, 2, r=14, pt=11, fill=BLUE) + blank +
           [T('sp/r2/t', qx + 76 + bw_ + 6, r2y, qw - 110 - bw_, 58, '마셨던 와인은?', size=17, color=INK, weight='m', anchor='ctr')])
-    s.add('sp/cap', [caption('sp/cap', [[('질문을 단서 순서대로 ', INK), ('둘로 나눕니다', PURPLE)]], qx + qw / 2, 92, size=24)])
+    s.add('sp/cap', [caption('sp/cap', [[('복잡한 질문을 ', INK), ('단계별 질문 두 개로 나눕니다', PURPLE)]], qx + qw / 2, 92, size=24)])
     s.on('sp/cap', 'rise', 200, 500, dy=14)
     s.click()
     s.on('sp/b1', 'wipe_in', 0, 450)
@@ -780,7 +777,7 @@ def s_hop1():
     # ① → Hop 1: 판 왼쪽 바깥으로 도는 화살표
     s.add('h1/c', thread('h1/c', [(QC[0] + 14, r1y + 20), (QC[0] - 14, r1y + 20), (H1[0] - 14, H1[1] + 30), (H1[0] - 2, H1[1] + 30)],
                          w=2.2, tail='triangle'))
-    s.add('h1/cap', [caption('h1/cap', [[('Reasoning Embedding', PURPLE), ('은 단어가 달라도 단서가 될 기록을 가깝게 둡니다', INK)]], 640, 80, size=21.5)])
+    s.add('h1/cap', [caption('h1/cap', [[('Reasoning Embedding', PURPLE), ('은 표현이 달라도 맥락이 통하는 기록을 찾아냅니다', INK)]], 640, 80, size=21.5)])
     sx, sy, sw, sh = H1_SPACE
     s.add('h1/space', [R('h1/space/bg', sx, sy, sw, sh, prst='roundRect', radius=22, fill='FFFFFF', alpha=88, line=LINE2, line_w=1.2)])
     tx0, ty0 = sx + 20, sy + 16
@@ -874,8 +871,8 @@ H2_PHOTOS = ['babich', 'table', 'w1', 'w3', 'w2']
 
 def s_hop2():
     s = Slide('hop2', trans=('morph', 1100), cur='03', done={'00', '01', '02'},
-              notes='찾은 날짜를 빈칸에 넣어 질문을 다시 씁니다. (클릭) 날짜는 메타데이터로 걸러 그날 사진만 남기고, '
-                    '(클릭) 와인이 보이는 사진의 라벨을 읽어 배비치 소비뇽 블랑을 찾습니다.')
+              notes='찾은 날짜를 빈칸에 넣어 질문을 다시 완성합니다. (클릭) 메타데이터로 그날 찍은 사진만 추린 뒤, '
+                    '(클릭) 와인이 보이는 사진의 라벨을 읽어 배비치 소비뇽 블랑을 찾아냅니다.')
     card_, q_, r1, r2, an, (r1y, r2y, ay) = qr_small('hop2')
     for p_ in card_:
         s.add(p_[1], [p_])
@@ -884,7 +881,7 @@ def s_hop2():
     s.add('sp/r2', [p_ for p_ in r2 if not p_[1].startswith('sp/r2/b')])
     s.add('sp/ans', an)
     s.add('h2/re', re_card('h2/re', H1, 2, [('3/15 (일)', 'tok'), ('마셨던 와인은?', 'q')]))
-    s.add('h2/cap', [caption('h2/cap', [[('찾은 날짜로 그날 사진만 남기고, ', INK), ('라벨에서 이름을 읽습니다', PURPLE)]], 640, 80, size=22)])
+    s.add('h2/cap', [caption('h2/cap', [[('찾아낸 날짜(3/15)의 사진만 추린 뒤, ', INK), ('라벨에서 이름을 읽습니다', PURPLE)]], 640, 80, size=22)])
     # Hop 1 결과(카톡) — 오른쪽 위. 날짜 토큰이 ② 빈칸으로(모핑)
     tx, ty, tww = H2_TALK
     talk = card('h1/card', 'talk', tx, ty, tww, '지은', '카카오톡 · 3월 15일 (일) 오후 4:12', ['박스 정리 다 했어! 이따 올 때', '휴지 안 사 와도 돼'],
@@ -967,7 +964,7 @@ SHEET = (70, 236, 560, 340)
 
 def s_deliver():
     s = Slide('deliver', trans=('morph', 1000), cur='04', done={'00', '01', '02', '03'},
-              notes='찾은 이름은 근거 기록과 함께 건네고, 입력하기를 누르면 검색창에 바로 들어갑니다.')
+              notes='찾아낸 이름은 관련 기록과 함께 보여주고, 입력하기를 누르면 검색창에 바로 들어갑니다.')
     x, y, w, h = DL_SP
     pill, txt, cur, tx0 = search_pill('dl/sp', x, y, w, h, QUERY, pt=16.5)
     s.add('dl/sp', pill)
@@ -999,7 +996,7 @@ def s_deliver():
     hw = HD * 773 / 960
     bx, by2 = sx + sw - 120, by_ + 25
     s.add('dl/hand', [P('dl/hand', str(AS / 'hand.png'), bx - hw * 0.388, by2 - HD * 0.015 + 6, hw, HD)])
-    s.add('dl/cap', [caption('dl/cap', [[('찾은 이름을 근거와 함께 건네고', INK)], [('탭 한 번에 검색창을 채웁니다', PURPLE)]], 690, 330, size=28,
+    s.add('dl/cap', [caption('dl/cap', [[('찾아낸 이름과 관련 기록을 보여주고', INK)], [('탭 한 번으로 검색창에 바로 입력합니다', PURPLE)]], 690, 330, size=26,
                              align='l')])
     s.on('dl/q', 'jump', 0)
     s.on('dl/sheet', 'rise', 150, 550, dy=16)
@@ -1016,14 +1013,14 @@ def s_deliver():
 # ------------------------------------------------------------------ 9. 한눈에 보기 (4열 좌→우 직관적 파이프라인)
 def s_overview():
     s = Slide('overview', trans=('morph', 800), done={'00', '01', '02', '03', '04'},
-              notes='정리하면, 질문을 나누고 찾은 단서로 다시 묻습니다. 이 모든 과정은 기기 안에서 이뤄집니다.')
-    s.add('ov/cap', [caption('ov/cap', [[('질문을 나누고, ', INK), ('찾은 단서로 다시 묻습니다', PURPLE)]], 640, 80, size=26)])
-    tagw = tw('모든 단계가 기기 안에서', 10.5, 'b') + 48
+              notes='정리하면, 질문을 단계별로 나누고 찾은 단서를 이어서 답을 찾습니다. 이 모든 과정은 기기 안에서 이뤄집니다.')
+    s.add('ov/cap', [caption('ov/cap', [[('질문을 단계별로 나누고, ', INK), ('찾은 단서를 이어서 답을 찾습니다', PURPLE)]], 640, 80, size=25)])
+    tagw = tw('모든 과정은 기기 안에서', 10.5, 'b') + 48
     s.add('ov/dev', [R('ov/dev/bg', 36, 136, 1208, 558, prst='roundRect', radius=28, fill='FFFFFF', alpha=55, line=LINE2, line_w=1.4),
                      R('ov/dev/tag', 60, 122, tagw, 28, prst='roundRect', fill='FFFFFF', line=LINE2, line_w=1.2),
                      R('ov/dev/ph', 74, 128, 11, 16, prst='roundRect', radius=3, fill=None, line=PURPLE, line_w=1.6),
                      R('ov/dev/ph2', 77.5, 141, 4, 1.4, fill=PURPLE, line=None),
-                     T('ov/dev/t', 94, 122, tagw - 40, 28, '모든 단계가 기기 안에서', size=10.5, color=PURPLE, weight='b', anchor='ctr')])
+                     T('ov/dev/t', 94, 122, tagw - 40, 28, '모든 과정은 기기 안에서', size=10.5, color=PURPLE, weight='b', anchor='ctr')])
 
     def stage_tag(key, x, y, no, name):
         w = tw(name, 10.5, 'b') + 46
@@ -1202,7 +1199,7 @@ def sol_steps(prs, sol, layout, note_tpl):
     """솔루션 장을 세 장으로 나눠 하나씩 모은다(모핑, 클릭 두 번).
     ① UX 1을 가운데 조금 크게 → ② UX 1은 왼쪽 자리로, UX 2는 오른쪽 칸 가운데에 → ③ UX 2는 오른쪽 위로, UX 3은 오른쪽 아래에(완성).
     한 장짜리 그래픽 그림을 UX마다 잘라 그 UX 글상자와 같이 옮기고, 이름(!!sol/…)이 같아서 모핑이 장 사이를 잇는다.
-    가운데 머리 칩과 부제는 빼고, 같은 글의 뱃지를 왼쪽 위(How it Works 뱃지 자리)에 둔다. 돌려줌: 세 장(③은 원래 솔루션 장)."""
+    머리 칩(SOLUTION: WEAVE ASSIST)과 부제는 뺀다. 돌려줌: 세 장(③은 원래 솔루션 장)."""
     E = 9525
     art = next(sh for sh in sol.shapes if sh.shape_type == 13 and sh.width > 1200 * E)
     art_rid = art._element.xpath('.//a:blip/@r:embed')[0]
@@ -1255,9 +1252,6 @@ def sol_steps(prs, sol, layout, note_tpl):
             for name, el in texts[ux]:
                 _move(put(name, el), c0, c1, sc)
         put(*title)
-        sb = 'SOLUTION: WEAVE ASSIST'                              # 뱃지: How it Works·Appendix와 같은 자리·모양
-        pa.put('sol/badge', [T('sol/badge', 40, 22, tw(sb, 10.5, 'sb') + 32, 28, sb, size=10.5, color='FFFFFF', weight='sb', align='c',
-                               anchor='ctr', spc=0.5, fill=PURPLE, radius=14)], group=False)
         for n, c in enumerate(tree.iter(q('p:cNvPr')), 2):        # 도형 번호를 새로(복사한 것과 겹치지 않게)
             c.set('id', str(n))
         if slide is not sol:
