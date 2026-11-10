@@ -1145,7 +1145,7 @@ def qr_full():
 
 def s_split():
     s = Slide('split', trans=('morph', 1000), cur='02', done={'00', '01'},
-              notes='받은 질의는 의미 단위로 나눠 (클릭) 집들이 날짜를 먼저 묻고 와인은 그날을 빈칸으로 둡니다.')
+              notes='받은 질의는 의미 단위로 나눠 (클릭) 집들이 날짜를 먼저 묻고 와인 질의는 그날을 빈칸으로 둡니다.')
     parts, txt, cur, tx0 = trig_parts()
     pm = dict(parts)
     for k in ('tr/sp', 'tr/kb', 'tr/hand'):
