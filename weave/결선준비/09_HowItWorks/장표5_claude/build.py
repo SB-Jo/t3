@@ -4,7 +4,8 @@
 
   python build.py                 → ../HowItWorks_Argon_claude.pptx (발표용: 클릭마다 한 박자)
   python build.py --png           + out/png/s01.png… 와 out/한눈에.png (PowerPoint로 렌더, 정적 = 마지막 상태)
-  python build.py --video         + out/HowItWorks_Argon_claude_미리보기.mp4 (클릭 효과도 저절로 나오는 사본을 PowerPoint로 녹화)
+  python build.py --video         + out/HowItWorks_Argon_claude_미리보기.mp4 (본문 17장만. 클릭 효과가 저절로 나오는 사본을 PowerPoint로 녹화하되,
+                                  구간마다 그 구간의 노트를 말하는 시간만큼 머물고 그 말을 자막으로 띄움 → 영상 길이 = 발표 시간 어림)
   python build.py --skip-blur     흐린 배경 그림(out/blur_*.png)을 다시 만들지 않음(있는 것을 씀)
   python build.py --time          덱은 만들지 않고 발표 시간만 어림(본문 17장: 장마다 클릭 수, 음절 수, 걸리는 시간)
 
@@ -282,9 +283,9 @@ SOL_PHONE = ['phone', 'call', 'swipe', 'sheet', 'go', 'q', 'sum']     # 1쪽에�
 SOL_LABEL = {'ux1': (1, '기록 통합 검색'), 'ux2': (2, '단서로 찾는 기억'), 'ux3': (3, '먼저 건네는 기억')}
 SOL_Q1 = '삼성기술전 시연 내용'
 SOL_QPT = 12.5 * 0.75                              # (2) 검색창 글자 크기(pt)
-SOL_NOTES = [                                      # 11-10 4차: 본문 17장을 3분 남짓에 말할 수 있게 줄임(python build.py --time)
+SOL_NOTES = [                                      # 11-10 4차: 발표 시간에 맞춘 노트(python build.py --time으로 다시 잼)
     '방금 보신 세 장면이 Weave의 핵심 UX입니다. 첫째, 기록 통합 검색입니다. 통화 중에 (클릭) 화면을 밀어 올려 '
-    '(클릭) 삼성기술전 시연 내용을 물으면 여러 앱의 기록을 이어 요약합니다.',
+    '(클릭) 물으면 여러 앱의 기록을 이어 요약합니다.',
     '둘째, 단서로 찾는 기억입니다. 이름이 떠오르지 않아도 단서만 적고 (클릭) 실타래 버튼을 누르면 Weave가 이름을 찾아 줍니다.',
     '셋째, 먼저 건네는 기억입니다. 위치와 탑승권으로 상황을 알아채고 (클릭) 아내가 말했던 갈색병을 먼저 떠올려 줍니다. '
     '세 가지 모두 지금 보던 화면과 키보드 위에서 끝납니다.',
@@ -549,7 +550,7 @@ SOL_SLIDES = [s_sol1, s_sol2, s_sol3]
 # ------------------------------------------------------------------ 0. 솔루션 → How it works?
 def s_hiw():
     s = Slide('hiw', trans=('fade', 500), bar=False,
-              notes='그럼 Weave는 어떻게 동작할까요? 집들이 와인 장면으로 따라가 보겠습니다.')
+              notes='그럼 Weave는 어떻게 동작할까요? 집들이 와인으로 따라가 보겠습니다.')
     s.add('bg/blur', [P('bg/blur', str(OUT / 'blur_sol.png'), 0, 0, 1280, 720)])
     s.add('hiw/big', [caption('hiw/big', [[('How it ', INK), ('works?', PURPLE)]], 640, 300, size=80)])
     s.on('hiw/big', 'rise', 120, 450, dy=10)
@@ -777,8 +778,8 @@ KW_KEYS = ['kw/t1', 'kw/t2', 'kw/t3', 'kw/c1', 'kw/c2', 'kw/c3', 'kw/gal', 'kw/p
 
 def s_kw():
     s = Slide('kw', trans=('morph', 900), bar=False,
-              notes=('키워드 검색은 단어가 겹치는 기록만 찾습니다. '
-                    '(클릭) 지은이네로는 (클릭) 관련 없는 집 주소가, (클릭) 집들이로는 (클릭) 다른 사람 집들이가, '
+              notes=('키워드 검색은 같은 단어를 찾습니다. '
+                    '(클릭) 지은이네로는 (클릭) 관련 없는 집 주소가 (클릭) 집들이로는 (클릭) 다른 사람 집들이가 '
                     '(클릭) 와인으로는 (클릭) 다른 날 와인 결제가 나옵니다. '
                     '(클릭) 정작 그날 찍은 사진은 (클릭) 읽지도 못합니다.'))
     s.add('old/title', [old_title(OLD_Y, 30)])
@@ -826,8 +827,10 @@ def s_emb():
     """11-10 4차: 가까운 기록은 '소믈리에 추천' 메모와 다른 날 와인 사진 두 장(레드, 화이트). ✕는 메모 → 와인 둘(한마디와 함께) 순서로,
     끝에 멀리 있는 지은 카톡에 옅은 '단서' 표."""
     s = Slide('emb', trans=('morph', 1000), bar=False,
-              notes=('임베딩 검색은 (클릭) 질문을 벡터로 바꿔 (클릭) 기록이 놓인 공간에서 (클릭) 뜻이 가까운 기록을 찾습니다. '
-                    '(클릭) 하지만 관련 없는 메모와 (클릭) 다른 날 마신 와인 사진만 가깝고, 단서인 지은이의 카톡은 와인 이야기가 없어 멀리 있습니다.'))
+              notes=('임베딩 검색은 단어 대신 뜻으로 찾습니다. (클릭) 질문을 벡터로 바꿔 '
+                    '(클릭) 뜻이 비슷할수록 가까이 놓이는 공간에서 (클릭) 가까운 기록을 찾습니다. '
+                    '(클릭) 하지만 가까운 것은 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. '
+                    '단서인 지은이의 카톡은 와인 이야기가 없어 멀리 있습니다.'))
     s.add('old/title', [old_title(OLD_Y, 30)])
     parts, _ = kw_parts()
     pm = dict(parts)
@@ -1138,7 +1141,7 @@ def qr_full():
 
 def s_split():
     s = Slide('split', trans=('morph', 1000), cur='02', done={'00', '01'},
-              notes='받은 질의는 의미 단위로 나눠 다시 씁니다. (클릭) 집들이 날짜를 먼저 묻고, 와인은 그날을 빈칸으로 둡니다.')
+              notes='받은 질의는 의미 단위로 나눠 다시 씁니다. (클릭) 집들이 날짜를 먼저 묻고 와인은 그날을 빈칸으로 둡니다.')
     parts, txt, cur, tx0 = trig_parts()
     pm = dict(parts)
     for k in ('tr/sp', 'tr/kb', 'tr/hand'):
@@ -1246,9 +1249,10 @@ def s_hop1():
     (클릭) Reasoning Embedding(보라)으로 바꾸면 공간이 다시 놓이고, 단서가 옛 자리에 흐린 흔적과 실선을 남기며 질문 곁으로 →
     (클릭) 카톡을 펼쳐 근거와 받은 날짜(따로 뱃지 없이 그 자리에서 강조)."""
     s = Slide('hop1', trans=('morph', 1100), cur='03', done={'00', '01', '02'},
-              notes=('첫 질의를 일반 임베딩으로 찾으면 다른 사람의 집들이 일정과 주소 메모가 먼저 잡히고, '
-                    '단서인 지은이의 카톡은 멀리 있습니다. '
-                    '(클릭) Reasoning Embedding은 ‘휴지 안 사 와도 돼’가 집들이 초대라는 걸 알아보고 이 카톡을 질문 곁에 둡니다. '
+              notes=('앞서 본 일반 임베딩은 뜻이 비슷한 기록을 가깝게 둡니다. '
+                    '그래서 다른 집들이 일정과 주소 메모가 먼저 잡히고 단서인 지은이의 카톡은 멀리 있습니다. '
+                    '(클릭) Reasoning Embedding은 추론까지 잘하도록 튜닝한 임베딩입니다. '
+                    '‘휴지 안 사 와도 돼’가 집들이 초대라는 걸 알아보고 이 카톡을 질문 곁에 둡니다. '
                     '(클릭) 카톡을 받은 3월 15일이 다음 단서가 됩니다.'))
     card_, q_, r1, r2, (r1y, r2y) = qr_small()
     for p_ in card_:
@@ -1482,8 +1486,8 @@ SHEET = (140, 252, 560, 340)
 
 def s_deliver():
     s = Slide('deliver', trans=('morph', 1000), cur='04', done={'00', '01', '02', '03'},
-              notes='찾은 답은 다듬어 근거와 함께 건넵니다. (클릭) 입력하기를 누르면 검색창에 들어가고, 그 와인을 다시 살 수 있습니다. '
-                    '이 모든 과정은 기기 안에서 이뤄집니다.')
+              notes=('찾은 답은 다듬어 근거와 함께 건넵니다. (클릭) 입력하기를 누르면 검색창에 들어가고 그 와인을 다시 살 수 있습니다. '
+                    '이 모든 과정은 기기 안에서 이뤄집니다.'))
     x, y, w, h = DL_SP
     QPT = 16.5
     pill, txt, cur, tx0 = search_pill('dl/sp', x, y, w, h, QUERY, pt=QPT)
@@ -1744,15 +1748,18 @@ def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
         adv = sp.advance
         if any(tl.steps):
             if auto:
-                holds = [(500 if j == 0 else hold) for j in range(len(tl.steps))]
+                holds = getattr(sp, 'holds', None) or [(500 if j == 0 else hold) for j in range(len(tl.steps))]
                 slide._element.append(tl.xml(sp_ids, auto=(150, holds)))
                 total = 150 + sum(tl.step_len(j) + holds[j] for j in range(len(tl.steps)))
                 adv = max(adv or 0, total)
             else:
                 slide._element.append(tl.xml(sp_ids, first_auto=True))
         set_transition(slide, sp.trans, adv if (auto or sp.advance) else None)
-        dur_s = ((adv or 2500) + (sp.trans[1] if sp.trans else 0)) / 1000
-        secs.append(max(dur_s, 1.6))
+        if getattr(sp, 'holds', None):          # 발표 속도 미리보기: PowerPoint가 장 넘김 시간을 따로 더하므로 여기서는 더하지 않음
+            secs.append((adv or 2500) / 1000)
+        else:
+            dur_s = ((adv or 2500) + (sp.trans[1] if sp.trans else 0)) / 1000
+            secs.append(max(dur_s, 1.6))
         ns = slide.notes_slide
         if ns.notes_text_frame is None:
             for e in note_tpl:
@@ -1764,15 +1771,16 @@ def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
 
 
 
-def build(dst, auto=False, hold=1700):
+def build(dst, auto=False, hold=1700, talk=False):
     """원본 덱에서 장 틀과 노트 틀만 빌려, 새 장을 끝에 다 넣은 뒤 원본 장을 지운다
-    (먼저 지우면 python-pptx가 장 파일 이름을 다시 써서 PowerPoint가 못 여는 일이 있었음)."""
+    (먼저 지우면 python-pptx가 장 파일 이름을 다시 써서 PowerPoint가 못 여는 일이 있었음).
+    talk=True면 미리보기 영상용: 본문 17장만, 발표 속도로 머물고 자막을 띄움(talk_specs)."""
     prs = Presentation(str(SRC))
     layout = prs.slides[LAYOUT_INDEX].slide_layout
     note_tpl = [copy.deepcopy(sh._element) for sh in prs.slides[LAYOUT_INDEX].notes_slide.placeholders]
     lst = prs.slides._sldIdLst
     old = list(lst)
-    specs = [f() for f in SOL_SLIDES] + [f() for f in SLIDES] + appendix_specs()
+    specs = talk_specs() if talk else [f() for f in SOL_SLIDES] + [f() for f in SLIDES] + appendix_specs()
     _, report, secs = add_slides(prs, layout, note_tpl, specs, auto, hold)
     for sid in old:
         prs.part.drop_rel(sid.get(q('r:id')))
@@ -1807,30 +1815,74 @@ def syllables(text):
     return sum(1 for ch in text if '가' <= ch <= '힣') + sum(len(re.findall(r'[aeiouAEIOU]+', w)) for w in re.findall(r'[A-Za-z]+', text))
 
 
+def _group_len(grp):
+    """한 묶음(장이 열린 뒤, 또는 클릭 한 번)의 효과가 끝나는 때(ms)."""
+    t = 0
+    for key, kind, delay, dur, kw in grp:
+        d = dur * 2 if kind == 'pulse' else (kw.get('ms', 45) * kw.get('n', 20) if kind == 'type' else
+                                            (0 if kind in ('blink', 'jump', 'goto', 'appear') else dur))
+        t = max(t, delay + d)
+    return t
+
+
+def _say_times(sp, rate=SPEECH_RATE):
+    """노트를 (클릭)으로 나눈 구간마다 말하는 시간(초): 음절 ÷ 속도 + 문장 끝 0.3초."""
+    return [syllables(seg) / rate + 0.3 * len(re.findall(r'[.?!](?:\s|$)', seg)) for seg in sp.notes.split('(클릭)')]
+
+
 def rehearse(specs, rate=SPEECH_RATE):
     """발표를 한 번 해 보는 셈으로 장마다 걸리는 시간을 어림한다.
     한 구간(장이 열린 뒤, 또는 클릭 한 번 뒤) = max(그 구간에 할 말, 그 구간의 효과 길이). 문장 끝 0.3초, 클릭 0.25초, 장 넘김 시간을 더한다."""
     rows, total = [], 0.0
     for sp in specs:
         segs = sp.notes.split('(클릭)')
-        anim = []
-        for grp in sp.groups:
-            t = 0
-            for key, kind, delay, dur, kw in grp:
-                d = dur * 2 if kind == 'pulse' else (kw.get('ms', 45) * kw.get('n', 20) if kind == 'type' else
-                                                    (0 if kind in ('blink', 'jump', 'goto', 'appear') else dur))
-                t = max(t, delay + d)
-            anim.append(t / 1000)
-        trans = (sp.trans[1] / 1000) if sp.trans else 0
-        sec, syl = trans, 0
-        for i, seg in enumerate(segs):
-            n = syllables(seg)
-            say = n / rate + 0.3 * len(re.findall(r'[.?!](?:\s|$)', seg))
-            sec += max(say, anim[i] if i < len(anim) else 0) + (0.25 if i else 0)
-            syl += n
+        says = _say_times(sp, rate)
+        anim = [_group_len(g) / 1000 for g in sp.groups]
+        sec = (sp.trans[1] / 1000) if sp.trans else 0
+        for i in range(len(segs)):
+            sec += max(says[i], anim[i] if i < len(anim) else 0) + (0.25 if i else 0)
         total += sec
-        rows.append((sp.key, len(segs) - 1, syl, sec, total))
+        rows.append((sp.key, len(segs) - 1, sum(syllables(g) for g in segs), sec, total))
     return rows
+
+
+def subtitle(key, text, pt=15, maxw=1080):
+    """미리보기 영상 아래쪽 자막(그 구간에 할 말). 긴 말은 폭에 맞춰 줄을 나눈다."""
+    lines, cur = [], ''
+    for w in text.split(' '):
+        if cur and tw(cur + ' ' + w, pt, 'm') > maxw:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = (cur + ' ' + w).strip()
+    lines.append(cur)
+    lh = 26
+    w = max(tw(ln, pt, 'm') for ln in lines) + 44
+    h = lh * len(lines) + 16
+    x, y = 640 - w / 2, 710 - h
+    return [R(key + '/bg', x, y, w, h, prst='roundRect', radius=12, fill='1C1A24', alpha=82, line=None),
+            T(key + '/t', x, y + 8, w, lh * len(lines), [[(ln, {})] for ln in lines], size=pt, color='FFFFFF', weight='m', align='c',
+              lnspc=lh * 0.75)]
+
+
+def talk_specs(rate=SPEECH_RATE):
+    """미리보기 영상용 본문 17장(Appendix는 넣지 않음): 구간마다 그 구간에 할 말을 하는 동안 머물고, 그 말을 아래에 자막으로 띄운다.
+    그래서 영상 길이가 발표 시간 어림(--time)과 같다."""
+    specs = [f() for f in SOL_SLIDES + SLIDES]
+    for sp in specs:
+        segs = sp.notes.split('(클릭)')
+        says = _say_times(sp, rate)
+        sp.holds = [max(round(says[j] * 1000) - _group_len(g), 0) + (250 if j else 0) for j, g in enumerate(sp.groups)]
+        for j, grp in enumerate(sp.groups):
+            text = ' '.join(segs[j].split())
+            if not text:
+                continue
+            key = 'sub/%s/%d' % (sp.key, j)
+            sp.add(key, subtitle(key, text))
+            grp.insert(0, (key, 'appear', 0, 1, {}))
+            if j + 1 < len(sp.groups):
+                sp.groups[j + 1].insert(0, (key, 'fade_out', 0, 100, {}))
+    return specs
 
 
 def sheet(pngs, dst, labels, cols=4, w=520):
@@ -1892,7 +1944,8 @@ def main():
         print('png', len(pngs))
     if a.video:
         auto = OUT / '_auto.pptx'
-        _, secs = build(auto, auto=True)
+        _, secs = build(auto, auto=True, talk=True)
+        print('미리보기 영상: 본문 %d장, %d:%02d' % (len(secs), sum(secs) // 60, sum(secs) % 60))
         print(render_c.video(auto, OUT / 'HowItWorks_Argon_claude_미리보기.mp4', secs))
         auto.unlink()
 
