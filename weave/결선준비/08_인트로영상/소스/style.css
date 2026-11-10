@@ -606,3 +606,6 @@ mark.rm { color: inherit; padding: 0 1px; }
 /* v21 수미상관: 첫 문장(#opSub)은 끝 화면 한 줄 소개(#sub)와 같은 글꼴, 끝 화면은 '그때 그거?' 줄 없이 로고 아래 44px(오프닝과 같은 간격)에 한 줄 */
 #opSub { font-size: 48px; font-weight: 400; color: var(--gray); letter-spacing: -0.02em; }
 #sub { top: 560px; font-size: 48px; }   /* 33 → 40 → 54 → 48px(사용자 요청) */
+
+/* v23 (11-10): 첫 문장과 끝 화면 한 줄 소개를 덱 표지의 부제처럼 굵게, 검정으로(크기는 48px 그대로) */
+#opSub, #sub { font-weight: 700; color: var(--ink); letter-spacing: -0.03em; }

@@ -275,6 +275,23 @@ def star4_icon(name, cx, cy, r=6.5, color=PURPLE):
     return [R(name, cx - r, cy - r, 2 * r, 2 * r, fill=color, line=None, custom_path=cg)]
 
 
+def spark_icon(name, x, y, size=13, color=PURPLE):
+    """별 둘(큰 별 + 오른쪽 아래 작은 별): 모션그래픽의 '요약'·'자동 완성 추천' 옆 표시(#i-spark)와 같은 모양. (x, y) = 24칸 상자의 왼쪽 위.
+    11-10 5차: 덱의 ✦(별 하나)를 이걸로 통일."""
+    cg = etree.Element(q('a:custGeom'))
+    for t in ('a:avLst', 'a:gdLst', 'a:ahLst', 'a:cxnLst'):
+        etree.SubElement(cg, q(t))
+    etree.SubElement(cg, q('a:rect'), l='l', t='t', r='r', b='b')
+    path = etree.SubElement(etree.SubElement(cg, q('a:pathLst')), q('a:path'), w='2400', h='2400')
+    for pts in (((10, 2.5), (11.6, 8), (17, 9.6), (11.6, 11.2), (10, 16.6), (8.4, 11.2), (3, 9.6), (8.4, 8)),
+                ((18, 13), (18.9, 15.6), (21.5, 16.5), (18.9, 17.4), (18, 20), (17.1, 17.4), (14.5, 16.5), (17.1, 15.6))):
+        etree.SubElement(etree.SubElement(path, q('a:moveTo')), q('a:pt'), x=str(round(pts[0][0] * 100)), y=str(round(pts[0][1] * 100)))
+        for px_, py_ in pts[1:]:
+            etree.SubElement(etree.SubElement(path, q('a:lnTo')), q('a:pt'), x=str(round(px_ * 100)), y=str(round(py_ * 100)))
+        etree.SubElement(path, q('a:close'))
+    return [R(name, x, y, size, size, fill=color, line=None, custom_path=cg)]
+
+
 def caption(name, lines, x, y, size=24, align='c', w=None, lh=None, color=INK):
     """여러 줄 제목. lines = [[(글자, 색)], ...]. 돌려줌: 원시 하나."""
     lh = lh or size * 1.42
@@ -338,14 +355,15 @@ def xmark(name, cx, cy, s=40, w=5.5):
     return out
 
 
-def hl_band(name, x, y, text, sub, pt, weight='r', start=0, kind='low', color=HL, alpha=34):
-    """글자 위 형광펜(모션그래픽처럼 글자 아래쪽 반). x, y = 글 상자 왼쪽 위."""
+def hl_band(name, x, y, text, sub, pt, weight='r', start=0, kind='low', color=HL, alpha=34, pad=(2, 0.5)):
+    """글자 위 형광펜(모션그래픽처럼 글자 아래쪽 반). x, y = 글 상자 왼쪽 위. pad = 글자 폭 밖으로 (왼쪽, 오른쪽) 내미는 px.
+    11-10 5차: 오른쪽으로 2px 내밀던 것을 0.5px로(한글은 글자 오른쪽에 빈 폭이 있어 띠가 튀어나와 보였음)."""
     i = text.index(sub, start)
     ox, w = tw(text[:i], pt, weight), tw(sub, pt, weight)
     S = pt * 4 / 3
     if kind == 'low':
-        return R(name, x + ox - 2, y + S * 0.58, w + 4, S * 0.55, prst='roundRect', radius=3, fill=color, alpha=alpha, line=None)
-    return R(name, x + ox - 3, y + S * 0.06, w + 6, S * 1.14, prst='roundRect', radius=5, fill=color, alpha=alpha, line=None)
+        return R(name, x + ox - pad[0], y + S * 0.58, w + pad[0] + pad[1], S * 0.55, prst='roundRect', radius=3, fill=color, alpha=alpha, line=None)
+    return R(name, x + ox - pad[0] - 1, y + S * 0.06, w + pad[0] + pad[1] + 2, S * 1.14, prst='roundRect', radius=5, fill=color, alpha=alpha, line=None)
 
 
 def thread(name, pts, w=2.6, alpha=100, dash=None, color=None, tail=None):
