@@ -1,4 +1,4 @@
-"""Appendix (Argon 개선판): Q&A 대응 및 아키텍처 심층 근거 장표.
+"""Appendix (Argon 개선판, _claude 사본): Q&A 대응 및 아키텍처 심층 근거 장표. 11-10: 뱃지 없음, 표지 다음에 '한눈에 보기'(build.py)가 들어감.
 How it Works 본문과 동일한 디자인 시스템·배경·카드·글꼴을 사용하며,
 임원·비전공자도 한눈에 읽히는 본문 + 전공자·엔지니어를 위한 검증된 학술·시스템 각주를 함께 제공한다.
 """
@@ -9,12 +9,8 @@ from ui import (BODY, ICON, INK, LAV, LAV2, LINE, LINE2, MUTE, PURPLE, PURPLE2, 
 GRAY = '8E88A0'
 
 
-def apx_badge(s):
-    return                     # 뱃지는 모두 뺌
-
-
-def head(s, title_runs, sub=None, y=58, size=24):
-    apx_badge(s)
+def head(s, title_runs, sub=None, y=54, size=24):
+    """제목(+ 부제). 11-10: 뱃지는 어느 장에도 없음."""
     s.add('apx/title', [caption('apx/title', [title_runs], 640, y, size=size)])
     if sub:
         s.add('apx/sub', [T('apx/sub', 100, y + size * 1.42 + 6, 1080, 24, sub, size=13, color=SUB, align='c')])
@@ -92,10 +88,9 @@ def qcard(s, key, x, y, w, h, q, a_lines, sub_lines=None, pt=12, sub_bottom=Fals
 def a_divider():
     s = Slide('apx0', trans=('fade', 500), bar=False,
               notes='여기부터는 질의응답(Q&A) 시 띄우는 Appendix입니다. 본 발표에서는 넘기지 않습니다.')
-    apx_badge(s)
     s.add('apx/d1', [caption('apx/d1', [[('Appendix', PURPLE)]], 640, 260, size=44)])
     s.add('apx/d2', [T('apx/d2', 200, 342, 880, 64,
-                       ['단계별 모듈 역할 분담 · Reasoning Embedding 원리 · 삼성 PDE(지식 그래프)와의 보완 관계',
+                       ['전체 흐름 한눈에 보기 · 단계별 모듈 역할 분담 · Reasoning Embedding 원리 · 삼성 PDE(지식 그래프)와의 보완 관계',
                         '3가지 UX 공통 파이프라인 · 주요 질의응답(Q&A)'],
                        size=14, color=SUB, align='c', lnspc=22)])
     return s
@@ -107,11 +102,11 @@ def a_roles():
                     '날짜는 모델이 지어내지 않고 카톡을 받은 날, 즉 메타데이터에서 가져옵니다. 마지막 이름은 사진 속 라벨을 읽어 출처와 함께 건넵니다.')
     head(s, [('단계마다 ', INK), ('맡는 모듈과 역할', PURPLE), ('이 명확히 나뉩니다', INK)],
          '‘지은이네 집들이 때 마셨던 와인’ 하나가 정답이 되기까지의 모듈별 분담')
-    rows = [['02 질의 재작성', '기기 안 소형 언어 모델 (sLLM)', '집들이 날짜를 먼저 묻도록 질문을 단서 순서대로 둘로 나눕니다'],
+    rows = [['02 질의 재작성', '기기 안 소형 언어 모델 (sLLM)', '집들이 날짜를 먼저 묻도록 질의를 의미 단위로 나눠 다시 씁니다'],
             ['03-1 중간 근거 검색', 'Reasoning Embedding', '‘집들이’라는 단어가 없는 지은이의 카톡(‘휴지 안 사 와도 돼’)을 찾아냅니다'],
             ['03-2 단서 추출·결합', 'sLLM + 메타데이터 파서', ['‘이따 올 때’와 카톡 수신 시각을 이어', '3월 15일을 두 번째 하위 질문의 빈칸([그날])에 채웁니다']],
             ['03-3 조건 필터 + 재검색', '메타데이터 필터 + Reasoning Embedding', 'date: "2026-03-15" 사진만 남긴 뒤 와인 사진을 고릅니다'],
-            ['04 결과 제공', '온디바이스 OCR + sLLM + 키보드 UI', '와인 라벨을 읽고 근거 기록(카톡·사진)과 함께 탭 한 번으로 입력합니다']]
+            ['04 결과 제공', '온디바이스 OCR + sLLM + 키보드 UI', '와인 라벨을 읽고 근거 기록(카톡·사진)과 함께 건넵니다']]
     table(s, 'apx/t', 70, 148, [220, 330, 590], ['단계', '담당 모듈', '와인 검색 시나리오에서 수행하는 역할'], rows, row_h=70, hi=1)
     s.add('apx/n', [T('apx/n', 70, 554, 1140, 60,
                       ['• 00 데이터 색인은 기기가 충전 중이거나 유휴 상태일 때 미리 수행합니다. 01 상황 인식은 키보드 실타래 버튼·통화·위치·탑승권 신호가 맡습니다.',

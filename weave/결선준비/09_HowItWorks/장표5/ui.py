@@ -204,11 +204,13 @@ def bg_prims():
 
 
 STAGES = [('00', '데이터 색인'), ('01', '상황 인식'), ('02', '질의 재작성'), ('03', '연쇄 탐색'), ('04', '결과 제공')]
-BAR_PT = 10.5
+BAR_PT = 11.5                      # 11-10: 10.5 → 11.5(작은 글자를 조금 키움)
+BAR_Y, BAR_H = 18, 44
 
 
 def bar_layout():
-    widths = [24 + 8 + tw(ko, BAR_PT, 'b') + 20 for _, ko in STAGES]
+    """위 띠 칸 자리. 11-10: 왼쪽 위 뱃지를 모두 빼서 띠를 장표 한가운데(x 640)에 둔다."""
+    widths = [26 + 8 + tw(ko, BAR_PT, 'b') + 22 for _, ko in STAGES]
     gap = 30
     total = sum(widths) + gap * (len(STAGES) - 1)
     x = 640 - total / 2
@@ -219,18 +221,9 @@ def bar_layout():
     return out
 
 
-def badge_prims():
-    cw = tw('HOW IT WORKS', 10.5, 'sb') + 32
-    return [T('top/badge', 40, 22, cw, 28, 'HOW IT WORKS', size=10.5, color='FFFFFF', weight='sb', align='c', anchor='ctr',
-              spc=0.5, fill=PURPLE, radius=14)]
-
-
-BADGE_BOX = (40, 22, tw('HOW IT WORKS', 10.5, 'sb') + 32, 28)
-
-
 def topbar_prims(cur=None, done=(), alpha=100):
     """위 띠(00~04). cur = 지금 단계, done = 끝난 단계."""
-    y0, hh = 16, 40
+    y0, hh = BAR_Y, BAR_H
     lay = bar_layout()
     x0, x1 = lay[0][0], lay[-1][0] + lay[-1][1]
     out = [R('top/bar', x0 - 12, y0, x1 - x0 + 24, hh, prst='roundRect', fill='FFFFFF', alpha=94, line=LINE, shadow=SHADOW_SOFT)]
@@ -243,16 +236,16 @@ def topbar_prims(cur=None, done=(), alpha=100):
         bf, bt, lc, lw = {'cur': (PURPLE, 'FFFFFF', INK, 'b'), 'done': ('DCD3FF', PURPLE, PURPLE, 'b'),
                           'todo': ('F1EEF8', 'C3BDD2', 'BDB7CC', 'sb')}[state]
         cy = y0 + hh / 2
-        out.append(R('top/b%s' % no, x + 8, cy - 11, 22, 22, prst='ellipse', fill=bf, line=None))
+        out.append(R('top/b%s' % no, x + 8, cy - 12, 24, 24, prst='ellipse', fill=bf, line=None))
         if state == 'done':
-            out += check_icon('top/bn%s' % no, x + 19, cy, s=9.5, color=bt, w=2.0)
+            out += check_icon('top/bn%s' % no, x + 20, cy, s=10.5, color=bt, w=2.1)
         else:
-            out.append(T('top/bn%s' % no, x + 8, cy - 11, 22, 22, no, size=8, color=bt, weight='b',
+            out.append(T('top/bn%s' % no, x + 8, cy - 12, 24, 24, no, size=8.5, color=bt, weight='b',
                          align='c', anchor='ctr'))
-        out.append(T('top/l%s' % no, x + 36, y0, w - 34, hh, ko, size=BAR_PT, color=lc, weight=lw, anchor='ctr'))
+        out.append(T('top/l%s' % no, x + 39, y0, w - 36, hh, ko, size=BAR_PT, color=lc, weight=lw, anchor='ctr'))
         if i < len(STAGES) - 1:
             gx = lay[i + 1][0] - x - w
-            out.append(T('top/a%d' % i, x + w + gx / 2 - 11, y0, 22, hh, '→', size=10, color='C9C0E8', align='c', anchor='ctr'))
+            out.append(T('top/a%d' % i, x + w + gx / 2 - 11, y0, 22, hh, '→', size=10.5, color='C9C0E8', align='c', anchor='ctr'))
     return out
 
 

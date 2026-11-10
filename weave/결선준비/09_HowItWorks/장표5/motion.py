@@ -22,7 +22,9 @@ PRESET = {
     'fly': (0, 'path', 0), 'move': (0, 'path', 0), 'pulse': (6, 'emph', 0), 'ring': (53, 'entr', 16),
     'zoom_out': (53, 'exit', 16), 'sink': (42, 'exit', 0),
 }
-WIPE = {'left': (8, 'wipe(left)'), 'right': (2, 'wipe(right)'), 'down': (1, 'wipe(down)'), 'up': (4, 'wipe(up)')}
+# 닦아 내기 방향. left·right는 시작하는 쪽(왼쪽에서, 오른쪽에서), down·up은 나아가는 쪽(아래로, 위로).
+# PowerPoint의 필터 이름은 반대라서(wipe(up) = 위에서부터 아래로, wipe(down) = 아래에서부터 위로) 여기서 바꿔 적는다(11-10 영상으로 확인).
+WIPE = {'left': (8, 'wipe(left)'), 'right': (2, 'wipe(right)'), 'down': (1, 'wipe(up)'), 'up': (4, 'wipe(down)')}
 
 
 class Timeline:
