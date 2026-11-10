@@ -2,8 +2,7 @@
 How it Works 본문과 동일한 디자인 시스템·배경·카드·글꼴을 사용하며,
 임원·비전공자도 한눈에 읽히는 본문 + 전공자·엔지니어를 위한 검증된 학술·시스템 각주를 함께 제공한다.
 """
-import ui
-from build import (AS, BLUE, BLUE_BG, MEMO1, MEMO2, PH, QUERY, Slide, memo_line)
+from build import (AS, BLUE, BLUE_BG, PH, QUERY, Slide)
 from ui import (BODY, ICON, INK, LAV, LAV2, LINE, LINE2, MUTE, PURPLE, PURPLE2, RED, RING, SUB, SHADOW_CARD, SHADOW_SOFT, C, P, R, T,
                 caption, chip, crop_fit, line, numdot, scurve, thread, tw)
 
@@ -91,27 +90,20 @@ def a_divider():
               notes='여기부터는 질의응답(Q&A) 시 띄우는 Appendix입니다. 본 발표에서는 넘기지 않습니다.')
     s.add('apx/d1', [caption('apx/d1', [[('Appendix', PURPLE)]], 640, 260, size=44)])
     s.add('apx/d2', [T('apx/d2', 200, 342, 880, 64,
-                       ['전체 흐름 한눈에 보기 · 단계별 모듈 역할 분담 · Reasoning Embedding 원리 · 삼성 PDE(지식 그래프)와의 보완 관계',
+                       ['전체 흐름 한눈에 보기 · 단계별 모듈 역할 분담 · Reasoning Embedding 원리와 후보 방식 · 삼성 PDE(지식 그래프)와의 보완 관계',
                         '3가지 UX 공통 파이프라인 · 주요 질의응답(Q&A)'],
                        size=14, color=SUB, align='c', lnspc=22)])
     return s
 
 
 def a_roles():
-    memo = ui.MEMO
     s = Slide('apx_roles', trans=('fade', 400), bar=False,
-              notes=('Weave를 부품별로 나누면 이렇습니다. 질문을 나누고 메모를 적는 일은 기기 안 소형 언어 모델이, 그 메모까지 읽고 중간 근거를 찾는 일은 '
-                     'Reasoning Embedding이 맡습니다. ' if memo else
-                     'Weave를 부품별로 나누면 이렇습니다. 질문을 나누는 일은 기기 안 소형 언어 모델이, 중간 근거를 찾는 일은 Reasoning Embedding이 맡습니다. ') +
+              notes='Weave를 부품별로 나누면 이렇습니다. 질문을 나누는 일은 기기 안 소형 언어 모델이, 중간 근거를 찾는 일은 Reasoning Embedding이 맡습니다. '
                     '날짜는 모델이 지어내지 않고 카톡을 받은 날, 즉 메타데이터에서 가져옵니다. 마지막 이름은 사진 속 라벨을 읽어 출처와 함께 건넵니다.')
     head(s, [('단계마다 ', INK), ('맡는 모듈과 역할', PURPLE), ('이 명확히 나뉩니다', INK)],
          '‘지은이네 집들이 때 마셨던 와인’ 하나가 정답이 되기까지의 모듈별 분담')
-    r02 = ['집들이 날짜를 먼저 묻도록 질의를 의미 단위로 나눠 다시 쓰고,', '질의마다 무엇을 찾을지 메모합니다'] if memo else \
-        '집들이 날짜를 먼저 묻도록 질의를 의미 단위로 나눠 다시 씁니다'
-    r031 = ['질의와 메모를 함께 읽어, ‘집들이’라는 단어가 없는', '지은이의 카톡(‘휴지 안 사 와도 돼’)을 찾아냅니다'] if memo else \
-        '‘집들이’라는 단어가 없는 지은이의 카톡(‘휴지 안 사 와도 돼’)을 찾아냅니다'
-    rows = [['02 질의 재작성', '기기 안 소형 언어 모델 (sLLM)', r02],
-            ['03-1 중간 근거 검색', 'Reasoning Embedding', r031],
+    rows = [['02 질의 재작성', '기기 안 소형 언어 모델 (sLLM)', '집들이 날짜를 먼저 묻도록 질의를 의미 단위로 나눠 다시 씁니다'],
+            ['03-1 중간 근거 검색', 'Reasoning Embedding', '‘집들이’라는 단어가 없는 지은이의 카톡(‘휴지 안 사 와도 돼’)을 찾아냅니다'],
             ['03-2 단서 추출·결합', 'sLLM + 메타데이터 파서', ['‘이따 올 때’와 카톡 수신 시각을 이어', '3월 15일을 두 번째 하위 질문의 빈칸([그날])에 채웁니다']],
             ['03-3 조건 필터 + 재검색', '메타데이터 필터 + Reasoning Embedding', 'date: "2026-03-15" 사진만 남긴 뒤 와인 사진을 고릅니다'],
             ['04 결과 제공', '온디바이스 OCR + sLLM + 키보드 UI', '와인 라벨을 읽고 근거 기록(카톡·사진)과 함께 건넵니다']]
@@ -122,81 +114,7 @@ def a_roles():
     return s
 
 
-def a_rem_memo():
-    """메모판의 근거 장: 질의 재작성이 쓴 메모를 Reasoning Embedding이 질의와 함께 읽는다(AgentIR의 Reasoning-Aware Retrieval)."""
-    s = Slide('apx_rem', trans=('fade', 400), bar=False,
-              notes='검색하기 바로 앞서 적어 둔 메모를 Reasoning Embedding이 질문과 함께 읽습니다. 검색 직전에 적은 추론을 질의와 함께 임베딩하는 AgentIR의 방식입니다. '
-                    '같은 임베딩 모델에 추론을 붙이기만 해도 정확도가 오르고, 함께 읽도록 학습시키면 더 크게 오릅니다. '
-                    '메모에는 무엇을 찾는지와 이미 아는 단서만 짧게 적습니다. 메모는 짐작이고, 그 짐작에 맞는 기록을 골라 질문 곁에 두는 일은 임베딩이 합니다. '
-                    '메모는 거르는 조건이 아니라 힌트입니다. 짐작이 빗나가도 질문은 그대로 함께 읽히고, 근거가 약하면 후보와 원문을 함께 보여 드립니다. '
-                    '본 발표에서는 첫 질문의 메모만 보여 드렸고, 두 번째 질문에도 같은 식으로 메모가 붙습니다.')
-    head(s, [('질의 재작성이 쓴 ', INK), ('메모', PURPLE), ('를, ', INK), ('Reasoning Embedding', PURPLE), ('이 함께 읽습니다', INK)],
-         'AgentIR(Reasoning-Aware Retrieval) 방식의 적용과 벤치마크 근거', size=23)
-    x, y, w, h = 70, 148, 545, 300
-    out = [R('apx/l/bg', x, y, w, h, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD),
-           P('apx/l/ic', ICON['spool'], x + 22, y + 20, 26, 26),
-           T('apx/l/t', x + 56, y + 18, 300, 30, 'Query Rewriting (질의 재작성)', size=14.5, color=PURPLE, weight='b', anchor='ctr'),
-           T('apx/l/s', x + 22, y + 58, w - 44, 22, '복합 질문을 나누고, 질의마다 무엇을 찾을지 메모합니다', size=12, color=INK, weight='b'),
-           R('apx/l/q0', x + 22, y + 88, w - 44, 32, prst='roundRect', radius=12, fill='F7F5FC', line=None),
-           T('apx/l/q0t', x + 38, y + 88, w - 70, 32, QUERY, size=12, color=SUB, anchor='ctr'),
-           T('apx/l/arr', x + w / 2 - 10, y + 120, 20, 18, '↓', size=13, color=PURPLE2, weight='b', align='c', anchor='ctr'),
-           R('apx/l/q1', x + 22, y + 139, w - 44, 34, prst='roundRect', radius=12, fill=LAV, line=None)]
-    out += numdot('apx/l/n1', x + 44, y + 156, 1, r=10, pt=8.5)
-    out.append(T('apx/l/q1t', x + 62, y + 139, w - 90, 34, '지은이네 집들이는 언제였지?', size=12.5, color=INK, weight='m', anchor='ctr'))
-    tg, mt, _, _ = memo_line('apx/l/m1', x + 62, y + 175, MEMO1, pt=10.5, h=22, tag_pt=8.5, tag_h=17, color=SUB)
-    out += tg + [mt]
-    out.append(R('apx/l/q2', x + 22, y + 200, w - 44, 34, prst='roundRect', radius=12, fill=BLUE_BG, line=None))
-    out += numdot('apx/l/n2', x + 44, y + 217, 2, r=10, pt=8.5, fill=BLUE)
-    tk, tkw = chip('apx/l/tk', x + 62, y + 205, '3/15 (일)', 'fill', pt=10, h=24, padx=8)
-    out += tk
-    out.append(T('apx/l/q2t', x + 62 + tkw + 6, y + 200, w - 100 - tkw, 34, '마셨던 와인은?', size=12.5, color=INK, weight='m', anchor='ctr'))
-    tg, mt, _, _ = memo_line('apx/l/m2', x + 62, y + 236, MEMO2, pt=10.5, h=22, tag_pt=8.5, tag_h=17, color=SUB)
-    out += tg + [mt]
-    out.append(T('apx/l/f', x + 22, y + 264, w - 44, 22, '메모는 거르는 조건이 아니라 힌트입니다. 빗나가도 질의는 그대로 함께 읽힙니다', size=10.5, color=SUB))
-    s.add('apx/l', out)
-    # 오른쪽: Reasoning Embedding(질의 + 메모를 함께 읽음)
-    x2 = 665
-    out = [R('apx/r/bg', x2, y, w, h, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD),
-           T('apx/r/t', x2 + 22, y + 18, 340, 30, 'Reasoning Embedding (추론 임베딩)', size=14.5, color=PURPLE, weight='b', anchor='ctr'),
-           T('apx/r/s', x2 + 22, y + 58, w - 44, 22, '질의와 메모를 함께 읽어, 단서가 될 기록을 가깝게 둡니다', size=12, color=INK, weight='b')]
-    cx, cy = x2 + 150, y + 178
-    out.append(R('apx/r/near', cx - 92, cy - 64, 184, 128, prst='ellipse', fill=None, line=PURPLE2, line_w=1.5, dash='dash'))
-    out.append(R('apx/r/star', cx - 11, cy - 11, 22, 22, prst='star5', fill=PURPLE, line='FFFFFF', line_w=1.5))
-    out.append(T('apx/r/sl', cx - 70, cy + 12, 140, 18, [[('질문 ①', dict(color=PURPLE)), (' + 메모', dict(color=PURPLE))]], size=9.5, weight='m', align='c'))
-    out.append(R('apx/r/k0', x2 + 380, y + 202, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=LINE, line_w=1.0, dash='dash'))
-    out.append(P('apx/r/k0i', ICON['talk'], x2 + 388, y + 207, 20, 20, alpha=55))
-    out.append(T('apx/r/k0t', x2 + 412, y + 202, 90, 30, '지은 카톡', size=10, color=MUTE, anchor='ctr'))
-    out.append(T('apx/r/k0l', x2 + 372, y + 234, 140, 18, '일반 임베딩에서는 멀리', size=9, color=MUTE, align='c'))
-    out.append(R('apx/r/k1', cx + 16, cy - 46, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=RING, line_w=1.8))
-    out.append(P('apx/r/k1i', ICON['talk'], cx + 24, cy - 41, 20, 20))
-    out.append(T('apx/r/k1t', cx + 48, cy - 46, 90, 30, '지은 카톡', size=10, color=INK, weight='b', anchor='ctr'))
-    out.append(C('apx/r/arr', [(x2 + 378, y + 210), (x2 + 330, y + 182), (cx + 180, cy - 40), (cx + 138, cy - 31)], w=1.8, color=PURPLE2,
-                 dash='dash', tail='triangle'))
-    out.append(T('apx/r/q', x2 + 300, y + 106, 220, 40, ['‘박스 정리 다 했어!', '휴지 안 사 와도 돼’'], size=10, color=SUB, lnspc=14))
-    out.append(T('apx/r/f', x2 + 22, y + 264, w - 44, 22, '동일 크기의 경량 임베딩 모델을 (질의 + 메모, 단서) 쌍으로 파인튜닝합니다', size=10.5, color=SUB))
-    s.add('apx/r', out)
-    # 아래: 논문 근거
-    by = 472
-    out = [R('apx/b/bg', 70, by, 1140, 150, prst='roundRect', radius=18, fill=LAV2, line=LINE2, line_w=1.0),
-           T('apx/b/t', 92, by + 14, 500, 24, '학술 벤치마크가 보여 주는 두 가지 근거', size=12.5, color=PURPLE, weight='b')]
-    items = [('1. 일반 임베딩의 추론형 검색 한계', ['뜻이 비슷한 기록을 찾는 일반 임베딩은 추론이 필요한 검색에서 급격히 취약해집니다.', '동일 모델 기준 MTEB 검색 59.0 → BRIGHT 18.3 (nDCG@10)¹']),
-             ('2. 추론을 함께 읽는 임베딩의 효과 (AgentIR)', ['검색 직전에 적은 추론을 질의와 함께 임베딩하도록 학습하면 정확도가 오릅니다.',
-                                                  '같은 4B 임베딩 모델, BrowseComp-Plus 정확도²',
-                                                  '질의만 48.7 → 추론을 붙이면 55.5 → 함께 읽도록 학습하면 66.3'])]
-    for i, (t, ls) in enumerate(items):          # 둘째 항목이 세 줄이라 항목을 6px 올려 아래 여백을 맞춤
-        ix = 92 + i * 560
-        out.append(T('apx/b/i%dt' % i, ix, by + 44, 520, 22, t, size=12, color=INK, weight='b'))
-        out.append(T('apx/b/i%dl' % i, ix, by + 70, 530, 20 * len(ls), ls, size=11, color=BODY, lnspc=17))
-    s.add('apx/b', out)
-    foot(s, '¹ Su et al., "BRIGHT: A Realistic and Challenging Benchmark for Reasoning-Intensive Retrieval", ICLR 2025 (SFR-Embedding-Mistral)   '
-            '² Chen et al., "AgentIR: Reasoning-Aware Retrieval for Deep Research Agents", arXiv:2603.04384, 2026 '
-            '(Qwen3-Embedding-4B, Tongyi-DR 에이전트. 추론을 붙이기만 한 값은 학습 없이 잰 것).', y=640)
-    return s
-
-
 def a_rem():
-    if ui.MEMO:
-        return a_rem_memo()
     s = Slide('apx_rem', trans=('fade', 400), bar=False,
               notes='Reasoning Embedding의 몫을 좁혀서 말하면 이렇습니다. 다음에 찾을 것을 질문에 넣는 일은 질문 다시 쓰기가, '
                     '답을 직접 말하지 않는 기록까지 가까이 두는 일은 Reasoning Embedding이 맡습니다. 두 효과는 따로 볼 수 있습니다.')
@@ -245,7 +163,7 @@ def a_rem():
     by = 472
     out = [R('apx/b/bg', 70, by, 1140, 150, prst='roundRect', radius=18, fill=LAV2, line=LINE2, line_w=1.0),
            T('apx/b/t', 92, by + 14, 500, 24, '학술 벤치마크에서 입증된 두 가지 독립 효과', size=12.5, color=PURPLE, weight='b')]
-    items = [('1. 일반 임베딩의 추론형 검색 한계', ['단어 유사도 중심 임베딩은 추론이 필요한 검색에서 급격히 취약해집니다.', '동일 모델 기준 MTEB 검색 59.0 → BRIGHT 18.3 (nDCG@10)¹']),
+    items = [('1. 일반 임베딩의 추론형 검색 한계', ['뜻이 비슷한 기록을 찾는 일반 임베딩은 추론이 필요한 검색에서 급격히 취약해집니다.', '동일 모델 기준 MTEB 검색 59.0 → BRIGHT 18.3 (nDCG@10)¹']),
              ('2. 추론형 임베딩 + 질의 재작성 결합 시너지', ['추론용으로 학습한 임베딩 모델에 재작성된 질의를 넣으면 성능이 가장 높습니다.', 'ReasonIR-8B 기준 BRIGHT 24.4 → 29.9 (원래 질문 → 재작성 질문)²'])]
     for i, (t, ls) in enumerate(items):
         ix = 92 + i * 560
@@ -254,6 +172,83 @@ def a_rem():
     s.add('apx/b', out)
     foot(s, '¹ Su et al., "BRIGHT: A Realistic and Challenging Benchmark for Reasoning-Intensive Retrieval", ICLR 2025 (SFR-Embedding-Mistral)   '
             '² Shao et al., "ReasonIR: Training Retrievers for Reasoning Tasks", COLM 2025.', y=640)
+    return s
+
+
+def memo_line(key, x, y, text, pt=10.5, h=22, tag_pt=8.5, tag_h=17, color=SUB):
+    """질의 아래에 붙는 메모 한 줄: '메모' 표 + 글(AgentIR 후보 장). 돌려줌: 원시 목록."""
+    tg, tgw = chip(key + '/tag', x, y + (h - tag_h) / 2, '메모', 'soft', pt=tag_pt, h=tag_h, padx=8)
+    S = pt * 4 / 3
+    return tg + [T(key + '/t', x + tgw + 8, y + (h - S * 1.4) / 2, tw(text, pt) + 12, S * 1.4, text, size=pt, color=color)]
+
+
+def a_agentir():
+    """11-11 6차: Reasoning Embedding 파이프라인 후보 가운데 하나(AgentIR). 본문에는 넣지 않고 여기에 로직과 원논문만 둔다.
+    질의 재작성이 질의마다 무엇을 찾을지 메모(추론)를 적고, 임베딩이 질의와 메모를 함께 읽는다."""
+    s = Slide('apx_agentir', trans=('fade', 400), bar=False,
+              notes='Reasoning Embedding을 구현하는 후보 방식 가운데 하나입니다. 질의 재작성 단계에서 기기 안 소형 언어 모델이 질의마다 무엇을 찾을지 메모를 적고, '
+                    '임베딩이 질의와 메모를 함께 읽습니다. 검색 직전에 적은 추론을 질의와 함께 임베딩하는 AgentIR 논문의 방식입니다. '
+                    '메모는 거르는 조건이 아니라 힌트라서, 짐작이 빗나가도 질의는 그대로 함께 읽힙니다.')
+    head(s, [('Reasoning Embedding 후보 방식: ', INK), ('추론 메모', PURPLE), ('를 질의와 함께 읽습니다', INK)],
+         'Reasoning Embedding 파이프라인 후보 가운데 하나인 AgentIR(Reasoning-Aware Retrieval)의 로직과 원논문', size=23)
+    x, y, w, h = 70, 148, 545, 300
+    out = [R('apx/l/bg', x, y, w, h, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD),
+           P('apx/l/ic', ICON['spool'], x + 22, y + 20, 26, 26),
+           T('apx/l/t', x + 56, y + 18, 300, 30, 'Query Rewriting (질의 재작성)', size=14.5, color=PURPLE, weight='b', anchor='ctr'),
+           T('apx/l/s', x + 22, y + 58, w - 44, 22, '복합 질문을 나누고, 질의마다 무엇을 찾을지 메모합니다', size=12, color=INK, weight='b'),
+           R('apx/l/q0', x + 22, y + 88, w - 44, 32, prst='roundRect', radius=12, fill='F7F5FC', line=None),
+           T('apx/l/q0t', x + 38, y + 88, w - 70, 32, QUERY, size=12, color=SUB, anchor='ctr'),
+           T('apx/l/arr', x + w / 2 - 10, y + 120, 20, 18, '↓', size=13, color=PURPLE2, weight='b', align='c', anchor='ctr'),
+           R('apx/l/q1', x + 22, y + 139, w - 44, 34, prst='roundRect', radius=12, fill=LAV, line=None)]
+    out += numdot('apx/l/n1', x + 44, y + 156, 1, r=10, pt=8.5)
+    out.append(T('apx/l/q1t', x + 62, y + 139, w - 90, 34, '지은이네 집들이는 언제였지?', size=12.5, color=INK, weight='m', anchor='ctr'))
+    out += memo_line('apx/l/m1', x + 62, y + 175, '초대나 선물 얘기가 오갔을 거야')
+    out.append(R('apx/l/q2', x + 22, y + 200, w - 44, 34, prst='roundRect', radius=12, fill=BLUE_BG, line=None))
+    out += numdot('apx/l/n2', x + 44, y + 217, 2, r=10, pt=8.5, fill=BLUE)
+    tk, tkw = chip('apx/l/tk', x + 62, y + 205, '3/15 (일)', 'fill', pt=10, h=24, padx=8)
+    out += tk
+    out.append(T('apx/l/q2t', x + 62 + tkw + 6, y + 200, w - 100 - tkw, 34, '마셨던 와인은?', size=12.5, color=INK, weight='m', anchor='ctr'))
+    out += memo_line('apx/l/m2', x + 62, y + 236, '사진에 와인병이 찍혀 있을 거야')
+    out.append(T('apx/l/f', x + 22, y + 264, w - 44, 22, '메모는 거르는 조건이 아니라 힌트입니다. 빗나가도 질의는 그대로 함께 읽힙니다', size=10.5, color=SUB))
+    s.add('apx/l', out)
+    # 오른쪽: Reasoning Embedding(질의 + 메모를 함께 읽음)
+    x2 = 665
+    out = [R('apx/r/bg', x2, y, w, h, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.2, shadow=SHADOW_CARD),
+           T('apx/r/t', x2 + 22, y + 18, 340, 30, 'Reasoning Embedding (추론 임베딩)', size=14.5, color=PURPLE, weight='b', anchor='ctr'),
+           T('apx/r/s', x2 + 22, y + 58, w - 44, 22, '질의와 메모를 함께 읽어, 단서가 될 기록을 가깝게 둡니다', size=12, color=INK, weight='b')]
+    cx, cy = x2 + 150, y + 178
+    out.append(R('apx/r/near', cx - 92, cy - 64, 184, 128, prst='ellipse', fill=None, line=PURPLE2, line_w=1.5, dash='dash'))
+    out.append(R('apx/r/star', cx - 11, cy - 11, 22, 22, prst='star5', fill=PURPLE, line='FFFFFF', line_w=1.5))
+    out.append(T('apx/r/sl', cx - 70, cy + 12, 140, 18, '질문 ① + 메모', size=9.5, color=PURPLE, weight='m', align='c'))
+    out.append(R('apx/r/k0', x2 + 380, y + 202, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=LINE, line_w=1.0, dash='dash'))
+    out.append(P('apx/r/k0i', ICON['talk'], x2 + 388, y + 207, 20, 20, alpha=55))
+    out.append(T('apx/r/k0t', x2 + 412, y + 202, 90, 30, '지은 카톡', size=10, color=MUTE, anchor='ctr'))
+    out.append(T('apx/r/k0l', x2 + 372, y + 234, 140, 18, '질의만 읽으면 멀리', size=9, color=MUTE, align='c'))
+    out.append(R('apx/r/k1', cx + 16, cy - 46, 120, 30, prst='roundRect', radius=10, fill='FFFFFF', line=RING, line_w=1.8))
+    out.append(P('apx/r/k1i', ICON['talk'], cx + 24, cy - 41, 20, 20))
+    out.append(T('apx/r/k1t', cx + 48, cy - 46, 90, 30, '지은 카톡', size=10, color=INK, weight='b', anchor='ctr'))
+    out.append(C('apx/r/arr', [(x2 + 378, y + 210), (x2 + 330, y + 182), (cx + 180, cy - 40), (cx + 138, cy - 31)], w=1.8, color=PURPLE2,
+                 dash='dash', tail='triangle'))
+    out.append(T('apx/r/q', x2 + 300, y + 106, 220, 40, ['‘박스 정리 다 했어!', '휴지 안 사 와도 돼’'], size=10, color=SUB, lnspc=14))
+    out.append(T('apx/r/f', x2 + 22, y + 264, w - 44, 22, '동일 크기의 경량 임베딩 모델을 (질의 + 메모, 단서) 쌍으로 파인튜닝합니다', size=10.5, color=SUB))
+    s.add('apx/r', out)
+    # 아래: 원논문과 본문 파이프라인과의 차이
+    by = 472
+    out = [R('apx/b/bg', 70, by, 1140, 150, prst='roundRect', radius=18, fill=LAV2, line=LINE2, line_w=1.0),
+           T('apx/b/t', 92, by + 14, 500, 24, '원논문과 본문 파이프라인과의 차이', size=12.5, color=PURPLE, weight='b')]
+    items = [('1. 원논문: AgentIR (Chen 외, 2026)¹', ['에이전트가 검색 직전에 적은 추론을 질의와 함께 임베딩하도록 검색기를 학습합니다.',
+                                                '같은 4B 임베딩 모델, BrowseComp-Plus 정확도',
+                                                '질의만 48.7 → 추론을 붙이면 55.5 → 함께 읽도록 학습하면 66.3']),
+             ('2. 본문 파이프라인에 적용하면', ['02 질의 재작성: 질의를 나눌 때 질의마다 메모 한 줄을 함께 적습니다.',
+                                       '03 연쇄 탐색: Reasoning Embedding이 질의와 메모를 함께 읽습니다.',
+                                       '00 색인과 04 결과 제공, 날짜를 메타데이터로 거르는 단계는 그대로입니다.'])]
+    for i, (t, ls) in enumerate(items):
+        ix = 92 + i * 560
+        out.append(T('apx/b/i%dt' % i, ix, by + 44, 520, 22, t, size=12, color=INK, weight='b'))
+        out.append(T('apx/b/i%dl' % i, ix, by + 70, 530, 20 * len(ls), ls, size=11, color=BODY, lnspc=17))
+    s.add('apx/b', out)
+    foot(s, '¹ Chen et al., "AgentIR: Reasoning-Aware Retrieval for Deep Research Agents", arXiv:2603.04384, 2026 '
+            '(Qwen3-Embedding-4B, Tongyi-DR 에이전트. 추론을 붙이기만 한 값은 학습 없이 잰 것).', y=640)
     return s
 
 
@@ -490,4 +485,4 @@ def a_credits():
     return s
 
 
-APPENDIX = [a_divider, a_roles, a_rem, a_kg, a_hops, a_compare, a_ux, q_pde, q_sameday, q_apple, q_llm, q_data, a_credits]
+APPENDIX = [a_divider, a_roles, a_rem, a_agentir, a_kg, a_hops, a_compare, a_ux, q_pde, q_sameday, q_apple, q_llm, q_data, a_credits]

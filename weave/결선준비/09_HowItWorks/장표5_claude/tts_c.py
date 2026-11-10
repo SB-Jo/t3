@@ -2,7 +2,8 @@
 """미리보기 영상에 넣을 낭독(TTS). 모두 이 컴퓨터 안에서 만든다(글을 밖으로 보내지 않는다).
 
 목소리는 둘 가운데 하나를 쓴다.
-  - Supertonic 3(신경망 음성, ONNX, CPU): 목소리 F1~F5, M1~M5. 기본은 F2(밝고 젊은 여성 목소리. 11-10 5차: 발표자가 20대 여성이라 F3에서 바꿈).
+  - Supertonic 3(신경망 음성, ONNX, CPU): 목소리 F1~F5, M1~M5, 또는 둘을 섞은 'F2F1_70'(F2 30% + F1 70%).
+    기본은 F2F1_70(11-11 6차: F2가 아나운서처럼 들린다고 해서, 차분한 F1을 70% 섞어 억양 폭을 줄임. 5차까지는 F2, 그 전은 F3).
     따로 둔 환경과 모델이 있어야 한다(없으면 아래 Windows 음성으로 넘어감):
       ~/.cache/weave-tools/tts-venv      pip install supertonic        (받아쓰기 점검까지 하려면 faster-whisper도)
       ~/.cache/weave-tools/supertonic-3  Hugging Face Supertone/supertonic-3의 onnx/, voice_styles/, config.json
@@ -31,9 +32,9 @@ NEURAL_MODEL = TOOLS / 'supertonic-3'
 ASR_MODEL = TOOLS / 'whisper-turbo'
 WORKER = HERE / 'tts_worker.py'
 
-VOICE = 'F2'                       # Supertonic 3 목소리. 'heami'면 Windows 음성
+VOICE = 'F2F1_70'                  # Supertonic 3 목소리. 'heami'면 Windows 음성
 SPEED = 1.05                       # Supertonic 속도(1.05가 모델 기본). 이 속도에서 F2는 1초에 6.1음절쯤, F3는 5.6음절쯤 읽음
-SPEEDS = {}                        # 목소리마다 속도를 따로 줄 때: {'M3': 0.85}처럼(M3와 F4는 기본 속도로는 말이 빠름)
+SPEEDS = {'F2F1_70': 1.15}         # 목소리마다 속도를 따로 줄 때(F2F1_70은 기본 속도로는 F2보다 10%쯤 느려 1.15로)
 STEPS = 12                         # Supertonic 합성 단계 수(기본 8, 많을수록 고름)
 SAPI_VOICE = 'Microsoft Heami Desktop'
 SAPI_RATE = 0                      # SAPI 속도(-10~10). 0이 기본(낱말을 1초에 5.5~6음절로 읽음), 한 칸에 약 1.1배

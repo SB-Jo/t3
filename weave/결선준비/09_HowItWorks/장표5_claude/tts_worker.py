@@ -3,11 +3,15 @@
 
   python -I tts_worker.py synth <Supertonic 3 폴더> <목록 파일> <나올 폴더> <목소리> <속도> <단계 수>
       목록 파일은 한 줄에 '이름<TAB>읽을 글'. 나올 폴더에 <이름>.wav(16비트 모노)를 쓴다.
+      목소리는 F1~F5, M1~M5, 또는 둘을 섞은 'F2F1_70'(F2 30% + F1 70%).
   python -I tts_worker.py asr <Whisper 폴더> <목록 파일>
       목록 파일은 한 줄에 wav 경로 하나. 'wav 경로<TAB>받아쓴 글'을 찍는다(낭독이 글대로 읽혔는지 점검하는 데 씀).
 """
+import json
 import os
+import re
 import sys
+import tempfile
 import wave
 import zlib
 from pathlib import Path
@@ -15,10 +19,27 @@ from pathlib import Path
 import numpy as np
 
 
+def _style(tts, model_dir, voice):
+    """목소리 이름 → style. 'F2F1_70'처럼 적으면 기본 목소리 둘의 style 값을 섞는다(앞 목소리 30% + 뒤 목소리 70%)."""
+    m = re.fullmatch(r'([FM]\d)([FM]\d)_(\d{1,2})', voice)
+    if not m:
+        return tts.get_voice_style(voice)
+    w = int(m.group(3)) / 100
+    ja, jb = (json.loads((Path(model_dir) / 'voice_styles' / (n + '.json')).read_text()) for n in m.group(1, 2))
+    for k in ('style_ttl', 'style_dp'):
+        ja[k]['data'] = ((1 - w) * np.array(ja[k]['data'], dtype=np.float32) + w * np.array(jb[k]['data'], dtype=np.float32)).tolist()
+    with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as f:
+        json.dump(ja, f)
+    try:
+        return tts.get_voice_style_from_path(f.name)
+    finally:
+        os.unlink(f.name)
+
+
 def synth(model_dir, lst, out, voice, speed, steps):
     from supertonic import TTS
     tts = TTS(model='supertonic-3', model_dir=Path(model_dir), auto_download=False)
-    style = tts.get_voice_style(voice)
+    style = _style(tts, model_dir, voice)
     n = 0
     for line in Path(lst).read_text(encoding='utf-8').splitlines():
         if not line.strip():

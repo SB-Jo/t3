@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""How it Works — _claude판 5차(2026-11-10 밤) → ../HowItWorks_Argon_claude.pptx
-솔루션 세 장(조각마다 하나씩 움직임) + How it Works 14장 + Appendix 14장(한눈에 보기 포함). 뱃지는 어느 장에도 없다.
+"""How it Works — _claude판 6차(2026-11-11) → ../HowItWorks_Argon_claude.pptx
+솔루션 세 장(조각마다 하나씩 움직임) + How it Works 14장 + Appendix 15장(한눈에 보기 포함). 뱃지는 어느 장에도 없다.
 
   python build.py                 → ../HowItWorks_Argon_claude.pptx (발표용: 클릭마다 한 박자)
   python build.py --png           + out/png/s01.png… 와 out/한눈에.png (PowerPoint로 렌더, 정적 = 마지막 상태)
@@ -34,7 +34,6 @@ from pptx import Presentation
 import hiw_lib as L
 import motion as M
 import render_c
-import ui
 from hiw_lib import q
 from ui import (BODY, GRAY_FILL, HL, ICON, INK, INK2, LAV, LAV2, LINE, LINE2, MUTE, PURPLE, PURPLE2, RED, RING, SUB,
                 SHADOW_CARD, SHADOW_LIFT, SHADOW_SOFT, C, P, Painter, R, T, Xf, bg_prims, caption, card,
@@ -76,11 +75,6 @@ WINE4 = ['babich', 'w3', 'w2', 'w1']          # 키워드·끊어진 고리 장�
 BLUE, BLUE_HL, BLUE_BG = '4F7BFF', '7EA2FF', 'EEF3FF'    # 둘째 하위 질문 색(①은 보라, ②는 파랑)
 ORANGE, ORANGE2 = 'F26B3A', 'F59B76'                     # 일반 임베딩(Reasoning Embedding의 보라와 맞서는 색, 노란 기 없는 주황)
 ANSWER = '배비치 소비뇽 블랑'
-# 메모판(--memo, 11-11): 02에서 질의 아래에 '무엇을 찾을지' 메모를 적고, 03의 Reasoning Embedding이 질의와 메모를 함께 읽는다
-# (AgentIR의 Reasoning-Aware Retrieval: 검색 직전에 적은 추론을 질의와 함께 임베딩). 기본판과 다른 곳은 14~15쪽, 9쪽의 낱말 하나,
-# Appendix 19~21쪽과 그 노트뿐이다. 메모판인지는 ui.MEMO로 본다(use_memo()가 켬)
-MEMO1 = '초대나 선물 얘기가 오갔을 거야'
-MEMO2 = '사진에 와인병이 찍혀 있을 거야'           # 둘째 질의의 메모는 Appendix(한눈에 보기, 근거 장)에만 나온다
 
 
 # ------------------------------------------------------------------ 장
@@ -271,23 +265,6 @@ def jieun_card(key, x, y, w, pt=12.5, title_pt=14, meta_pt=10, date=True):
     return out, h, pos
 
 
-def memo_line(key, x, y, text, pt=13.5, h=26, tag_pt=9.5, tag_h=20, color=BODY, elbow=None):
-    """질의 아래에 붙는 메모 한 줄(메모판): '메모' 표 + 글. Weave가 그 질의로 무엇을 찾을지 적어 둔 짐작이다.
-    elbow = (x, y): 질의 줄의 번호 아래에서 내려와 메모 쪽으로 꺾이는 이음선의 시작점.
-    돌려줌: (표 원시 목록, 글 원시, 이음선 원시 목록, 글 자리 — band()에 넘기는 (x, y, 글, pt, 굵기))."""
-    tg, tgw = chip(key + '/tag', x, y + (h - tag_h) / 2, '메모', 'soft', pt=tag_pt, h=tag_h, padx=8)
-    tx = x + tgw + 8
-    S = pt * 4 / 3
-    ty = y + (h - S * 1.4) / 2
-    txt = T(key + '/t', tx, ty, tw(text, pt) + 12, S * 1.4, text, size=pt, color=color)
-    el = []
-    if elbow:
-        ex, ey = elbow
-        cy = y + h / 2
-        el = [line(key + '/e1', (ex, ey), (ex, cy), color='C9BEEB', w=1.6), line(key + '/e2', (ex, cy), (x - 6, cy), color='C9BEEB', w=1.6)]
-    return tg, txt, el, (tx, ty, text, pt, 'r')
-
-
 def date_band(name, pos, alpha=40):
     """지은 카톡 카드의 날짜 아래 형광펜."""
     x, y, w, S = pos['date']
@@ -299,7 +276,8 @@ SOL_TITLE_Y = 46                                   # 뱃지·부제 없이 제�
 SOL_DY = -14                                       # 뱃지가 빠진 만큼 내용 전체를 14px 위로(위아래 여백을 맞춤)
 SOL_END = Xf(0, 0, 0, SOL_DY, 1.0)                 # 세 UX가 다 모인 마지막 자리(HTML 좌표 그대로, 위로 14px)
 SOL_ONE = Xf(315, 416, 640, 404, 1.08)             # 1쪽: UX 1 묶음(기록 + 휴대폰)만 가운데에 조금 크게
-SOL_MID = Xf(0, 275, 0, 416 + SOL_DY, 1.0)         # 2쪽: UX 2(이름표 158 ~ 카드 아래 392)는 오른쪽 칸의 세로 가운데
+SOL_LAB_DY = 10                                    # 11-11 6차: 번호·이름을 아래 UI 쪽으로 10px(사이 28 → 18px, 세 묶음 모두 같은 간격)
+SOL_MID = Xf(0, 280, 0, 416 + SOL_DY, 1.0)         # 2쪽: UX 2(이름표 168 ~ 카드 아래 392)는 오른쪽 칸의 세로 가운데
 SOL_Z = {                                          # 겹침 순서(아래 → 위). 이름표는 sol_label()이 따로 그림
     'ux1': ['th1', 'th2', 'th3', 'tm', 'tc', 'note0', 'arr', 'note', 'mail', 'cal', 'phone', 'call', 'swipe', 'sheet', 'go', 'q',
             'sum', 'sl1', 'sl2', 'sl3', 'ttl', 'r1', 'r2', 'r3'],
@@ -315,10 +293,10 @@ SOL_QPT = 12.5 * 0.75                              # (2) 검색창 글자 크기
 NOTES = {
     'sol1': ('방금 보신 첫 번째 장면은 기록 통합 검색입니다. '
              '(클릭) 한 번만 물으면, 여러 앱에 흩어진 기록을 찾아서 요약해 줍니다.'),
-    'sol2': '두 번째는 단서로 찾는 기억입니다. 이름이 입안에서만 맴돌 때 있으시죠? 단서만 적고 실타래 버튼을 누르면 됩니다.',
+    'sol2': '두 번째는 단서로 찾는 기억입니다. 이름이 떠오르지 않아도, 단서만 적고 실타래 버튼을 누르면 됩니다.',
     'sol': '세 번째는 먼저 건네는 기억입니다. 이번엔 묻기도 전에, 필요한 기억을 먼저 꺼내 주죠.',
-    'hiw': '그런데 이름도 모르는 걸 어떻게 찾아냈을까요? 마법은 아니고요. 그 속을 한번 들여다보겠습니다.',
-    'ask': '제가 지난봄에 친구 지은이네 집들이에 갔는데요. 거기서 마신 와인이 너무 맛있어서 다시 사려는데, 이름이 도무지 생각나지 않는 겁니다.',
+    'hiw': '그런데 이름도 모르는 걸 어떻게 찾아냈을까요? 그 속을 한번 들여다보겠습니다.',
+    'ask': '친구 지은이네 집들이에서 마신 와인을 다시 사려는데, 이름이 생각나지 않습니다.',
     'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 그런데 단서가 카톡에, 갤러리에, 여러 앱에 흩어져 있죠.',
     'old': '그럼 지금 쓰는 검색으로 한번 찾아볼까요?',
     'kw': ('먼저 키워드 검색은 글자가 같은 기록을 찾습니다. '
@@ -326,53 +304,24 @@ NOTES = {
            '(클릭) ‘와인’으로는 (클릭) 다른 날 결제 내역이 나오죠. '
            '(클릭) 그럼 그날 찍은 사진은요? (클릭) 키워드가 없으니 아예 검색이 안 됩니다.'),
     'emb': ('임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 벡터라는 숫자로 바꾸고 '
-            '(클릭) 뜻이 비슷하면 가까이 놓이는 공간에서 (클릭) 가까운 기록을 가져옵니다. '
-            '(클릭) 그런데 가져온 건 엉뚱한 메모와 (클릭) 다른 날 마신 와인이네요. 정작 단서는 저 멀리 있고요.'),
+            '(클릭) 뜻이 비슷할수록 가까이 놓이는 임베딩 공간에서 (클릭) 질문과 가까운 기록을 가져옵니다. '
+            '(클릭) 그런데 가져온 건 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. 정작 단서는 멀리 있죠.'),
     'step': ('왜 이럴까요? 우리는 키워드가 아니라 ‘언제, 어디서, 누구와’ 같은 맥락으로 기억하기 때문입니다. '
-             '그것도 ‘어제 회의 때 프로님이 메일로 주신다고 했는데…’ 하면서 꼬리를 물고 떠올리죠. '
              '그래서 검색도 사람처럼 한 단계씩 생각해야 합니다.'),
-    'chain': ('이 질문에도 빠진 고리가 하나 있습니다. (클릭) 바로 이 카톡인데요. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
-              '집들이라는 말은 없지만 우리는 바로 알죠. ‘아, 이날이 집들이구나.’ 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
+    'chain': ('이 질문에는 빠진 고리가 하나 있습니다. (클릭) 바로 이 카톡인데요. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
+              '집들이라는 말은 없지만, 우리는 이날이 집들이라는 걸 바로 알죠. 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
     'idx': ('먼저, 기록이 쌓일 때마다 미리 색인해 둡니다. '
-            '(클릭) 문장은 임베딩 모델을 거쳐 뜻을 담은 숫자, 의미 벡터가 되고요. (클릭) 언제, 어느 앱에서, 누가 보냈는지는 메타데이터로 저장합니다.'),
+            '(클릭) 문장은 임베딩 모델을 거쳐 뜻을 담은 숫자, 의미 벡터가 되고요. (클릭) 언제, 어느 앱에서, 누가 보냈는지 등은 메타데이터로 저장합니다.'),
     'trig': '검색하다 막히면 실타래 버튼을 누릅니다. Weave가 적던 질문을 가져오고요.',
     'split': '이 질문을 작은 질문 두 개로 나눠 다시 씁니다. (클릭) 집들이가 언제였는지 먼저 묻고, 와인 질문은 ‘그날’을 빈칸으로 남겨 두죠.',
     'hop1': ('첫 질문을 일반 임베딩으로 찾으면, 지은이의 카톡은 여전히 멀리 있는데요. '
-             '(클릭) Reasoning Embedding은 추론까지 잘하도록 튜닝한 임베딩입니다. '
+             '(클릭) Reasoning Embedding은 추론에 필요한 다음 단서 또한 잘 찾도록 튜닝한 임베딩 모델입니다. '
              '‘휴지 안 사 와도 돼’가 집들이 초대라는 걸 알아보고 질문 곁으로 끌어오죠. '
              '이 카톡을 받은 3월 15일이 다음 단서가 됩니다.'),
     'hop2': '이 날짜를 두 번째 질문의 빈칸에 넣으면 (클릭) 메타데이터로 그날 사진만 남고 (클릭) 그중 와인 사진에서 드디어 이름을 찾아냅니다.',
-    'deliver': ('이렇게 찾은 답은 근거와 함께 건넵니다. (클릭) 저는 ‘입력하기’만 누르면 되고요. '
-                '이 모든 과정에서 제 기록은 기기 밖으로 나가지 않습니다. '
+    'deliver': ('이렇게 찾은 답은 근거와 함께 건넵니다. (클릭) 저는 ‘입력하기’만 누르면 됩니다. '
                 '그럼 Weave가 우리 일상을 어떻게 바꿀까요?'),
 }
-
-# 메모판(--memo)에서 달라지는 노트는 세 군데뿐이다(나머지 14장은 기본판과 같은 글).
-# 9쪽: 삼성노트 기록을 '메모' 대신 '노트'로 부른다(Weave가 적는 메모와 헷갈리지 않게, 화면의 ✕ 옆 한마디도).
-# 14쪽: 첫 질의 아래에 메모가 적힌다(클릭 한 번 더). 15쪽: '추론까지 잘하도록' → '이 메모까지 읽도록', '집들이 초대라는 걸' → '바로 그 선물 얘기라는 걸'
-# (14쪽에서 들은 메모의 말을 되받음). 16쪽은 화면도 글도 기본판 그대로
-NOTES_MEMO = {
-    'emb': ('임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 벡터라는 숫자로 바꾸고 '
-            '(클릭) 뜻이 비슷하면 가까이 놓이는 공간에서 (클릭) 가까운 기록을 가져옵니다. '
-            '(클릭) 그런데 가져온 건 엉뚱한 노트와 (클릭) 다른 날 마신 와인이네요. 정작 단서는 저 멀리 있고요.'),
-    'split': ('이 질문을 작은 질문 두 개로 나눠 다시 씁니다. '
-              '(클릭) 집들이가 언제였는지 먼저 묻고, 초대나 선물 얘기가 오갔을 거라고 메모해 둡니다. '
-              '(클릭) 와인 질문은 ‘그날’을 빈칸으로 남겨 두죠.'),
-    'hop1': ('첫 질문을 일반 임베딩으로 찾으면, 지은이의 카톡은 여전히 멀리 있는데요. '
-             '(클릭) Reasoning Embedding은 이 메모까지 읽도록 튜닝한 임베딩입니다. '
-             '‘휴지 안 사 와도 돼’가 바로 그 선물 얘기라는 걸 알아보고 질문 곁으로 끌어오죠. '
-             '이 카톡을 받은 3월 15일이 다음 단서가 됩니다.'),
-}
-
-
-def use_memo():
-    """메모판으로 바꾼다: 화면(ui.MEMO), 노트, 나오는 파일(../HowItWorks_Argon_claude_memo.pptx)과 폴더(out/memo)."""
-    global OUT, DST
-    ui.MEMO = True
-    OUT = HERE / 'out' / 'memo'
-    DST = HERE.parent / 'HowItWorks_Argon_claude_memo.pptx'
-    NOTES.update(NOTES_MEMO)
-
 
 _SOL = {}
 
@@ -428,6 +377,7 @@ def sol_label(ux):
     """번호 + 이름. 11-10 5차: 다시 묶음의 왼쪽 위(HTML의 GEOM.lab = 왼쪽 끝). 덱 글꼴로 그린다."""
     n, name = SOL_LABEL[ux]
     x, y = sol_data()['geom']['lab'][ux]
+    y += SOL_LAB_DY
     key = 'sol/%s/label' % ux
     pt = 23 * 0.75
     nw = tw(name, pt, 'b')
@@ -896,7 +846,7 @@ EM_PANEL = (624, 132, 600, 124)
 EM_FIELD = (646, 182, 556, 54)
 SPACE = (624, 314, 600, 330)
 STAR = (884, 494)
-SPACE_NOTE = '* 공간상에서 질문과 가까울수록 뜻이 비슷함'
+SPACE_NOTE = '* 임베딩 공간에서 질문과 가까이 있는 기록일수록 뜻이 비슷합니다'
 
 
 def space_note(name, box, text, pt=10):
@@ -985,7 +935,7 @@ def s_emb():
     s.add('em/k2', [ring_box('em/k2', pic1_box, pad=4, radius=14, w=2.2)])
     s.add('em/k3', [ring_box('em/k3', pic2_box, pad=4, radius=14, w=2.2)])
     # ✕와 한마디: 메모는 칩 바로 아래에, 와인 사진은 두 장 사이에 걸쳐서
-    x1, v1 = verdict('em/x1', 'em/v1', memo_box[0] + mw / 2, memo_box[1] + mh + 19, '관련 없는 노트' if ui.MEMO else '관련 없는 메모', xs=20, xw=4.0, pt=10.5, h=24)
+    x1, v1 = verdict('em/x1', 'em/v1', memo_box[0] + mw / 2, memo_box[1] + mh + 19, '관련 없는 메모', xs=20, xw=4.0, pt=10.5, h=24)
     x2, v2 = verdict('em/x2', 'em/v2', pic1_box[0] + pw1 / 2, (pic1_box[1] + ph1 + pic2_box[1]) / 2, '다른 날 마신 와인', xs=20, xw=4.0,
                      pt=10.5, h=24)
     s.add('em/x1', x1)
@@ -1038,7 +988,18 @@ def s_step():
     return s
 
 
-GAP = (492, 281, 296, 170)          # 빠진 고리 자리. 클릭하면 이 자리에 지은 카톡(중간 단서)이 들어옴(폭은 카드 + 양쪽 16px)
+TALK_K = 1.2                        # 11-11 6차: 끊어진 고리·데이터 색인 장의 지은 카톡 카드를 1.2배로('약간 작네')
+
+
+def _gap():
+    """빠진 고리 자리. 클릭하면 이 자리에 지은 카톡(중간 단서)이 들어옴(키운 카드 + 사방 16px, 가운데는 그대로)."""
+    w = jieun_fit()
+    h = jieun_card('ch/talk', 0, 0, w)[1]
+    gw, gh = round(w * TALK_K) + 32, round(h * TALK_K) + 32
+    return (640 - gw / 2, 366 - gh / 2, gw, gh)
+
+
+GAP = _gap()
 CH_GAL = (874, 228, 360)
 
 
@@ -1078,12 +1039,13 @@ def s_chain():
     tk_h = jieun_card('ch/talk', 0, 0, tk_w)[1]
     tx, ty = gx + (gw - tk_w) / 2, cy - tk_h / 2
     talk = jieun_card('ch/talk', tx, ty, tk_w)
-    s.add('ch/talk', talk[0])
+    kx = Xf(gx + gw / 2, cy, gx + gw / 2, cy, TALK_K)      # 카드와 그 위 표시를 가운데 기준으로 함께 키움
+    s.add('ch/talk', talk[0], xf=kx)
     tp = talk[2]
-    s.add('ch/h1', [band('ch/h1', tp[0], '박스 정리')])
-    s.add('ch/h2', [band('ch/h2', tp[1], '휴지 안 사 와도 돼')])
-    s.add('ch/hd', [date_band('ch/hd', tp)])
-    s.add('ch/tag', clue_tag('ch/tag', tx, ty))
+    s.add('ch/h1', [band('ch/h1', tp[0], '박스 정리')], xf=kx)
+    s.add('ch/h2', [band('ch/h2', tp[1], '휴지 안 사 와도 돼')], xf=kx)
+    s.add('ch/hd', [date_band('ch/hd', tp)], xf=kx)
+    s.add('ch/tag', clue_tag('ch/tag', tx, ty), xf=kx)
     s.add('ch/pring', [ring_box('ch/pring', spots[wi], pad=4, radius=12, w=3.0)])
     px_, py_, pw_, ph_ = spots[wi]
     ans, _ = chip('ch/ans', px_ + pw_ - 44, py_ - 17, ANSWER, 'fill', pt=13, h=34, padx=16)        # 정답 사진의 오른쪽 위 모서리에
@@ -1103,14 +1065,15 @@ def s_chain():
     s.on('ch/t1', 'wipe_in', 150, 300)
     s.on('ch/talk', 'zoom_in', 300, 450, **{'from': 0.9})
     s.on('ch/tag', 'zoom_in', 650, 300, **{'from': 0.6})
-    s.on('ch/h1', 'wipe_in', 2000, 300)
-    s.on('ch/h2', 'wipe_in', 4375, 400)
-    s.on('ch/hd', 'wipe_in', 7125, 350)
-    s.on('ch/t2', 'wipe_in', 7625, 300)
-    s.on('ch/dimb', 'fade_out', 7875, 300)
-    s.on('ch/pring', 'zoom_in', 7940, 400, **{'from': 1.12})
-    s.on('ch/ans', 'zoom_in', 8300, 350, **{'from': 0.8})
-    s.on('ch/bridge', 'rise', 11250, 500, dy=14)
+    # 11-11 6차: 새 목소리와 줄인 대본에 맞춰 다시 잼('박스 정리' 1.8초, '휴지 안 사 와도 돼' 4.0초, '이날이' 7.6초, 물음 9.8초)
+    s.on('ch/h1', 'wipe_in', 2200, 300)
+    s.on('ch/h2', 'wipe_in', 5000, 400)
+    s.on('ch/hd', 'wipe_in', 9500, 350)
+    s.on('ch/t2', 'wipe_in', 10000, 300)
+    s.on('ch/dimb', 'fade_out', 10250, 300)
+    s.on('ch/pring', 'zoom_in', 10315, 400, **{'from': 1.12})
+    s.on('ch/ans', 'zoom_in', 10675, 350, **{'from': 0.8})
+    s.on('ch/bridge', 'rise', 12275, 500, dy=14)
     return s
 
 
@@ -1130,12 +1093,13 @@ def s_idx():
     tk_w = jieun_fit()
     w = round(30 + lab_w + max(tw(IDX_ORIG, 14), tw(IDX_VEC, 15.5, 'm'), tw(IDX_META, 15.5, 'm')) + 34)
     gap = 80
-    x0 = 640 - (tk_w + gap + w) / 2
-    x, y, h = x0 + tk_w + gap, IDX_Y, IDX_H
+    tkw = tk_w * TALK_K                 # 카톡 카드는 앞 장과 같은 배율로(모핑으로 이어짐)
+    x0 = 640 - (tkw + gap + w) / 2
+    x, y, h = x0 + tkw + gap, IDX_Y, IDX_H
     cy = y + h / 2
-    talk = chain_talk(x0, cy - chain_talk(0, 0, tk_w)[1] / 2, tk_w)
-    s.add('ch/talk', talk[0])
-    s.add('idx/arr', thread('idx/arr', scurve((x0 + tk_w + 3, cy), (x - 4, cy)), w=2.6))
+    talk = chain_talk(x0 + (tkw - tk_w) / 2, cy - chain_talk(0, 0, tk_w)[1] / 2, tk_w)
+    s.add('ch/talk', talk[0], xf=Xf(x0 + tkw / 2, cy, x0 + tkw / 2, cy, TALK_K))
+    s.add('idx/arr', thread('idx/arr', scurve((x0 + tkw + 3, cy), (x - 4, cy)), w=2.6))
     rows_y = [y + 84, y + 158, y + 232]
     s.add('idx/card', [R('idx/card/bg', x, y, w, h, prst='roundRect', radius=22, fill='FFFFFF', line=RING, line_w=2.2, glow=(10, RING, 22),
                          shadow=SHADOW_LIFT),
@@ -1211,12 +1175,11 @@ def s_trig():
 
 
 QR = (52, 246, 576, 288)          # 11-10 4차: 질의 글 위아래 빈 곳을 절반으로(340 → 288). 글과 판 묶음은 오른쪽 검색창·자판과 세로 가운데를 맞춤
-QR_M = (52, 230, 576, 320)        # 메모판: 첫 질의 아래 메모 줄만큼 판이 길어짐(글과 판 묶음의 세로 가운데는 그대로)
 
 
-def qr_full(box=QR):
+def qr_full():
     """02 장의 Query Rewriting 판(크게)."""
-    x, y, w, h = box
+    x, y, w, h = QR
     out = [('sp/card', [R('sp/card/bg', x, y, w, h, prst='roundRect', radius=22, fill='FFFFFF', line=RING, line_w=2.2, glow=(10, RING, 22),
                           shadow=SHADOW_LIFT),
                         P('sp/card/ic', ICON['spool'], x + 24, y + 20, 30, 30),
@@ -1233,11 +1196,9 @@ def s_split():
         s.add(k, pm[k], alpha=30)
     x, y, w, h = TR_SP
     s.add('tr/q2', [T('tr/q2', tx0, txt[3], w - (tx0 - x) - 20, txt[5], QUERY, size=17.5, color=INK, anchor='ctr', alpha=30)])
-    memo = ui.MEMO
-    box = QR_M if memo else QR
-    for k, prims in qr_full(box):
+    for k, prims in qr_full():
         s.add(k, prims)
-    qx, qy, qw, qh = box
+    qx, qy, qw, qh = QR
     qpt = 17
     S = qpt * 4 / 3
     tqx, tqy = qx + 26, qy + 74
@@ -1247,7 +1208,7 @@ def s_split():
     b2 = hl_band('sp/b2', tqx, tqy, QUERY, '때 마셨던 와인', qpt, color=BLUE_HL, alpha=40)
     s.add('sp/b1', [b1])
     s.add('sp/b2', [b2])
-    r1y, r2y = qy + 130, qy + (238 if memo else 206)
+    r1y, r2y = qy + 130, qy + 206
     s.add('sp/r1', [R('sp/r1/bg', qx + 22, r1y, qw - 44, 58, prst='roundRect', radius=14, fill=LAV, line=None)] +
           numdot('sp/r1/n', qx + 50, r1y + 29, 1, r=14, pt=11) +
           [T('sp/r1/t', qx + 76, r1y, qw - 110, 58, '지은이네 집들이는 언제였지?', size=17, color=INK, weight='m', anchor='ctr')])
@@ -1255,28 +1216,13 @@ def s_split():
     s.add('sp/r2', [R('sp/r2/bg', qx + 22, r2y, qw - 44, 58, prst='roundRect', radius=14, fill=BLUE_BG, line=None)] +
           numdot('sp/r2/n', qx + 50, r2y + 29, 2, r=14, pt=11, fill=BLUE) + blank +
           [T('sp/r2/t', qx + 76 + bw_ + 6, r2y, qw - 110 - bw_, 58, '마셨던 와인은?', size=17, color=INK, weight='m', anchor='ctr')])
-    if memo:    # 첫 질의 아래에 메모 한 줄(번호 아래에서 꺾여 내려오는 이음선 + '메모' 표 + 글). 표와 글은 다음 장의 Query 1 카드로 모핑된다
-        tg, mt, el, _ = memo_line('sp/m1', qx + 76, r1y + 62, MEMO1, elbow=(qx + 50, r1y + 58))
-        s.add('sp/m1e', el)
-        s.add('sp/m1', tg)
-        s.add('sp/m1t', [mt])
-        cap = [('질의를 나누고, ', INK), ('찾을 단서를 메모', PURPLE), ('합니다', INK)]
-    else:
-        cap = [('질의를 ', INK), ('의미 단위로 나눠', PURPLE), (' 다시 씁니다', INK)]
-    s.add('sp/cap', [caption('sp/cap', [cap], qx + qw / 2, qy - 58, size=24)])
+    s.add('sp/cap', [caption('sp/cap', [[('질의를 ', INK), ('의미 단위로 나눠', PURPLE), (' 다시 씁니다', INK)]], qx + qw / 2, qy - 58, size=24)])
     s.on('sp/cap', 'rise', 200, 500, dy=14)
     s.click()
     s.on('sp/b1', 'wipe_in', 0, 450)
     s.on('sp/r1', 'rise', 500, 450, dy=14)
-    if memo:    # 메모판: 질의 하나에 클릭 한 번. 첫 질의 → 그 메모가 적힘('초대나 선물 얘기가…'를 말할 때 함께), 둘째 질의는 빈칸만
-        s.on(['sp/m1e', 'sp/m1'], 'fade_in', 2150, 300)
-        s.on('sp/m1t', 'type', 2400, 1, ms=110, n=len(MEMO1))
-        s.click()
-        s.on('sp/b2', 'wipe_in', 0, 450)
-        s.on('sp/r2', 'rise', 500, 450, dy=14)
-    else:
-        s.on('sp/b2', 'wipe_in', 1300, 450)
-        s.on('sp/r2', 'rise', 1800, 450, dy=14)
+    s.on('sp/b2', 'wipe_in', 2200, 450)          # 11-11 6차: '와인 질문은'을 말할 때(2.0초쯤)
+    s.on('sp/r2', 'rise', 2600, 450, dy=14)
     return s
 
 
@@ -1286,8 +1232,6 @@ H1 = (40, 445, 420, 118)           # Hop 1 장의 Query 1 카드
 QC2 = (40, 156, 420, 188)          # Hop 2 장: Query Rewriting 판은 Query 1과 함께 위로 올라감(11-10 5차: 없애지 않고 남김)
 Q1B = (40, 366, 420, 118)          # Hop 2 장: 끝난 Query 1
 Q2B = (40, 520, 420, 118)          # Hop 2 장: Query 2(아래에 새로 뜸)
-# 메모판: Query 카드에 메모 줄이 붙어 32px씩 길어짐(왼쪽 묶음의 세로 가운데는 그대로)
-QC_M, H1_M = (40, 213, 420, 188), (40, 429, 420, 150)
 TOK = '3/15 (일)'                   # ②의 빈칸(그날)에 들어가는 날짜
 
 
@@ -1309,11 +1253,9 @@ def qr_small(box=QC):
     return out, q_, r1, r2, (r1y, r2y)
 
 
-def query_card(key, box, n, runs, active=True, done=False, memo=None, memo_key=None):
+def query_card(key, box, n, runs, active=True, done=False):
     """하위 질의 카드: 'Query n' + Hop n 칩 + 질의 글. runs = [(글, 'q' | 'blank')] — 'blank'는 점선 빈칸(나중에 날짜 칩이 그 위에 앉음).
-    11-10 4차: 카드 이름을 Reasoning Embedding → Query 1, Query 2로. 돌려줌: (원시, 자리) — 자리['blank'] = 빈칸의 (x, y, w, h).
-    memo(메모판): 질의 글 아래에 메모 한 줄(카드 높이는 118 → 150으로 줌). 자리['memo'] = 메모 글의 자리, 자리['mtag'] = '메모' 표의 왼쪽 위.
-    memo_key를 주면 메모를 카드 묶음에 넣지 않고 자리['mparts'] = ('메모' 표 원시 목록, 글 원시)로 돌려준다(그 이름으로 따로 넣어 모핑·타이핑)."""
+    11-10 4차: 카드 이름을 Reasoning Embedding → Query 1, Query 2로. 돌려줌: (원시, 자리) — 자리['blank'] = 빈칸의 (x, y, w, h)."""
     x, y, w, h = box
     ln = (RING, 2.2) if active else (LINE2, 1.4)
     out = [R(key + '/bg', x, y, w, h, prst='roundRect', radius=20, fill='FFFFFF', line=ln[0], line_w=ln[1],
@@ -1339,20 +1281,12 @@ def query_card(key, box, n, runs, active=True, done=False, memo=None, memo_key=N
             tx += pos['qw']
     if done:
         out += check_icon(key + '/ok', x + w - 31, y + 76, s=14, color=PURPLE, w=2.4)
-    if memo:
-        tg, mt, _, mp = memo_line(memo_key or key + '/m', x + 20, y + 106, memo, pt=11.5, tag_pt=9, tag_h=19,
-                                  color=BODY if (active or done) else MUTE)
-        if memo_key:
-            pos['mparts'] = (tg, mt)
-        else:
-            out += tg + [mt]
-        pos['memo'], pos['mtag'] = mp, (x + 20, y + 106 + (26 - 19) / 2)
     return out, pos
 
 
 H1_SPACE = (490, 134, 750, 512)
 H1_STAR = (770, 404)
-H1_NOTE = '* 공간상에서 질문과 가까울수록 먼저 찾음'      # 일반 임베딩과 Reasoning Embedding 양쪽에 다 맞는 말로(9쪽 각주와 같은 말씨)
+H1_NOTE = '* 임베딩 공간에서 질문과 가까이 있는 기록일수록 먼저 찾습니다'      # 일반 임베딩과 Reasoning Embedding 양쪽에 다 맞는 말로(9쪽 각주와 같은 말씨)
 H1_Q = '지은이네 집들이는 언제였지?'
 CAP_Y = 84                         # 위 띠 아래 한 줄 설명(Hop 1, Hop 2)
 H1_DSHIFT = [(-14, 9), (12, -10), (-9, -13), (15, 7)]      # 일반 임베딩일 때 배경 점 네 무리가 놓이는 자리(Reasoning Embedding 자리 기준 px)
@@ -1366,27 +1300,20 @@ def s_hop1():
     11-10 5차: 클릭 2 → 1번. 옮겨 온 뒤 테두리를 한 번 더 그리지 않고, 옛 자리 흔적에는 보라 테두리와 '단서' 표가 없다.
     카톡 내용 카드는 실로 잇지 않고 단서 칩에 겹칠 듯 붙여 둔다. 토글의 주황은 바꾼 뒤 남지 않는다."""
     s = Slide('hop1', trans=('morph', 1100), cur='03', done={'00', '01', '02'}, notes=NOTES['hop1'])
-    memo = ui.MEMO      # 메모판: Query 1 카드에 메모 줄(앞 장에서 모핑). 일반 임베딩은 질문만 읽고, 클릭하면 메모가 질문 곁에 붙는다('Query 1 + 메모')
-    QCb, H1b = (QC_M, H1_M) if memo else (QC, H1)
-    card_, q_, r1, r2, (r1y, r2y) = qr_small(QCb)
+    card_, q_, r1, r2, (r1y, r2y) = qr_small()
     for p_ in card_:
         s.add(p_[1], [p_])
     s.add('q/text', q_)
     s.add('sp/r1', r1)
     s.add('sp/r2', r2)
     # ① → Query 1: 판 왼쪽 바깥으로 도는 화살표(장이 열리면 가장 먼저 그려짐)
-    s.add('h1/c', thread('h1/c', [(QCb[0] + 14, r1y + 20), (QCb[0] - 14, r1y + 20), (H1b[0] - 14, H1b[1] + 30), (H1b[0] - 2, H1b[1] + 30)],
+    s.add('h1/c', thread('h1/c', [(QC[0] + 14, r1y + 20), (QC[0] - 14, r1y + 20), (H1[0] - 14, H1[1] + 30), (H1[0] - 2, H1[1] + 30)],
                          w=2.2, tail='triangle'))
-    q1, qp = query_card('h1/q1', H1b, 1, [(H1_Q, 'q')], memo=MEMO1 if memo else None, memo_key='sp/m1' if memo else None)
+    q1, qp = query_card('h1/q1', H1, 1, [(H1_Q, 'q')])
     s.add('h1/q1', q1)
-    if memo:    # 메모(표와 글)는 앞 장(02)의 첫 질의 아래에서 이 카드로 모핑되어 내려온다
-        s.add('sp/m1', qp['mparts'][0])
-        s.add('sp/m1t', [qp['mparts'][1]])
     # 제목: 일반 임베딩(잠깐만, temp) → Reasoning Embedding
     s.add('h1/cap0', [caption('h1/cap0', [[('일반 임베딩', ORANGE), ('은 뜻이 비슷한 기록을 가깝게 둡니다', INK)]], 640, CAP_Y, size=22)], temp=True)
-    cap = [('Reasoning Embedding', PURPLE), ('은 ', INK), ('질문과 메모를 함께 읽어', PURPLE), (' 단서를 가깝게 둡니다', INK)] if memo else \
-        [('Reasoning Embedding', PURPLE), ('은 단서가 될 기록도 가깝게 둡니다', INK)]
-    s.add('h1/cap', [caption('h1/cap', [cap], 640, CAP_Y, size=22)])
+    s.add('h1/cap', [caption('h1/cap', [[('Reasoning Embedding', PURPLE), ('은 단서가 될 기록도 가깝게 둡니다', INK)]], 640, CAP_Y, size=22)])
     sx, sy, sw, sh = H1_SPACE
     s.add('h1/space', [R('h1/space/bg', sx, sy, sw, sh, prst='roundRect', radius=22, fill='FFFFFF', alpha=88, line=LINE2, line_w=1.2)])
     s.add('h1/note', [space_note('h1/note', H1_SPACE, H1_NOTE)])
@@ -1467,26 +1394,13 @@ def s_hop1():
     s.add('h1/k', kk + clue_tag('h1/k/tag', kf[0], kf[1]), start=off(ki, kf))     # 보라 테두리와 '단서' 표는 이 칩에만(옮겨 가는 게 보임)
     s.add('h1/star0', star('h1/star0', SX, SY, color=ORANGE), temp=True)          # 일반 임베딩의 질문(주황 별, 잠깐만)
     s.add('h1/star', star('h1/star', SX, SY))
-    if memo:    # 일반 임베딩은 질문만 읽는다(이름표 'Query 1', 잠깐만). 클릭하면 '메모' 칩이 Query 1 카드에서 별 곁으로 날아와
-        # 이름표가 'Query 1 + 메모'로 바뀐다: Reasoning Embedding은 메모까지 함께 읽는다
-        s.add('h1/starl0', chip('h1/starl0', SX + 20, SY - 44, 'Query 1', 'white', pt=10.5, h=24, padx=9, weight='b')[0], temp=True)
-        lw = tw('Query 1 + 메모', 10.5, 'b') + 18
-        s.add('h1/starl', [R('h1/starl/bg', SX + 20, SY - 44, lw, 24, prst='roundRect', fill='FFFFFF', line=LINE, line_w=1.0, shadow=SHADOW_SOFT),
-                           T('h1/starl/t', SX + 29, SY - 44, lw, 24, [[('Query 1', dict(color=INK2)), (' + 메모', dict(color=PURPLE))]],
-                             size=10.5, weight='b', anchor='ctr')])
-        mdst = (SX + 29 + tw('Query 1 + ', 10.5, 'b') - 8, SY - 42)
-        msrc = qp['mtag']
-        s.add('h1/mfly', chip('h1/mfly', mdst[0], mdst[1], '메모', 'fill', pt=9.5, h=20, padx=8)[0], temp=True)
-    else:
-        s.add('h1/starl', chip('h1/starl', SX + 20, SY - 44, 'Query 1', 'white', pt=10.5, h=24, padx=9, weight='b')[0])
+    s.add('h1/starl', chip('h1/starl', SX + 20, SY - 44, 'Query 1', 'white', pt=10.5, h=24, padx=9, weight='b')[0])
     talk = jieun_card('h1/card', cx_, cy_, cw_, pt=12, title_pt=13.5)
     s.add('h1/card', talk[0])
     tp = talk[2]
     s.add('h1/h1', [band('h1/h1', tp[0], '박스 정리')])
     s.add('h1/h2', [band('h1/h2', tp[1], '휴지 안 사 와도 돼')])
     s.add('h1/hd', [date_band('h1/hd', tp)])
-    if memo:    # 카톡의 '휴지 안 사 와도 돼'에 형광펜이 그어질 때 메모의 '선물 얘기'에도('바로 그 선물 얘기'라고 말하는 때)
-        s.add('h1/mh', [band('h1/mh', qp['memo'], '선물 얘기')])
     # 효과 — 장이 열리면: ① → Query 1 카드 → 임베딩 공간(일반 임베딩). 뜻이 비슷한 두 기록이 질문 곁에, '단서'는 멀리
     s.on('h1/c', 'wipe_in', 150, 380, dir='down')
     s.on('h1/q1', 'rise', 480, 450, dy=12)
@@ -1512,45 +1426,32 @@ def s_hop1():
     s.on('h1/star0', 'fly', t + 800, 750, dx=qsrc[0] - SX, dy=qsrc[1] - SY, bend=0.12, show=False, fade=False)
     s.on('h1/near0', 'zoom_in', t + 1450, 400, **{'from': 0.4})
     s.on('h1/near0', 'jump', t + 1450)
-    if memo:
-        s.on('h1/starl0', 'fade_in', t + 1550, 300)
-        s.on('h1/starl0', 'jump', t + 1550)
-    else:
-        s.on('h1/starl', 'fade_in', t + 1550, 300)
+    s.on('h1/starl', 'fade_in', t + 1550, 300)
     s.click()   # 1: Reasoning Embedding으로 바꿈 — 제목·토글·별·원이 보라로, 공간이 다시 놓이고 '단서'가 질문 곁으로 → 카톡 내용과 근거
     s.on('h1/cap0', 'fade_out', 0, 250)
     s.on('h1/cap', 'rise', 150, 450, dy=12)
     s.on('h1/togA', 'fade_out', 100, 300)
     s.on('h1/togB', 'fade_in', 100, 350)
-    o = 1100 if memo else 0     # 메모판: 메모가 질문 곁에 붙은 다음에 공간이 다시 놓인다
     s.on(['h1/star0', 'h1/near0'], 'fade_out', 250, 300)
     s.on(['h1/star', 'h1/near'], 'fade_in', 250, 300)
-    if memo:    # '이 메모까지'를 말할 즈음: '메모' 칩이 Query 1 카드에서 별 곁으로 날아가 이름표가 'Query 1 + 메모'로 바뀐다
-        s.on('h1/mfly', 'fade_in', 950, 120)
-        s.on('h1/mfly', 'fly', 950, 700, dx=msrc[0] - mdst[0], dy=msrc[1] - mdst[1], bend=0.2, show=False, fade=False)
-        s.on('h1/starl0', 'fade_out', 1650, 200)
-        s.on('h1/starl', 'fade_in', 1650, 300)
-        s.on('h1/mfly', 'fade_out', 1650, 150)
-    s.on('h1/k', 'pulse', 450 + o, 150, scale=1.08)
-    s.on('h1/d1', 'fly', 700 + o, 1000, dx=d1i[0] - d1f[0], dy=d1i[1] - d1f[1], bend=0.1, show=False, fade=False)
-    s.on('h1/d2', 'fly', 700 + o, 1000, dx=d2i[0] - d2f[0], dy=d2i[1] - d2f[1], bend=-0.1, show=False, fade=False)
-    s.on(['h1/d1', 'h1/d2'], 'dim', 1300 + o, 400, to=0.4)
+    s.on('h1/k', 'pulse', 450, 150, scale=1.08)
+    s.on('h1/d1', 'fly', 700, 1000, dx=d1i[0] - d1f[0], dy=d1i[1] - d1f[1], bend=0.1, show=False, fade=False)
+    s.on('h1/d2', 'fly', 700, 1000, dx=d2i[0] - d2f[0], dy=d2i[1] - d2f[1], bend=-0.1, show=False, fade=False)
+    s.on(['h1/d1', 'h1/d2'], 'dim', 1300, 400, to=0.4)
     for g, d_ in enumerate(H1_DSHIFT):                      # 배경 점과 멀리 있는 기록도 조금씩 자리를 옮김
-        s.on('h1/dots%d' % g, 'fly', 700 + o + g * 70, 1100, dx=d_[0], dy=d_[1], bend=0, show=False, fade=False)
+        s.on('h1/dots%d' % g, 'fly', 700 + g * 70, 1100, dx=d_[0], dy=d_[1], bend=0, show=False, fade=False)
     for i, (k, _, _, _, st) in enumerate(far):
-        s.on(k, 'fly', 740 + o + i * 80, 1050, dx=st[0], dy=st[1], bend=0.08 if i % 2 else -0.08, show=False, fade=False)
-    s.on('h1/ghost', 'fade_in', 800 + o, 300)
-    s.on('h1/trail', 'wipe_in', 800 + o, 1200, dir='right')
-    s.on('h1/k', 'fly', 800 + o, 1300, dx=ki[0] - kf[0], dy=ki[1] - kf[1], bend=0.15, show=False, fade=False)
-    t = 2250 + o    # 단서가 질문 곁에 앉으면 곧바로 카톡 내용이 그 곁에 펼쳐짐(클릭 없이) → 근거 두 곳 → 받은 날짜
+        s.on(k, 'fly', 740 + i * 80, 1050, dx=st[0], dy=st[1], bend=0.08 if i % 2 else -0.08, show=False, fade=False)
+    s.on('h1/ghost', 'fade_in', 800, 300)
+    s.on('h1/trail', 'wipe_in', 800, 1200, dir='right')
+    s.on('h1/k', 'fly', 800, 1300, dx=ki[0] - kf[0], dy=ki[1] - kf[1], bend=0.15, show=False, fade=False)
+    t = 2250    # 단서가 질문 곁에 앉으면 곧바로 카톡 내용이 그 곁에 펼쳐짐(클릭 없이) → 근거 두 곳 → 받은 날짜
     s.on('h1/card', 'zoom_in', t, 480, **{'from': 0.82})
-    # 11-10 5차: 근거는 그 말을 할 즈음에(카드가 뜨고 조금 뒤 근거 두 군데, 날짜는 '다음 단서'를 말하기 앞서).
-    b1, b2, bd = 4500, 4875, 8500
-    s.on('h1/h1', 'wipe_in', b1, 350)
-    s.on('h1/h2', 'wipe_in', b2, 450)
-    if memo:
-        s.on('h1/mh', 'wipe_in', b2, 450)
-    s.on('h1/hd', 'wipe_in', bd, 400)
+    # 11-10 5차: 근거는 그 말을 할 즈음에(카드가 뜨고 조금 뒤 근거 두 군데, 날짜는 '다음 단서'를 말하기 앞서)
+    # 11-11 6차: 첫 문장이 길어져 근거는 5.5초쯤, 날짜는 '이 카톡을 받은 3월 15일'을 말할 때(10.8초)
+    s.on('h1/h1', 'wipe_in', 6875, 350)
+    s.on('h1/h2', 'wipe_in', 7250, 450)
+    s.on('h1/hd', 'wipe_in', 13500, 400)
     return s
 
 
@@ -1566,18 +1467,16 @@ def s_hop2():
     s = Slide('hop2', trans=('morph', 1100), cur='03', done={'00', '01', '02'}, notes=NOTES['hop2'])
     s.add('h2/cap', [caption('h2/cap', [[('찾은 날짜를 단서로,', PURPLE), (' 정확한 이름을 찾습니다', INK)]], 640, CAP_Y, size=22)])
     # Query Rewriting 판(위로 올라옴) — ①은 끝나서 흐리게, ②는 지금 차례
-    # 메모판도 이 장은 기본판과 같다: 메모는 14~15쪽에서만 보이고, 여기로 넘어올 때 Query 1 카드에서 사라진다(둘째 메모는 Appendix에만)
-    QC2b, Q1b, Q2b = QC2, Q1B, Q2B
-    card_, q_, r1, r2, (r1y, r2y) = qr_small(QC2b)
+    card_, q_, r1, r2, (r1y, r2y) = qr_small(QC2)
     for p_ in card_:
         s.add(p_[1], [p_])
     s.add('q/text', q_)
     s.add('sp/r1', r1, alpha=56)
     s.add('sp/r2', r2)
-    x1, y1, w1, h1_ = Q1b
-    x2, y2, w2, h2_ = Q2b
+    x1, y1, w1, h1_ = Q1B
+    x2, y2, w2, h2_ = Q2B
     q1cy, q2cy = y1 + h1_ / 2, y2 + h2_ / 2
-    s.add('h1/c', thread('h1/c', [(QC2b[0] + 14, r1y + 20), (QC2b[0] - 14, r1y + 20), (x1 - 14, y1 + 30), (x1 - 2, y1 + 30)],
+    s.add('h1/c', thread('h1/c', [(QC2[0] + 14, r1y + 20), (QC2[0] - 14, r1y + 20), (x1 - 14, y1 + 30), (x1 - 2, y1 + 30)],
                          w=2.2, tail='triangle', alpha=56))
     # Query 1(끝남, 흐리게) —— 그 결과인 지은 카톡(곡선으로 이어짐)
     cw_ = jieun_fit(pt=12, title_pt=13.5)
@@ -1585,7 +1484,7 @@ def s_hop2():
     gx, gy, gw = H2_GAL
     tx, ty = 546, gy - 22 - th_
     s.add('h2/l1', thread('h2/l1', scurve((x1 + w1 - 6, q1cy), (tx + 6, ty + th_ / 2)), w=2.2))
-    q1, q1p = query_card('h1/q1', Q1b, 1, [(H1_Q, 'q')], active=False, done=True)
+    q1, _ = query_card('h1/q1', Q1B, 1, [(H1_Q, 'q')], active=False, done=True)
     s.add('h1/q1', q1, alpha=64)
     talk = jieun_card('h1/card', tx, ty, cw_, pt=12, title_pt=13.5)
     s.add('h1/card', talk[0])
@@ -1594,9 +1493,9 @@ def s_hop2():
     s.add('h1/h2', [band('h1/h2', tp[1], '휴지 안 사 와도 돼')])
     s.add('h1/hd', [date_band('h1/hd', tp)])
     # ② → Query 2: ①의 화살표 바깥으로 도는 화살표, Query 2(빈칸) + 날아와 앉는 날짜
-    s.add('h2/c', thread('h2/c', [(QC2b[0] + 14, r2y + 20), (QC2b[0] - 34, r2y + 20), (x2 - 34, y2 + 30), (x2 - 2, y2 + 30)],
+    s.add('h2/c', thread('h2/c', [(QC2[0] + 14, r2y + 20), (QC2[0] - 34, r2y + 20), (x2 - 34, y2 + 30), (x2 - 2, y2 + 30)],
                          w=2.2, tail='triangle'))
-    q2, qp = query_card('h2/q2', Q2b, 2, [('그날', 'blank'), ('마셨던 와인은?', 'q')])
+    q2, qp = query_card('h2/q2', Q2B, 2, [('그날', 'blank'), ('마셨던 와인은?', 'q')])
     s.add('h2/q2', q2)
     bx, by, bw, bh = qp['blank']
     s.add('h2/tok', [R('h2/tok/bg', bx - 1, by - 1, bw + 2, bh + 2, prst='roundRect', fill=PURPLE, line=None, shadow=SHADOW_SOFT),      # 빈칸의 점선까지 덮음
@@ -1736,8 +1635,7 @@ def s_deliver():
 # ------------------------------------------------------------------ 9. 한눈에 보기 (4열 좌→우 직관적 파이프라인) — 11-10: 본문에서 빼고 Appendix 첫 장으로
 def s_overview():
     s = Slide('overview', trans=('fade', 500), done={'00', '01', '02', '03', '04'},
-              notes='(Appendix) 전체 흐름을 한 장에 모았습니다. 질문을 나누고 메모를 달아, 찾은 단서로 다시 묻습니다. 이 모든 과정은 기기 안에서 이뤄집니다.'
-              if ui.MEMO else '(Appendix) 전체 흐름을 한 장에 모았습니다. 질문을 나누고 찾은 단서로 다시 묻습니다. 이 모든 과정은 기기 안에서 이뤄집니다.')
+              notes='(Appendix) 전체 흐름을 한 장에 모았습니다. 질문을 나누고 찾은 단서로 다시 묻습니다. 이 모든 과정은 기기 안에서 이뤄집니다.')
     s.add('ov/cap', [caption('ov/cap', [[('질문을 나누고, ', INK), ('찾은 단서로 다시 묻습니다', PURPLE)]], 640, 80, size=26)])
     tagw = tw('모든 단계가 기기 안에서', 10.5, 'b') + 48
     s.add('ov/dev', [R('ov/dev/bg', 36, 136, 1208, 558, prst='roundRect', radius=28, fill='FFFFFF', alpha=55, line=LINE2, line_w=1.4),
@@ -1772,17 +1670,11 @@ def s_overview():
             R('ov/rw/r1', c2x + 14, cy + 96, c2w - 28, 56, prst='roundRect', radius=12, fill=LAV, line=None)]
     rows += numdot('ov/rw/n1', c2x + 32, cy + 124, 1, r=10, pt=8.5)
     rows.append(T('ov/rw/t1', c2x + 48, cy + 96, c2w - 64, 56, '지은이네 집들이는 언제였지?', size=11, color=INK, weight='b', anchor='ctr'))
-    memo = ui.MEMO
-    d2 = 26 if memo else 0          # 메모판: ① 아래 메모 줄만큼 ②가 내려감
-    rows.append(R('ov/rw/r2', c2x + 14, cy + 172 + d2, c2w - 28, 56, prst='roundRect', radius=12, fill=BLUE_BG, line=None))
-    rows += numdot('ov/rw/n2', c2x + 32, cy + 200 + d2, 2, r=10, pt=8.5, fill=BLUE)
-    tk, tkw = chip('ov/rw/tk', c2x + 48, cy + 189 + d2, '3/15 (일)', 'fill', pt=9.5, h=22, padx=8)
+    rows.append(R('ov/rw/r2', c2x + 14, cy + 172, c2w - 28, 56, prst='roundRect', radius=12, fill=BLUE_BG, line=None))
+    rows += numdot('ov/rw/n2', c2x + 32, cy + 200, 2, r=10, pt=8.5, fill=BLUE)
+    tk, tkw = chip('ov/rw/tk', c2x + 48, cy + 189, '3/15 (일)', 'fill', pt=9.5, h=22, padx=8)
     rows += tk
-    rows.append(T('ov/rw/t2', c2x + 48 + tkw + 5, cy + 172 + d2, c2w - 64 - tkw, 56, '마셨던 와인은?', size=11, color=INK, weight='b', anchor='ctr'))
-    if memo:
-        for i, (my, text) in enumerate(((cy + 154, MEMO1), (cy + 230 + d2, MEMO2)), 1):
-            tg, mt, _, _ = memo_line('ov/rw/m%d' % i, c2x + 18, my, text, pt=9.5, h=20, tag_pt=8, tag_h=16, color=SUB)
-            rows += tg + [mt]
+    rows.append(T('ov/rw/t2', c2x + 48 + tkw + 5, cy + 172, c2w - 64 - tkw, 56, '마셨던 와인은?', size=11, color=INK, weight='b', anchor='ctr'))
     s.add('ov/rw', stage_tag('ov/rw/tag', c2x, cy, '02', '질의 재작성') + rows)
 
     # Column 3: 03 연쇄 탐색 (x=606, w=330) — Hop 1 위, Hop 2 아래
@@ -1841,9 +1733,9 @@ def s_overview():
     # 좌 → 우 직관적 화살표 (01 → 02 → 03 Hop1 → 단서 대입 → 03 Hop2 → 04)
     s.add('ov/a1', thread('ov/a1', [(c1x + c1w + 2, cy + 190)] * 2 + [(c2x - 2, cy + 190)] * 2, w=2.4, tail='triangle'))
     s.add('ov/a2', thread('ov/a2', scurve((c2x + c2w + 2, cy + 124), (c3x - 2, cy + 110)), w=2.4, tail='triangle'))
-    s.add('ov/loop', thread('ov/loop', scurve((c3x - 2, cy + 148), (c2x + c2w + 2, cy + 196 + d2)), w=2.4, tail='triangle'))
-    s.add('ov/loopt', chip('ov/loopt', c3x - 13, cy + 162 + d2 / 2, '3/15 (일)', 'white', pt=8.5, h=20, padx=7, align='c')[0])
-    s.add('ov/a3', thread('ov/a3', scurve((c2x + c2w + 2, cy + 216 + d2), (c3x - 2, cy + 286)), w=2.4, tail='triangle'))
+    s.add('ov/loop', thread('ov/loop', scurve((c3x - 2, cy + 148), (c2x + c2w + 2, cy + 196)), w=2.4, tail='triangle'))
+    s.add('ov/loopt', chip('ov/loopt', c3x - 13, cy + 162, '3/15 (일)', 'white', pt=8.5, h=20, padx=7, align='c')[0])
+    s.add('ov/a3', thread('ov/a3', scurve((c2x + c2w + 2, cy + 216), (c3x - 2, cy + 286)), w=2.4, tail='triangle'))
     s.add('ov/a4', thread('ov/a4', scurve((c3x + c3w + 2, cy + 290), (c4x - 2, cy + 190)), w=2.4, tail='triangle'))
     s.add('ov/u1', [line('ov/u1', (c3x + c3w / 2, iy), (c3x + c3w / 2, cy + 368), color=PURPLE2, w=1.8, dash='dash')])
     order = [('ov/dev', 0), ('ov/idx', 150), ('ov/q', 400), ('ov/a1', 650), ('ov/rw', 750), ('ov/hoptag', 950),
@@ -1977,7 +1869,7 @@ def build(dst, auto=False, hold=1700, talk=False, says=None):
 
 
 # ------------------------------------------------------------------ 발표 시간 어림(--time)
-SPEECH_RATE = 6.3                  # 1초에 말하는 음절 수(쉼을 뺀 말 빠르기). 낭독 영상(--tts)과 맞춘 값(11-10 5차: 젊은 목소리 F2)
+SPEECH_RATE = 6.5                  # 1초에 말하는 음절 수(쉼을 뺀 말 빠르기). 낭독 영상(--tts)과 맞춘 값(11-11 6차: 목소리 F2F1_70, 속도 1.15)
 # 실제 발표에서 생기는 틈(11-10 5차: 넘길 때의 반응 시간을 넣음). 낭독 영상과 --time 어림이 같은 값을 쓴다
 LAT_START = 0.12                   # 장이 열린 뒤 말을 떼기까지(넘어가는 동안 숨을 고르고, 화면이 자리 잡으면 곧 말함)
 LAT_CLICK = 0.08                   # 클릭한 뒤 말을 잇기까지
@@ -2314,12 +2206,9 @@ def main():
     ap.add_argument('--voice', help='낭독 목소리: Supertonic 3의 F1~F5·M1~M5(기본 F2), heami = Windows 한국어 음성')
     ap.add_argument('--check', action='store_true', help='--tts와 함께: 낭독을 받아쓰기로 글과 견줌')
     ap.add_argument('--remux', action='store_true', help='--video --tts와 함께: PowerPoint 녹화(out/_silent.mp4)는 그대로 두고 낭독만 다시 얹음')
-    ap.add_argument('--memo', action='store_true', help='메모판(질의마다 메모를 달고 임베딩이 함께 읽음)을 만듦 → ../HowItWorks_Argon_claude_memo.pptx, out/memo/')
     a = ap.parse_args()
-    if a.memo:
-        use_memo()
     if a.time:
-        OUT.mkdir(parents=True, exist_ok=True)
+        OUT.mkdir(exist_ok=True)
         specs = [f() for f in SOL_SLIDES + SLIDES]
         rows = rehearse(specs, says=narrate(specs, a.voice, a.check)[0] if a.tts else None)
         for i, (key, nclick, syl, sec, cum) in enumerate(rows, 1):
@@ -2327,12 +2216,8 @@ def main():
         how = '낭독 길이로 잼' if a.tts else '1초에 %.1f음절로 말할 때' % SPEECH_RATE
         print('본문 %d장  %d음절  %d:%02d  (%s)' % (len(rows), sum(r[2] for r in rows), rows[-1][4] // 60, rows[-1][4] % 60, how))
         return
-    OUT.mkdir(parents=True, exist_ok=True)
+    OUT.mkdir(exist_ok=True)
     blurs = ('blur_sol.png', 'blur_emb.png', 'blur_cloud.png')
-    if ui.MEMO:                     # 메모판은 흐린 그림이 들어가는 장까지 기본판과 같아, 기본판 것(out/)을 가져다 쓴다
-        for f in blurs:
-            if not (OUT / f).exists() and (HERE / 'out' / f).exists():
-                shutil.copyfile(HERE / 'out' / f, OUT / f)
     if not a.skip_blur or not all((OUT / f).exists() for f in blurs):
         # 1차: 흐린 배경 없이 만들고 PowerPoint로 찍어 앞 장(또는 같은 장의 앞 상태)을 흐리게
         for f in blurs:
@@ -2360,7 +2245,7 @@ def main():
         print('png', len(pngs))
     if a.video:
         auto = OUT / '_auto.pptx'
-        mp4 = OUT / (DST.stem + '_미리보기.mp4')
+        mp4 = OUT / 'HowItWorks_Argon_claude_미리보기.mp4'
         says = clips = None
         if a.tts:
             says, clips = narrate([f() for f in SOL_SLIDES + SLIDES], a.voice, a.check)
