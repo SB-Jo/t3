@@ -4,6 +4,8 @@
 
 이 폴더와 `07_소스/slides/p05_결선/*_claude`만 고쳐요. 그림(`assets`)은 `../장표5/assets`를 읽기만 해요.
 
+**메모판(2026-11-11)**: 14~16쪽에 메모 줄만 얹어 AgentIR 방식으로 바꾼 판이 `../HowItWorks_Argon_claude_memo.pptx`예요(`build.py --memo`). 바뀐 곳, 근거, 두 판을 비교한 결과는 [`메모판.md`](메모판.md)에 있어요. 아래 내용은 기본판 기준이에요.
+
 ## 다시 만들기
 
 ```bash

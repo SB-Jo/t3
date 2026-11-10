@@ -27,6 +27,7 @@ ICON = {'talk': 'app-kakao.png', 'note': 'app-notes.png', 'cal': 'samsung-calend
         'spool': 'weave-spool-6B4EFF.png', 'spool_w': 'weave-spool-white.png', 'google': 'google.png'}
 APP_NAME = {'talk': '카카오톡', 'note': '삼성노트', 'cal': '캘린더', 'gallery': '갤러리', 'mail': '이메일', 'phone': '전화',
             'map': '지도', 'wallet': '삼성 월렛'}
+MEMO = False                       # 메모판 여부(build.py --memo가 켠다). build.py는 __main__과 build 두 벌로 읽힐 수 있어, 둘이 같이 보는 여기에 둔다
 
 
 def tw(text, pt, weight='r'):
