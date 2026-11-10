@@ -8,6 +8,8 @@
                                   구간마다 그 구간의 노트를 말하는 시간만큼 머물고 그 말을 자막으로 띄움 → 영상 길이 = 발표 시간 어림)
   python build.py --skip-blur     흐린 배경 그림(out/blur_*.png)을 다시 만들지 않음(있는 것을 씀)
   python build.py --time          덱은 만들지 않고 발표 시간만 어림(본문 17장: 장마다 클릭 수, 음절 수, 걸리는 시간)
+  python build.py --time --tts    노트를 낭독해서(tts_c.py, 기기 안의 음성 합성) 그 길이로 잼. --check를 붙이면 낭독을 받아쓰기로 글과 견줌
+  python build.py --video --tts   미리보기 영상에 낭독을 넣음(낭독 길이만큼 머묾). --voice로 목소리, --remux로 녹화는 두고 낭독만 다시
 
 흐름(장): 솔루션 1·2·3 → How it works? → 질문 → 흩어진 단서 → 기존 검색이라면? → 키워드 → 임베딩 → Let's think step by step!
 → 끊어진 고리 → 00 데이터 색인 → 01 상황 인식 → 02 질의 재작성 → 03 Hop 1 → 03 Hop 2 → 04 결과 제공 | Appendix(한눈에 보기, …).
@@ -20,6 +22,8 @@ import copy
 import json
 import random
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -550,7 +554,7 @@ SOL_SLIDES = [s_sol1, s_sol2, s_sol3]
 # ------------------------------------------------------------------ 0. 솔루션 → How it works?
 def s_hiw():
     s = Slide('hiw', trans=('fade', 500), bar=False,
-              notes='그럼 Weave는 어떻게 동작할까요? 집들이 와인으로 따라가 보겠습니다.')
+              notes='그럼 어떻게 동작하는지 집들이 와인으로 따라가 보겠습니다.')
     s.add('bg/blur', [P('bg/blur', str(OUT / 'blur_sol.png'), 0, 0, 1280, 720)])
     s.add('hiw/big', [caption('hiw/big', [[('How it ', INK), ('works?', PURPLE)]], 640, 300, size=80)])
     s.on('hiw/big', 'rise', 120, 450, dy=10)
@@ -830,7 +834,7 @@ def s_emb():
               notes=('임베딩 검색은 단어 대신 뜻으로 찾습니다. (클릭) 질문을 벡터로 바꿔 '
                     '(클릭) 뜻이 비슷할수록 가까이 놓이는 공간에서 (클릭) 가까운 기록을 찾습니다. '
                     '(클릭) 하지만 가까운 것은 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. '
-                    '단서인 지은이의 카톡은 와인 이야기가 없어 멀리 있습니다.'))
+                    '단서인 지은이의 카톡은 멀리 있습니다.'))
     s.add('old/title', [old_title(OLD_Y, 30)])
     parts, _ = kw_parts()
     pm = dict(parts)
@@ -1043,7 +1047,7 @@ IDX_META = '{ date: "2026-03-15", app: "kakaotalk", from: "지은", … }'      
 
 def s_idx():
     s = Slide('idx', trans=('morph', 1000), cur='00',
-              notes='먼저 기록이 쌓이는 대로 미리 색인해 둡니다. (클릭) 문장의 뜻은 의미 벡터로, 날짜와 앱 정보는 메타데이터로 저장합니다.')
+              notes='먼저 기록이 쌓이는 대로 (클릭) 문장의 뜻은 의미 벡터로, 날짜와 앱 정보는 메타데이터로 미리 색인해 둡니다.')
     s.add('idx/cap', [caption('idx/cap', [[('기록이 쌓이는 대로, ', INK), ('미리 색인', PURPLE), ('해 둡니다', INK)]], 640, 92, size=25)])
     # 11-10: 카톡 카드와 색인 카드 모두 폭을 글에 맞추고(오른쪽 여백), 둘을 한 묶음으로 가운데에. 뒤에 겹쳐 보이던 카드 두 장은 뺌
     lab_w = 124
@@ -1104,7 +1108,7 @@ def trig_parts(alpha=100):
 
 def s_trig():
     s = Slide('trig', trans=('morph', 1000), cur='01', done={'00'},
-              notes='검색하다 막히면 (클릭) 실타래 버튼을 누릅니다. Weave가 검색창의 질의를 받아 옵니다.')
+              notes='검색하다 막히면 (클릭) 실타래 버튼을 누릅니다. Weave가 질의를 받아 옵니다.')
     parts, txt, cur, tx0 = trig_parts()
     pm = dict(parts)
     s.add('tr/sp', pm['tr/sp'])
@@ -1141,7 +1145,7 @@ def qr_full():
 
 def s_split():
     s = Slide('split', trans=('morph', 1000), cur='02', done={'00', '01'},
-              notes='받은 질의는 의미 단위로 나눠 다시 씁니다. (클릭) 집들이 날짜를 먼저 묻고 와인은 그날을 빈칸으로 둡니다.')
+              notes='받은 질의는 의미 단위로 나눠 (클릭) 집들이 날짜를 먼저 묻고 와인은 그날을 빈칸으로 둡니다.')
     parts, txt, cur, tx0 = trig_parts()
     pm = dict(parts)
     for k in ('tr/sp', 'tr/kb', 'tr/hand'):
@@ -1249,10 +1253,9 @@ def s_hop1():
     (클릭) Reasoning Embedding(보라)으로 바꾸면 공간이 다시 놓이고, 단서가 옛 자리에 흐린 흔적과 실선을 남기며 질문 곁으로 →
     (클릭) 카톡을 펼쳐 근거와 받은 날짜(따로 뱃지 없이 그 자리에서 강조)."""
     s = Slide('hop1', trans=('morph', 1100), cur='03', done={'00', '01', '02'},
-              notes=('앞서 본 일반 임베딩은 뜻이 비슷한 기록을 가깝게 둡니다. '
-                    '그래서 다른 집들이 일정과 주소 메모가 먼저 잡히고 단서인 지은이의 카톡은 멀리 있습니다. '
+              notes=('일반 임베딩으로는 뜻이 비슷한 다른 집들이 일정과 주소 메모가 먼저 잡히고 지은이의 카톡은 여전히 멀리 있습니다. '
                     '(클릭) Reasoning Embedding은 추론까지 잘하도록 튜닝한 임베딩입니다. '
-                    '‘휴지 안 사 와도 돼’가 집들이 초대라는 걸 알아보고 이 카톡을 질문 곁에 둡니다. '
+                    '‘휴지 안 사 와도 돼’가 집들이 초대라는 걸 알아보고 질문 곁에 둡니다. '
                     '(클릭) 카톡을 받은 3월 15일이 다음 단서가 됩니다.'))
     card_, q_, r1, r2, (r1y, r2y) = qr_small()
     for p_ in card_:
@@ -1393,8 +1396,8 @@ def s_hop2():
     카톡의 날짜가 날아와 빈칸을 채움 → (클릭) 날짜 필터로 그날 사진만 → (클릭) 와인 사진에 테두리와 이름.
     Query Rewriting 판과 따로 놓였던 날짜 뱃지, 라벨 글자 칩은 뺐다(카톡 카드가 엉뚱한 데로 이어지던 선도 함께)."""
     s = Slide('hop2', trans=('morph', 1100), cur='03', done={'00', '01', '02'},
-              notes=('찾은 날짜를 다음 질의의 빈칸에 넣습니다. (클릭) 메타데이터로 그날 사진만 남기고 '
-                    '(클릭) 그 가운데 와인 사진에서 배비치 소비뇽 블랑을 찾아냅니다.'))
+              notes=('찾은 날짜를 빈칸에 넣습니다. (클릭) 메타데이터로 그날 사진만 남기고 '
+                    '(클릭) 와인 사진에서 배비치 소비뇽 블랑을 찾아냅니다.'))
     s.add('h2/cap', [caption('h2/cap', [[('찾은 날짜를 단서로,', PURPLE), (' 정확한 이름을 찾습니다', INK)]], 640, CAP_Y, size=22)])
     # Query 1(끝남, 흐리게) —— 그 결과인 지은 카톡
     x1, y1, w1, h1_ = Q1B
@@ -1486,7 +1489,7 @@ SHEET = (140, 252, 560, 340)
 
 def s_deliver():
     s = Slide('deliver', trans=('morph', 1000), cur='04', done={'00', '01', '02', '03'},
-              notes=('찾은 답은 다듬어 근거와 함께 건넵니다. (클릭) 입력하기를 누르면 검색창에 들어가고 그 와인을 다시 살 수 있습니다. '
+              notes=('찾은 답은 다듬어 근거와 함께 건넵니다. (클릭) 입력하기를 누르면 그 와인을 다시 살 수 있습니다. '
                     '이 모든 과정은 기기 안에서 이뤄집니다.'))
     x, y, w, h = DL_SP
     QPT = 16.5
@@ -1771,16 +1774,16 @@ def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
 
 
 
-def build(dst, auto=False, hold=1700, talk=False):
+def build(dst, auto=False, hold=1700, talk=False, says=None):
     """원본 덱에서 장 틀과 노트 틀만 빌려, 새 장을 끝에 다 넣은 뒤 원본 장을 지운다
     (먼저 지우면 python-pptx가 장 파일 이름을 다시 써서 PowerPoint가 못 여는 일이 있었음).
-    talk=True면 미리보기 영상용: 본문 17장만, 발표 속도로 머물고 자막을 띄움(talk_specs)."""
+    talk=True면 미리보기 영상용: 본문 17장만, 발표 속도로 머물고 자막을 띄움(talk_specs). says는 낭독 길이(narrate)."""
     prs = Presentation(str(SRC))
     layout = prs.slides[LAYOUT_INDEX].slide_layout
     note_tpl = [copy.deepcopy(sh._element) for sh in prs.slides[LAYOUT_INDEX].notes_slide.placeholders]
     lst = prs.slides._sldIdLst
     old = list(lst)
-    specs = talk_specs() if talk else [f() for f in SOL_SLIDES] + [f() for f in SLIDES] + appendix_specs()
+    specs = talk_specs(says=says) if talk else [f() for f in SOL_SLIDES] + [f() for f in SLIDES] + appendix_specs()
     _, report, secs = add_slides(prs, layout, note_tpl, specs, auto, hold)
     for sid in old:
         prs.part.drop_rel(sid.get(q('r:id')))
@@ -1791,7 +1794,7 @@ def build(dst, auto=False, hold=1700, talk=False):
 
 
 # ------------------------------------------------------------------ 발표 시간 어림(--time)
-SPEECH_RATE = 5.0                  # 1초에 말하는 음절 수(또박또박 발표하는 속도, 1분에 300음절)
+SPEECH_RATE = 5.6                  # 1초에 말하는 음절 수. 낭독 영상(--tts)의 말 빠르기에 맞춘 값이고, 또박또박 천천히 말하면 5.0쯤
 READ_AS = {'Reasoning Embedding': '리즈닝 임베딩', 'Query Rewriting': '쿼리 리라이팅', 'Weave': '위브', 'BM25': '비엠 이십오', 'UX': '유엑스'}
 
 
@@ -1830,24 +1833,101 @@ def _say_times(sp, rate=SPEECH_RATE):
     return [syllables(seg) / rate + 0.3 * len(re.findall(r'[.?!](?:\s|$)', seg)) for seg in sp.notes.split('(클릭)')]
 
 
-def rehearse(specs, rate=SPEECH_RATE):
+def rehearse(specs, rate=SPEECH_RATE, says=None):
     """발표를 한 번 해 보는 셈으로 장마다 걸리는 시간을 어림한다.
-    한 구간(장이 열린 뒤, 또는 클릭 한 번 뒤) = max(그 구간에 할 말, 그 구간의 효과 길이). 문장 끝 0.3초, 클릭 0.25초, 장 넘김 시간을 더한다."""
+    한 구간(장이 열린 뒤, 또는 클릭 한 번 뒤) = max(그 구간에 할 말, 그 구간의 효과 길이). 문장 끝 0.3초, 클릭 0.25초, 장 넘김 시간을 더한다.
+    says = {장 키: [구간마다 낭독 길이(초)]}를 주면 음절로 어림하지 않고 그 길이(토막 사이 틈 포함)로 잰다."""
     rows, total = [], 0.0
     for sp in specs:
         segs = sp.notes.split('(클릭)')
-        says = _say_times(sp, rate)
+        say = says[sp.key] if says else _say_times(sp, rate)
         anim = [_group_len(g) / 1000 for g in sp.groups]
         sec = (sp.trans[1] / 1000) if sp.trans else 0
         for i in range(len(segs)):
-            sec += max(says[i], anim[i] if i < len(anim) else 0) + (0.25 if i else 0)
+            sec += max(say[i], anim[i] if i < len(anim) else 0) + (0.25 if (i and not says) else 0)
+        if says:
+            sec += 0.15
         total += sec
         rows.append((sp.key, len(segs) - 1, sum(syllables(g) for g in segs), sec, total))
     return rows
 
 
-def subtitle(key, text, pt=15, maxw=1080):
-    """미리보기 영상 아래쪽 자막(그 구간에 할 말). 긴 말은 폭에 맞춰 줄을 나눈다."""
+FFMPEG = str(Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg')
+MARK = ['B9B2C9', '6A6474', '1C1A24']        # 자막마다 번갈아 붙는 왼쪽 아래 작은 표(밝은 회색, 회색, 검정): 영상에서 그 구간이 실제로 시작한 때를 찾는 데 씀
+MARK_BOX = (0, 713, 46, 7)
+
+
+def tts_text(seg):
+    """낭독(TTS)에 넘길 글: 영문과 숫자를 읽는 소리로 바꾸고 따옴표를 뺀다."""
+    t = ' '.join(seg.split())
+    for k, v in READ_AS.items():
+        t = t.replace(k, v)
+    t = re.sub(r'\d+', lambda m: _num_ko(int(m.group())), t)
+    return re.sub('[‘’“”"]', '', t)
+
+
+def narrate(specs, voice=None, check=False):
+    """본문 노트를 (클릭)마다 토막 내어 낭독(wav)을 만든다. 돌려줌: ({장 키: [토막 길이 + 다음 토막까지의 틈]}, {장 키: [wav 경로]}).
+    틈은 문장이 끝난 토막 뒤 0.35초, 문장 중간에서 누르는 클릭 뒤 0.12초(말이 이어지므로).
+    voice는 tts_c의 목소리 이름(없으면 기본). check면 낭독을 받아쓰기로 글과 견준다."""
+    import tts_c
+    d = OUT / 'tts'
+    shutil.rmtree(d, ignore_errors=True)
+    todo = []
+    for sp in specs:
+        for j, seg in enumerate(sp.notes.split('(클릭)')):
+            t = tts_text(seg)
+            todo.append(('%s_%d' % (sp.key, j), t if t.endswith(('.', '?', '!')) else t + ','))       # 문장 중간에서 끊는 토막은 쉼표로(말끝을 내리지 않게)
+    tts_c.synth(todo, d, voice)
+    says, clips = {}, {}
+    for sp in specs:
+        segs = sp.notes.split('(클릭)')
+        clips[sp.key] = [d / ('%s_%d.wav' % (sp.key, j)) for j in range(len(segs))]
+        says[sp.key] = [tts_c.tidy(c) + (0.35 if seg.rstrip().endswith(('.', '?', '!')) else 0.12) for c, seg in zip(clips[sp.key], segs)]
+    if check:
+        narrate_check(specs, clips)
+    return says, clips
+
+
+def narrate_check(specs, clips, ok=0.85):
+    """낭독이 글대로 읽혔는지 받아쓰기(기기 안의 Whisper)로 견준다. 장마다 토막을 이어 붙여 듣고, 글과 다르게 들린 장을 찍는다.
+    받아쓴 글은 out/tts_check.txt에 남긴다. 점검용 모델이 없으면 건너뛴다."""
+    import difflib
+    import numpy as np
+    import tts_c
+    d = OUT / 'tts'
+    paths = []
+    for sp in specs:
+        sr = tts_c._load(clips[sp.key][0])[0]
+        xs = []
+        for c in clips[sp.key]:
+            xs += [tts_c._load(c)[1], np.zeros(int(sr * 0.4), dtype=np.int16)]
+        paths.append(str(d / ('_chk_%s.wav' % sp.key)))
+        tts_c._save(paths[-1], sr, np.concatenate(xs))
+    heard = tts_c.transcribe(paths)
+    for p in paths:
+        Path(p).unlink()
+    if heard is None:
+        print('낭독 점검: 받아쓰기 모델이 없어 건너뜀')
+        return []
+    norm = lambda t: re.sub(r'[^가-힣a-z0-9]', '', tts_text(t.replace('(클릭)', ' ')).lower())
+    bad, lines = [], []
+    for sp, p in zip(specs, paths):
+        h = heard.get(p, '')
+        r = difflib.SequenceMatcher(None, norm(sp.notes), norm(h)).ratio()
+        lines.append('%s  %.2f\n   글: %s\n   들린 말: %s\n' % (sp.key, r, ' '.join(sp.notes.split()), h))
+        if r < ok:
+            bad.append((sp.key, r, h))
+    (OUT / 'tts_check.txt').write_text('\n'.join(lines), encoding='utf-8')
+    print('낭독 점검(받아쓰기): %d장 가운데 %d장이 글과 다르게 들림 → out/tts_check.txt' % (len(specs), len(bad)))
+    for key, r, h in bad:
+        print('   %-8s %.2f  들린 말: %s' % (key, r, h))
+    return bad
+
+
+def subtitle(key, text, code=None, pt=15, maxw=1080):
+    """미리보기 영상 아래쪽 자막(그 구간에 할 말). 긴 말은 폭에 맞춰 줄을 나눈다.
+    code를 주면 왼쪽 아래 구석에 구간 표(MARK[code])를 함께 둔다(낭독을 얹을 때만 쓰고, 얹은 뒤 영상에서 지움)."""
     lines, cur = [], ''
     for w in text.split(' '):
         if cur and tw(cur + ' ' + w, pt, 'm') > maxw:
@@ -1862,27 +1942,105 @@ def subtitle(key, text, pt=15, maxw=1080):
     x, y = 640 - w / 2, 710 - h
     return [R(key + '/bg', x, y, w, h, prst='roundRect', radius=12, fill='1C1A24', alpha=82, line=None),
             T(key + '/t', x, y + 8, w, lh * len(lines), [[(ln, {})] for ln in lines], size=pt, color='FFFFFF', weight='m', align='c',
-              lnspc=lh * 0.75)]
+              lnspc=lh * 0.75)] + ([] if code is None else [R(key + '/mk', *MARK_BOX, fill=MARK[code % 3], line=None)])
 
 
-def talk_specs(rate=SPEECH_RATE):
+def talk_specs(rate=SPEECH_RATE, says=None):
     """미리보기 영상용 본문 17장(Appendix는 넣지 않음): 구간마다 그 구간에 할 말을 하는 동안 머물고, 그 말을 아래에 자막으로 띄운다.
-    그래서 영상 길이가 발표 시간 어림(--time)과 같다."""
+    그래서 영상 길이가 발표 시간 어림(--time)과 같다. says(narrate()의 낭독 길이)를 주면 그 길이만큼 머문다.
+    장마다 sp.starts = [구간이 시작하는 때(영상 처음부터, 초)]를 남긴다."""
     specs = [f() for f in SOL_SLIDES + SLIDES]
+    t, k = 0.0, 0
     for sp in specs:
         segs = sp.notes.split('(클릭)')
-        says = _say_times(sp, rate)
-        sp.holds = [max(round(says[j] * 1000) - _group_len(g), 0) + (250 if j else 0) for j, g in enumerate(sp.groups)]
+        say = says[sp.key] if says else _say_times(sp, rate)
+        gap = 0 if says else 250
+        sp.holds = [max(round(say[j] * 1000) - _group_len(g), 0) + (gap if j else 0) for j, g in enumerate(sp.groups)]
+        t += (sp.trans[1] / 1000 if sp.trans else 0) + 0.15
+        sp.starts = []
         for j, grp in enumerate(sp.groups):
+            sp.starts.append(t)
+            t += (_group_len(grp) + sp.holds[j]) / 1000
             text = ' '.join(segs[j].split())
-            if not text:
-                continue
-            key = 'sub/%s/%d' % (sp.key, j)
-            sp.add(key, subtitle(key, text))
-            grp.insert(0, (key, 'appear', 0, 1, {}))
-            if j + 1 < len(sp.groups):
-                sp.groups[j + 1].insert(0, (key, 'fade_out', 0, 100, {}))
+            if text:
+                key = 'sub/%s/%d' % (sp.key, j)
+                sp.add(key, subtitle(key, text, k if says else None))
+                grp.insert(0, (key, 'appear', 0, 1, {}))
+                if j + 1 < len(sp.groups):
+                    sp.groups[j + 1].insert(0, (key, 'fade_out', 0, 100, {}))
+            k += 1
     return specs
+
+
+def video_len(mp4):
+    """영상 길이(초). ffprobe가 없어 ffmpeg -i가 찍는 Duration을 읽는다."""
+    err = subprocess.run([FFMPEG, '-hide_banner', '-i', str(mp4)], capture_output=True, text=True).stderr
+    h, m, sec = re.search(r'Duration: (\d+):(\d+):([\d.]+)', err).groups()
+    return int(h) * 3600 + int(m) * 60 + float(sec)
+
+
+def mark_times(mp4, specs, fps=30):
+    """영상의 왼쪽 아래 구간 표를 읽어 구간마다 실제로 시작한 때(초)를 찾는다(PowerPoint 녹화는 계산한 때와 1초쯤 어긋날 수 있음).
+    돌려줌: [초] — talk_specs()의 구간 순서대로. 못 찾은 구간은 계산한 때(sp.starts)를 쓴다."""
+    import numpy as np
+    x, y, w, h = MARK_BOX
+    cw, ch = int(w * 1.5 - 12) // 2 * 2, int(h * 1.5 - 4) // 2 * 2          # 표 안쪽만. 짝수로(yuv420p에서 crop이 홀수를 짝수로 내림)
+    cx, cy = int(x * 1.5 + 6) // 2 * 2, int(y * 1.5 + 3) // 2 * 2
+    raw = subprocess.run([FFMPEG, '-loglevel', 'error', '-i', str(mp4), '-vf', 'fps=%d,crop=%d:%d:%d:%d:exact=1,format=gray' % (fps, cw, ch, cx, cy),
+                          '-f', 'rawvideo', '-'], capture_output=True, check=True).stdout
+    n = cw * ch
+    assert len(raw) % n == 0, (len(raw), n)
+    luma = np.frombuffer(raw, dtype=np.uint8).reshape(-1, n).mean(axis=1)
+    assert abs(len(luma) / fps - video_len(mp4)) < 1.0, (len(luma) / fps, video_len(mp4))      # 프레임 수가 영상 길이와 맞아야 때가 맞음
+    band = [(140, 198), (72, 140), (0, 72)]                 # MARK 순서대로(밝은 회색, 회색, 검정). 표가 없으면 바탕이라 198보다 밝음
+    out, last, k, miss, off = [], 0, 0, 0, 0.0             # off = 지금까지 계산한 때보다 밀린 만큼(다음 구간은 그만큼 옮겨서 찾음)
+    for sp in specs:
+        for t0 in sp.starts:
+            lo, hi = band[k % 3]
+            hit = None
+            for f in range(max(int((t0 + off - 1.5) * fps), last + 1), min(int((t0 + off + 2.5) * fps), len(luma) - 5)):
+                seg = luma[f:f + 5]
+                if seg.min() >= lo and seg.max() < hi and seg.max() - seg.min() <= 4:       # 다섯 프레임 내내 같은 밝기(사라지는 중이 아님)
+                    hit = f
+                    break
+            if hit is None:
+                miss += 1
+                hit = max(int((t0 + off) * fps), last + 1)
+            else:
+                off = hit / fps - t0
+            out.append(hit / fps)
+            last = hit
+            k += 1
+    return out, miss
+
+
+def add_voice(silent, mp4, says, clips, tail=1.0):
+    """소리 없는 미리보기 영상에 낭독을 얹는다: 구간 표로 구간이 실제로 시작한 때를 찾아 낭독 토막을 그 자리에 놓고, 한 줄로 합쳐 넣는다.
+    구간 표는 바로 위 바탕을 덮어 지우고(그래서 영상을 다시 인코딩함), 마지막 말이 끝나고 tail초 뒤에 영상을 끝낸다(모자라면 마지막 화면을 늘림)."""
+    import tts_c
+    specs = talk_specs(says=says)
+    starts, miss = mark_times(silent, specs)
+    order = [c for sp in specs for c in clips[sp.key]]
+    end = starts[-1] + 0.05 + tts_c.wav_len(order[-1]) + tail
+    wav = OUT / '_voice.wav'
+    tts_c.track([(c, t + 0.05) for c, t in zip(order, starts)], end, wav)
+    x, y, w, h = MARK_BOX
+    W, Y = int(w * 1.5) + 9, int(y * 1.5) - 7               # 표와 그 둘레(압축 번짐)까지
+    H = 1080 - Y
+    more = max(end - video_len(silent), 0) + 0.2
+    cover = '[0:v]tpad=stop_mode=clone:stop_duration=%.2f,split[a][b];[b]crop=%d:%d:0:%d[p];[a][p]overlay=0:%d[v]' % (more, W, H, Y - H - 2, Y)
+    # 소리 크기: 말소리를 -16 LUFS(영상에 흔히 쓰는 크기)에 맞추고, 짧게 튀는 소리만 -2.5dB에서 눌러 줌
+    err = subprocess.run([FFMPEG, '-hide_banner', '-i', str(wav), '-af', 'ebur128', '-f', 'null', '-'], capture_output=True, text=True).stderr
+    gain = min(max(-16 - float(re.findall(r'I:\s+(-?[\d.]+) LUFS', err)[-1]), -6), 12)
+    loud = '[1:a]volume=%.2fdB,alimiter=limit=0.75:attack=3:release=40:level=false:latency=true[au]' % gain
+    subprocess.run([FFMPEG, '-y', '-loglevel', 'error', '-i', str(silent), '-i', str(wav), '-filter_complex', cover + ';' + loud,
+                    '-map', '[v]', '-map', '[au]', '-r', '30', '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p',
+                    '-c:a', 'aac', '-b:a', '160k', '-ar', '44100', '-t', '%.2f' % end, '-movflags', '+faststart', str(mp4)], check=True)
+    wav.unlink()
+    drift = max(abs(a - b) for a, b in zip(starts, [t for sp in specs for t in sp.starts]))
+    print('낭독을 넣음: 구간 %d개, 표를 못 찾은 구간 %d개, 계산한 때와 가장 크게 어긋난 곳 %.2f초, 영상 길이 %d:%04.1f' % (
+        len(starts), miss, drift, end // 60, end % 60))
+    return starts
 
 
 def sheet(pngs, dst, labels, cols=4, w=520):
@@ -1907,13 +2065,19 @@ def main():
     ap.add_argument('--video', action='store_true')
     ap.add_argument('--skip-blur', action='store_true', help='흐린 그림을 다시 만들지 않음(있는 것을 씀)')
     ap.add_argument('--time', action='store_true', help='덱을 만들지 않고 발표 시간만 어림(본문 17장)')
+    ap.add_argument('--tts', action='store_true', help='--time, --video와 함께: 노트를 낭독(기기 안의 음성 합성)해서 그 길이로 재고, 영상에는 소리로 넣음')
+    ap.add_argument('--voice', help='낭독 목소리: Supertonic 3의 F1~F5·M1~M5(기본 M3), heami = Windows 한국어 음성')
+    ap.add_argument('--check', action='store_true', help='--tts와 함께: 낭독을 받아쓰기로 글과 견줌')
+    ap.add_argument('--remux', action='store_true', help='--video --tts와 함께: PowerPoint 녹화(out/_silent.mp4)는 그대로 두고 낭독만 다시 얹음')
     a = ap.parse_args()
     if a.time:
-        rows = rehearse([f() for f in SOL_SLIDES + SLIDES])
+        OUT.mkdir(exist_ok=True)
+        specs = [f() for f in SOL_SLIDES + SLIDES]
+        rows = rehearse(specs, says=narrate(specs, a.voice, a.check)[0] if a.tts else None)
         for i, (key, nclick, syl, sec, cum) in enumerate(rows, 1):
             print('%2d %-8s 클릭 %d  %3d음절  %5.1f초  (누적 %d:%02d)' % (i, key, nclick, syl, sec, cum // 60, cum % 60))
-        print('본문 %d장  %d음절  %d:%02d  (1초에 %.1f음절로 말할 때)' % (len(rows), sum(r[2] for r in rows), rows[-1][4] // 60, rows[-1][4] % 60,
-                                                             SPEECH_RATE))
+        how = '낭독 길이로 잼' if a.tts else '1초에 %.1f음절로 말할 때' % SPEECH_RATE
+        print('본문 %d장  %d음절  %d:%02d  (%s)' % (len(rows), sum(r[2] for r in rows), rows[-1][4] // 60, rows[-1][4] % 60, how))
         return
     OUT.mkdir(exist_ok=True)
     blurs = ('blur_sol.png', 'blur_emb.png', 'blur_cloud.png')
@@ -1944,10 +2108,18 @@ def main():
         print('png', len(pngs))
     if a.video:
         auto = OUT / '_auto.pptx'
-        _, secs = build(auto, auto=True, talk=True)
-        print('미리보기 영상: 본문 %d장, %d:%02d' % (len(secs), sum(secs) // 60, sum(secs) % 60))
-        print(render_c.video(auto, OUT / 'HowItWorks_Argon_claude_미리보기.mp4', secs))
-        auto.unlink()
+        mp4 = OUT / 'HowItWorks_Argon_claude_미리보기.mp4'
+        says = clips = None
+        if a.tts:
+            says, clips = narrate([f() for f in SOL_SLIDES + SLIDES], a.voice, a.check)
+        silent = OUT / '_silent.mp4' if a.tts else mp4      # 소리 없는 녹화는 남겨 둠(--remux로 낭독만 다시 얹을 수 있게)
+        if not (a.remux and silent.exists()):
+            _, secs = build(auto, auto=True, talk=True, says=says)
+            print('미리보기 영상: 본문 %d장, %d:%02d' % (len(secs), sum(secs) // 60, sum(secs) % 60))
+            print(render_c.video(auto, silent, secs))
+            auto.unlink()
+        if a.tts:
+            add_voice(silent, mp4, says, clips)
 
 
 if __name__ == '__main__':
