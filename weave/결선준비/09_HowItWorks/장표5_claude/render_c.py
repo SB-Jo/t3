@@ -61,7 +61,10 @@ def ps(script, *args, timeout=3600):
         try:
             r = subprocess.run([POWERSHELL, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', winpath(script), *args],
                                cwd=WINTMP, capture_output=True, timeout=timeout)
-            return r.returncode, (r.stdout + r.stderr).decode('utf-8', 'replace')
+            log = (r.stdout + r.stderr).decode('utf-8', 'replace')
+            if r.returncode != 0 and 'powershell.exe: Invalid argument' in log:      # 같은 실패가 종료 코드로 돌아올 때도 있음
+                raise OSError(log.strip())
+            return r.returncode, log
         except OSError as e:          # WSL 연동이 가끔 'Invalid argument'로 실패함 → 점점 길게 기다렸다 다시
             err = str(e)
             time.sleep(min(30, 2 * (i + 1)))
