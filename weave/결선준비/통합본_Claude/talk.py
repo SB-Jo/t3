@@ -143,6 +143,7 @@ def build_auto(dst, fu, says, part=None):
     src = list(Presentation(str(MK.INTRO)).slides)
     intro = {key: F.copy_slide(prs, src[int(key[2:]) - 1], note_tpl) for key in MK.INTRO_KEYS}
     MK.patch_intro(intro, note_tpl)
+    MK.patch_cover(cover)           # 덱과 같은 표지(영상 v9, 제목 크기)로 찍는다
     say_of = {key: say for key, _, say in fu}
     order, logos = [], []
     for item in MK.SEQ:
@@ -161,7 +162,7 @@ def build_auto(dst, fu, says, part=None):
         hold = says[key][0]
         if key != 'cover':
             hold = max(hold, F.anim_len(slide) / 1000 + 0.3)
-        else:                       # 표지 영상(22초)이 끝나야 PowerPoint가 장을 넘기므로, 녹화용 사본에서는 머무는 시간만큼만 재생(뒤를 잘라 둠)
+        else:                       # 표지 영상(18초)이 끝나야 PowerPoint가 장을 넘기므로, 녹화용 사본에서는 머무는 시간만큼만 재생(뒤를 잘라 둠)
             media_ms = F.anim_len(slide)
             for c in slide._element.iter(F.q('p:cmd')):
                 c.find(F.q('p:cBhvr')).find(F.q('p:cTn')).set('dur', str(round(hold * 1000)))
@@ -311,6 +312,11 @@ def finish(silent, mp4, plan, clips, tail=1.0):
     place, events, starts = [], [], []
     for p in plan:
         ts = [next(it) for _ in p['marks']]
+        ss = p.get('seg_secs') or []
+        if len(ts) > 1 and ss and ts[1] - ts[0] < ss[0] - 0.3:
+            # PowerPoint가 무거운 장을 그리느라 첫 효과(표 포함)를 늦게 띄운 때: 다음 클릭은 제때 오므로 첫 말이 뒤 말에 붙는다 → 첫 말은 계획한 때로 당김
+            print('   %s: 첫 효과가 %.2f초 늦게 떠서 첫 말을 그만큼 당김' % (p['key'], ss[0] - (ts[1] - ts[0])))
+            ts[0] = ts[1] - ss[0]
         starts.append(ts[0])
         for j, seg in enumerate(p['segs']):
             if not seg.strip():

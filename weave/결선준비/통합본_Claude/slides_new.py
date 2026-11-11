@@ -1,7 +1,7 @@
 """통합본에 새로 그린 장 (How it Works와 같은 엔진: 09_HowItWorks/장표5_claude).
 
 인트로
-- hook: 6쪽. 검색해도 없는 기록 → 수많은 기록(앱 화면의 벽) → (클릭마다) 카톡 대화, 사진, 메모, 일정, 메일의 화면 두 곳씩에 불 → (클릭) 불이 꺼지고 문구.
+- hook: 6쪽. 검색해도 없는 기록 → 수많은 기록(앱 화면의 벽) → (클릭마다) 카톡 대화, 사진, 메모, 일정, 메일의 화면 한 곳에서 세 곳에 불 → (클릭) 불이 꺼지고 문구.
 - hub2: 9쪽. 8쪽의 앱 네 개가 둥근 자리로 옮겨 가고, 기록을 남기는 곳 일곱과 평균 3.8곳 → (클릭) 두 곳 이상, 세 곳 이상.
 - scat, link: 11~12쪽. '지금의 나' 둘레에 흩어져 있던 기록이(11쪽) 가운데로 모여 반듯해지고 선으로 이어진다(12쪽). 인트로 덱 10~11쪽의 차례를 뒤집어 다시 그린 것.
 - bridge: 14쪽. 모션그래픽 첫 화면처럼 가운데 위에 로고, 그 아래 떠 있는 앱들 → (클릭) 실 한 가닥이 넷을 이음.
@@ -211,7 +211,7 @@ def hero_prims(key, fail):
 
 def s_hook():
     """검색 화면 → '검색 결과가 없습니다'(말없이) → 화면이 물러나며 수많은 앱 화면의 벽 →
-    (클릭 다섯 번) "카톡 대화, 사진, 메모, 일정, 메일까지"를 하나씩 말할 때마다 그 앱의 화면 두 곳에만 불이 켜지고 앞의 불은 꺼짐 →
+    (클릭 다섯 번) "카톡 대화, 사진, 메모, 일정, 메일까지"를 하나씩 말할 때마다 그 앱의 화면 한 곳에서 세 곳에만 불이 켜지고 앞의 불은 꺼짐 →
     (클릭) 불이 꺼지고 문구. 아이콘은 불이 켜진 화면의 왼쪽 위에 붙었다가 함께 꺼진다."""
     s = Slide('hook', trans=('fade', 700), bar=False, bg=False, notes=NOTES['hook'])
     s.add('hk/bg', [R('hk/bg', 0, 0, 1280, 720, fill=HK_BG, line=None)])
@@ -236,7 +236,7 @@ def s_hook():
     ease = dict(accel=35000, decel=65000)
     s.on('hk/hero2', 'zoom_out', rt(t_out), rt(950), to=HK_SHRINK, **ease)
     s.on('hk/wall', 'zoom_in', rt(t_out), rt(950), **{'from': 1 / HK_SHRINK}, **ease)
-    # 클릭마다: 앞 앱의 불은 꺼지고 이번 앱의 화면 두 곳에 불
+    # 클릭마다: 앞 앱의 불은 꺼지고 이번 앱의 화면(HL.LIT, 한 곳에서 세 곳)에 불
     for n, app in enumerate(HL.APPS):
         s.click()
         if n:
@@ -829,14 +829,18 @@ def photo_bg(key, fname, stops):
             R(key + '/veil', 0, 0, 1280, 720, fill=None, line=None, grad=dict(stops=[(p, VEIL, a) for p, a in stops], ang=90))]
 
 
+END1_Y = 285                       # 인용 글상자의 위(11-12: 두 줄과 출처 묶음의 가운데가 화면 세로 가운데 y = 360에 오게, 168 → 285)
+
+
 def s_end1():
-    """인용 두 줄과 출처를 화면 가운데(가로)에. 글은 모두 흰색."""
+    """인용 두 줄과 출처를 화면 한가운데(가로, 세로)에. 글은 모두 흰색."""
     s = Slide('end1', trans=('fade', 900), bar=False, bg=False, notes=NOTES['end1'])
     s.add('end/bg', photo_bg('end/bg', 'closing-1-sunset-chairs.jpg', [(0, 68), (42, 52), (70, 30), (100, 26)]))
-    s.add('end1/q', [T('end1/q', 220, 168, 840, 110,
+    y = END1_Y
+    s.add('end1/q', [T('end1/q', 220, y, 840, 110,
                        ['당신이 사랑하는 모든 것에 더 가까이 다가가고,', '오래도록 이야기하게 될 순간을 담아보세요'],
                        size=30, color=WHITE, weight='b', align='c', lnspc=40, spc=-0.4)])
-    s.add('end1/by', [T('end1/by', 340, 290, 600, 26, '— Samsung Galaxy 광고 카피 중', size=13, color=WHITE, alpha=78, align='c', anchor='ctr')])
+    s.add('end1/by', [T('end1/by', 340, y + 122, 600, 26, '— Samsung Galaxy 광고 카피 중', size=13, color=WHITE, alpha=78, align='c', anchor='ctr')])
     s.on('end1/q', 'rise', 500, 800, dy=14)
     s.on('end1/by', 'fade_in', 1500, 600)
     return s
