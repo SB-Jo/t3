@@ -10,6 +10,7 @@
   python build.py --time          덱은 만들지 않고 발표 시간만 어림(본문 17장: 장마다 클릭 수, 음절 수, 걸리는 시간)
   python build.py --time --tts    노트를 낭독해서(tts_c.py, 기기 안의 음성 합성) 그 길이로 잼. --check를 붙이면 낭독을 받아쓰기로 글과 견줌
   python build.py --video --tts   미리보기 영상에 낭독을 넣음(낭독 길이만큼 머묾). --voice로 목소리, --remux로 녹화는 두고 낭독만 다시
+                                  낭독 영상은 덱 옆(../HowItWorks_Argon_claude_미리보기.mp4)에도 복사됨
 
 흐름(장): 솔루션 1·2·3 → How it works? → 질문 → 흩어진 단서 → 기존 검색이라면? → 키워드 → 임베딩 → Let's think step by step!
 → 끊어진 고리 → 00 데이터 색인 → 01 상황 인식 → 02 질의 재작성 → 03 Hop 1 → 03 Hop 2 → 04 결과 제공 | Appendix(한눈에 보기, …).
@@ -2403,6 +2404,7 @@ def main():
             auto.unlink()
         if a.tts:
             add_voice(silent, mp4, says, clips)
+            shutil.copyfile(mp4, DST.with_name(mp4.name))       # 낭독 영상은 덱 옆에도 둔다(저장소에 올려 바로 볼 수 있게. out/은 올리지 않음)
 
 
 if __name__ == '__main__':

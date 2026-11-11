@@ -1,10 +1,8 @@
 # How it Works _claude판 (7차, 2026-11-11)
 
-결과는 **`../HowItWorks_Argon_claude.pptx`** 32장이에요. 솔루션 3장 + How it Works 14장이 본문(17장, 클릭 23번)이고, 뒤 15장은 Appendix예요(한눈에 보기 포함). 노트는 901음절이고, 낭독을 넣은 미리보기 영상이 3분 14초예요(아래 '발표 시간'). 말 빠르기는 그대로 두고 장이 바뀔 때, 물음 뒤, 문장 사이에 숨을 돌리는 틈을 넣었어요.
+결과는 **`../HowItWorks_Argon_claude.pptx`** 32장이에요. 솔루션 3장 + How it Works 14장이 본문(17장, 클릭 23번)이고, 뒤 15장은 Appendix예요(한눈에 보기 포함). 노트는 901음절이고, 낭독을 넣은 미리보기 영상 **`../HowItWorks_Argon_claude_미리보기.mp4`**가 3분 14초예요(아래 '발표 시간'). 말 빠르기는 그대로 두고 장이 바뀔 때, 물음 뒤, 문장 사이에 숨을 돌리는 틈을 넣었어요.
 
 이 폴더와 `07_소스/slides/p05_결선/*_claude`만 고쳐요. 그림(`assets`)은 `../장표5/assets`를 읽기만 해요.
-
-**Carbon판(비교용, 2026-11-11).** 같은 화면에 대본과 낭독만 다른 판이 하나 더 있어요. Gemini 4 Carbon (High)이 대본을 새로 쓰고 목소리와 쉼을 직접 골랐어요. 덱은 `../HowItWorks_Argon_claude_carbon.pptx`, 설정은 `carbon/notes.json`, 두 대본을 나란히 놓은 표는 `대본_비교.md`예요(아래 'Carbon판').
 
 **메모 방식(AgentIR)은 본문에 넣지 않았어요(2026-11-11).** 질의마다 메모를 적고 임베딩이 질의와 메모를 함께 읽는 방식은 Appendix 22쪽에 Reasoning Embedding 파이프라인 후보로 로직과 원논문만 실었어요. 견줘 보려고 만들었던 메모판 pptx와 5차 pptx는 작업 컴퓨터의 `out/이전판/`에만 있어요.
 
@@ -20,7 +18,6 @@ cd 09_HowItWorks/장표5_claude
 ~/.cache/weave-tools/venv/bin/python build.py --video --tts --check --skip-blur   # out/HowItWorks_Argon_claude_미리보기.mp4(본문 17장, 낭독과 자막)
 ~/.cache/weave-tools/venv/bin/python build.py --time            # 덱은 만들지 않고 발표 시간만 어림(음절 수로)
 ~/.cache/weave-tools/venv/bin/python build.py --time --tts --check        # 낭독 길이로 재고, 낭독을 받아쓰기로 노트와 견줌
-~/.cache/weave-tools/venv/bin/python build.py --variant carbon --video --tts --check --skip-blur   # 대본과 낭독만 다른 판(아래 'Carbon판')
 ```
 
 - 원본 덱(`02_PPT/Weave_결선.pptx`)에서는 장 틀과 노트 틀만 빌려요(읽기만). 새 장을 다 넣은 뒤 원본 장을 지워요.
@@ -30,7 +27,7 @@ cd 09_HowItWorks/장표5_claude
 
 ## 발표 시간
 
-본문 17장을 3분 10~20초에 맞췄어요. 낭독 영상(`out/HowItWorks_Argon_claude_미리보기.mp4`)이 3분 14.0초이고, 마지막 말은 3분 13.0초에 끝나요.
+본문 17장을 3분 10~20초에 맞췄어요. 낭독 영상(`../HowItWorks_Argon_claude_미리보기.mp4`, 만들 때는 `out/`에 나오고 덱 옆으로 복사돼요)이 3분 14.0초이고, 마지막 말은 3분 13.0초에 끝나요.
 
 | 구간 | 낭독 영상 | 음절 어림(1초 6.6음절) | 천천히 말할 때(1초 5.5음절) |
 |---|---|---|---|
@@ -105,15 +102,13 @@ python3 -m venv --without-pip ~/.cache/weave-tools/tts-venv
 #   faster_whisper.utils.download_model('large-v3-turbo', output_dir='~/.cache/weave-tools/whisper-turbo')   # 점검용, 없어도 됨
 ```
 
-## Carbon판 (대본과 낭독만 다른 판)
+## 대본과 낭독만 다른 판 만들기 (`--variant`)
 
-발표자가 두 판을 직접 견주려고 만든 판이에요. 화면, 효과, 클릭 수는 같아요.
+화면, 효과, 클릭 수는 그대로 두고 대본과 낭독만 바꾼 판을 따로 만들 수 있어요.
 
-- `carbon/notes.json` 하나로 만들어져요: `notes`(1~17쪽 대본), `voice`와 `speed`(낭독 목소리), `cues`(말에 맞춰 뜨는 효과가 떠야 할 때 말하는 구절), `timing`(쉼의 길이), `read_as`(영문 읽는 소리). `build.py --variant carbon`이 이 파일을 읽어요(`use_variant()`). 장마다 `(클릭)` 수가 기본판과 다르면 멈춰요.
-- 나오는 곳: 덱 `../HowItWorks_Argon_claude_carbon.pptx`, 낭독 영상 `out/carbon/HowItWorks_Argon_claude_carbon_미리보기.mp4`(3분 15.7초), 받아쓰기 점검 `out/carbon/tts_check.txt`(17장 모두 대본대로 들림).
-- 대본은 941음절이고 `(쉼)`을 네 번 썼어요(4, 10, 11, 17쪽). 목소리는 F4F5_30(F4 70% + F5 30%), 속도 1.12예요. 쉼은 기본판보다 조금 짧게 잡았어요(문장 사이 0.59초, 물음 뒤 0.90초).
-- 맡길 때 준 조건: 자료는 모두 읽어도 되고 레퍼런스 발표도 조사해도 됨, 기존 대본의 말투는 따라 쓰지 않음, 장마다 길이는 자유(전체 3분 10~20초), 있는 파일은 고치지 않음.
-- 다른 판을 더 만들 때는 `<이름>/notes.json`을 두고 `--variant <이름>`으로 돌려요.
+- `<이름>/notes.json`을 두고 `build.py --variant <이름>`으로 돌려요(`use_variant()`). 내용: `notes`(1~17쪽 대본), `voice`와 `speed`(낭독 목소리), `cues`(말에 맞춰 뜨는 효과가 떠야 할 때 말하는 구절), `timing`(쉼의 길이), `read_as`(영문 읽는 소리). 장마다 `(클릭)` 수가 기본판과 다르면 멈춰요.
+- 덱은 `../HowItWorks_Argon_claude_<이름>.pptx`, 나머지는 `out/<이름>/`에 나와요.
+- 2026-11-11에 Gemini 4 Carbon이 대본을 새로 쓰고 목소리를 고른 판(`carbon`)을 만들어 견줬고, 쓰지 않기로 했어요. 그 판은 작업 컴퓨터의 `out/이전판/carbon/`에만 있어요.
 
 ## 솔루션 세 장은 조각으로 만들어요
 
