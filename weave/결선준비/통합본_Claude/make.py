@@ -5,7 +5,9 @@
   python make.py --png            + out/png/s01.png… 와 out/한눈에.png (PowerPoint로 렌더)
 
 재료
-- 인트로 2~13쪽과 노트: 원본/Weave_결선_중간본_도입부수정.pptx (jjun-0824/t3). 장을 그대로 옮긴다(도형·그림·전환·효과).
+- 인트로 2~5, 7~12쪽: 원본/Weave_결선_중간본_도입부수정.pptx (jjun-0824/t3). 장을 그대로 옮기고(도형·그림·전환·효과) 노트와 화면 글 두 곳, 고리 굵기를 손본다(patch_intro).
+- 6쪽(수많은 기록), 8쪽 다음(기록을 남기는 곳), 13쪽(잇는 장): 새로 그린다(slides_new.py).
+- 바꾸기 전의 장: 원본/통합본_1차.pptx (git show ab7ab74:weave/결선준비/통합본_Claude/Weave_통합본_Claude.pptx)에서 옮겨 덱 맨 뒤에 둔다.
 - 표지와 모션그래픽 영상 장: 02_PPT/Weave_결선_중간본.pptx의 1쪽(표지 영상 v8)과 4쪽(모션그래픽 v23).
 - 솔루션 3장 + How it Works 14장 + Appendix 15장: 09_HowItWorks/장표5_claude/build.py의 장을 그대로 그린다.
 - 뒷부분: 원본/Weave_BI_아웃트로_통합_1110_v7.pptx (WIWLEE/t3-2)의 내용을 같은 엔진으로 다시 그린다(slides_new.py).
@@ -60,6 +62,7 @@ import slides_new as N  # noqa: E402
 
 BASE = ROOT / '02_PPT' / 'Weave_결선_중간본.pptx'
 INTRO = HERE / '원본' / 'Weave_결선_중간본_도입부수정.pptx'
+PREV = HERE / '원본' / '통합본_1차.pptx'                 # 11월 11일 1차 통합본(바꾸기 전의 장을 여기서 옮김)
 DST = HERE / 'Weave_통합본_Claude.pptx'
 q = F.q
 A = 'http://schemas.openxmlformats.org/drawingml/2006/main'
@@ -109,36 +112,80 @@ def logo_style(slides):
     return n
 
 
+INTRO_KEYS = ['in02', 'in03', 'in04', 'in05', 'in07', 'in08', 'in09', 'in10', 'in11', 'in12']      # 인트로 덱에서 그대로 옮기는 장(6쪽과 13쪽은 새로 그림)
+RING_ADJ = ('7741', '9800')                        # 7·8쪽 고리 굵기(도형 크기의 7.7% → 9.8%, 298px에 23px → 29px)
+INTRO_TEXT = {                                      # 옮겨 온 장의 화면 글을 바꾸는 곳: {장: [(원래, 지금)]}
+    'in07': [('검색으로 바로 찾지 못한 경험', '원하는 정보를 한 번에 찾지 못한 경험')],
+    'in12': [('내 폰에 바로 물을 순 없을까요?', '내 휴대폰에게 바로 물을 순 없을까요?')],
+}
+# 덱 차례(본 발표). 글자 = 옮겨 온 장, ('own', 이름) = 새로 그린 묶음, 'mg' = 모션그래픽
+SEQ = ['cover', 'in02', 'in03', 'in04', 'in05', ('own', 'hook'), 'in07', 'in08', ('own', 'hub2'), 'in09', 'in10', 'in11', 'in12',
+       ('own', 'bridge'), 'mg', ('own', 'hiw'), ('own', 'back')]
+PREV_KEEP = list(range(2, 14)) + list(range(32, 42)) + [59]      # 1차 통합본에서 남겨 두는 장: 인트로 2~13쪽, 뒷부분 32~41쪽, 저장 채널 그림(59쪽)
+
+
+def own_specs():
+    """새로 그린 장의 묶음(덱과 낭독 영상이 같은 것을 씀)."""
+    return dict(hook=[N.s_hook()], hub2=[N.s_hub2()], bridge=[N.s_bridge()],
+                hiw=[f() for f in HW.SOL_SLIDES] + [f() for f in HW.SLIDES], back=[f() for f in N.SLIDES_BACK],
+                prop=[f() for f in N.SLIDES_PROPOSAL])
+
+
+def patch_intro(slides, note_tpl):
+    """옮겨 온 인트로 장을 손본다: 노트(새 대본), 화면 글 두 곳, 7·8쪽 고리 굵기. slides = {키: 장}."""
+    for key, sl in slides.items():
+        F.set_notes(sl, N.INTRO_NOTES[key], note_tpl)
+        for old, new in INTRO_TEXT.get(key, []):
+            hit = [e for e in sl._element.iter('{%s}t' % A) if e.text == old]
+            assert len(hit) == 1, (key, old, len(hit))
+            hit[0].text = new
+        if key in ('in07', 'in08'):
+            n = 0
+            for g in sl._element.iter('{%s}prstGeom' % A):
+                if g.get('prst') in ('donut', 'blockArc'):
+                    for gd in g.iter('{%s}gd' % A):
+                        if gd.get('name') in ('adj', 'adj3') and gd.get('fmla') == 'val ' + RING_ADJ[0]:
+                            gd.set('fmla', 'val ' + RING_ADJ[1])
+                            n += 1
+            assert n >= 2, (key, n)
+
+
 def build(dst):
     prs = Presentation(str(BASE))
     old = list(prs.slides)
     cover, mg = old[0], old[3]
     layout = old[5].slide_layout                       # How it Works 장과 같은 틀
     note_tpl = [copy.deepcopy(sh._element) for sh in old[5].notes_slide.placeholders]
-    src = Presentation(str(INTRO))
-    intro = [F.copy_slide(prs, s, note_tpl) for s in list(src.slides)[1:13]]
-    F.set_notes(cover, F.note_text(src.slides[0]), note_tpl)
+    src = list(Presentation(str(INTRO)).slides)
+    intro = {k: F.copy_slide(prs, src[int(k[2:]) - 1], note_tpl) for k in INTRO_KEYS}
+    patch_intro(intro, note_tpl)
+    F.set_notes(cover, N.INTRO_NOTES['cover'], note_tpl)
     report = []
 
     def draw(specs):
         slides, rep, _ = HW.add_slides(prs, layout, note_tpl, specs)
         report.extend(rep)
         return slides
-    bridge = draw([N.s_bridge()])
-    hiw = draw([f() for f in HW.SOL_SLIDES] + [f() for f in HW.SLIDES])
-    back = draw([f() for f in N.SLIDES_BACK])
+    own = {k: draw(v) for k, v in own_specs().items() if k != 'prop'}
+    main = []
+    for item in SEQ:
+        main += own[item[1]] if isinstance(item, tuple) else [cover if item == 'cover' else mg if item == 'mg' else intro[item]]
+    n_main = len(main)
     appx = draw(HW.appendix_specs() + [N.s_credits2()])
-    n_main = 1 + 11 + 1 + 1 + len(hiw) + len(back)
-    tl_no = n_main - 4                                  # 기존 연표 쪽 번호(마무리 3장과 끝 화면 앞)
-    prop = draw([N.s_p_divider(['설문의 저장 채널 그림: 인트로 8쪽 뒤에 넣는 안',
-                                '새 연표: %d쪽 연표 자리에 넣는 안' % tl_no,
-                                '교체 전: 인트로 덱의 13쪽 (지금은 13쪽 자리에 새 장이 들어가 있음)'])] + [f() for f in N.SLIDES_PROPOSAL])
-    order = [cover, *intro[:11], *bridge, mg, *hiw, *back, *appx, *prop, intro[11]]
+    prop = draw([N.s_divider('p0', '제안 장표', ['기대효과 세 장: 기능이 있으면 고리 그래프와 왼쪽 말이 바뀌는 안 (%d~%d쪽 자리)' % (n_main - 8, n_main - 6),
+                                                  '새 연표: 두 줄 연표와 길게 말하는 대본 (%d쪽 자리)' % (n_main - 3)],
+                             '여기부터는 제안 장표입니다. 본 발표에서는 넘기지 않습니다.')] + own_specs()['prop'])
+    prev = list(Presentation(str(PREV)).slides)
+    olds = draw([N.s_divider('o0', '이전 판', ['11월 11일 1차 통합본의 인트로 2~13쪽, 뒷부분 32~41쪽, 저장 채널 그림(59쪽)', '그 뒤는 인트로 덱의 13쪽',
+                                               '노트에 그때의 대본이 그대로 있습니다'],
+                             '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
+    olds += [F.copy_slide(prs, prev[i - 1], note_tpl) for i in PREV_KEEP] + [F.copy_slide(prs, src[12], note_tpl)]
+    order = [*main, *appx, *prop, *olds]
     drop_slides(prs, [s for s in old if s not in (cover, mg)])
     reorder(prs, order)
     samsung_fonts.remap_prs(prs)
-    logo_style(bridge + back)
-    build.n_main = n_main
+    logo_style(own['bridge'])
+    build.n_main, build.n_appx, build.n_prop, build.n_old = n_main, len(appx), len(prop), len(olds)
     prs.save(str(dst))
     for key, nclick, nnote, _ in report:
         if nclick != nnote:

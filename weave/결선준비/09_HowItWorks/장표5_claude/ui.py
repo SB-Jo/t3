@@ -116,7 +116,7 @@ class Painter:
                            fill=o.get('fill', 'FFFFFF'), alpha=None if fa is None or fa >= 99.9 else fa,
                            line=o.get('line'), line_w=max(0.5, o.get('line_w', 0.75) * s),
                            line_alpha=None if la >= 99.9 else la, dash=o.get('dash'), shadow=shadow, glow=glow,
-                           grad_fill=o.get('grad'), soft=o.get('soft'),
+                           grad_fill=o.get('grad'), soft=o.get('soft'), adj=o.get('adj'),
                            custom_path=copy.deepcopy(o['custom_path']) if o.get('custom_path') is not None else None)
         if kind == 'text':
             _, _, x, y, w, h, paras, o = p

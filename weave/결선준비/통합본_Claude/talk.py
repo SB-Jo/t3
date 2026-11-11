@@ -11,7 +11,7 @@
 
 하는 일
 - 낭독은 이 컴퓨터 안에서만 만든다(09_HowItWorks/장표5_claude의 tts_c: Supertonic 3, 목소리 F2F1_70, 속도 1.15).
-- 인트로 장(다른 덱에서 그대로 옮긴 장)은 효과가 저절로 나오므로, 그 장의 말이 끝날 때까지 머물게만 한다. 말할 글은 노트에서 괄호 속 무대 지시를 뺀 것.
+- 인트로 장(다른 덱에서 옮긴 장)은 효과가 저절로 나오므로, 그 장의 말이 끝날 때까지 머물게만 한다. 말할 글은 노트(slides_new.INTRO_NOTES)에서 괄호 속 무대 지시를 뺀 것.
 - 새로 그린 장은 How it Works 낭독 영상과 같은 방식: 클릭 묶음마다 그 구간의 말이 끝날 때까지 머문다.
 - 장(또는 구간)마다 왼쪽 아래 구석에 작은 색 표를 두고, 녹화에서 그 표가 뜬 때를 찾아 낭독을 그 자리에 놓는다. 표는 마지막에 덮어 지운다.
 - 모션그래픽 장은 원본 영상(08_인트로영상/Weave_모션그래픽.mp4)의 화면과 소리를 녹화 속 재생이 시작한 때에 맞춰 얹는다.
@@ -48,8 +48,8 @@ MG_LEN = 111.1                     # 모션그래픽 길이(초)
 MG_TAIL = 1.4                      # 영상이 끝난 뒤 그 장에 더 머무는 시간
 MG_VOL = 0.8                       # 덱에 넣은 영상 소리 크기(80%)와 같게
 END_HOLD = 3.0                     # 말이 없는 끝 화면에 머무는 시간
-SPEAKER = '이재웅'                 # 노트의 [발표자 이름] 자리에 읽을 이름
-LEADS = {'cover': 1.0, 'in02': 1.2, 'in06': 2.0}        # 장이 열린 뒤 말을 떼기까지(초): 표지, 2쪽(문장이 다 뜬 뒤), 6쪽(처음 2초는 말없이)
+SPEAKER = '장이준'                 # 노트에 [발표자 이름]이 남아 있으면 읽을 이름
+LEADS = {'cover': 1.0, 'in02': 1.2}                     # 장이 열린 뒤 말을 떼기까지(초): 표지, 2쪽(문장이 다 뜬 뒤)
 MARK_RGB = ['FF00FF', '00FFFF', '00FF00']               # 구간 표 색(차례로 번갈아). 영상에서 덮어 지움
 MARK_BOX = HW.MARK_BOX
 FONT = Path.home() / '.cache' / 'weave-tools' / 'fonts' / 'SamsungOneKorean-500.ttf'
@@ -59,25 +59,16 @@ SUB_H = 150                        # 자막 띠 높이(px, 1920×1080 기준). �
 
 # ------------------------------------------------------------------ 말할 글
 def say_text(key, note):
-    """옮겨 온 장의 노트 → 소리 내어 말할 글(괄호 속 지시를 빼고, 이름을 넣고, 노트가 쉬라고 한 자리에 (쉼))."""
-    t = F.spoken(note).replace('[발표자 이름]', SPEAKER)
-    if key == 'in06':               # 노트: (문구가 뜨면 한 박자 쉬고)
-        a = '헤매기 시작합니다. '
-        assert a in t, t
-        t = t.replace(a, a + HW.REST + ' ')
-    return t
+    """옮겨 온 장의 노트 → 소리 내어 말할 글(괄호 속 지시를 뺌)."""
+    return F.spoken(note).replace('[발표자 이름]', SPEAKER)
 
 
 def foreign_units():
-    """표지와 인트로 2~12쪽: [(키, 덱 노트, 말할 글)]."""
-    sl = list(Presentation(str(MK.INTRO)).slides)
-    rows = [('cover', F.note_text(sl[0]))] + [('in%02d' % (i + 1), F.note_text(sl[i])) for i in range(1, 12)]
-    return [(k, n, say_text(k, n)) for k, n in rows]
+    """표지와 옮겨 온 인트로 장: [(키, 덱 노트, 말할 글)]. 노트는 slides_new.INTRO_NOTES(새 대본)."""
+    return [(k, N.INTRO_NOTES[k], say_text(k, N.INTRO_NOTES[k])) for k in ['cover'] + MK.INTRO_KEYS]
 
 
-def own_specs():
-    return dict(bridge=[N.s_bridge()], hiw=[f() for f in HW.SOL_SLIDES] + [f() for f in HW.SLIDES], back=[f() for f in N.SLIDES_BACK],
-                prop=[f() for f in N.SLIDES_PROPOSAL])
+own_specs = MK.own_specs
 
 
 def disp_sents(seg):
@@ -94,7 +85,7 @@ def narrate_all(check=False):
     fu = foreign_units()
     proxies = [types.SimpleNamespace(key=k, notes=say) for k, _, say in fu]
     own = own_specs()
-    specs = proxies + own['bridge'] + own['hiw'] + [sp for sp in own['back'] + own['prop'] if sp.notes.strip()]
+    specs = proxies + [sp for name in ('hook', 'hub2', 'bridge', 'hiw', 'back', 'prop') for sp in own[name] if sp.notes.strip()]
     says, clips = HW.narrate(specs, None, check)
     for p in proxies:               # 옮겨 온 장: 말 떼기까지의 틈을 장마다 따로
         lead = LEADS.get(p.key, HW.LAT_START)
@@ -121,7 +112,7 @@ def talkify(specs, says, k, plan):
     return k
 
 
-PART = {'proposal': ['prop'], 'new': ['bridge', 'back', 'prop']}       # 따로 찍는 묶음
+PART = {'proposal': ['prop'], 'new': ['hook', 'hub2', 'bridge', 'back', 'prop']}       # 따로 찍는 묶음
 
 
 def build_auto(dst, fu, says, part=None):
@@ -132,26 +123,45 @@ def build_auto(dst, fu, says, part=None):
     layout = old[5].slide_layout
     note_tpl = [copy.deepcopy(sh._element) for sh in old[5].notes_slide.placeholders]
     own = own_specs()               # 낭독 뒤에 다시 만든다(말에 맞춰 뜨는 효과의 때가 낭독에서 나옴)
-    plan, secs, k = [], [], 0
-    if part:
-        specs = [sp for name in PART[part] for sp in own[name]]
+    plan, k = [], 0
+
+    def draw(specs, k):
+        """새로 그린 묶음을 덱 끝에 넣고 계획에 적는다. 돌려줌: (장들, 다음 표 번호)."""
+        n0 = len(plan)
         k = talkify(specs, says, k, plan)
         slides, _, secs = HW.add_slides(prs, layout, note_tpl, specs, auto=True)
-        for p, sec, sp in zip(plan, secs, specs):
+        for p, sec, sp in zip(plan[n0:], secs, specs):
             p['secs'], p['trans'] = sec, (sp.trans[1] / 1000 if sp.trans else 0)
+        return slides, k
+    if part:
+        slides, k = draw([sp for name in PART[part] for sp in own[name]], k)
         MK.drop_slides(prs, old)
         MK.samsung_fonts.remap_prs(prs)
         MK.logo_style(slides)
         prs.save(str(dst))
-        return secs, plan
-    src = Presentation(str(MK.INTRO))
-    intro = [F.copy_slide(prs, s, note_tpl) for s in list(src.slides)[1:12]]
+        return [p['secs'] for p in plan], plan
+    src = list(Presentation(str(MK.INTRO)).slides)
+    intro = {key: F.copy_slide(prs, src[int(key[2:]) - 1], note_tpl) for key in MK.INTRO_KEYS}
+    MK.patch_intro(intro, note_tpl)
     say_of = {key: say for key, _, say in fu}
-    for key, slide in [('cover', cover)] + [('in%02d' % (i + 2), s) for i, s in enumerate(intro)]:
+    order, logos = [], []
+    for item in MK.SEQ:
+        if isinstance(item, tuple):
+            slides, k = draw(own[item[1]], k)
+            order += slides
+            logos += slides if item[1] == 'bridge' else []
+            continue
+        if item == 'mg':
+            F.add_mark(mg, MARK_BOX, MARK_RGB[k % 3], 'mk_mg')
+            plan.append(dict(key='mg', kind='video', marks=[k], leads=[], segs=[], secs=MG_LEN + MG_TAIL, trans=0))
+            order.append(mg)
+            k += 1
+            continue
+        key, slide = item, (cover if item == 'cover' else intro[item])
         hold = says[key][0]
         if key != 'cover':
             hold = max(hold, F.anim_len(slide) / 1000 + 0.3)
-        if key == 'cover':               # 표지 영상(22초)이 끝나야 PowerPoint가 장을 넘기므로, 녹화용 사본에서는 머무는 시간만큼만 재생(뒤를 잘라 둠)
+        else:                       # 표지 영상(22초)이 끝나야 PowerPoint가 장을 넘기므로, 녹화용 사본에서는 머무는 시간만큼만 재생(뒤를 잘라 둠)
             media_ms = F.anim_len(slide)
             for c in slide._element.iter(F.q('p:cmd')):
                 c.find(F.q('p:cBhvr')).find(F.q('p:cTn')).set('dur', str(round(hold * 1000)))
@@ -163,25 +173,12 @@ def build_auto(dst, fu, says, part=None):
         F.add_mark(slide, MARK_BOX, MARK_RGB[k % 3], 'mk_' + key)
         plan.append(dict(key=key, kind='foreign', marks=[k], leads=[LEADS.get(key, HW.LAT_START)], segs=[say_of[key]], secs=hold,
                          trans=F.trans_ms(slide) / 1000))
+        order.append(slide)
         k += 1
-    k = talkify(own['bridge'], says, k, plan)
-    F.add_mark(mg, MARK_BOX, MARK_RGB[k % 3], 'mk_mg')
-    plan.append(dict(key='mg', kind='video', marks=[k], leads=[], segs=[], secs=MG_LEN + MG_TAIL, trans=0))
-    k += 1
-    k = talkify(own['hiw'], says, k, plan)
-    k = talkify(own['back'], says, k, plan)
-    bridge, _, s_b = HW.add_slides(prs, layout, note_tpl, own['bridge'], auto=True)
-    hiw, _, s_h = HW.add_slides(prs, layout, note_tpl, own['hiw'], auto=True)
-    back, _, s_k = HW.add_slides(prs, layout, note_tpl, own['back'], auto=True)
-    own_secs = iter(s_b + s_h + s_k)
-    own_trans = iter([(sp.trans[1] / 1000 if sp.trans else 0) for sp in own['bridge'] + own['hiw'] + own['back']])
-    for p in plan:
-        if p['kind'] == 'own':
-            p['secs'], p['trans'] = next(own_secs), next(own_trans)
     MK.drop_slides(prs, [s for s in old if s not in (cover, mg)])
-    MK.reorder(prs, [cover, *intro, *bridge, mg, *hiw, *back])
+    MK.reorder(prs, order)
     MK.samsung_fonts.remap_prs(prs)
-    MK.logo_style(bridge + back)
+    MK.logo_style(logos)
     prs.save(str(dst))
     return [p['secs'] for p in plan], plan
 
@@ -382,7 +379,7 @@ def finish(silent, mp4, plan, clips, tail=1.0):
 
 
 # ------------------------------------------------------------------ 시간표
-SECTIONS = [('표지와 인트로', lambda k: k == 'cover' or k.startswith('in') or k == 'bridge'),
+SECTIONS = [('표지와 인트로', lambda k: k == 'cover' or k.startswith('in') or k in ('hook', 'hub2', 'bridge')),
             ('모션그래픽', lambda k: k == 'mg'),
             ('솔루션과 How it Works', lambda k: k in HW.SLIDE_KEYS),
             ('뒷부분', lambda k: True)]

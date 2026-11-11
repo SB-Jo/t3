@@ -2042,7 +2042,7 @@ def cue(name, default, ahead=0.15):
     else:                                   # 낭독이 없거나 노트가 바뀜: 음절 수로 어림(쉼 없는 말 빠르기 6.9음절/초)
         durs = [syllables(x) / 6.9 + 0.3 * x.count(',') + PIECE_PAD for x, _ in pieces]
         t = sum(durs[:k]) + sum(b for _, b in pieces[:k]) + _in_piece(pieces[k][0], durs[k], None, phrase)
-    return max(round((_lead(segs, j) + t - ahead) / SPEED * 1000), 0)
+    return max(round((_lead(segs, j, key) + t - ahead) / SPEED * 1000), 0)
 
 
 def _ends(seg):
@@ -2066,17 +2066,20 @@ def _sents(seg):
     return out
 
 
-def _lead(segs, j):
+LEAD_EXTRA = {}                    # {(장 키, 구간): 초} 말없이 화면을 먼저 보여 주는 구간은 그만큼 더 기다렸다 말을 뗌(통합본의 6쪽)
+
+
+def _lead(segs, j, key=None):
     """구간 j에서 말을 떼기까지의 틈(초): 장이 열린 뒤 첫 구간은 LAT_START, 클릭 뒤 새 문장을 시작하면 LAT_CLICK, 문장 중간의 클릭 뒤는 LAT_MID.
     구간이 (쉼)으로 시작하면 그만큼 더 기다린다."""
     base = LAT_START if j == 0 else (LAT_CLICK if _ends(segs[j - 1]) else LAT_MID)
-    return base + (R_BEAT if segs[j].lstrip().startswith(REST) else 0)
+    return base + (R_BEAT if segs[j].lstrip().startswith(REST) else 0) + LEAD_EXTRA.get((key, j), 0)
 
 
 def seg_leads(sp):
     """구간마다 말을 떼기까지의 틈(초). _lead()."""
     segs = sp.notes.split('(클릭)')
-    return [_lead(segs, j) for j in range(len(segs))]
+    return [_lead(segs, j, sp.key) for j in range(len(segs))]
 
 
 def seg_gaps(sp):

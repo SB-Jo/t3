@@ -197,8 +197,9 @@ SHADOW_LIFT = (26, 8, '6B4EFF', 14)
 
 
 def shape(sid, name, x, y, w, h, prst='rect', radius=None, fill='FFFFFF', alpha=None, line=None, line_w=0.75,
-          line_alpha=None, dash=None, shadow=None, glow=None, grad_fill=None, custom_path=None, soft=None):
-    """p:sp 하나. radius(px)는 roundRect 모서리. grad_fill = dict(stops=[(pos%, color, alpha%)], path='circle'|None, ang, rect)."""
+          line_alpha=None, dash=None, shadow=None, glow=None, grad_fill=None, custom_path=None, soft=None, adj=None):
+    """p:sp 하나. radius(px)는 roundRect 모서리. grad_fill = dict(stops=[(pos%, color, alpha%)], path='circle'|None, ang, rect).
+    adj = {이름: 값}은 그 밖의 도형 조절값(예: donut의 adj, blockArc의 adj1~3)."""
     sp = etree.Element(q('p:sp'), nsmap=NS)
     nv = _nv(sp, 'p:nvSpPr', sid, name)
     el('p:cNvSpPr', nv)
@@ -215,6 +216,8 @@ def shape(sid, name, x, y, w, h, prst='rect', radius=None, fill='FFFFFF', alpha=
         if prst == 'roundRect':
             r = 50000 if radius is None else min(50000, int(radius / max(1e-6, min(w, h)) * 100000))
             el('a:gd', av, name='adj', fmla='val %d' % r)
+        for k, v in (adj or {}).items():
+            el('a:gd', av, name=k, fmla='val %d' % v)
     if grad_fill:
         gf = el('a:gradFill', spPr, rotWithShape=1)
         gl = el('a:gsLst', gf)

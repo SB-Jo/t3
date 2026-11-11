@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<!-- 6쪽(수많은 기록)의 휴대폰 화면들. 카카오톡 대화, 갤러리, 삼성 노트, 캘린더, 이메일을 알아볼 수 있게 그린 것(360×780).
+     찍기: python tools/hook_assets.py  (node tools/shot.cjs assets/src/screens.html assets/hook/screens 를 부르고, 모자이크 그림까지 만듦)
+     사진은 photos/ (위키미디어 공용의 Unsplash 사진, 모두 CC0. 출처는 photos/credits.json) -->
+<style>
+  @font-face { font-family: SOne; font-weight: 400; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneKorean-400.woff2'); }
+  @font-face { font-family: SOne; font-weight: 500; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneKorean-500.woff'); }
+  @font-face { font-family: SOne; font-weight: 700; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneKorean-700.woff'); }
+  @font-face { font-family: SOneL; font-weight: 400; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneLatin-400.woff2'); }
+  @font-face { font-family: SOneL; font-weight: 500; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneLatin-500.woff2'); }
+  @font-face { font-family: SOneL; font-weight: 700; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneLatin-700.woff2'); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: transparent; display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; width: 1600px; font-family: SOneL, SOne, 'Noto Sans KR', sans-serif; }
+  .ph { width: 360px; height: 780px; border-radius: 40px; overflow: hidden; position: relative; background: #fff; color: #17171a; font-size: 14px; line-height: 1.35; }
+  .sb { height: 36px; padding: 11px 24px 0 28px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; }
+  .sb svg { height: 12px; margin-left: 5px; }
+  .home { position: absolute; left: 50%; bottom: 8px; width: 108px; height: 4px; margin-left: -54px; border-radius: 2px; background: rgba(0,0,0,.28); }
+  svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---------- 카카오톡 대화 ---------- */
+  .kk { background: #BACEE0; }
+  .kk .hd { height: 46px; display: flex; align-items: center; padding: 0 14px; gap: 10px; }
+  .kk .hd b { font-size: 17px; font-weight: 700; flex: 1; }
+  .kk .hd b small { font-weight: 500; font-size: 15px; color: #5b6b7a; margin-left: 5px; }
+  .kk .day { margin: 8px auto 12px; width: max-content; padding: 4px 13px; border-radius: 13px; background: rgba(0,0,0,.13); color: #fff; font-size: 11px; }
+  .kk .m { display: flex; padding: 0 12px; margin-bottom: 9px; align-items: flex-start; }
+  .kk .av { width: 40px; height: 40px; border-radius: 15px; flex: none; margin-right: 8px; background-size: cover; background-position: center; }
+  .kk .nm { font-size: 12px; color: #3d4852; margin: 1px 0 4px 2px; }
+  .kk .row { display: flex; align-items: flex-end; gap: 5px; margin-bottom: 4px; }
+  .kk .b { max-width: 212px; padding: 8px 11px; border-radius: 14px; background: #fff; font-size: 14px; }
+  .kk .t { font-size: 10px; color: #5f6f7d; white-space: nowrap; }
+  .kk .me { justify-content: flex-end; }
+  .kk .me .b { background: #FEE500; }
+  .kk .pic { width: 190px; height: 142px; border-radius: 12px; background-size: cover; background-position: center; }
+  .kk .in { position: absolute; left: 0; right: 0; bottom: 0; height: 66px; background: #fff; display: flex; align-items: flex-start; padding: 9px 12px; gap: 9px; color: #8a8f96; }
+  .kk .in .f { flex: 1; height: 34px; border-radius: 17px; background: #F3F4F6; }
+  .kk .in svg { margin-top: 6px; }
+
+  /* ---------- 카카오톡 채팅 목록 ---------- */
+  .kl .hd { height: 52px; display: flex; align-items: center; padding: 0 18px; gap: 16px; }
+  .kl .hd b { font-size: 22px; font-weight: 700; flex: 1; }
+  .kl .r { display: flex; align-items: center; padding: 9px 18px; gap: 13px; }
+  .kl .av { width: 50px; height: 50px; border-radius: 19px; flex: none; background-size: cover; background-position: center; }
+  .kl .c { flex: 1; min-width: 0; }
+  .kl .c b { font-size: 15px; font-weight: 700; }
+  .kl .c b small { color: #9a9ea5; font-weight: 500; font-size: 13px; margin-left: 4px; }
+  .kl .c p { font-size: 13px; color: #7c8087; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kl .x { text-align: right; flex: none; font-size: 11px; color: #a0a4ab; }
+  .kl .n { display: inline-block; margin-top: 5px; min-width: 19px; height: 19px; line-height: 19px; padding: 0 6px; border-radius: 10px; background: #F4553B; color: #fff; font-size: 11px; font-weight: 700; text-align: center; }
+  .kl .tab { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; border-top: 1px solid #ececef; background: #fff; display: flex; justify-content: space-around; padding-top: 10px; color: #b4b7bd; }
+  .kl .tab .on { color: #17171a; }
+  .kl .tab svg { width: 26px; height: 26px; }
+
+  /* ---------- 갤러리 ---------- */
+  .ga .hd { height: 44px; display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; gap: 16px; color: #3c3c43; }
+  .ga h4 { font-size: 14px; font-weight: 700; padding: 10px 14px 7px; }
+  .ga .g { display: grid; gap: 2px; }
+  .ga .g i { display: block; aspect-ratio: 1; background-size: cover; background-position: center; }
+  .ga .tab { position: absolute; left: 0; right: 0; bottom: 0; height: 62px; background: rgba(255,255,255,.96); display: flex; justify-content: space-around; align-items: flex-start; padding-top: 14px; font-size: 15px; font-weight: 700; color: #a2a5ab; }
+  .ga .tab .on { color: #17171a; border-bottom: 2px solid #17171a; padding-bottom: 3px; }
+  .ga .al { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; padding: 4px 16px; }
+  .ga .al i { display: block; aspect-ratio: 1; border-radius: 18px; background-size: cover; background-position: center; }
+  .ga .al b { display: block; font-size: 14px; font-weight: 700; margin-top: 6px; }
+  .ga .al span { font-size: 12px; color: #8a8d93; }
+  .ga .big { font-size: 26px; font-weight: 700; padding: 6px 18px 14px; }
+
+  /* ---------- 삼성 노트 ---------- */
+  .no { background: #F4F4F6; }
+  .no .hd { height: 52px; display: flex; align-items: center; padding: 0 16px; gap: 14px; color: #2c2c30; }
+  .no .hd b { font-size: 20px; font-weight: 700; flex: 1; }
+  .no .gr { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; padding: 4px 16px; }
+  .no .cd { height: 150px; border-radius: 16px; background: #fff; padding: 12px 12px; overflow: hidden; font-size: 8.5px; line-height: 1.6; color: #55585f; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .no .cd b { display: block; font-size: 10px; color: #222; margin-bottom: 3px; }
+  .no .cd.ink svg { width: 100%; height: 100%; }
+  .no .gr h5 { font-size: 13px; font-weight: 700; margin: 7px 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .no .gr span { font-size: 11px; color: #8d9097; margin-left: 2px; }
+  .fab { position: absolute; right: 18px; bottom: 34px; width: 54px; height: 54px; border-radius: 27px; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,.2); }
+  .no .fab { background: #F0603F; }
+  .pg { background: #fff; }
+  .pg .hd { height: 50px; display: flex; align-items: center; padding: 0 14px; gap: 14px; color: #3c3c43; }
+  .pg .hd span { flex: 1; }
+  .pg h2 { font-size: 21px; font-weight: 700; padding: 6px 20px 2px; }
+  .pg .dt { font-size: 11.5px; color: #9a9da3; padding: 0 20px 12px; border-bottom: 1px solid #eeeef1; }
+  .pg .bd { padding: 14px 20px; font-size: 14.5px; line-height: 1.9; color: #2a2a2e; }
+  .pg .ck { display: flex; align-items: center; gap: 9px; }
+  .pg .ck i { width: 17px; height: 17px; border-radius: 5px; border: 1.6px solid #b9bcc2; flex: none; }
+  .pg .ck i.on { background: #F0603F; border-color: #F0603F; }
+  .pg .tool { position: absolute; left: 14px; right: 14px; bottom: 26px; height: 50px; border-radius: 25px; background: #F3F3F6; display: flex; justify-content: space-around; align-items: center; color: #55585f; }
+  .pg .tool u { width: 22px; height: 22px; border-radius: 11px; }
+
+  /* ---------- 캘린더 ---------- */
+  .ca .hd { height: 54px; display: flex; align-items: center; padding: 0 16px; gap: 14px; }
+  .ca .hd b { font-size: 21px; font-weight: 700; flex: 1; }
+  .ca .hd em { font-style: normal; width: 24px; height: 24px; border: 1.8px solid #2c2c30; border-radius: 6px; font-size: 11px; font-weight: 700; text-align: center; line-height: 21px; }
+  .ca .wk, .ca .mo { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .ca .wk { font-size: 11.5px; text-align: center; color: #6d7077; padding: 2px 4px 6px; }
+  .ca .wk :first-child, .ca .mo .su { color: #E4513E; }
+  .ca .wk :last-child, .ca .mo .sa { color: #3D7BEA; }
+  .ca .mo { padding: 0 4px; }
+  .ca .mo div { border-top: 1px solid #ededf0; padding: 5px 1.5px 0; font-size: 12px; text-align: center; overflow: hidden; }
+  .ca .mo div.o { color: #c3c5ca; }
+  .ca .mo s { text-decoration: none; display: inline-block; width: 21px; height: 21px; line-height: 21px; border-radius: 11px; }
+  .ca .mo .td s { background: #2F7BF5; color: #fff; font-weight: 700; }
+  .ca .mo u { display: block; text-decoration: none; height: 14px; line-height: 14px; margin-top: 2px; border-radius: 3.5px; color: #fff; font-size: 8.5px; text-align: left; padding-left: 3px; white-space: nowrap; overflow: hidden; }
+  .ca .fab { background: #fff; color: #2F7BF5; }
+  .ca .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 262px; border-radius: 26px 26px 0 0; background: #fff; box-shadow: 0 -6px 22px rgba(0,0,0,.12); padding: 18px 22px; }
+  .ca .sheet h4 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+  .ca .ev { display: flex; gap: 11px; padding: 9px 0; align-items: center; }
+  .ca .ev i { width: 4px; height: 36px; border-radius: 2px; }
+  .ca .ev b { font-size: 14.5px; display: block; font-weight: 700; }
+  .ca .ev span { font-size: 12px; color: #84878e; }
+
+  /* ---------- 이메일 ---------- */
+  .ma .hd { height: 54px; display: flex; align-items: center; padding: 0 16px; gap: 14px; }
+  .ma .hd b { font-size: 21px; font-weight: 700; flex: 1; }
+  .ma .hd b small { font-size: 13px; color: #2F7BF5; margin-left: 6px; font-weight: 700; }
+  .ma .r { display: flex; padding: 11px 18px 11px 12px; gap: 9px; border-bottom: 1px solid #f0f0f3; }
+  .ma .d { width: 8px; height: 8px; border-radius: 4px; margin-top: 6px; flex: none; }
+  .ma .d.on { background: #2F7BF5; }
+  .ma .c { flex: 1; min-width: 0; }
+  .ma .c div { display: flex; justify-content: space-between; align-items: baseline; }
+  .ma .c b { font-size: 15px; font-weight: 700; }
+  .ma .c time { font-size: 11px; color: #9b9ea5; }
+  .ma .c p { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ma .c p.s { color: #8b8e95; font-size: 12.5px; }
+  .ma .rd b, .ma .rd p { font-weight: 400; color: #55585f; }
+  .ma .fab { background: #2F7BF5; }
+  .ml h2 { font-size: 20px; font-weight: 700; padding: 8px 20px 12px; line-height: 1.35; }
+  .ml .fr { display: flex; align-items: center; gap: 11px; padding: 0 20px 14px; border-bottom: 1px solid #eeeef1; }
+  .ml .fr i { width: 38px; height: 38px; border-radius: 19px; background: #5B8DEF; color: #fff; font-style: normal; font-weight: 700; text-align: center; line-height: 38px; font-size: 15px; }
+  .ml .fr b { font-size: 14.5px; display: block; }
+  .ml .fr span { font-size: 12px; color: #8b8e95; }
+  .ml .bd { padding: 16px 20px; font-size: 14px; line-height: 1.75; color: #2a2a2e; }
+  .ml .at { margin: 0 20px; height: 50px; border-radius: 14px; background: #F3F4F7; display: flex; align-items: center; gap: 10px; padding: 0 14px; font-size: 13px; font-weight: 700; }
+  .ml .at i { width: 26px; height: 30px; border-radius: 5px; background: #E4513E; color: #fff; font-style: normal; font-size: 8px; font-weight: 700; text-align: center; line-height: 30px; }
+  .ml .act { position: absolute; left: 0; right: 0; bottom: 20px; display: flex; justify-content: space-around; font-size: 11.5px; color: #55585f; text-align: center; }
+  .ml .act svg { display: block; margin: 0 auto 4px; }
+
+  /* ---------- 검색(결과 없음) ---------- */
+  .fi .q { margin: 10px 16px 0; height: 46px; border-radius: 23px; background: #F1F1F5; display: flex; align-items: center; padding: 0 16px; gap: 9px; font-size: 14.5px; font-weight: 500; color: #4a4a52; }
+  .fi .q u { width: 2px; height: 19px; background: #6B4EFF; margin-left: -6px; }
+  .fi .nr { margin-top: 196px; text-align: center; color: #b8bac0; }
+  .fi .nr svg { width: 62px; height: 62px; stroke-width: 1.5; }
+  .fi .nr b { display: block; margin-top: 12px; font-size: 22px; color: #E5484D; font-weight: 700; }
+</style>
+<body>
+<script>
+const P = n => `photos/g${String(n).padStart(2, '0')}.jpg`;
+const AS = '../../../09_HowItWorks/장표5/assets/', IMG = '../../../08_인트로영상/소스/assets/img/';
+const SB = `<div class="sb"><span>12:30</span><span><svg viewBox="0 0 18 12"><path d="M1 11h2.600V7.600H1zm4.600 0h2.600V5H5.600zm4.600 0h2.600V2.600h-2.600zm4.600 0H17V0h-2.200z" fill="currentColor"/></svg><svg viewBox="0 0 16 12"><path d="M1 4.200a10 10 0 0 1 14 0M3.300 6.700a6.700 6.700 0 0 1 9.400 0M5.600 9.100a3.400 3.400 0 0 1 4.800 0" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round"/><circle cx="8" cy="11" r="1" fill="currentColor"/></svg><svg viewBox="0 0 26 12"><rect x=".7" y=".7" width="21.600" height="10.600" rx="3.200" fill="none" stroke="currentColor" stroke-width="1.300"/><rect x="2.500" y="2.500" width="15" height="7" rx="1.600" fill="currentColor"/><rect x="23.500" y="3.800" width="2" height="4.400" rx="1" fill="currentColor"/></svg></span></div>`;
+const I = {
+  back: '<svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  search: '<svg class="i" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.500 15.500L20 20"/></svg>',
+  menu: '<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+  more: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="5.500" r="1.200" fill="currentColor"/><circle cx="12" cy="12" r="1.200" fill="currentColor"/><circle cx="12" cy="18.500" r="1.200" fill="currentColor"/></svg>',
+  plus: '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  smile: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><path d="M8.500 14.200c1 1.300 2.200 1.900 3.500 1.900s2.500-.6 3.500-1.900M9.200 9.800v.4M14.800 9.800v.4"/></svg>',
+  hash: '<svg class="i" viewBox="0 0 24 24"><path d="M9.500 4.500l-2 15M16.500 4.500l-2 15M5 9h15M4 15h15"/></svg>',
+  pen: '<svg class="i" viewBox="0 0 24 24" style="width:25px;height:25px"><path d="M5 19l1-4L16.500 4.500l3 3L9 18z M14.500 6.500l3 3"/></svg>',
+  star: '<svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px;color:#c3c5ca"><path d="M12 4l2.400 5 5.400.700-4 3.800 1 5.400L12 16.300 7.200 18.900l1-5.400-4-3.800 5.400-.700z"/></svg>',
+  person: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.500" r="3.800"/><path d="M4.500 19.500c1.200-3.300 4-5 7.500-5s6.300 1.700 7.500 5"/></svg>',
+  chat: '<svg class="i" viewBox="0 0 24 24"><path d="M12 4.500c4.700 0 8.500 3 8.500 6.800s-3.800 6.800-8.500 6.800c-.9 0-1.700-.1-2.500-.3L5.500 20l.8-3.500C4.600 15.200 3.500 13.400 3.500 11.300c0-3.800 3.800-6.800 8.500-6.800z" fill="currentColor"/></svg>',
+  eye: '<svg class="i" viewBox="0 0 24 24"><path d="M3 12c2.200-3.800 5.200-5.700 9-5.700s6.800 1.900 9 5.700c-2.200 3.800-5.200 5.700-9 5.700S5.200 15.800 3 12z"/><circle cx="12" cy="12" r="2.600"/></svg>',
+  bag: '<svg class="i" viewBox="0 0 24 24"><path d="M5.500 8.500h13l-1 11h-11zM9 8.500V7a3 3 0 0 1 6 0v1.500"/></svg>',
+  dots: '<svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.300" fill="currentColor"/><circle cx="12" cy="12" r="1.300" fill="currentColor"/><circle cx="18" cy="12" r="1.300" fill="currentColor"/></svg>',
+  reply: '<svg class="i" viewBox="0 0 24 24"><path d="M10 7L4.500 12 10 17M5 12h8.500c3.300 0 6 2 6 5.500"/></svg>',
+  fwd: '<svg class="i" viewBox="0 0 24 24"><path d="M14 7l5.500 5-5.500 5M19 12h-8.500c-3.300 0-6 2-6 5.500"/></svg>',
+  trash: '<svg class="i" viewBox="0 0 24 24"><path d="M5 7.500h14M9.500 7.500V5.500h5v2M7 7.500l.8 12h8.400l.800-12"/></svg>',
+  clip: '<svg class="i" viewBox="0 0 24 24" style="width:14px;height:14px;color:#9b9ea5"><path d="M17.500 11.500l-6 6a3.500 3.500 0 0 1-5-5l7-7a2.300 2.300 0 0 1 3.300 3.300l-6.800 6.800"/></svg>',
+};
+// 카카오톡 기본 프로필(연한 파랑 바탕에 사람 모양)
+const DEF = c => `url('data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='${c}'/><circle cx='20' cy='15.500' r='6.500' fill='#fff' opacity='.82'/><path d='M6.500 40c.8-8.500 6.200-13 13.500-13s12.700 4.500 13.500 13z' fill='#fff' opacity='.82'/></svg>`).replace(/'/g, '%27')}')`;
+const AV = { jieun: `url(${IMG}wife-avatar.jpg)`, mom: `url(${IMG}mom-avatar.png)`, a: DEF('#9DBDDD'), b: DEF('#A9C7A3'), c: DEF('#C9B3E6'), d: DEF('#E8B8A6'),
+             cat: `url(${P(7)})`, dog: `url(${P(11)})`, sea: `url(${P(30)})`, flower: `url(${P(36)})`, me: `url(${P(26)})` };
+const add = (name, cls, html) => document.body.insertAdjacentHTML('beforeend', `<div class="shot ph ${cls}" data-name="${name}">${SB}${html}<div class="home"></div></div>`);
+
+// ---- 카카오톡 대화: [누구(없으면 나), 이름, 말들([글] 또는 {pic}), 시각]
+function talk(name, title, count, day, msgs) {
+  let h = `<div class="hd">${I.back}<b>${title}${count ? `<small>${count}</small>` : ''}</b>${I.search}${I.menu}</div><div class="day">${day}</div>`;
+  for (const [who, nm, items, t] of msgs) {
+    const rows = items.map((x, k) => {
+      const body = typeof x === 'string' ? `<div class="b">${x}</div>` : `<div class="pic" style="background-image:url(${x.pic})"></div>`;
+      const time = k === items.length - 1 ? `<span class="t">${t}</span>` : '';
+      return `<div class="row${who ? '' : ' me'}">${who ? body + time : time + body}</div>`;
+    }).join('');
+    h += who ? `<div class="m"><div class="av" style="background-image:${AV[who]}"></div><div><div class="nm">${nm}</div>${rows}</div></div>`
+             : `<div class="m me"><div>${rows}</div></div>`;
+  }
+  add(name, 'kk', h + `<div class="in">${I.plus}<div class="f"></div>${I.smile}${I.hash}</div>`);
+}
+talk('talk1', '지은', '', '2026년 3월 15일 일요일', [
+  ['jieun', '지은', ['오늘 6시 맞지?'], '오후 1:02'],
+  ['', '', ['응 맞아. 뭐 사 갈까?'], '오후 1:05'],
+  ['jieun', '지은', ['박스 정리 다 했어! 이따 올 때<br>휴지 안 사 와도 돼'], '오후 4:12'],
+  ['', '', ['그럼 와인 한 병 들고 갈게'], '오후 4:15'],
+  ['jieun', '지은', [{ pic: AS + 'photo-homedinner.jpg' }, '상 차리는 중'], '오후 5:40'],
+  ['', '', ['우와 맛있겠다', '지금 출발해'], '오후 5:42'],
+]);
+talk('talk2', '대학 동기', '5', '2026년 11월 6일 금요일', [
+  ['a', '민수', ['이번 주말에 다들 시간 돼?'], '오후 2:11'],
+  ['flower', '서연', ['토요일 저녁 괜찮아'], '오후 2:13'],
+  ['', '', ['나도 토요일 좋아'], '오후 2:14'],
+  ['a', '민수', ['그럼 성수에서 보자', '지난번 그 피자집 어때?'], '오후 2:20'],
+  ['c', '현우', [{ pic: P(40) }, '여기 말하는 거지?'], '오후 2:24'],
+  ['flower', '서연', ['맞아 거기. 내가 예약해 둘게'], '오후 2:26'],
+  ['', '', ['고마워. 7시로 부탁해'], '오후 3:20'],
+]);
+talk('talk4', '엄마', '', '2026년 11월 8일 일요일', [
+  ['mom', '엄마', ['주말에 김치 가지러 와'], '오전 11:08'],
+  ['', '', ['네, 토요일 점심때 갈게요'], '오전 11:15'],
+  ['mom', '엄마', [{ pic: P(38) }, '오면 이것도 해 줄게'], '오전 11:20'],
+  ['', '', ['와 맛있겠다'], '오전 11:21'],
+  ['mom', '엄마', ['올 때 아빠 영양제 좀 사 오고', '저번에 말한 그걸로'], '오전 11:30'],
+  ['', '', ['알겠어요. 챙겨 갈게요'], '오전 11:32'],
+]);
+
+// ---- 카카오톡 채팅 목록
+{
+  const rows = [['jieun', '지은', '', '지금 출발해', '오후 5:42', 0], ['a', '대학 동기', '5', '고마워. 7시로 부탁해', '오후 3:20', 3],
+                ['mom', '엄마', '', '올 때 아빠 영양제 좀 사 오고', '오전 11:30', 1], ['me', '나와의 채팅', '', '주차 B2 17번 기둥', '오전 9:14', 0],
+                ['b', '기술전 준비', '12', '회의록 공유드립니다', '어제', 5], ['d', '김민수 선배', '', '시연 순서 확인 부탁해', '어제', 0],
+                ['cat', '아내', '', '면세점에서 사 갈까?', '11월 8일', 0], ['c', '현우', '', '사진 보냈어', '11월 7일', 0],
+                ['sea', '제주 여행', '4', '숙소 예약 완료', '11월 5일', 0], ['dog', '초코 산책 모임', '8', '내일 7시 한강에서 봬요', '11월 3일', 0]];
+  let h = `<div class="hd"><b>채팅</b>${I.search}${I.plus}${I.more}</div>`;
+  for (const [av, nm, cnt, msg, t, n] of rows)
+    h += `<div class="r"><div class="av" style="background-image:${AV[av]}"></div><div class="c"><b>${nm}${cnt ? `<small>${cnt}</small>` : ''}</b><p>${msg}</p></div><div class="x">${t}<br>${n ? `<span class="n">${n}</span>` : ''}</div></div>`;
+  h += `<div class="tab">${I.person}<span class="on">${I.chat}</span>${I.eye}${I.bag}${I.dots}</div>`;
+  add('talk3', 'kl', h);
+}
+
+// ---- 갤러리: 사진(날짜별), 앨범
+function gal(name, cols, secs) {
+  let h = `<div class="hd">${I.search}${I.more}</div>`;
+  for (const [label, ids] of secs)
+    h += `<h4>${label}</h4><div class="g" style="grid-template-columns:repeat(${cols},1fr)">${ids.map(n => `<i style="background-image:url(${typeof n === 'number' ? P(n) : n})"></i>`).join('')}</div>`;
+  add(name, 'ga', h + `<div class="tab"><span class="on">사진</span><span>앨범</span><span>스토리</span>${I.menu}</div>`);
+}
+gal('gal1', 4, [['오늘', [0, 38, 5, 7, 20, 34, 11, 43]], ['어제', [15, 16, 29, 30, 51, 24, 2, 47, 8, 39, 21, 60]],
+                ['11월 8일', [12, 31, 44, 26, 35, 53, 18, 58, 3, 41, 56, 23]]]);
+gal('gal2', 3, [['3월 15일', [AS + 'photo-homedinner.jpg', AS + 'photo-babich.png', 36, 9, 40, 1]], ['3월 14일', [17, 19, 6, 33, 48, 13]],
+                ['3월 12일', [22, 27, 61, 10, 45, 52]]]);
+gal('gal4', 4, [['11월 3일', [49, 46, 48, 14, 25, 28, 50, 62]], ['10월 30일', [32, 33, 4, 37, 54, 55, 57, 59, 42, 6, 9, 13]],
+                ['10월 25일', [17, 19, 22, 27, 1, 10, 45, 52, 61, 36, 34, 20]]]);
+{
+  const al = [['카메라', '1,204', 29], ['스크린샷', '318', 44], ['카카오톡', '96', 38], ['다운로드', '41', 15], ['제주 여행', '212', 30], ['초코', '87', 11]];
+  add('gal3', 'ga', `<div class="hd">${I.plus}${I.search}${I.more}</div><div class="big">앨범</div><div class="al">` +
+    al.map(([n, c, p]) => `<div><i style="background-image:url(${P(p)})"></i><b>${n}</b><span>${c}</span></div>`).join('') +
+    `</div><div class="tab"><span>사진</span><span class="on">앨범</span><span>스토리</span>${I.menu}</div>`);
+}
+
+// ---- 삼성 노트: 모든 노트, 노트 한 장
+{
+  const ink = `<svg viewBox="0 0 130 120"><path d="M8 22c10-9 18 8 28-2s14 6 24-1 16 5 26-2M8 46c12-7 20 6 30-1s18 5 28-1M8 70c9-8 20 7 31-2s15 6 24 0 14 4 22-1M8 94c10-6 16 5 27-1" fill="none" stroke="#3B6FE0" stroke-width="2.200" stroke-linecap="round"/><path d="M84 84l10 10 22-26" fill="none" stroke="#E4513E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const notes = [['삼성기술전 준비 회의', '11월 10일', '<b>시연 순서</b>· 통화 중 기록 찾기<br>· 단서로 이름 찾기<br>· 먼저 건네는 기억<br><b>준비물</b>· 시연용 기기 2대<br>· 발표 자료 최종본<br>· 부스 배치도'],
+                 ['장보기 목록', '11월 8일', '☐ 우유, 달걀<br>☐ 방울토마토<br>☑ 파스타 면<br>☑ 올리브유<br>☐ 키친타월<br>☐ 아빠 영양제<br>☐ 과일'],
+                 ['', '', ink, 'ink'], ['집들이 선물 아이디어', '3월 14일', '· 와인(화이트)<br>· 디퓨저<br>· 휴지는 필요 없다고 함<br>· 꽃다발<br><br>예산 5만 원 안쪽'],
+                 ['제주 여행 일정', '11월 5일', '<b>1일 차</b>공항 → 고기국수 → 숙소<br><b>2일 차</b>성산 일출봉, 카페<br><b>3일 차</b>동문시장, 기념품<br><br>렌터카 9시 인수'],
+                 ['읽고 싶은 책', '10월 28일', '· 사피엔스<br>· 불편한 편의점<br>· 아몬드<br>· 물고기는 존재하지 않는다<br>· 일의 기쁨과 슬픔']];
+  const names = { 2: ['회의 메모 (손글씨)', '11월 9일'] };
+  add('note1', 'no', `<div class="hd">${I.menu}<b>모든 노트</b>${I.search}${I.more}</div><div class="gr">` +
+    notes.map(([t, d, body, cls], k) => `<div><div class="cd ${cls || ''}">${body}</div><h5>${(names[k] || [t])[0]}</h5><span>${(names[k] || [0, d])[1]}</span></div>`).join('') +
+    `</div><div class="fab">${I.pen}</div>`);
+  add('note2', 'pg', `<div class="hd">${I.back}<span></span>${I.search}${I.more}</div><h2>삼성기술전 준비 회의</h2><div class="dt">2026년 11월 10일 화요일 오후 3:40</div>
+    <div class="bd"><b>시연 순서</b><br>1. 통화 중 기록 찾기<br>2. 단서로 이름 찾기<br>3. 먼저 건네는 기억<br><br><b>할 일</b>
+    <div class="ck"><i class="on"></i>발표 자료 최종본 공유</div><div class="ck"><i class="on"></i>시연용 기기 2대 충전</div><div class="ck"><i></i>부스 배치도 확인</div><div class="ck"><i></i>리허설 일정 잡기</div>
+    <svg viewBox="0 0 300 70" style="width:100%;margin-top:10px"><path d="M6 30c16-16 28 12 44-4s22 10 38-2 26 8 42-3 22 9 36-1M6 56c18-10 30 8 46-2s26 7 40-1" fill="none" stroke="#3B6FE0" stroke-width="2.600" stroke-linecap="round"/></svg></div>
+    <div class="tool">${I.pen}<u style="background:#17171a"></u><u style="background:#3B6FE0"></u><u style="background:#E4513E"></u>${I.smile}${I.plus}</div>`);
+  add('note3', 'pg', `<div class="hd">${I.back}<span></span>${I.search}${I.more}</div><h2>장보기 목록</h2><div class="dt">2026년 11월 8일 일요일 오전 10:12</div>
+    <div class="bd"><div class="ck"><i></i>우유, 달걀</div><div class="ck"><i></i>방울토마토</div><div class="ck"><i class="on"></i>파스타 면</div><div class="ck"><i class="on"></i>올리브유</div>
+    <div class="ck"><i></i>키친타월</div><div class="ck"><i></i>아빠 영양제 (저번에 말한 것)</div><div class="ck"><i></i>과일</div><br>마트 주차는 2시간 무료<br>포인트 적립 번호 확인하기</div>
+    <div class="tool">${I.pen}<u style="background:#17171a"></u><u style="background:#3B6FE0"></u><u style="background:#E4513E"></u>${I.smile}${I.plus}</div>`);
+}
+
+// ---- 캘린더: 달 보기(일정 막대), 날짜를 누른 모습
+function cal(name, title, days, first, prevLast, today, evs, sheet) {
+  const C = { b: '#4A8FF0', g: '#3DBB7A', p: '#8A6BE8', r: '#F0706A', t: '#2BB5A8', o: '#F2994A' };
+  let cells = '';
+  const total = Math.ceil((first + days) / 7) * 7;
+  for (let k = 0; k < total; k++) {
+    const d = k - first + 1, inm = d >= 1 && d <= days;
+    const num = inm ? d : (d < 1 ? prevLast + d : d - days);
+    const cls = [inm ? '' : 'o', k % 7 === 0 ? 'su' : '', k % 7 === 6 ? 'sa' : '', inm && d === today ? 'td' : ''].join(' ');
+    const ev = inm && evs[d] ? evs[d].map(([c, t]) => `<u style="background:${C[c]}">${t}</u>`).join('') : '';
+    cells += `<div class="${cls}" style="height:${sheet ? 70 : 104}px"><s>${num}</s>${ev}</div>`;
+  }
+  let h = `<div class="hd">${I.menu}<b>${title}</b>${I.search}<em>${today}</em></div><div class="wk"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div><div class="mo">${cells}</div>`;
+  if (sheet) h += `<div class="sheet"><h4>${sheet[0]}</h4>` + sheet[1].map(([c, t, s]) => `<div class="ev"><i style="background:${C[c]}"></i><div><b>${t}</b><span>${s}</span></div></div>`).join('') + '</div>';
+  else h += `<div class="fab">${I.plus}</div>`;
+  add(name, 'ca', h);
+}
+cal('cal1', '2026년 3월', 31, 0, 28, 15, { 3: [['b', '주간 회의']], 6: [['g', '치과']], 10: [['b', '주간 회의'], ['p', '엄마 생신']], 13: [['o', '택배 수령']],
+  15: [['r', '지은 집들이']], 17: [['b', '주간 회의']], 20: [['t', '헬스 PT']], 21: [['p', '동기 모임']], 24: [['b', '주간 회의']], 27: [['g', '건강검진'], ['t', '헬스 PT']], 31: [['b', '월말 보고']] });
+cal('cal2', '2026년 11월', 30, 0, 31, 10, { 3: [['b', '주간 회의']], 5: [['o', '제주 숙소']], 7: [['p', '동기 모임']], 10: [['r', '기술전 회의']], 12: [['t', '헬스 PT']],
+  14: [['g', '엄마 집']], 17: [['b', '주간 회의']], 20: [['p', '결혼기념일']], 24: [['b', '주간 회의']], 26: [['r', '출장']], 27: [['r', '출장']] },
+  ['11월 10일 화요일', [['r', '삼성기술전 준비 회의', '오후 3:00 ~ 4:00 · 회의실 B'], ['t', '헬스 PT', '오후 7:30 ~ 8:30'], ['p', '동기 모임 장소 정하기', '하루 종일']]]);
+cal('cal3', '2026년 10월', 31, 4, 30, 25, { 2: [['b', '주간 회의']], 6: [['g', '병원']], 9: [['p', '한글날']], 13: [['b', '주간 회의']], 16: [['o', '이사 견적']], 18: [['t', '등산']],
+  20: [['b', '주간 회의']], 23: [['r', '발표 리허설']], 25: [['p', '아빠 생신']], 27: [['b', '주간 회의']], 30: [['g', '독감 접종'], ['o', '택배 수령']] });
+
+// ---- 이메일: 받은편지함, 메일 한 통
+{
+  const rows = [[1, '삼성기술전 사무국', '오후 2:14', '시연 일정 안내', '안녕하세요. 11월 20일 시연 순서와 부스 배치를 안내드립니다.', 1],
+                [1, '김민수 선배', '오전 11:40', 'Re: 발표 자료 검토', '수정한 부분 확인했어요. 3쪽 그림만 한 번 더 봐 주세요.', 0],
+                [1, '대한항공', '오전 9:02', '전자 항공권 발행 안내', '김포 → 제주 11월 5일 08:10 출발 항공권이 발행되었습니다.', 1],
+                [0, 'SSG.COM', '어제', '주문하신 상품이 배송을 시작했습니다', '에스티 로더 어드밴스드 나이트 리페어 외 1건', 0],
+                [0, '인사팀', '어제', '11월 건강검진 일정 안내', '대상자께서는 아래 일정 가운데 하루를 골라 예약해 주세요.', 1],
+                [0, '지은', '11월 8일', '집들이 사진 모음', '그날 찍은 사진 한꺼번에 보내. 와인 사진도 있어.', 1],
+                [0, '제주 스테이', '11월 5일', '예약이 확정되었습니다', '체크인 11월 5일 오후 3시, 2박, 조식 포함', 0],
+                [0, '카드 명세서', '11월 3일', '10월 이용 대금 명세서', '결제일은 11월 14일입니다. 자세한 내역은 첨부를 확인해 주세요.', 1]];
+  let h = `<div class="hd">${I.menu}<b>받은편지함<small>3</small></b>${I.search}${I.more}</div>`;
+  for (const [un, from, t, sub, snip, clip] of rows)
+    h += `<div class="r ${un ? '' : 'rd'}"><i class="d ${un ? 'on' : ''}"></i><div class="c"><div><b>${from}</b><time>${t}</time></div><p>${sub}</p><div><p class="s">${snip}</p>${clip ? I.clip : ''}</div></div></div>`;
+  add('mail1', 'ma', h + `<div class="fab">${I.pen}</div>`);
+  add('mail2', 'ma ml', `<div class="hd">${I.back}<b></b>${I.trash}${I.more}</div><h2>삼성기술전 시연 일정 안내</h2>
+    <div class="fr"><i>삼</i><div><b>삼성기술전 사무국</b><span>받는 사람: 나 · 11월 10일 오후 2:14</span></div></div>
+    <div class="bd">안녕하세요.<br>11월 20일 삼성기술전 시연 일정을 안내드립니다.<br><br>· 시연 시간: 오후 2시 ~ 2시 20분<br>· 장소: B홀 12번 부스<br>· 리허설: 11월 19일 오후 4시<br><br>시연 순서는 첨부 파일을 확인해 주세요.<br>감사합니다.</div>
+    <div class="at"><i>PDF</i>시연_순서.pdf</div>
+    <div class="act"><span>${I.reply}답장</span><span>${I.reply}전체 답장</span><span>${I.fwd}전달</span></div>`);
+  const rows2 = [[1, '제주 스테이', '오후 4:20', '체크인 안내', '도착 시간에 맞춰 문자로 출입 번호를 보내 드립니다.', 0],
+                 [1, '렌터카 예약', '오후 1:05', '예약 확정: 11월 5일 09:00 인수', '제주공항 지점, 2박 3일, 완전 자차 포함', 1],
+                 [0, '서연', '오전 10:31', '토요일 예약 확인', '성수 7시 다섯 명으로 예약했어. 주소 같이 보내.', 0],
+                 [0, '도서관', '어제', '대출 도서 반납 예정일 안내', '불편한 편의점 외 1권의 반납 예정일이 3일 남았습니다.', 0],
+                 [0, '관리사무소', '어제', '11월 관리비 고지서', '납부 기한은 11월 25일입니다.', 1],
+                 [0, '헬스장', '11월 6일', 'PT 일정 변경 안내', '다음 주 수요일 7시로 변경되었습니다.', 0],
+                 [0, '온라인 서점', '11월 4일', '주문하신 책이 도착했습니다', '아몬드 외 2권, 문 앞에 두었습니다.', 0],
+                 [0, '통신사', '11월 2일', '10월 요금 청구서', '자세한 내역은 첨부를 확인해 주세요.', 1]];
+  h = `<div class="hd">${I.menu}<b>받은편지함<small>2</small></b>${I.search}${I.more}</div>`;
+  for (const [un, from, t, sub, snip, clip] of rows2)
+    h += `<div class="r ${un ? '' : 'rd'}"><i class="d ${un ? 'on' : ''}"></i><div class="c"><div><b>${from}</b><time>${t}</time></div><p>${sub}</p><div><p class="s">${snip}</p>${clip ? I.clip : ''}</div></div></div>`;
+  add('mail3', 'ma', h + `<div class="fab">${I.pen}</div>`);
+}
+
+// ---- 검색했지만 결과가 없는 화면(모자이크 한가운데, 큰 화면이 줄어들어 놓이는 자리)
+add('find', 'fi', `<div class="q">${I.search}지은이네 집들이 때 마셨던 와인</div><div class="nr"><svg class="i" viewBox="0 0 24 24"><circle cx="10.500" cy="10.500" r="6.500"/><path d="M15.500 15.500L20 20"/></svg><b>검색 결과가 없습니다</b></div>`);
+</script>
+</body>
+</html>

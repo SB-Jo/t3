@@ -1,63 +1,85 @@
 #!/usr/bin/env python3
-"""대본.md를 쓴다: 장마다 말할 글과 영상에서 잰 시간, 구역별 시간, 줄이는 순서(trim.py가 잰 값).
+"""대본.md를 쓴다: 장마다 말할 글과 영상에서 잰 시간, 구역별 시간, 더 줄일 곳(trim.py가 잰 값), 바꾼 곳, 이전 대본.
 
-  python doc.py        (먼저 talk.py로 영상을, trim.py로 줄인 대본의 시간을 만들어 둠)
+  python doc.py        (먼저 talk.py로 영상을, trim.py로 더 줄인 대본의 시간을 만들어 둠)
 """
 import json
 from pathlib import Path
 
+import make as MK
+
 HERE = Path(__file__).resolve().parent
 OUT = HERE / 'out'
+N = MK.N
 NAME = {
     'cover': '표지', 'in02': '인트로 2 · "잠깐만요, 찾아보고 다시 알려 드릴게요."', 'in03': '인트로 3 · 막막한 순간 ①', 'in04': '인트로 4 · 막막한 순간 ②',
-    'in05': '인트로 5 · 막막한 순간 ③', 'in06': '인트로 6 · 기록의 늪', 'in07': '인트로 7 · 설문 93.8%', 'in08': '인트로 8 · 설문 94.9%',
-    'in09': '인트로 9 · 세상의 모든 지식은 AI에게 묻는데', 'in10': '인트로 10 · 정작 내 기록은', 'in11': '인트로 11 · 흩어진 기록', 'in12': '인트로 12 · 내 폰에 물을 순 없을까요',
-    'bridge': '잇는 장 · Weave Assist (새로 그림)', 'mg': '모션그래픽 (말 없음)', 'sol1': '솔루션 ① 기록 통합 검색', 'sol2': '솔루션 ② 단서로 찾는 기억',
+    'in05': '인트로 5 · 막막한 순간 ③', 'hook': '인트로 6 · 수많은 기록 (새로 그림)', 'in07': '인트로 7 · 설문 93.8%', 'in08': '인트로 8 · 설문 94.9%',
+    'hub2': '인트로 9 · 기록을 남기는 곳 (새로 그림)', 'in09': '인트로 10 · 세상의 모든 지식은 AI에게 묻는데', 'in10': '인트로 11 · 정작 내 기록은',
+    'in11': '인트로 12 · 흩어진 기록', 'in12': '인트로 13 · 내 휴대폰에게 물을 순 없을까요', 'bridge': '잇는 장 · Weave Assist (새로 그림)',
+    'mg': '모션그래픽 (말 없음)', 'sol1': '솔루션 ① 기록 통합 검색', 'sol2': '솔루션 ② 단서로 찾는 기억',
     'sol': '솔루션 ③ 먼저 건네는 기억', 'hiw': 'How it works?', 'ask': '질문', 'cloud': '흩어진 단서', 'old': '기존 검색이라면?', 'kw': '키워드 검색',
     'emb': '임베딩 검색', 'step': "Let's think step by step!", 'chain': '빠진 고리', 'idx': '00 데이터 색인', 'trig': '01 상황 인식', 'split': '02 질의 재작성',
     'hop1': '03 연쇄 탐색 (Hop 1)', 'hop2': '03 연쇄 탐색 (Hop 2)', 'deliver': '04 결과 제공', 'fx1': '기대효과 ①', 'fx2': '기대효과 ②', 'fx3': '기대효과 ③',
-    'bi': '비즈니스 임팩트', 'cmp': '기존 기능과의 비교 (새로 그림)', 'tl': 'Why Now · Why Samsung 연표', 'end1': '마무리 ① 인용', 'end2': "마무리 ② '순간'",
-    'end3': '마무리 ③ 문장', 'endlogo': '끝 화면',
+    'bi': '비즈니스 임팩트', 'cmp': '기존 기능과의 비교', 'tl': 'Why Now · Why Samsung 연표', 'end1': '마무리 ① 인용', 'end2': "마무리 ② '순간'",
+    'end3': '마무리 ③ 문장과 끝 로고',
+    'p_fx1': '제안 · 기대효과 ①', 'p_fx2': '제안 · 기대효과 ②', 'p_fx3': '제안 · 기대효과 ③', 'p_tl': '제안 · 두 줄 연표',
 }
-SECTION = [('표지와 인트로', 'cover', 'bridge'), ('모션그래픽', 'mg', 'mg'), ('솔루션과 How it Works', 'sol1', 'deliver'), ('뒷부분', 'fx1', 'endlogo')]
+SECTION = [('표지와 인트로', 'cover', 'bridge'), ('모션그래픽', 'mg', 'mg'), ('솔루션과 How it Works', 'sol1', 'deliver'), ('뒷부분', 'fx1', 'end3')]
+PREV = {'표지와 인트로': '4분 08.4초', '모션그래픽': '1분 52.7초', '솔루션과 How it Works': '3분 25.7초', '뒷부분': '2분 35.0초', '모두': '12분 01.8초'}
 
 
 def mmss(t):
     return '%d분 %04.1f초' % (t // 60, t % 60) if t >= 60 else '%.1f초' % t
 
 
+def flat(t):
+    return ' '.join(t.split())
+
+
 def main():
     tm = json.loads((OUT / 'timing.json').read_text(encoding='utf-8'))
     plan = json.loads((OUT / '_talk.json').read_text(encoding='utf-8'))['plan']
-    trim = json.loads((OUT / 'trim.json').read_text(encoding='utf-8'))
-    say = {p['key']: ' (클릭) '.join(' '.join(s.split()) for s in p['segs']) for p in plan}
+    say = {p['key']: ' (클릭) '.join(flat(s) for s in p['segs']) for p in plan}
     rows = tm['rows']
     keys = [r[0] for r in rows]
-    L = ['# Weave 통합본(Claude) 대본과 시간', '',
+    L = ['# Weave 통합본(Claude) 대본과 시간 (2차)', '',
          '`Weave_통합본_Claude_미리보기.mp4`에서 잰 시간이에요. 낭독은 이 컴퓨터 안에서 만든 목소리(Supertonic 3, F2F1_70, 속도 1.15)이고, '
          '문장 사이 숨과 클릭 전후의 틈은 How it Works 낭독 영상과 같은 값이에요.', '',
-         '## 구역별 시간', '', '| 구역 | 쪽 | 시간 |', '| --- | --- | --- |']
+         '## 구역별 시간', '', '| 구역 | 쪽 | 시간 | 1차 때 |', '| --- | --- | --- | --- |']
     for name, a, b in SECTION:
         i, j = keys.index(a), keys.index(b)
-        L.append('| %s | %s | %s |' % (name, '%d' % (i + 1) if i == j else '%d~%d' % (i + 1, j + 1), mmss(sum(r[2] for r in rows[i:j + 1]))))
-    L += ['| **모두** | 1~%d | **%s** |' % (len(rows), mmss(tm['total'])), '',
+        L.append('| %s | %s | %s | %s |' % (name, '%d' % (i + 1) if i == j else '%d~%d' % (i + 1, j + 1), mmss(sum(r[2] for r in rows[i:j + 1])), PREV[name]))
+    L += ['| **모두** | 1~%d | **%s** | %s |' % (len(rows), mmss(tm['total']), PREV['모두']), '',
           '## 장마다 말할 글과 시간', '',
-          '(클릭)은 그 자리에서 클릭이에요. 인트로 2~12쪽은 효과가 저절로 나와서 클릭이 없어요. 인트로의 글은 팀원 노트에서 괄호 속 지시만 뺀 것이에요.', '',
+          '(클릭)은 그 자리에서 클릭이에요. 옮겨 온 인트로 장(2~5, 7~8, 10~13쪽)은 효과가 저절로 나와서 클릭이 없어요. '
+          '6쪽은 장이 열리면 검색 화면이 "검색 결과가 없습니다"를 띄우는 3초 동안 말없이 기다렸다가, 화면이 물러나며 벽이 드러날 때 말을 시작해요.', '',
           '| 쪽 | 장 | 말할 글 | 시작 | 길이 |', '| --- | --- | --- | --- | --- |']
     for i, (k, a, d) in enumerate(rows, 1):
         L.append('| %d | %s | %s | %d:%02d | %.1f초 |' % (i, NAME.get(k, k), say.get(k) or '—', a // 60, a % 60, d))
-    L += ['', '## 줄이는 순서', '',
-          '줄인 문장을 같은 목소리로 낭독해서 잰 값이에요(`trim.py`). 위에서부터 차례로 적용해요. 될 수 있으면 문장을 통째로 빼고, 남긴 문장은 그대로 뒀어요.', '',
-          '| 순서 | 줄이는 곳 | 줄어드는 시간 | 여기까지 줄이면 |', '| --- | --- | --- | --- |']
-    for g in trim['groups']:
-        L.append('| %d | %s | %.1f초 | %s |' % (g['n'], g['name'], g['cut'], mmss(g['left'])))
     L += ['']
-    for g in trim['groups']:
-        L += ['### %d. %s' % (g['n'], g['name']), '', '| 장 | 지금 | 줄인 뒤 | 줄인 글 |', '| --- | --- | --- | --- |']
-        for x in g['slides']:
-            L.append('| %s | %.1f초 | %.1f초 | %s |' % (NAME.get(x['key'], x['key']), x['now'], x['after'], ' '.join(g['text'][x['key']].split())))
-        L.append('')
     L += (HERE / '대본_덧붙임.md').read_text(encoding='utf-8').rstrip('\n').split('\n') + ['']
+    f = OUT / 'trim.json'
+    if f.exists():
+        trim = json.loads(f.read_text(encoding='utf-8'))
+        L += ['## 더 줄여야 할 때', '',
+              '연표(Why Now · Why Samsung)를 20초쯤 더 말하면 지금 길이에 그만큼이 더해져요. 그때 덜어 낼 곳을 차례로 적고, 같은 목소리로 낭독해 쟀어요(`trim.py`).', '',
+              '| 순서 | 줄이는 곳 | 줄어드는 시간 | 여기까지 줄이면 | 연표를 20초 늘린 뒤 |', '| --- | --- | --- | --- | --- |']
+        for g in trim['groups']:
+            L.append('| %d | %s | %.1f초 | %s | %s |' % (g['n'], g['name'], g['cut'], mmss(g['left']), mmss(g['left'] + 20)))
+        L += ['']
+        for g in trim['groups']:
+            L += ['### %d. %s' % (g['n'], g['name']), '', '| 장 | 지금 | 줄인 뒤 | 줄인 글 |', '| --- | --- | --- | --- |']
+            for x in g['slides']:
+                L.append('| %s | %.1f초 | %.1f초 | %s |' % (NAME.get(x['key'], x['key']), x['now'], x['after'], flat(g['text'][x['key']])))
+            L.append('')
+    L += ['## 제안 장표에서 할 말', '', '덱 뒤쪽 제안 장표의 노트예요(`제안장표_미리보기.mp4`).', '']
+    f = OUT / 'timing_p.json'
+    tp = {k: d for k, a, d in json.loads(f.read_text(encoding='utf-8'))['rows']} if f.exists() else {}
+    L += ['| 장 | 말할 글 | 길이 |', '| --- | --- | --- |']
+    for k in ('p_fx1', 'p_fx2', 'p_fx3', 'p_tl'):
+        L.append('| %s | %s | %s |' % (NAME[k], flat(N.NOTES[k]), ('%.1f초' % tp[k]) if k in tp else '—'))
+    L += ['']
+    L += (HERE / '대본_이전판.md').read_text(encoding='utf-8').rstrip('\n').split('\n') + ['']
     (HERE / '대본.md').write_text('\n'.join(L), encoding='utf-8')
     print('→ 대본.md', len(L), '줄')
 

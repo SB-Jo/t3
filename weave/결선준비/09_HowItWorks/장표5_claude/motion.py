@@ -236,7 +236,7 @@ class Timeline:
             s0 = e.get('from', 0.88)
             self._set(ck, ids, spid, 'style.visibility', 'visible')
             self._fx(ck, ids, spid, 'in', 'fade', dur)
-            self._scale(ck, ids, spid, s0, 1.0, dur, decel=100000)
+            self._scale(ck, ids, spid, s0, 1.0, dur, accel=e.get('accel'), decel=e.get('decel', 100000))
         elif kind == 'pop':           # 넘쳤다가 제자리: s0 → over → 1
             s0, over = e.get('from', 0.6), e.get('over', 1.05)
             d1 = int(dur * 0.62)
@@ -247,7 +247,7 @@ class Timeline:
         elif kind == 'zoom_out':
             s1 = e.get('to', 0.85)
             self._fx(ck, ids, spid, 'out', 'fade', dur)
-            self._scale(ck, ids, spid, 1.0, s1, dur, accel=100000)
+            self._scale(ck, ids, spid, 1.0, s1, dur, accel=e.get('accel', 100000), decel=e.get('decel'))
             self._set(ck, ids, spid, 'style.visibility', 'hidden', delay=max(dur - 1, 0))
         elif kind == 'ring':          # 물결: 작게 나타나 커지며 사라짐
             s0, s1 = e.get('from', 0.2), e.get('to', 1.0)
