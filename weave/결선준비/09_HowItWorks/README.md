@@ -11,7 +11,7 @@
   - 1쪽 솔루션 장은 `02_PPT/Weave_결선_중간본.pptx`의 5쪽을 가져와요. 중간본 솔루션 장을 고쳤으면 흐린 그림(2쪽)까지 다시 만들도록 `--skip-blur` 없이 빌드해요.
 - 중간본 덱(`02_PPT/Weave_결선_중간본.pptx`, `11_중간본/build_deck.py`)의 How it Works(6~20쪽)와 Appendix(28~40쪽)도 같은 장이에요(15차부터). `build.py`의 `add_slides`와 `fix_solution`을 중간본 빌더가 불러서 그려요. 그래서 `장표5`를 고친 뒤에는 두 파일을 모두 다시 만들어요.
 - `HowItWorks_Claude.pptx`(`Claude/`)는 비교용으로만 남겨 둬요.
-- **`HowItWorks_Argon_claude.pptx`**(`장표5_claude/`)는 Argon판을 복사해 사용자 검토를 넣어 가는 판이에요(6차, 2026-11-11: 본문 17장 클릭 23번 + Appendix 15장, 노트 915음절, 20대 초반 여성 목소리로 읽힌 낭독 영상 3분 0초). 바뀐 것, 발표 시간(`build.py --time`), 낭독을 넣은 미리보기 영상(`build.py --video --tts`), 다시 만드는 법은 `장표5_claude/README.md`에 있어요. 중간본 덱에는 아직 들어가지 않았어요.
+- **`HowItWorks_Argon_claude.pptx`**(`장표5_claude/`)는 Argon판을 복사해 사용자 검토를 넣어 가는 판이에요(7차, 2026-11-11: 본문 17장 클릭 23번 + Appendix 15장, 노트 901음절, 숨 돌릴 틈을 넣은 낭독 영상 3분 14초). 바뀐 것, 발표 시간(`build.py --time`), 낭독을 넣은 미리보기 영상(`build.py --video --tts`), 다시 만드는 법은 `장표5_claude/README.md`에 있어요. 중간본 덱에는 아직 들어가지 않았어요.
 - 메모 방식(AgentIR)은 본문에 넣지 않고, Appendix 22쪽에 Reasoning Embedding 파이프라인 후보로 로직과 원논문만 실었어요.
 
 ## 폴더

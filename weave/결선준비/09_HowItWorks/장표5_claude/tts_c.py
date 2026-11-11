@@ -10,7 +10,7 @@
       ~/.cache/weave-tools/whisper-turbo faster-whisper large-v3-turbo (점검용, 없어도 됨)
   - 'heami': Windows에 깔려 있는 한국어 음성(Microsoft Heami, SAPI). PowerShell은 render_c와 같은 방식으로 부른다.
 
-  python tts_c.py "읽을 글" [목소리]        → out/tts_test.wav 와 길이(초)
+  python tts_c.py "읽을 글" [목소리] [속도] [나올 wav 경로]     → out/tts_test.wav(또는 적어 준 경로)와 길이(초)
 """
 import hashlib
 import os
@@ -183,6 +183,21 @@ def tidy(path, lead=0.05, trail=0.1, gap=0.45):
     return len(y) / sr
 
 
+def pauses(x, sr, least=0.12):
+    """낭독 토막 안의 쉼(least초 넘는 묵음)을 찾는다. 돌려줌: [[시작 초, 끝 초]]. 효과를 말에 맞출 때 쉼표 자리를 찾는 데 씀."""
+    win = int(sr * 0.02)
+    e = np.sqrt(np.convolve((x / 32768.0) ** 2, np.ones(win) / win, mode='same'))
+    v = e > max(0.003, 0.03 * e.max())
+    d = np.diff(v.astype(np.int8))
+    offs, ons = np.where(d == -1)[0], np.where(d == 1)[0]
+    out = []
+    for o in offs:
+        nxt = ons[ons > o]
+        if len(nxt) and (nxt[0] - o) / sr > least:
+            out.append([round(o / sr, 3), round(nxt[0] / sr, 3)])
+    return out
+
+
 def track(clips, total, dst, peak=0.89):
     """clips = [(wav 경로, 시작 초)] → 길이 total초짜리 낭독 한 줄(dst, wav). 가장 큰 소리가 peak(-1dB)가 되게 전체를 똑같이 키운다."""
     sr = _load(clips[0][0])[0]
@@ -198,5 +213,8 @@ def track(clips, total, dst, peak=0.89):
 
 
 if __name__ == '__main__':
-    d = synth([('tts_test', sys.argv[1])], HERE / 'out', sys.argv[2] if len(sys.argv) > 2 else None)
-    print(d)
+    # python tts_c.py "읽을 글" [목소리] [속도] [나올 wav 경로]
+    dst = Path(sys.argv[4]).resolve() if len(sys.argv) > 4 else HERE / 'out' / 'tts_test.wav'
+    d = synth([(dst.stem, sys.argv[1])], dst.parent, sys.argv[2] if len(sys.argv) > 2 else None,
+              speed=float(sys.argv[3]) if len(sys.argv) > 3 else None)
+    print(dst, d)

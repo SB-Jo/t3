@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""How it Works — _claude판 6차(2026-11-11) → ../HowItWorks_Argon_claude.pptx
+"""How it Works — _claude판 7차(2026-11-11) → ../HowItWorks_Argon_claude.pptx
 솔루션 세 장(조각마다 하나씩 움직임) + How it Works 14장 + Appendix 15장(한눈에 보기 포함). 뱃지는 어느 장에도 없다.
 
   python build.py                 → ../HowItWorks_Argon_claude.pptx (발표용: 클릭마다 한 박자)
@@ -297,7 +297,7 @@ NOTES = {
     'sol': '세 번째는 먼저 건네는 기억입니다. 이번엔 묻기도 전에, 필요한 기억을 먼저 꺼내 주죠.',
     'hiw': '그런데 이름도 모르는 걸 어떻게 찾아냈을까요? 그 속을 한번 들여다보겠습니다.',
     'ask': '친구 지은이네 집들이에서 마신 와인을 다시 사려는데, 이름이 생각나지 않습니다.',
-    'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 그런데 단서가 카톡에, 갤러리에, 여러 앱에 흩어져 있죠.',
+    'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 그런데 단서가 여러 앱에 흩어져 있죠.',
     'old': '그럼 지금 쓰는 검색으로 한번 찾아볼까요?',
     'kw': ('먼저 키워드 검색은 글자가 같은 기록을 찾습니다. '
            '(클릭) ‘지은이네’로는 (클릭) 집 주소가, (클릭) ‘집들이’로는 (클릭) 다른 사람 집들이가, '
@@ -306,7 +306,7 @@ NOTES = {
     'emb': ('임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 벡터라는 숫자로 바꾸고 '
             '(클릭) 뜻이 비슷할수록 가까이 놓이는 임베딩 공간에서 (클릭) 질문과 가까운 기록을 가져옵니다. '
             '(클릭) 그런데 가져온 건 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. 정작 단서는 멀리 있죠.'),
-    'step': ('왜 이럴까요? 우리는 키워드가 아니라 ‘언제, 어디서, 누구와’ 같은 맥락으로 기억하기 때문입니다. '
+    'step': ('왜 이럴까요? 우리는 키워드가 아니라 대화의 맥락으로 기억하기 때문입니다. '
              '그래서 검색도 사람처럼 한 단계씩 생각해야 합니다.'),
     'chain': ('이 질문에는 빠진 고리가 하나 있습니다. (클릭) 바로 이 카톡인데요. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
               '집들이라는 말은 없지만, 우리는 이날이 집들이라는 걸 바로 알죠. 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
@@ -322,6 +322,53 @@ NOTES = {
     'deliver': ('이렇게 찾은 답은 근거와 함께 건넵니다. (클릭) 저는 ‘입력하기’만 누르면 됩니다. '
                 '그럼 Weave가 우리 일상을 어떻게 바꿀까요?'),
 }
+
+# 말에 맞춰 뜨는 효과: 이름 → (장 키, 구간(클릭 번호), 그 효과가 떠야 할 때 말하는 구절). cue()가 낭독에서 그 구절을 말하는 때를 찾아 준다
+CUES = {
+    'chain.h1': ('chain', 1, '박스 정리'),          # 11쪽: 카톡의 '박스 정리' 형광펜
+    'chain.h2': ('chain', 1, '휴지 안 사'),         # 11쪽: '휴지 안 사 와도 돼' 형광펜
+    'chain.hd': ('chain', 1, '이날이'),             # 11쪽: 받은 날짜 형광펜 → 실이 이어져 그날 사진과 이름
+    'chain.bridge': ('chain', 1, '이 중간 단서를'),  # 11쪽: 아래 물음 글
+    'split.q2': ('split', 1, '와인 질문은'),        # 14쪽: 둘째 질의(②)
+    'hop1.ev': ('hop1', 1, '휴지 안 사'),           # 15쪽: 카톡 근거 두 군데 형광펜
+    'hop1.date': ('hop1', 1, '이 카톡을 받은'),     # 15쪽: 받은 날짜 형광펜
+}
+SLIDE_KEYS = ['sol1', 'sol2', 'sol', 'hiw', 'ask', 'cloud', 'old', 'kw', 'emb', 'step', 'chain', 'idx', 'trig', 'split', 'hop1', 'hop2', 'deliver']
+TIMING_NAMES = ('LAT_START', 'LAT_CLICK', 'LAT_MID', 'GAP_SLIDE', 'GAP_SENT', 'GAP_MID', 'GAP_Q', 'S_BEAT', 'Q_BEAT', 'X_BEAT', 'R_BEAT')
+
+
+def use_variant(name):
+    """대본과 낭독만 다른 판으로 바꾼다(화면과 효과는 같음). 설정은 <name>/notes.json:
+      {"notes": {"1": 글, …, "17": 글}, "voice": 목소리, "speed": 속도, "cues": {이름: 구절}, "timing": {틈 이름: 초}, "read_as": {영문: 읽는 소리}}
+    notes 말고는 없어도 된다. 장마다 (클릭) 수는 기본판과 같아야 한다.
+    덱은 ../HowItWorks_Argon_claude_<name>.pptx, 나머지(낭독, 영상, png)는 out/<name>/에 나온다."""
+    global DST, OUT
+    import tts_c
+    cfg = json.loads((HERE / name / 'notes.json').read_text(encoding='utf-8'))
+    notes = {SLIDE_KEYS[int(k) - 1] if str(k).isdigit() else k: ' '.join(v.split()) for k, v in cfg['notes'].items()}
+    assert set(notes) == set(SLIDE_KEYS), '노트는 17장 모두: 빠진 장 %s' % sorted(set(SLIDE_KEYS) - set(notes))
+    for i, k in enumerate(SLIDE_KEYS, 1):
+        assert notes[k].count('(클릭)') == NOTES[k].count('(클릭)'), '%d쪽(%s): (클릭)은 %d번이어야 함(지금 %d번)' % (
+            i, k, NOTES[k].count('(클릭)'), notes[k].count('(클릭)'))
+    NOTES.update(notes)
+    for k, phrase in cfg.get('cues', {}).items():
+        assert k in CUES, 'cues에 없는 이름 %s (쓸 수 있는 이름: %s)' % (k, ', '.join(CUES))
+        CUES[k] = (CUES[k][0], CUES[k][1], phrase) if phrase else None
+    for k, v in cfg.get('timing', {}).items():
+        assert k in TIMING_NAMES, 'timing에 없는 이름 %s (쓸 수 있는 이름: %s)' % (k, ', '.join(TIMING_NAMES))
+        globals()[k] = float(v)
+    READ_AS.update(cfg.get('read_as', {}))
+    if cfg.get('voice'):
+        tts_c.VOICE = cfg['voice']
+        tts_c.SPEEDS[cfg['voice']] = float(cfg.get('speed', tts_c.SPEEDS.get(cfg['voice'], tts_c.SPEED)))
+    main_out = OUT
+    DST = HERE.parent / ('HowItWorks_Argon_claude_%s.pptx' % name)
+    OUT = HERE / 'out' / name
+    OUT.mkdir(parents=True, exist_ok=True)
+    for f in ('blur_sol.png', 'blur_emb.png', 'blur_cloud.png'):      # 흐린 배경은 화면이 같으니 기본판 것을 그대로 씀
+        if not (OUT / f).exists():
+            shutil.copyfile(main_out / f, OUT / f)
+
 
 _SOL = {}
 
@@ -846,7 +893,7 @@ EM_PANEL = (624, 132, 600, 124)
 EM_FIELD = (646, 182, 556, 54)
 SPACE = (624, 314, 600, 330)
 STAR = (884, 494)
-SPACE_NOTE = '* 임베딩 공간에서 질문과 가까이 있는 기록일수록 뜻이 비슷합니다'
+SPACE_NOTE = '* 임베딩 공간에서는 의미가 비슷할수록 가까이 위치함'      # 11-11 7차: 각주는 '~함' 말씨로
 
 
 def space_note(name, box, text, pt=10):
@@ -1065,15 +1112,18 @@ def s_chain():
     s.on('ch/t1', 'wipe_in', 150, 300)
     s.on('ch/talk', 'zoom_in', 300, 450, **{'from': 0.9})
     s.on('ch/tag', 'zoom_in', 650, 300, **{'from': 0.6})
-    # 11-11 6차: 새 목소리와 줄인 대본에 맞춰 다시 잼('박스 정리' 1.8초, '휴지 안 사 와도 돼' 4.0초, '이날이' 7.6초, 물음 9.8초)
-    s.on('ch/h1', 'wipe_in', 2200, 300)
-    s.on('ch/h2', 'wipe_in', 5000, 400)
-    s.on('ch/hd', 'wipe_in', 9500, 350)
-    s.on('ch/t2', 'wipe_in', 10000, 300)
-    s.on('ch/dimb', 'fade_out', 10250, 300)
-    s.on('ch/pring', 'zoom_in', 10315, 400, **{'from': 1.12})
-    s.on('ch/ans', 'zoom_in', 10675, 350, **{'from': 0.8})
-    s.on('ch/bridge', 'rise', 12275, 500, dy=14)
+    # 11-11 7차: 때를 손으로 적지 않고 cue()가 낭독에서 그 말을 하는 때를 찾음(CUES). 기본값은 6차에 잰 값
+    t1 = max(cue('chain.h1', 2200), 950)
+    t2 = max(cue('chain.h2', 5000), t1 + 500)
+    td = max(cue('chain.hd', 9500), t2 + 600)
+    s.on('ch/h1', 'wipe_in', t1, 300)
+    s.on('ch/h2', 'wipe_in', t2, 400)
+    s.on('ch/hd', 'wipe_in', td, 350)
+    s.on('ch/t2', 'wipe_in', td + 500, 300)
+    s.on('ch/dimb', 'fade_out', td + 750, 300)
+    s.on('ch/pring', 'zoom_in', td + 815, 400, **{'from': 1.12})
+    s.on('ch/ans', 'zoom_in', td + 1175, 350, **{'from': 0.8})
+    s.on('ch/bridge', 'rise', max(cue('chain.bridge', 12275), td + 1700), 500, dy=14)
     return s
 
 
@@ -1221,8 +1271,9 @@ def s_split():
     s.click()
     s.on('sp/b1', 'wipe_in', 0, 450)
     s.on('sp/r1', 'rise', 500, 450, dy=14)
-    s.on('sp/b2', 'wipe_in', 2200, 450)          # 11-11 6차: '와인 질문은'을 말할 때(2.0초쯤)
-    s.on('sp/r2', 'rise', 2600, 450, dy=14)
+    tq = max(cue('split.q2', 2200), 1100)        # 둘째 질의는 '와인 질문은'을 말할 때(CUES)
+    s.on('sp/b2', 'wipe_in', tq, 450)
+    s.on('sp/r2', 'rise', tq + 400, 450, dy=14)
     return s
 
 
@@ -1286,7 +1337,7 @@ def query_card(key, box, n, runs, active=True, done=False):
 
 H1_SPACE = (490, 134, 750, 512)
 H1_STAR = (770, 404)
-H1_NOTE = '* 임베딩 공간에서 질문과 가까이 있는 기록일수록 먼저 찾습니다'      # 일반 임베딩과 Reasoning Embedding 양쪽에 다 맞는 말로(9쪽 각주와 같은 말씨)
+H1_NOTE = '* 임베딩 공간에서는 질문과 가까이 위치할수록 먼저 검색됨'      # 일반 임베딩과 Reasoning Embedding 양쪽에 다 맞는 말로(9쪽 각주와 같은 말씨)
 H1_Q = '지은이네 집들이는 언제였지?'
 CAP_Y = 84                         # 위 띠 아래 한 줄 설명(Hop 1, Hop 2)
 H1_DSHIFT = [(-14, 9), (12, -10), (-9, -13), (15, 7)]      # 일반 임베딩일 때 배경 점 네 무리가 놓이는 자리(Reasoning Embedding 자리 기준 px)
@@ -1448,10 +1499,12 @@ def s_hop1():
     t = 2250    # 단서가 질문 곁에 앉으면 곧바로 카톡 내용이 그 곁에 펼쳐짐(클릭 없이) → 근거 두 곳 → 받은 날짜
     s.on('h1/card', 'zoom_in', t, 480, **{'from': 0.82})
     # 11-10 5차: 근거는 그 말을 할 즈음에(카드가 뜨고 조금 뒤 근거 두 군데, 날짜는 '다음 단서'를 말하기 앞서)
-    # 11-11 6차: 첫 문장이 길어져 근거는 5.5초쯤, 날짜는 '이 카톡을 받은 3월 15일'을 말할 때(10.8초)
-    s.on('h1/h1', 'wipe_in', 6875, 350)
-    s.on('h1/h2', 'wipe_in', 7250, 450)
-    s.on('h1/hd', 'wipe_in', 13500, 400)
+    # 11-11 7차: 근거는 '휴지 안 사 와도 돼'를 말할 때, 날짜는 '이 카톡을 받은 3월 15일'을 말할 때(CUES, cue()가 낭독에서 찾음)
+    te = max(cue('hop1.ev', 6875, ahead=0.3), t + 700)
+    tdt = max(cue('hop1.date', 13500), te + 1400)
+    s.on('h1/h1', 'wipe_in', te, 350)
+    s.on('h1/h2', 'wipe_in', te + 375, 450)
+    s.on('h1/hd', 'wipe_in', tdt, 400)
     return s
 
 
@@ -1869,15 +1922,23 @@ def build(dst, auto=False, hold=1700, talk=False, says=None):
 
 
 # ------------------------------------------------------------------ 발표 시간 어림(--time)
-SPEECH_RATE = 6.5                  # 1초에 말하는 음절 수(쉼을 뺀 말 빠르기). 낭독 영상(--tts)과 맞춘 값(11-11 6차: 목소리 F2F1_70, 속도 1.15)
-# 실제 발표에서 생기는 틈(11-10 5차: 넘길 때의 반응 시간을 넣음). 낭독 영상과 --time 어림이 같은 값을 쓴다
-LAT_START = 0.12                   # 장이 열린 뒤 말을 떼기까지(넘어가는 동안 숨을 고르고, 화면이 자리 잡으면 곧 말함)
-LAT_CLICK = 0.08                   # 클릭한 뒤 말을 잇기까지
-GAP_SLIDE = 0.30                   # 그 장의 말을 마치고 다음 장으로 넘기기까지
-GAP_SENT = 0.40                    # 문장을 마치고 다음 클릭을 누르기까지
-GAP_MID = 0.22                     # 문장 중간에서 클릭할 때 말이 끊기는 틈
-PAUSE_SENT = 0.35                  # (어림용) 한 구간 안에서 문장과 문장 사이의 쉼
-Q_BEAT = 0.42                      # 낭독: 구간 안에서 물음으로 끝난 문장 뒤에 더 두는 쉼(답을 기다리듯 한 박자)
+SPEECH_RATE = 6.6                  # 1초에 말하는 음절 수(쉼을 뺀 말 빠르기). 낭독 영상(--tts)과 맞춘 값(11-11 7차: 목소리 F2F1_70, 속도 1.15)
+# 실제 발표에서 생기는 틈. 낭독 영상과 --time 어림이 같은 값을 쓴다
+# 11-11 7차: '유튜브 영상처럼 쉬지 않고 쭉쭉 간다' → 말 빠르기는 그대로 두고, 화면이 바뀔 때·물음 뒤·문장 사이에 숨을 돌리게 틈을 늘림
+LAT_START = 0.40                   # 장이 열린 뒤 말을 떼기까지(화면이 자리 잡는 것을 보고 말함)
+LAT_CLICK = 0.30                   # 클릭한 뒤 새 문장을 시작하기까지(효과가 뜨는 것을 보고 말함)
+LAT_MID = 0.10                     # 문장 중간에서 클릭한 뒤 말을 잇기까지
+GAP_SLIDE = 0.55                   # 그 장의 말을 마치고 다음 장으로 넘기기까지
+GAP_SENT = 0.55                    # 문장을 마치고 다음 클릭을 누르기까지
+GAP_MID = 0.25                     # 문장 중간에서 클릭할 때 말이 끊기는 틈
+GAP_Q = 0.35                       # 물음으로 끝난 구간·장 뒤에 더 두는 틈(답을 기다리듯 한 박자)
+# 한 구간 안에서 문장과 문장 사이에 넣는 쉼(문장마다 따로 읽혀 이어 붙임. 토막 앞뒤에 남는 묵음 PIECE_PAD가 여기에 더해짐)
+S_BEAT = 0.50                      # 마침표 뒤(숨 한 번)
+Q_BEAT = 0.80                      # 물음 뒤(답을 기다리듯)
+X_BEAT = 0.25                      # 느낌표 뒤(따옴표 안의 카톡 글이 이어질 때)
+R_BEAT = 0.85                      # 노트에 (쉼)이라고 적은 자리(일부러 한 박자, 1초쯤)
+REST = '(쉼)'
+PIECE_PAD = 0.15                   # 낭독 토막 앞뒤에 남기는 묵음(tts_c.tidy의 lead + trail)
 RATE_MAX, RATE_AIM = 6.9, 6.4      # 낭독: 한 토막이 1초에 RATE_MAX음절보다 빠르면(쉼 없는 짧은 한 문장) 그 토막만 RATE_AIM쯤으로 다시 읽음
 READ_AS = {'Reasoning Embedding': '리즈닝 임베딩', 'Query Rewriting': '쿼리 리라이팅', 'Weave': '위브', 'BM25': '비엠 이십오', 'UX': '유엑스'}
 
@@ -1896,6 +1957,7 @@ def _num_ko(n):
 
 def syllables(text):
     """소리 내어 읽을 때의 음절 수(한글 글자 수 + 숫자·영문 읽기)."""
+    text = text.replace(REST, ' ')
     for k, v in READ_AS.items():
         text = text.replace(k, v)
     text = re.sub(r'\d+', lambda m: _num_ko(int(m.group())), text)
@@ -1912,27 +1974,105 @@ def _group_len(grp):
     return t
 
 
+_CUE_CACHE = {}
+
+
+def _cue_data():
+    """낭독에서 잰 문장마다의 때(out/tts/_cues.json, narrate()가 씀). 없으면 빈 표."""
+    f = OUT / 'tts' / '_cues.json'
+    if 'd' not in _CUE_CACHE:
+        _CUE_CACHE['d'] = json.loads(f.read_text(encoding='utf-8')) if f.exists() else {}
+    return _CUE_CACHE['d']
+
+
+def _in_piece(text, dur, pauses, phrase):
+    """토막(text, 길이 dur초) 안에서 phrase를 말하기 시작하는 때(초). 쉼표마다 잰 쉼이 있으면 그 사이의 마디 안에서만 음절로 나눈다."""
+    i = text.index(phrase)
+    cw = 1.8 if pauses is None else 0.6                       # 쉼표 하나의 무게(음절): 낭독 전 어림은 1.8, 잰 토막에 쉼이 없으면 0.6
+    w = lambda t: syllables(t) + cw * t.count(',')
+    clauses = text.split(',')
+    if pauses and len(pauses) == len(clauses) - 1:
+        bounds = [0.05] + [x for pz in pauses for x in pz] + [max(dur - 0.1, 0.1)]
+        pos = 0
+        for k, c in enumerate(clauses):
+            if i <= pos + len(c):
+                a, b = bounds[2 * k], bounds[2 * k + 1]
+                return a + (b - a) * syllables(c[:i - pos]) / max(syllables(c), 1)
+            pos += len(c) + 1
+    return 0.05 + (dur - 0.15) * w(text[:i]) / max(w(text), 1)
+
+
+def cue(name, default, ahead=0.15):
+    """말에 맞춰 뜨는 효과의 때(ms, s.on()에 넣는 값). CUES[name] = (장 키, 구간, 그 말을 시작하는 구절).
+    낭독에서 잰 값(out/tts/_cues.json)이 지금 노트와 맞으면 그 값으로, 아니면 음절 수로 어림한다. 구절이 노트에 없으면 default."""
+    spec = CUES.get(name)
+    if not spec:
+        return default
+    key, j, phrase = spec
+    segs = NOTES[key].split('(클릭)')
+    phrase = tts_text(phrase)
+    pieces = _sents(segs[j])
+    hit = [k for k, (t, _) in enumerate(pieces) if phrase in t]
+    if not hit:
+        print('   ! cue %s: ‘%s’가 %s 노트의 구간 %d에 없음 → 기본값 %d' % (name, phrase, key, j, default))
+        return default
+    k = hit[0]
+    got = _cue_data().get('%s_%d' % (key, j))
+    if got and all(isinstance(g, dict) for g in got) and [g['t'] for g in got] == [t for t, _ in pieces]:
+        t = got[k]['at'] + _in_piece(got[k]['t'], got[k]['dur'], got[k]['pauses'], phrase)
+    else:                                   # 낭독이 없거나 노트가 바뀜: 음절 수로 어림(쉼 없는 말 빠르기 6.9음절/초)
+        durs = [syllables(x) / 6.9 + 0.3 * x.count(',') + PIECE_PAD for x, _ in pieces]
+        t = sum(durs[:k]) + sum(b for _, b in pieces[:k]) + _in_piece(pieces[k][0], durs[k], None, phrase)
+    return max(round((_lead(segs, j) + t - ahead) / SPEED * 1000), 0)
+
+
 def _ends(seg):
-    return seg.rstrip().endswith(('.', '?', '!'))
+    return seg.replace(REST, ' ').rstrip().endswith(('.', '?', '!'))
+
+
+def _beat(sent):
+    """구간 안에서 그 문장을 마친 뒤 다음 문장까지 넣는 쉼(초)."""
+    return Q_BEAT if sent.endswith('?') else (X_BEAT if sent.endswith('!') else S_BEAT)
+
+
+def _sents(seg):
+    """한 구간의 글을 낭독 토막으로 나눈다: [(읽을 글, 그 뒤에 넣는 쉼(초))]. 문장이 끝난 자리와 (쉼) 자리에서 끊는다(마지막 토막의 쉼은 쓰지 않음)."""
+    out = []
+    parts = tts_text(seg).split(REST)
+    for i, part in enumerate(parts):
+        ss = [t for t in re.split(r'(?<=[.?!])\s+', part.strip()) if t]
+        for k, t in enumerate(ss):
+            rest = i + 1 < len(parts) and k == len(ss) - 1          # 이 토막 뒤에 (쉼)이 적혀 있음
+            out.append((t, max(_beat(t), R_BEAT) if rest else _beat(t)))
+    return out
+
+
+def _lead(segs, j):
+    """구간 j에서 말을 떼기까지의 틈(초): 장이 열린 뒤 첫 구간은 LAT_START, 클릭 뒤 새 문장을 시작하면 LAT_CLICK, 문장 중간의 클릭 뒤는 LAT_MID.
+    구간이 (쉼)으로 시작하면 그만큼 더 기다린다."""
+    base = LAT_START if j == 0 else (LAT_CLICK if _ends(segs[j - 1]) else LAT_MID)
+    return base + (R_BEAT if segs[j].lstrip().startswith(REST) else 0)
 
 
 def seg_leads(sp):
-    """구간마다 말을 떼기까지의 틈(초): 장이 열린 뒤 첫 구간은 LAT_START, 클릭 뒤는 LAT_CLICK."""
-    return [LAT_START if j == 0 else LAT_CLICK for j in range(len(sp.notes.split('(클릭)')))]
+    """구간마다 말을 떼기까지의 틈(초). _lead()."""
+    segs = sp.notes.split('(클릭)')
+    return [_lead(segs, j) for j in range(len(segs))]
 
 
 def seg_gaps(sp):
-    """구간마다 말을 마친 뒤의 틈(초): 그 장의 끝 구간은 GAP_SLIDE, 문장이 끝난 구간은 GAP_SENT, 문장 중간에서 누르는 클릭은 GAP_MID."""
+    """구간마다 말을 마친 뒤의 틈(초): 그 장의 끝 구간은 GAP_SLIDE, 문장이 끝난 구간은 GAP_SENT, 문장 중간에서 누르는 클릭은 GAP_MID.
+    물음으로 끝난 구간은 GAP_Q만큼, (쉼)으로 끝난 구간은 R_BEAT만큼 더 둔다."""
     segs = sp.notes.split('(클릭)')
-    return [GAP_SLIDE if j == len(segs) - 1 else (GAP_SENT if _ends(seg) else GAP_MID) for j, seg in enumerate(segs)]
+    return [(GAP_SLIDE if j == len(segs) - 1 else (GAP_SENT if _ends(seg) else GAP_MID)) +
+            (R_BEAT if seg.rstrip().endswith(REST) else (GAP_Q if seg.rstrip().endswith('?') else 0)) for j, seg in enumerate(segs)]
 
 
 def _say_times(sp, rate=SPEECH_RATE):
     """노트를 (클릭)으로 나눈 구간마다 걸리는 시간(초) 어림: 말 떼기까지 + 음절 ÷ 속도 + 구간 안 문장 사이 쉼 + 말을 마친 뒤의 틈."""
     out = []
     for seg, lead, gap in zip(sp.notes.split('(클릭)'), seg_leads(sp), seg_gaps(sp)):
-        inner = max(len(re.findall(r'[.?!…](?:\s|$)', seg.strip())) - (1 if _ends(seg) else 0), 0)
-        out.append(lead + syllables(seg) / rate + PAUSE_SENT * inner + gap)
+        out.append(lead + syllables(seg) / rate + sum(b + PIECE_PAD for _, b in _sents(seg)[:-1]) + gap)
     return out
 
 
@@ -1960,23 +2100,19 @@ MARK_BOX = (0, 713, 46, 7)
 
 def tts_text(seg):
     """낭독(TTS)에 넘길 글: 영문과 숫자를 읽는 소리로 바꾸고 따옴표를 뺀다."""
-    t = ' '.join(seg.split())
+    t = ' '.join(seg.split())          # (쉼)은 그대로 둔다(_sents가 그 자리에서 끊음)
     for k, v in READ_AS.items():
         t = t.replace(k, v)
     t = re.sub(r'\d+', lambda m: _num_ko(int(m.group())), t)
     return re.sub('[‘’“”"]', '', t)
 
 
-def _pieces(seg):
-    """낭독 한 구간을 토막으로 나눈다: 구간 안에서 물음으로 끝난 문장 뒤에서 끊고, 이을 때 그 자리에 Q_BEAT만큼 쉼을 둔다."""
-    return [t for t in re.split(r'(?<=\?)\s+', tts_text(seg)) if t]
-
-
 def narrate(specs, voice=None, check=False):
     """본문 노트를 (클릭)마다 토막 내어 낭독(wav)을 만든다.
     돌려줌: ({장 키: [구간마다 걸리는 시간 = 말 떼기까지 + 토막 길이 + 말을 마친 뒤의 틈]}, {장 키: [wav 경로]}). 틈은 seg_leads(), seg_gaps().
     voice는 tts_c의 목소리 이름(없으면 기본). check면 낭독을 받아쓰기로 글과 견준다.
-    실제 발표처럼 들리게 두 가지를 손본다: 물음 뒤에는 한 박자 쉬고(Q_BEAT), 쉼 없이 빨리 읽힌 짧은 토막은 천천히 다시 읽는다(RATE_MAX)."""
+    실제 발표처럼 들리게 두 가지를 손본다: 구간 안의 문장은 하나씩 따로 읽혀 사이에 쉼을 넣고(_beat: 마침표 S_BEAT, 물음 Q_BEAT),
+    쉼 없이 빨리 읽힌 짧은 토막은 천천히 다시 읽는다(RATE_MAX). 문장마다 구간 안에서 시작하는 때는 out/tts/_cues.json에 남긴다(효과를 말에 맞출 때 봄)."""
     import numpy as np
     import tts_c
     d = OUT / 'tts'
@@ -1985,9 +2121,9 @@ def narrate(specs, voice=None, check=False):
     for sp in specs:
         for j, seg in enumerate(sp.notes.split('(클릭)')):
             parts[sp.key, j] = []
-            for k, t in enumerate(_pieces(seg)):
+            for k, (t, beat) in enumerate(_sents(seg)):
                 name = '%s_%d_p%d' % (sp.key, j, k)
-                parts[sp.key, j].append(name)
+                parts[sp.key, j].append((name, t, beat))
                 todo.append((name, t if t.endswith(('.', '?', '!')) else t + ','))       # 문장 중간에서 끊는 토막은 쉼표로(말끝을 내리지 않게)
     tts_c.synth(todo, d, voice)
     lens = {n: tts_c.tidy(d / (n + '.wav')) for n, _ in todo}
@@ -2006,21 +2142,28 @@ def narrate(specs, voice=None, check=False):
                 if rate > RATE_MAX:
                     tts_c.synth([(n, t)], d, voice, speed=round(spd * RATE_AIM / rate, 2))
                     lens[n] = tts_c.tidy(d / (n + '.wav'))
-    says, clips = {}, {}
+    says, clips, cues = {}, {}, {}
     for sp in specs:
         segs = sp.notes.split('(클릭)')
         clips[sp.key], durs = [], []
         for j in range(len(segs)):
-            xs = []
-            for k, n in enumerate(parts[sp.key, j]):
+            xs, at, prev = [], [], None
+            for n, t, beat in parts[sp.key, j]:
                 sr, x = tts_c._load(d / (n + '.wav'))
-                xs += ([np.zeros(int(sr * Q_BEAT), dtype=np.int16)] if k else []) + [x]
+                if prev is not None:
+                    xs.append(np.zeros(int(sr * prev), dtype=np.int16))
+                at.append({'t': t, 'at': round(sum(len(a) for a in xs) / sr, 3), 'dur': round(len(x) / sr, 3), 'pauses': tts_c.pauses(x, sr)})
+                xs.append(x)
+                prev = beat
                 (d / (n + '.wav')).unlink()
+            cues['%s_%d' % (sp.key, j)] = at
             dst = d / ('%s_%d.wav' % (sp.key, j))
             tts_c._save(dst, sr, np.concatenate(xs))
             clips[sp.key].append(dst)
             durs.append(tts_c.wav_len(dst))
         says[sp.key] = [lead + t + gap for t, lead, gap in zip(durs, seg_leads(sp), seg_gaps(sp))]
+    (d / '_cues.json').write_text(json.dumps(cues, ensure_ascii=False), encoding='utf-8')
+    _CUE_CACHE.clear()
     if check:
         narrate_check(specs, clips)
     return says, clips
@@ -2047,7 +2190,7 @@ def narrate_check(specs, clips, ok=0.85):
     if heard is None:
         print('낭독 점검: 받아쓰기 모델이 없어 건너뜀')
         return []
-    norm = lambda t: re.sub(r'[^가-힣a-z0-9]', '', tts_text(t.replace('(클릭)', ' ')).lower())
+    norm = lambda t: re.sub(r'[^가-힣a-z0-9]', '', tts_text(t.replace('(클릭)', ' ').replace(REST, ' ')).lower())
     bad, lines = [], []
     for sp, p in zip(specs, paths):
         h = heard.get(p, '')
@@ -2097,7 +2240,7 @@ def talk_specs(rate=SPEECH_RATE, says=None):
         for j, grp in enumerate(sp.groups):
             sp.starts.append(t)
             t += (_group_len(grp) + sp.holds[j]) / 1000
-            text = ' '.join(segs[j].split())
+            text = ' '.join(segs[j].replace(REST, ' ').split())
             if text:
                 key = 'sub/%s/%d' % (sp.key, j)
                 sp.add(key, subtitle(key, text, k if says else None))
@@ -2206,7 +2349,10 @@ def main():
     ap.add_argument('--voice', help='낭독 목소리: Supertonic 3의 F1~F5·M1~M5(기본 F2), heami = Windows 한국어 음성')
     ap.add_argument('--check', action='store_true', help='--tts와 함께: 낭독을 받아쓰기로 글과 견줌')
     ap.add_argument('--remux', action='store_true', help='--video --tts와 함께: PowerPoint 녹화(out/_silent.mp4)는 그대로 두고 낭독만 다시 얹음')
+    ap.add_argument('--variant', help='대본과 낭독만 다른 판(<이름>/notes.json). 덱은 ../HowItWorks_Argon_claude_<이름>.pptx, 나머지는 out/<이름>/')
     a = ap.parse_args()
+    if a.variant:
+        use_variant(a.variant)
     if a.time:
         OUT.mkdir(exist_ok=True)
         specs = [f() for f in SOL_SLIDES + SLIDES]
@@ -2233,6 +2379,9 @@ def main():
         blur_png(pngs[names.index('emb')], OUT / 'blur_emb.png')
         blur_png(pngs[names.index('cloud')], OUT / 'blur_cloud.png', radius=5.5, veil=0.12)    # 살짝만 흐리게(11-10 5차: 4 → 5.5로 조금 더)
         tmp.unlink()
+    says = clips = None
+    if a.video and a.tts:               # 낭독을 먼저 만든다: 말에 맞춰 뜨는 효과(cue)가 이 낭독에서 때를 찾음
+        says, clips = narrate([f() for f in SOL_SLIDES + SLIDES], a.voice, a.check)
     report, secs = build(DST)
     for key, nclick, nnote, nkeys in report:
         flag = '' if nclick == nnote else '   ! 클릭 %d ≠ 노트 (클릭) %d' % (nclick, nnote)
@@ -2245,10 +2394,7 @@ def main():
         print('png', len(pngs))
     if a.video:
         auto = OUT / '_auto.pptx'
-        mp4 = OUT / 'HowItWorks_Argon_claude_미리보기.mp4'
-        says = clips = None
-        if a.tts:
-            says, clips = narrate([f() for f in SOL_SLIDES + SLIDES], a.voice, a.check)
+        mp4 = OUT / (DST.stem + '_미리보기.mp4')
         silent = OUT / '_silent.mp4' if a.tts else mp4      # 소리 없는 녹화는 남겨 둠(--remux로 낭독만 다시 얹을 수 있게)
         if not (a.remux and silent.exists()):
             _, secs = build(auto, auto=True, talk=True, says=says)
