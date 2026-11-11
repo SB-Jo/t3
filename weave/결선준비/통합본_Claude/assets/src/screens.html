@@ -141,9 +141,11 @@
   /* ---------- 검색(결과 없음) ---------- */
   .fi .q { margin: 10px 16px 0; height: 46px; border-radius: 23px; background: #F1F1F5; display: flex; align-items: center; padding: 0 16px; gap: 9px; font-size: 14.5px; font-weight: 500; color: #4a4a52; }
   .fi .q u { width: 2px; height: 19px; background: #6B4EFF; margin-left: -6px; }
-  .fi .nr { margin-top: 196px; text-align: center; color: #b8bac0; }
-  .fi .nr svg { width: 62px; height: 62px; stroke-width: 1.5; }
-  .fi .nr b { display: block; margin-top: 12px; font-size: 22px; color: #E5484D; font-weight: 700; }
+  /* 7쪽의 '일치하는 결과가 없습니다'와 같은 모양: 연분홍 알약 + 빨간 점 + 빨간 글 */
+  .fi .nr { position: absolute; left: 50%; top: 322px; transform: translateX(-50%); height: 55px; padding: 0 26px 0 24px; border-radius: 28px; background: #FDECEF;
+            display: flex; align-items: center; gap: 11px; white-space: nowrap; }
+  .fi .nr i { width: 11px; height: 11px; border-radius: 50%; background: #E0566B; }
+  .fi .nr b { font-size: 21.5px; color: #D6455C; font-weight: 700; }
 </style>
 <body>
 <script>
@@ -332,7 +334,7 @@ cal('cal3', '2026년 10월', 31, 4, 30, 25, { 2: [['b', '주간 회의']], 6: [[
 }
 
 // ---- 검색했지만 결과가 없는 화면(모자이크 한가운데, 큰 화면이 줄어들어 놓이는 자리)
-add('find', 'fi', `<div class="q">${I.search}지은이네 집들이 때 마셨던 와인</div><div class="nr"><svg class="i" viewBox="0 0 24 24"><circle cx="10.500" cy="10.500" r="6.500"/><path d="M15.500 15.500L20 20"/></svg><b>검색 결과가 없습니다</b></div>`);
+add('find', 'fi', `<div class="q">${I.search}지은이네 집들이 때 마셨던 와인</div><div class="nr"><i></i><b>검색 결과가 없습니다</b></div>`);
 </script>
 </body>
 </html>

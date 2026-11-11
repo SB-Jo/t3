@@ -10,6 +10,15 @@
 | closing-2-capture.jpg | https://commons.wikimedia.org/wiki/File:Woman_shooting_ocean_sunset_(Unsplash).jpg | Ben White (Unsplash) | CC0 |
 | closing-3-sunset-picnic.jpg | https://commons.wikimedia.org/wiki/File:Sunset_Picnic_(Unsplash).jpg | Arthur Poulin (Unsplash) | CC0 |
 
+## 3~5쪽의 기록 조각, 13쪽의 흐린 배경 (`intro/`)
+
+- `intro/floats.png`: `src/floats.html`에 그린 기록 조각이에요. 표지 영상의 조각과 같은 모양이고, 아이콘은 `../10_표지영상/소스/assets/icons`의 것을 써요. `tools/intro_assets.py`가 찍어요.
+- `intro/blur_link.jpg`: 12쪽의 마지막 모습(기록이 이어진 모습)을 흐리게 한 그림이에요(`tools/intro_assets.py --blur`).
+
+## 연표의 NPU 아이콘 (`outro/ic-npu.png`)
+
+`src/icons.html`에 그린 선 그림이에요. 아웃트로 덱의 다른 아이콘(`outro/ic-*.png`)과 같은 규격(24칸 격자, 굵기 2)이고, Lucide의 cpu 아이콘(ISC 라이선스) 모양을 따랐어요.
+
 ## 6쪽 휴대폰 화면 (`hook/`, `src/`)
 
 `src/screens.html`에 그린 앱 화면(카카오톡, 갤러리, 삼성 노트, 캘린더, 이메일)을 `tools/hook_assets.py`가 `hook/screens/*.jpg`와 `hook/mosaic.jpg`로 찍어요.

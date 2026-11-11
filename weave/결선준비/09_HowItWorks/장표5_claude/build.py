@@ -86,12 +86,15 @@ class Slide:
         self.bar, self.cur, self.done, self.bg = bar, cur, set(done), bg
         self.items = []
         self.groups = [[]]
+        self.rots = {}              # {부품 키: 기울기(도)} — 통합본의 흩어진 기록 조각
 
-    def add(self, key, prims, alpha=100, xf=None, group=None, temp=False, start=None):
+    def add(self, key, prims, alpha=100, xf=None, group=None, temp=False, start=None, rot=None):
         """temp: 잠깐만 보이는 것. 화면 밖(+1600px)에 두고 처음 나타날 때 'jump'로 제자리에 옮김(정적 보기·내보내기엔 안 보임).
           PowerPoint는 이동 경로를 더하지 않고 바꿔 끼우므로, 그 뒤 'fly'·'move'는 화면 밖 기준(base)으로 바꿔 넣음.
         start = (dx, dy): 놓인 자리는 마지막 자리. 'goto'로 처음 자리에 옮겨 두고, 되돌아올 땐 'fly'(dx, dy)."""
         self.items.append((key, prims, alpha, xf, group, temp, start))
+        if rot:
+            self.rots[key] = rot
         return key
 
     def on(self, keys, kind, delay=0, dur=400, **kw):
@@ -292,11 +295,11 @@ SOL_Q1 = '삼성기술전 시연 내용'
 SOL_QPT = 12.5 * 0.75                              # (2) 검색창 글자 크기(pt)
 # 발표자 노트(말할 글). (클릭)은 그 자리에서 클릭해 다음 효과를 띄운다는 표시. 장 키 → 글. 발표 시간은 python build.py --time [--tts]로 잰다
 NOTES = {
-    'sol1': ('방금 보신 첫 번째 장면은 기록 통합 검색입니다. '
+    'sol1': ('영상 속 세 장면을 하나씩 정리해 보겠습니다. 방금 보신 첫 번째 장면은 기록 통합 검색입니다. '      # 11-12: 영상에서 넘어오는 한 문장을 앞에
              '(클릭) 통화 중이더라도, 간편하게 여러 앱에 흩어진 기록을 찾아 요약할 수 있었습니다.'),
     'sol2': '두 번째는 단서로 찾는 기억입니다. 이름이 떠오르지 않아도, 단서를 통해 정확한 이름을 찾을 수 있었습니다.',
     'sol': '세 번째는 먼저 건네는 기억입니다. 묻기도 전에, 필요한 기억을 먼저 꺼내 주었습니다.',
-    'hiw': '이는 어떻게 가능했을까요? 두 번째 시나리오를 통해 알아보도록 하겠습니다.',
+    'hiw': '이는 어떻게 가능했을까요? 두 번째 시나리오를 다시 한번 차근차근 따라가 보겠습니다.',
     'ask': '친구 집들이에서 마신 와인을 다시 사려는데, 이름이 생각나지 않는 상황입니다.',
     'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 하지만, 단서는 여러 앱에 흩어져 있죠.',
     'old': '그럼 지금 쓰는 검색으로 한번 찾아볼까요?',
@@ -308,7 +311,7 @@ NOTES = {
             '(클릭) 뜻이 비슷할수록 가까이 놓이는 임베딩 공간에서 (클릭) 질문과 가까운 기록을 가져옵니다. '
             '(클릭) 그런데 가져온 건 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. 정작 단서는 멀리 있죠.'),
     'step': ('왜 이럴까요? 우리는 키워드가 아니라 대화의 맥락으로 기억하기 때문입니다. '
-             '따라서 검색도 사람처럼 한 단계씩 생각해야 하며, 저희는 다음과 같이 단계를 거쳐 검색하는 과정을 제시합니다.'),
+             '검색도 사람처럼 한 단계씩 생각하면 어떨까요? 저희는 다음과 같이 단계를 거쳐 검색하는 과정을 제시합니다.'),
     'chain': ('이 질문에는 빠진 고리가 하나 있습니다. (클릭) 바로 이 카카오톡 대화인데요. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
               '집들이라는 말은 없지만, 우리는 이날이 집들이라는 걸 바로 알죠. 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
     'idx': ('먼저, 기록이 쌓일 때마다 미리 색인해 둡니다. '
@@ -320,8 +323,7 @@ NOTES = {
              '‘박스 정리, 휴지 안 사 와도 돼’가 함의한 의미가 집들이 초대라는 걸 알아보고, 질문 곁으로 끌어오죠. '
              '이 카톡을 받은 3월 15일이 다음 단서가 됩니다.'),
     'hop2': '이 날짜를 두 번째 질문의 빈칸에 넣으면 (클릭) 메타데이터로 그날 사진만 필터링할 수 있고 (클릭) 그중 와인 사진에서 이름을 찾아낼 수 있습니다.',
-    'deliver': ('이렇게 찾은 답은 근거와 함께 건네고, (클릭) 사용자는 ‘입력하기’만 누르면 됩니다. '
-                '그럼 Weave가 우리 일상을 어떻게 바꿀까요?'),
+    'deliver': '이렇게 찾은 답은 근거와 함께 다듬어 건넵니다. 그럼, Weave가 우리 일상을 어떻게 바꿀까요?',      # 11-12: 클릭 없이 한 구간
 }
 
 # 말에 맞춰 뜨는 효과: 이름 → (장 키, 구간(클릭 번호), 그 효과가 떠야 할 때 말하는 구절). cue()가 낭독에서 그 구절을 말하는 때를 찾아 준다
@@ -337,7 +339,6 @@ CUES = {
     'hop1.ev': ('hop1', 1, '박스 정리'),            # 15쪽: 카톡 근거 '박스 정리' 형광펜
     'hop1.ev2': ('hop1', 1, '휴지 안 사'),          # 15쪽: 카톡 근거 '휴지 안 사 와도 돼' 형광펜
     'hop1.date': ('hop1', 1, '이 카톡을 받은'),     # 15쪽: 받은 날짜 형광펜
-    'deliver.tap': ('deliver', 1, '입력하기'),      # 17쪽: 손이 '입력하기'를 누름
 }
 SLIDE_KEYS = ['sol1', 'sol2', 'sol', 'hiw', 'ask', 'cloud', 'old', 'kw', 'emb', 'step', 'chain', 'idx', 'trig', 'split', 'hop1', 'hop2', 'deliver']
 TIMING_NAMES = ('LAT_START', 'LAT_CLICK', 'LAT_MID', 'GAP_SLIDE', 'GAP_SENT', 'GAP_MID', 'GAP_Q', 'S_BEAT', 'Q_BEAT', 'X_BEAT', 'R_BEAT')
@@ -1047,14 +1048,17 @@ TALK_K = 1.2                        # 11-11 6차: 끊어진 고리·데이터 �
 
 
 def _gap():
-    """빠진 고리 자리. 클릭하면 이 자리에 지은 카톡(중간 단서)이 들어옴(키운 카드 + 사방 16px, 가운데는 그대로)."""
+    """빠진 고리 자리. 클릭하면 이 자리에 지은 카톡(중간 단서)이 들어옴.
+    11-12: 물음표 자리와 카드의 크기가 달라 보여, 카드를 자리에 꼭 맞게 키움(자리의 폭은 그대로, 높이는 카드 비율대로).
+    돌려줌: (자리 상자, 카드 배율)."""
     w = jieun_fit()
     h = jieun_card('ch/talk', 0, 0, w)[1]
-    gw, gh = round(w * TALK_K) + 32, round(h * TALK_K) + 32
-    return (640 - gw / 2, 366 - gh / 2, gw, gh)
+    k = (round(w * TALK_K) + 32) / w
+    gw, gh = w * k, h * k
+    return (640 - gw / 2, 366 - gh / 2, gw, gh), k
 
 
-GAP = _gap()
+GAP, CH_K = _gap()
 CH_GAL = (874, 228, 360)
 
 
@@ -1094,7 +1098,7 @@ def s_chain():
     tk_h = jieun_card('ch/talk', 0, 0, tk_w)[1]
     tx, ty = gx + (gw - tk_w) / 2, cy - tk_h / 2
     talk = jieun_card('ch/talk', tx, ty, tk_w)
-    kx = Xf(gx + gw / 2, cy, gx + gw / 2, cy, TALK_K)      # 카드와 그 위 표시를 가운데 기준으로 함께 키움
+    kx = Xf(gx + gw / 2, cy, gx + gw / 2, cy, CH_K)        # 카드와 그 위 표시를 가운데 기준으로 함께 키움(물음표 자리와 같은 크기)
     s.add('ch/talk', talk[0], xf=kx)
     tp = talk[2]
     s.add('ch/h1', [band('ch/h1', tp[0], '박스 정리')], xf=kx)
@@ -1634,16 +1638,8 @@ def s_deliver():
     x, y, w, h = DL_SP
     QPT = 16.5
     pill, txt, cur, tx0 = search_pill('dl/sp', x, y, w, h, QUERY, pt=QPT)
-    S = QPT * 4 / 3
-
-    def band_(name, text, color, alpha):           # 검색창 글자 위 띠(선택 표시, 바뀐 글 훑기)
-        return [R(name, tx0 - 3, y + h / 2 - S * 0.62, tw(text, QPT) + 6, S * 1.24, prst='roundRect', radius=5, fill=color, alpha=alpha, line=None)]
     s.add('dl/sp', pill)
-    s.add('dl/sel', band_('dl/sel', QUERY, 'B9A2FF', 55), temp=True)
-    s.add('dl/q', [txt], temp=True)
-    s.add('dl/sweep', band_('dl/sweep', ANSWER, HL, 36), temp=True)
-    s.add('dl/q2', [T('dl/q2', txt[2], txt[3], txt[4], txt[5], ANSWER, size=QPT, color=INK, anchor='ctr')])
-    s.add('dl/cur', [R('dl/cur', tx0 + tw(ANSWER, QPT) + 3, y + h / 2 - 11, 2.4, 22, fill=PURPLE, line=None)])
+    s.add('dl/q', [txt, cur])
     sx, sy, sw, sh = SHEET
     by_ = sy + 128
     rows = [('talk', '지은', '‘휴지 안 사 와도 돼’  3월 15일'), ('gallery', '와인 사진', '3월 15일 20:14')]
@@ -1664,37 +1660,11 @@ def s_deliver():
                 T('dl/sheet/r%d' % i, sx + 62, ry, sw - 90, 32, [[(a + '  ', {'weight': 'b', 'color': INK}), (b, {'color': SUB})]], size=12.5,
                   anchor='ctr')]
     s.add('dl/sheet', out)
-    HD = 96                                    # 11-10 4차: 손 112 → 96(살짝만 작게)
-    hw = HD * 773 / 960
-    bx, by2 = sx + sw - 120, by_ + 25
-    s.add('dl/hand', [P('dl/hand', str(AS / 'hand.png'), bx - hw * 0.388, by2 - HD * 0.015 + 6, hw, HD)])
-    # 시트의 답이 칩이 되어 검색창으로(모션그래픽과 같은 순서: 검색어 선택 → 칩 도착 → 글이 바로 바뀜)
-    fly, fw = chip('dl/fly', tx0 - 12, y + h / 2 - 17, ANSWER, 'fill', pt=QPT, h=34, padx=12)
-    s.add('dl/fly', fly, temp=True)
-    fdx, fdy = (sx + 36 + tw(ANSWER, 24, 'b') / 2) - (tx0 - 12 + fw / 2), (sy + 78) - (y + h / 2)
     # 11-10 4차: UX 3(보낼 말을 다듬어 건넴)까지 아우르도록 '다듬어'를 넣음
+    # 11-12: '입력하기'를 누르는 박자(손, 검색어가 바뀌는 효과)를 뺌. 답과 근거를 건네는 데서 끝나고 뒷부분으로 넘어감
     s.add('dl/cap', [caption('dl/cap', [[('찾은 답을 다듬어,', INK)], [('근거와 함께 건넵니다', PURPLE)]], sx + sw + 62, 348, size=30, align='l')])
-    s.on('dl/q', 'jump', 0)
     s.on('dl/sheet', 'rise', 150, 550, dy=16)
     s.on('dl/cap', 'rise', 450, 550, dy=16)
-    s.click()                    # 입력하기 → 검색어가 선택되고 답이 날아와 → 타이핑 없이 바로 찾은 이름으로 바뀜
-    th = max(cue('deliver.tap', 500) - 500, 0)     # 11-11 8차: 손은 '입력하기'를 말할 때 버튼을 누름(CUES)
-    s.on('dl/hand', 'fly', th, 650, dx=140, dy=200, bend=0.1)
-    s.on('dl/hand', 'pulse', th + 680, 140, scale=0.93)
-    t = th + 980
-    s.on('dl/sel', 'wipe_in', t, 260)
-    s.on('dl/sel', 'jump', t)
-    s.on('dl/fly', 'fade_in', t, 120)
-    s.on('dl/fly', 'fly', t, 520, dx=fdx, dy=fdy, bend=0.3, show=False, fade=False, grow=1.4)
-    t += 520
-    s.on(['dl/q', 'dl/sel'], 'fade_out', t - 40, 80)
-    s.on('dl/q2', 'appear', t, 1)
-    s.on('dl/sweep', 'wipe_in', t, 320)
-    s.on('dl/sweep', 'jump', t)
-    s.on('dl/fly', 'fade_out', t, 150)
-    s.on('dl/cur', 'appear', t + 40, 1)
-    s.on('dl/cur', 'blink', t + 70, 1000)
-    s.on('dl/sweep', 'fade_out', t + 660, 300)
     return s
 
 
@@ -1856,7 +1826,10 @@ def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
                 temps.add(key)
             if start:
                 starts[key] = start
-            pa.put(key, prims, alpha=alpha, xf=xf or Xf(), group=group)
+            ids = pa.put(key, prims, alpha=alpha, xf=xf or Xf(), group=group)
+            if key in sp.rots:      # 부품을 통째로 기울임(묶음이면 묶음의 xfrm에)
+                for e in list(pa.tree)[-len(ids):]:
+                    e.find('.//' + q('a:xfrm')).set('rot', str(round(sp.rots[key] * 60000)))
         if sp.bar:
             for p in topbar_prims(sp.cur, sp.done):
                 pa.put(p[1], [p], group=False)

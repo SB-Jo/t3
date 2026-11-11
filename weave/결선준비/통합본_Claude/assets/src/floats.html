@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<!-- 3~5쪽(막막한 순간들)의 말풍선 위에 옅게 흩어져 있는 기록 조각(제목이 있던 자리까지). 표지 영상의 조각(10_표지영상/소스의 .chip)과 같은 모양.
+     찍기: python tools/intro_assets.py  → assets/intro/floats.png (1280×236 자리, 두 배 화소, 투명 바탕) -->
+<style>
+  @font-face { font-family: SOne; font-weight: 400; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneKorean-400.woff2'); }
+  @font-face { font-family: SOne; font-weight: 700; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneKorean-700.woff'); }
+  @font-face { font-family: SOneL; font-weight: 400; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneLatin-400.woff2'); }
+  @font-face { font-family: SOneL; font-weight: 700; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneLatin-700.woff2'); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: transparent; font-family: SOneL, SOne, 'Noto Sans KR', sans-serif; }
+  .shot { position: relative; width: 1280px; height: 236px; }
+  .chip { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 9px; padding: 9px 15px 9px 9px; background: rgba(255,255,255,.97);
+          border-radius: 13px; box-shadow: 0 5px 14px rgba(74,52,160,.13), 0 0 0 1px rgba(107,78,255,.07); transform-origin: 0 0; white-space: nowrap; }
+  .chip img { width: 28px; height: 28px; border-radius: 7.5px; flex: none; }
+  .chip .t { font-size: 13px; font-weight: 700; letter-spacing: -0.02em; color: #1C1A24; line-height: 1.25; }
+  .chip .m { font-size: 10px; color: #8E88A0; margin-top: 1px; letter-spacing: -0.01em; line-height: 1.25; }
+</style>
+<body>
+<div class="shot" data-name="floats" id="box"></div>
+<script>
+const IC = '../../../10_표지영상/소스/assets/icons/';
+// [아이콘, 제목, 한 줄, x, y, 크기 배율, 진하기, 흐림(px)] — 크기와 진하기를 달리해 세 줄쯤으로 어긋나게. 큰 것은 또렷하게, 작은 것은 옅고 흐리게
+const CHIPS = [
+  ['app-kakao', '팀 단톡방', '회의록 공유해요', 30, 18, 1.15, 0.56, 0],
+  ['app-notes', '장 볼 것', '우유, 계란, 휴지', 262, 2, 0.85, 0.42, 0.3],
+  ['samsung-gallery', 'IMG_2433.jpg', '3월 8일 12:40', 452, 22, 1.0, 0.48, 0],
+  ['samsung-calendar', '팀 회식', '3/20 (금) 19:00', 700, 4, 1.2, 0.56, 0],
+  ['samsung-email-blue', '[예약 확인] 오사카 호텔', '2월 27일', 950, 14, 0.9, 0.44, 0.2],
+  ['samsung-phone', '부재중 전화', '어제 오후 3:12', 1146, 54, 0.8, 0.38, 0.4],
+  ['samsung-calendar', '치과 예약', '3/4 (수) 오전 10:30', 150, 92, 0.9, 0.42, 0.3],
+  ['samsung-email-blue', '관리비 고지서', '2월분 관리비', 370, 100, 1.1, 0.50, 0],
+  ['app-kakao', '엄마', '반찬 보냈다', 610, 86, 0.8, 0.38, 0.5],
+  ['app-notes', '회의록 3/14', '다음 주 시연 리허설', 790, 96, 1.05, 0.50, 0],
+  ['samsung-gallery', 'IMG_2475.jpg', '3월 15일 19:52', 1026, 100, 0.95, 0.44, 0.2],
+  ['app-map', '저장한 장소', '성수 카페', 40, 168, 0.8, 0.36, 0.5],
+  ['app-kakao', '민호', '주말에 축구 콜?', 270, 176, 0.75, 0.34, 0.6],
+  ['samsung-calendar', '헬스', '화, 목 오전 7:00', 520, 172, 0.72, 0.32, 0.6],
+  ['app-kakao', '택배', '문 앞에 두고 갔어요', 760, 178, 0.78, 0.36, 0.5],
+  ['samsung-wallet', '멤버십', '적립 1,200P', 1010, 166, 0.82, 0.38, 0.4],
+  ['samsung-email-blue', 'Q1_Demo_v3.pdf', '어제 오후 6:20', 1160, 178, 0.72, 0.32, 0.6],
+];
+const box = document.getElementById('box');
+for (const [ic, t, m, x, y, s, o, b] of CHIPS) {
+  const el = document.createElement('div');
+  el.className = 'chip';
+  el.innerHTML = `<img src="${IC}${ic}.png" alt=""><div><div class="t">${t}</div><div class="m">${m}</div></div>`;
+  el.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  el.style.opacity = o;
+  if (b) el.style.filter = `blur(${b}px)`;
+  box.appendChild(el);
+}
+</script>
+</body>
+</html>

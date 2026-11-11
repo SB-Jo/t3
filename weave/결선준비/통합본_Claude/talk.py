@@ -5,8 +5,8 @@
                                 (1920×1080 원본은 out/…_1080p.mp4, 덱 옆에는 확인용 1280×720)
   python talk.py --remux        녹화(out/_silent.mp4)는 그대로 두고 낭독·자막만 다시 얹음
   python talk.py --time         낭독까지만 하고 장마다 걸리는 시간을 어림(녹화하지 않음)
-  python talk.py --proposal     제안 장표 두 장만 따로 → 제안장표_미리보기.mp4
-  python talk.py --new          새로 그린 장만(잇는 장, 뒷부분, 제안 장표) 빨리 찍어 봄 → out/새장_미리보기.mp4
+  python talk.py --proposal     제안 장표 세 장만 따로 → 제안장표_미리보기.mp4
+  python talk.py --new          새로 그린 장만(6, 9, 11~12, 14쪽, 뒷부분, 제안 장표) 빨리 찍어 봄 → out/새장_미리보기.mp4
   --check                       낭독을 받아쓰기로 글과 견줌(out/tts_check.txt)
 
 하는 일
@@ -85,7 +85,7 @@ def narrate_all(check=False):
     fu = foreign_units()
     proxies = [types.SimpleNamespace(key=k, notes=say) for k, _, say in fu]
     own = own_specs()
-    specs = proxies + [sp for name in ('hook', 'hub2', 'bridge', 'hiw', 'back', 'prop') for sp in own[name] if sp.notes.strip()]
+    specs = proxies + [sp for name in ('hook', 'hub2', 'rec', 'bridge', 'hiw', 'back', 'prop') for sp in own[name] if sp.notes.strip()]
     says, clips = HW.narrate(specs, None, check)
     for p in proxies:               # 옮겨 온 장: 말 떼기까지의 틈을 장마다 따로
         lead = LEADS.get(p.key, HW.LAT_START)
@@ -112,7 +112,7 @@ def talkify(specs, says, k, plan):
     return k
 
 
-PART = {'proposal': ['prop'], 'new': ['hook', 'hub2', 'bridge', 'back', 'prop']}       # 따로 찍는 묶음
+PART = {'proposal': ['prop'], 'new': ['hook', 'hub2', 'rec', 'bridge', 'back', 'prop']}       # 따로 찍는 묶음
 
 
 def build_auto(dst, fu, says, part=None):
@@ -379,7 +379,7 @@ def finish(silent, mp4, plan, clips, tail=1.0):
 
 
 # ------------------------------------------------------------------ 시간표
-SECTIONS = [('표지와 인트로', lambda k: k == 'cover' or k.startswith('in') or k in ('hook', 'hub2', 'bridge')),
+SECTIONS = [('표지와 인트로', lambda k: k == 'cover' or k.startswith('in') or k in ('hook', 'hub2', 'scat', 'link', 'bridge')),
             ('모션그래픽', lambda k: k == 'mg'),
             ('솔루션과 How it Works', lambda k: k in HW.SLIDE_KEYS),
             ('뒷부분', lambda k: True)]

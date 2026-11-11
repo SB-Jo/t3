@@ -22,7 +22,8 @@ PURPLE, PURPLE2, RING, HL = '6B4EFF', '8B6BFF', '8B68F5', 'A67CF2'
 LAV, LAV2 = 'F1ECFF', 'F7F4FF'
 GRAY_FILL, GRAY_LINE = 'F3F1F7', 'B9B2C9'
 RED = 'E5484D'
-ICON = {'talk': 'app-kakao.png', 'note': 'app-notes.png', 'cal': 'samsung-calendar.png', 'gallery': 'samsung-gallery.png',
+ICON = {'talk': 'app-kakao.png', 'note': str(HERE / 'assets' / 'app-notes.png'),      # 삼성노트는 가장자리 흰 테를 지운 것(tools/notes_icon.py)
+         'cal': 'samsung-calendar.png', 'gallery': 'samsung-gallery.png',
         'mail': 'samsung-email-blue.png', 'phone': 'samsung-phone.png', 'map': 'app-map.png', 'wallet': 'samsung-wallet.png',
         'spool': 'weave-spool-6B4EFF.png', 'spool_w': 'weave-spool-white.png', 'google': 'google.png'}
 APP_NAME = {'talk': '카카오톡', 'note': '삼성노트', 'cal': '캘린더', 'gallery': '갤러리', 'mail': '이메일', 'phone': '전화',
