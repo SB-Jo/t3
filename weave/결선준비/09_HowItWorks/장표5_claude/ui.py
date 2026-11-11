@@ -140,7 +140,8 @@ class Painter:
             pa = o.get('alpha', 100) * a
             e = L.picture(self.sid(), name, self.rid(fname), xf.X(x), xf.Y(y), w * s, h * s, crop=o.get('crop'),
                           radius=(o['radius'] * s) if o.get('radius') else None, alpha=None if pa >= 99.9 else pa,
-                          line=o.get('line'), line_w=o.get('line_w', 0.75) * s, shadow=o.get('shadow') if a > 0.6 else None)
+                          line=o.get('line'), line_w=o.get('line_w', 0.75) * s, line_alpha=None if pa >= 99.9 else pa,
+                          shadow=o.get('shadow') if a > 0.6 else None)
             return e
         if kind == 'curve':
             _, _, pts, o = p

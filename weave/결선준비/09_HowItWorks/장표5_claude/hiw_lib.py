@@ -309,7 +309,7 @@ def text(sid, name, x, y, w, h, paras, size=10, color='1C1A24', weight='r', alig
     return sp
 
 
-def picture(sid, name, rId, x, y, w, h, crop=None, radius=None, line=None, line_w=0.75, shadow=None, alpha=None):
+def picture(sid, name, rId, x, y, w, h, crop=None, radius=None, line=None, line_w=0.75, shadow=None, alpha=None, line_alpha=None):
     """p:pic. crop=(l,t,r,b) 비율(0~1). radius px면 모서리 둥글게."""
     pic = etree.Element(q('p:pic'), nsmap=NS)
     nv = _nv(pic, 'p:nvPicPr', sid, name)
@@ -333,7 +333,7 @@ def picture(sid, name, rId, x, y, w, h, crop=None, radius=None, line=None, line_
     if radius:
         el('a:gd', av, name='adj', fmla='val %d' % min(50000, int(radius / min(w, h) * 100000)))
     if line:
-        _line(spPr, line, line_w)
+        _line(spPr, line, line_w, line_alpha)
     _effects(spPr, shadow)
     return pic
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""How it Works — _claude판 7차(2026-11-11) → ../HowItWorks_Argon_claude.pptx
+"""How it Works — _claude판 8차(2026-11-11) → ../HowItWorks_Argon_claude.pptx
 솔루션 세 장(조각마다 하나씩 움직임) + How it Works 14장 + Appendix 15장(한눈에 보기 포함). 뱃지는 어느 장에도 없다.
 
   python build.py                 → ../HowItWorks_Argon_claude.pptx (발표용: 클릭마다 한 박자)
@@ -293,46 +293,51 @@ SOL_QPT = 12.5 * 0.75                              # (2) 검색창 글자 크기
 # 발표자 노트(말할 글). (클릭)은 그 자리에서 클릭해 다음 효과를 띄운다는 표시. 장 키 → 글. 발표 시간은 python build.py --time [--tts]로 잰다
 NOTES = {
     'sol1': ('방금 보신 첫 번째 장면은 기록 통합 검색입니다. '
-             '(클릭) 한 번만 물으면, 여러 앱에 흩어진 기록을 찾아서 요약해 줍니다.'),
-    'sol2': '두 번째는 단서로 찾는 기억입니다. 이름이 떠오르지 않아도, 단서만 적고 실타래 버튼을 누르면 됩니다.',
-    'sol': '세 번째는 먼저 건네는 기억입니다. 이번엔 묻기도 전에, 필요한 기억을 먼저 꺼내 주죠.',
-    'hiw': '그런데 이름도 모르는 걸 어떻게 찾아냈을까요? 그 속을 한번 들여다보겠습니다.',
-    'ask': '친구 지은이네 집들이에서 마신 와인을 다시 사려는데, 이름이 생각나지 않습니다.',
-    'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 그런데 단서가 여러 앱에 흩어져 있죠.',
+             '(클릭) 통화 중이더라도, 간편하게 여러 앱에 흩어진 기록을 찾아 요약할 수 있었습니다.'),
+    'sol2': '두 번째는 단서로 찾는 기억입니다. 이름이 떠오르지 않아도, 단서를 통해 정확한 이름을 찾을 수 있었습니다.',
+    'sol': '세 번째는 먼저 건네는 기억입니다. 묻기도 전에, 필요한 기억을 먼저 꺼내 주었습니다.',
+    'hiw': '이는 어떻게 가능했을까요? 두 번째 시나리오를 통해 알아보도록 하겠습니다.',
+    'ask': '친구 집들이에서 마신 와인을 다시 사려는데, 이름이 생각나지 않는 상황입니다.',
+    'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 하지만, 단서는 여러 앱에 흩어져 있죠.',
     'old': '그럼 지금 쓰는 검색으로 한번 찾아볼까요?',
     'kw': ('먼저 키워드 검색은 글자가 같은 기록을 찾습니다. '
-           '(클릭) ‘지은이네’로는 (클릭) 집 주소가, (클릭) ‘집들이’로는 (클릭) 다른 사람 집들이가, '
+           '(클릭) ‘지은이네’로는 (클릭) 지은이네 집 주소가, (클릭) ‘집들이’로는 (클릭) 다른 사람 집들이가, '
            '(클릭) ‘와인’으로는 (클릭) 다른 날 결제 내역이 나오죠. '
            '(클릭) 그럼 그날 찍은 사진은요? (클릭) 키워드가 없으니 아예 검색이 안 됩니다.'),
-    'emb': ('임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 벡터라는 숫자로 바꾸고 '
+    'emb': ('임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 고차원 벡터로 바꾸고 '
             '(클릭) 뜻이 비슷할수록 가까이 놓이는 임베딩 공간에서 (클릭) 질문과 가까운 기록을 가져옵니다. '
             '(클릭) 그런데 가져온 건 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. 정작 단서는 멀리 있죠.'),
     'step': ('왜 이럴까요? 우리는 키워드가 아니라 대화의 맥락으로 기억하기 때문입니다. '
-             '그래서 검색도 사람처럼 한 단계씩 생각해야 합니다.'),
-    'chain': ('이 질문에는 빠진 고리가 하나 있습니다. (클릭) 바로 이 카톡인데요. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
+             '따라서 검색도 사람처럼 한 단계씩 생각해야 하며, 저희는 다음과 같이 단계를 거쳐 검색하는 과정을 제시합니다.'),
+    'chain': ('이 질문에는 빠진 고리가 하나 있습니다. (클릭) 바로 이 카카오톡 대화인데요. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
               '집들이라는 말은 없지만, 우리는 이날이 집들이라는 걸 바로 알죠. 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
     'idx': ('먼저, 기록이 쌓일 때마다 미리 색인해 둡니다. '
             '(클릭) 문장은 임베딩 모델을 거쳐 뜻을 담은 숫자, 의미 벡터가 되고요. (클릭) 언제, 어느 앱에서, 누가 보냈는지 등은 메타데이터로 저장합니다.'),
-    'trig': '검색하다 막히면 실타래 버튼을 누릅니다. Weave가 적던 질문을 가져오고요.',
-    'split': '이 질문을 작은 질문 두 개로 나눠 다시 씁니다. (클릭) 집들이가 언제였는지 먼저 묻고, 와인 질문은 ‘그날’을 빈칸으로 남겨 두죠.',
-    'hop1': ('첫 질문을 일반 임베딩으로 찾으면, 지은이의 카톡은 여전히 멀리 있는데요. '
-             '(클릭) Reasoning Embedding은 추론에 필요한 다음 단서 또한 잘 찾도록 튜닝한 임베딩 모델입니다. '
-             '‘휴지 안 사 와도 돼’가 집들이 초대라는 걸 알아보고 질문 곁으로 끌어오죠. '
+    'trig': '단서를 포함한 질의를 입력하고 실타래 버튼을 누르면, Weave는 사용자가 입력한 질의를 가져옵니다.',
+    'split': '이 질문을 의미 단위로 나누어 다시 씁니다. (클릭) 집들이가 언제였는지 먼저 묻고, 와인을 마셨던 날은 빈칸으로 남겨 두게 되죠.',
+    'hop1': ('첫 질문인 ‘지은이네 집들이는 언제였지?’를 일반 임베딩으로 찾으면, 지은이의 카톡은 여전히 멀리 있는데요. '
+             '(클릭) Reasoning Embedding은 추론에 필요한 단서도 잘 찾도록 튜닝한 임베딩 모델입니다. '
+             '‘박스 정리, 휴지 안 사 와도 돼’가 함의한 의미가 집들이 초대라는 걸 알아보고, 질문 곁으로 끌어오죠. '
              '이 카톡을 받은 3월 15일이 다음 단서가 됩니다.'),
-    'hop2': '이 날짜를 두 번째 질문의 빈칸에 넣으면 (클릭) 메타데이터로 그날 사진만 남고 (클릭) 그중 와인 사진에서 드디어 이름을 찾아냅니다.',
-    'deliver': ('이렇게 찾은 답은 근거와 함께 건넵니다. (클릭) 저는 ‘입력하기’만 누르면 됩니다. '
+    'hop2': '이 날짜를 두 번째 질문의 빈칸에 넣으면 (클릭) 메타데이터로 그날 사진만 필터링할 수 있고 (클릭) 그중 와인 사진에서 이름을 찾아낼 수 있습니다.',
+    'deliver': ('이렇게 찾은 답은 근거와 함께 건네고, (클릭) 사용자는 ‘입력하기’만 누르면 됩니다. '
                 '그럼 Weave가 우리 일상을 어떻게 바꿀까요?'),
 }
 
 # 말에 맞춰 뜨는 효과: 이름 → (장 키, 구간(클릭 번호), 그 효과가 떠야 할 때 말하는 구절). cue()가 낭독에서 그 구절을 말하는 때를 찾아 준다
 CUES = {
+    'emb.clue': ('emb', 5, '정작 단서는'),           # 9쪽: 멀리 있는 단서(지은 카톡)가 두 번 튐
     'chain.h1': ('chain', 1, '박스 정리'),          # 11쪽: 카톡의 '박스 정리' 형광펜
     'chain.h2': ('chain', 1, '휴지 안 사'),         # 11쪽: '휴지 안 사 와도 돼' 형광펜
     'chain.hd': ('chain', 1, '이날이'),             # 11쪽: 받은 날짜 형광펜 → 실이 이어져 그날 사진과 이름
     'chain.bridge': ('chain', 1, '이 중간 단서를'),  # 11쪽: 아래 물음 글
-    'split.q2': ('split', 1, '와인 질문은'),        # 14쪽: 둘째 질의(②)
-    'hop1.ev': ('hop1', 1, '휴지 안 사'),           # 15쪽: 카톡 근거 두 군데 형광펜
+    'trig.press': ('trig', 0, '누르면'),            # 13쪽: 손이 실타래 버튼을 누름
+    'trig.take': ('trig', 0, '사용자가 입력한'),     # 13쪽: 검색창의 질의에 형광펜(질의를 가져옴)
+    'split.q2': ('split', 1, '와인을 마셨던 날은'),  # 14쪽: 둘째 질의(②)
+    'hop1.ev': ('hop1', 1, '박스 정리'),            # 15쪽: 카톡 근거 '박스 정리' 형광펜
+    'hop1.ev2': ('hop1', 1, '휴지 안 사'),          # 15쪽: 카톡 근거 '휴지 안 사 와도 돼' 형광펜
     'hop1.date': ('hop1', 1, '이 카톡을 받은'),     # 15쪽: 받은 날짜 형광펜
+    'deliver.tap': ('deliver', 1, '입력하기'),      # 17쪽: 손이 '입력하기'를 누름
 }
 SLIDE_KEYS = ['sol1', 'sol2', 'sol', 'hiw', 'ask', 'cloud', 'old', 'kw', 'emb', 'step', 'chain', 'idx', 'trig', 'split', 'hop1', 'hop2', 'deliver']
 TIMING_NAMES = ('LAT_START', 'LAT_CLICK', 'LAT_MID', 'GAP_SLIDE', 'GAP_SENT', 'GAP_MID', 'GAP_Q', 'S_BEAT', 'Q_BEAT', 'X_BEAT', 'R_BEAT')
@@ -781,7 +786,7 @@ KW_Y = 334
 KW_GAL = (375, 490, 530)
 # 11-10 4차: ✕가 뜰 때 옆에 따라 나오는 한마디(카드 셋 + 갤러리).
 # 5차: '다른 날 와인 결제' → '다른 날 결제 내역', 갤러리는 '읽을 수 없는 사진' → '키워드가 없는 사진'(키워드 검색은 같은 글자를 찾는데 사진에는 '와인'도 '집들이'도 적혀 있지 않음)
-KW_VERDICT = ['관련 없는 집 주소', '다른 사람 집들이', '다른 날 결제 내역', '키워드가 없는 사진']
+KW_VERDICT = ['관련 없는 주소 정보', '다른 사람 집들이', '다른 날 결제 내역', '키워드가 없는 사진']      # 11-11 8차: '관련 없는 집 주소' → '관련 없는 주소 정보'
 
 
 def method_chip(name, x, y, title, label, title_pt=16):
@@ -1019,7 +1024,9 @@ def s_emb():
     s.on(['em/r_pic', 'em/r_pic2', 'em/k2', 'em/k3'], 'dim', 0, 380, to=0.45)
     s.on('em/x2', 'zoom_in', 100, 300, **{'from': 0.8})
     s.on('em/v2', 'wipe_in', 250, 300)
-    s.on(['em/r_jieun', 'em/clue'], 'pulse', 950, 190, scale=1.1)      # 끝에 한 번 짚어 줌: 진짜 단서는 저 멀리
+    tc = max(cue('emb.clue', 950, ahead=0.1), 950)          # 끝에 짚어 줌: 진짜 단서는 저 멀리. '정작 단서는'을 말할 때(CUES)
+    for i in range(2):                                      # 11-11 8차: 조금 더 크게(1.1 → 1.16), 두 번 튐
+        s.on(['em/r_jieun', 'em/clue'], 'pulse', tc + i * 420, 170, scale=1.16)
     return s
 
 
@@ -1164,7 +1171,7 @@ def s_idx():
     s.add('idx/l1', [T('idx/l1', x + 30, rows_y[1], lab_w, 34, '의미 벡터', size=13.5, color=PURPLE, weight='b', anchor='ctr')])
     s.add('idx/r1', [T('idx/r1', vx, rows_y[1], w - 170, 34, IDX_VEC, size=15.5, color=PURPLE, weight='m', anchor='ctr')])
     s.add('idx/l2', [T('idx/l2', x + 30, rows_y[2], lab_w, 34, '메타데이터', size=13.5, color=PURPLE, weight='b', anchor='ctr')])
-    s.add('idx/r2', [T('idx/r2', vx, rows_y[2], w - 170, 34, IDX_META, size=15.5, color=INK, weight='m', anchor='ctr')])
+    s.add('idx/r2', [T('idx/r2', vx, rows_y[2], w - 170, 34, IDX_META, size=15.5, color=PURPLE, weight='m', anchor='ctr')])   # 11-11 8차: 의미 벡터처럼 보라
     s.on('idx/card', 'rise', 250, 550, dy=14)
     s.on('idx/arr', 'wipe_in', 500, 450)
     s.on(['idx/l0', 'idx/r0'], 'fade_in', 750, 400)
@@ -1190,7 +1197,8 @@ def trig_parts(alpha=100):
     pill, txt, cur, tx0 = search_pill('tr/sp', x, y, w, h, QUERY, pt=17.5)
     out.append(('tr/sp', pill))
     # 11-10 5차: 그림 맨 위 흰 줄(2px)을 잘라 내고, 옅은 바탕과 구분되게 테두리를 조금 진하게 + 그림자를 깊게
-    out.append(('tr/kb', [P('tr/kb', str(AS / 'keyboard.png'), *KB, radius=18, crop=(0, 3 / 800, 0, 0), line='CDC8DC', line_w=1.3,
+    # 11-11 8차: '테두리 너무 진함' → 조금 연하게(CDC8DC 1.3 → D9D4E8 1.2). 흐려진 자판(14쪽)은 테두리도 함께 흐려짐(ui.Painter)
+    out.append(('tr/kb', [P('tr/kb', str(AS / 'keyboard.png'), *KB, radius=18, crop=(0, 3 / 800, 0, 0), line='D9D4E8', line_w=1.2,
                             shadow=SHADOW_LIFT)]))
     hw = HAND_H * 773 / 960
     hx, hy = SPOOL[0] - hw * 0.388, SPOOL[1] - HAND_H * 0.015 + 8
@@ -1216,12 +1224,13 @@ def s_trig():
     s.add('tr/cap', [caption('tr/cap', [[('실타래 버튼', PURPLE), ('을 누르면', INK)], [('Weave', PURPLE), ('가 실행됩니다', INK)]],
                              TR_SP[0] / 2 + 6, 344, size=30)])
     # 11-10 5차: 클릭 없이 장이 열리면 이어서(01은 짧게 지나가는 단계). 글은 손이 들어와 누를 때 함께
-    t = 450
+    # 11-11 8차: 말이 길어져 말에 맞춤(CUES). 손은 '누르면'을 말할 때 버튼을 누르고, 질의 형광펜은 '사용자가 입력한 질의를'을 말할 때
+    t = max(cue('trig.press', 1210, ahead=0.05) - 760, 450)
     s.on('tr/hand', 'fly', t, 700, dx=170, dy=230, bend=0.1)
     s.on('tr/cap', 'rise', t + 200, 550, dy=16)
     s.on('tr/hand', 'pulse', t + 760, 140, scale=0.93)
     s.on('tr/glow', 'zoom_in', t + 860, 300, **{'from': 0.6})
-    s.on('tr/qhl', 'wipe_in', t + 1150, 600)
+    s.on('tr/qhl', 'wipe_in', max(cue('trig.take', t + 1150), t + 1150), 600)
     return s
 
 
@@ -1255,8 +1264,9 @@ def s_split():
     tqx, tqy = qx + 26, qy + 74
     s.add('q/text', [T('q/text', tqx, tqy, qw - 40, S * 1.4, QUERY, size=qpt, color=INK)])
     qpos = (tqx, tqy, QUERY, qpt, 'r')
-    b1 = band('sp/b1', qpos, '지은이네 집들이', alpha=36)
-    b2 = hl_band('sp/b2', tqx, tqy, QUERY, '때 마셨던 와인', qpt, color=BLUE_HL, alpha=40)
+    # 11-11 8차: '지은이네 집들이' / '때 마셨던 와인' → '지은이네 집들이 때' / '마셨던 와인'
+    b1 = band('sp/b1', qpos, '지은이네 집들이 때', alpha=36)
+    b2 = hl_band('sp/b2', tqx, tqy, QUERY, '마셨던 와인', qpt, color=BLUE_HL, alpha=40)
     s.add('sp/b1', [b1])
     s.add('sp/b2', [b2])
     r1y, r2y = qy + 130, qy + 206
@@ -1272,7 +1282,7 @@ def s_split():
     s.click()
     s.on('sp/b1', 'wipe_in', 0, 450)
     s.on('sp/r1', 'rise', 500, 450, dy=14)
-    tq = max(cue('split.q2', 2200), 1100)        # 둘째 질의는 '와인 질문은'을 말할 때(CUES)
+    tq = max(cue('split.q2', 2200), 1100)        # 둘째 질의는 '와인을 마셨던 날은'을 말할 때(CUES)
     s.on('sp/b2', 'wipe_in', tq, 450)
     s.on('sp/r2', 'rise', tq + 400, 450, dy=14)
     return s
@@ -1502,14 +1512,15 @@ def s_hop1():
     # 11-10 5차: 근거는 그 말을 할 즈음에(카드가 뜨고 조금 뒤 근거 두 군데, 날짜는 '다음 단서'를 말하기 앞서)
     # 11-11 7차: 근거는 '휴지 안 사 와도 돼'를 말할 때, 날짜는 '이 카톡을 받은 3월 15일'을 말할 때(CUES, cue()가 낭독에서 찾음)
     te = max(cue('hop1.ev', 6875, ahead=0.3), t + 700)
-    tdt = max(cue('hop1.date', 13500), te + 1400)
+    te2 = max(cue('hop1.ev2', te + 375), te + 375)          # 11-11 8차: '박스 정리'와 '휴지 안 사 와도 돼'를 말하는 차례로
+    tdt = max(cue('hop1.date', 13500), te2 + 1000)
     s.on('h1/h1', 'wipe_in', te, 350)
-    s.on('h1/h2', 'wipe_in', te + 375, 450)
+    s.on('h1/h2', 'wipe_in', te2, 450)
     s.on('h1/hd', 'wipe_in', tdt, 400)
     return s
 
 
-H2_GAL = (500, 440, 736)
+H2_GAL = (500, 398, 736)           # 11-11 8차: 갤러리와 그 위 카톡을 42px 위로(갤러리 아래가 Query 2 아래와 나란히. 오른쪽 위가 비어 보였음)
 H2_PH = 154                        # 갤러리 사진 높이(11-10 5차: 126 → 154, 와인 라벨이 더 잘 보이게)
 H2_PHOTOS = ['babich', 'table', 'w1', 'w3', 'w2']
 
@@ -1667,9 +1678,10 @@ def s_deliver():
     s.on('dl/sheet', 'rise', 150, 550, dy=16)
     s.on('dl/cap', 'rise', 450, 550, dy=16)
     s.click()                    # 입력하기 → 검색어가 선택되고 답이 날아와 → 타이핑 없이 바로 찾은 이름으로 바뀜
-    s.on('dl/hand', 'fly', 0, 650, dx=140, dy=200, bend=0.1)
-    s.on('dl/hand', 'pulse', 680, 140, scale=0.93)
-    t = 980
+    th = max(cue('deliver.tap', 500) - 500, 0)     # 11-11 8차: 손은 '입력하기'를 말할 때 버튼을 누름(CUES)
+    s.on('dl/hand', 'fly', th, 650, dx=140, dy=200, bend=0.1)
+    s.on('dl/hand', 'pulse', th + 680, 140, scale=0.93)
+    t = th + 980
     s.on('dl/sel', 'wipe_in', t, 260)
     s.on('dl/sel', 'jump', t)
     s.on('dl/fly', 'fade_in', t, 120)
@@ -1987,20 +1999,26 @@ def _cue_data():
 
 
 def _in_piece(text, dur, pauses, phrase):
-    """토막(text, 길이 dur초) 안에서 phrase를 말하기 시작하는 때(초). 쉼표마다 잰 쉼이 있으면 그 사이의 마디 안에서만 음절로 나눈다."""
+    """토막(text, 길이 dur초) 안에서 phrase를 말하기 시작하는 때(초).
+    쉼표마다 잰 쉼 가운데 가장 가까운 것을 짝지어 그 자리를 기준으로 삼고(쉼표에서 쉬지 않고 읽힌 곳은 짝이 없음), 그 사이는 음절 수로 나눈다."""
     i = text.index(phrase)
-    cw = 1.8 if pauses is None else 0.6                       # 쉼표 하나의 무게(음절): 낭독 전 어림은 1.8, 잰 토막에 쉼이 없으면 0.6
+    cw = 1.8 if pauses is None else 0.6                       # 짝 없는 쉼표 하나의 무게(음절): 낭독 전 어림은 1.8, 잰 토막에서는 0.6
     w = lambda t: syllables(t) + cw * t.count(',')
-    clauses = text.split(',')
-    if pauses and len(pauses) == len(clauses) - 1:
-        bounds = [0.05] + [x for pz in pauses for x in pz] + [max(dur - 0.1, 0.1)]
-        pos = 0
-        for k, c in enumerate(clauses):
-            if i <= pos + len(c):
-                a, b = bounds[2 * k], bounds[2 * k + 1]
-                return a + (b - a) * syllables(c[:i - pos]) / max(syllables(c), 1)
-            pos += len(c) + 1
-    return 0.05 + (dur - 0.15) * w(text[:i]) / max(w(text), 1)
+    t0, t1 = 0.05, max(dur - 0.1, 0.1)
+    total = max(w(text), 1)
+    segs, c0, a, left = [], 0, t0, [list(z) for z in (pauses or [])]
+    for m in re.finditer(',', text):
+        e = t0 + (t1 - t0) * w(text[:m.start()]) / total     # 쉼 없이 고르게 읽었다면 이 쉼표가 올 때
+        cand = [z for z in left if abs((z[0] + z[1]) / 2 - e) < 0.9]
+        if cand:
+            z = min(cand, key=lambda z: abs((z[0] + z[1]) / 2 - e))
+            left = [y for y in left if y[0] > z[0]]
+            segs.append((c0, m.start(), a, z[0]))
+            c0, a = m.end(), z[1]
+    segs.append((c0, len(text), a, t1))
+    for c0, c1, a, b_ in segs:
+        if i < c1 or c1 == len(text):
+            return a + (b_ - a) * w(text[c0:max(i, c0)]) / max(w(text[c0:c1]), 1)
 
 
 def cue(name, default, ahead=0.15):
@@ -2105,7 +2123,8 @@ def tts_text(seg):
     for k, v in READ_AS.items():
         t = t.replace(k, v)
     t = re.sub(r'\d+', lambda m: _num_ko(int(m.group())), t)
-    return re.sub('[‘’“”"]', '', t)
+    t = re.sub('[‘’“”"]', '', t)
+    return re.sub(r'[?!](?=[가-힣])', '', t)          # 따옴표 안의 물음이 문장 가운데 있을 때(‘… 언제였지?’를): 물음표 없이 이어 읽음
 
 
 def narrate(specs, voice=None, check=False):
@@ -2125,7 +2144,7 @@ def narrate(specs, voice=None, check=False):
             for k, (t, beat) in enumerate(_sents(seg)):
                 name = '%s_%d_p%d' % (sp.key, j, k)
                 parts[sp.key, j].append((name, t, beat))
-                todo.append((name, t if t.endswith(('.', '?', '!')) else t + ','))       # 문장 중간에서 끊는 토막은 쉼표로(말끝을 내리지 않게)
+                todo.append((name, t if t.endswith(('.', '?', '!')) else t.rstrip(', ') + ','))       # 문장 중간에서 끊는 토막은 쉼표로(말끝을 내리지 않게)
     tts_c.synth(todo, d, voice)
     lens = {n: tts_c.tidy(d / (n + '.wav')) for n, _ in todo}
     v = tts_c.pick_voice(voice)
@@ -2378,7 +2397,7 @@ def main():
         names = [f.__name__[2:] for f in SOL_SLIDES + SLIDES]
         blur_png(pngs[names.index('sol3')], OUT / 'blur_sol.png', radius=BLUR_SOL)
         blur_png(pngs[names.index('emb')], OUT / 'blur_emb.png')
-        blur_png(pngs[names.index('cloud')], OUT / 'blur_cloud.png', radius=5.5, veil=0.12)    # 살짝만 흐리게(11-10 5차: 4 → 5.5로 조금 더)
+        blur_png(pngs[names.index('cloud')], OUT / 'blur_cloud.png', radius=7, veil=0.12)      # 살짝만 흐리게(5차: 4 → 5.5, 8차: 5.5 → 7로 조금 더)
         tmp.unlink()
     says = clips = None
     if a.video and a.tts:               # 낭독을 먼저 만든다: 말에 맞춰 뜨는 효과(cue)가 이 낭독에서 때를 찾음
