@@ -4,10 +4,10 @@
 
   python build.py                 → ../HowItWorks_Argon_claude.pptx (발표용: 클릭마다 한 박자)
   python build.py --png           + out/png/s01.png… 와 out/한눈에.png (PowerPoint로 렌더, 정적 = 마지막 상태)
-  python build.py --video         + out/HowItWorks_Argon_claude_미리보기.mp4 (본문 17장만. 클릭 효과가 저절로 나오는 사본을 PowerPoint로 녹화하되,
+  python build.py --video         + out/HowItWorks_Argon_claude_미리보기.mp4 (본문 16장만. 클릭 효과가 저절로 나오는 사본을 PowerPoint로 녹화하되,
                                   구간마다 그 구간의 노트를 말하는 시간만큼 머물고 그 말을 자막으로 띄움 → 영상 길이 = 발표 시간 어림)
   python build.py --skip-blur     흐린 배경 그림(out/blur_*.png)을 다시 만들지 않음(있는 것을 씀)
-  python build.py --time          덱은 만들지 않고 발표 시간만 어림(본문 17장: 장마다 클릭 수, 음절 수, 걸리는 시간)
+  python build.py --time          덱은 만들지 않고 발표 시간만 어림(본문 16장: 장마다 클릭 수, 음절 수, 걸리는 시간)
   python build.py --time --tts    노트를 낭독해서(tts_c.py, 기기 안의 음성 합성) 그 길이로 잼. --check를 붙이면 낭독을 받아쓰기로 글과 견줌
   python build.py --video --tts   미리보기 영상에 낭독을 넣음(낭독 길이만큼 머묾). --voice로 목소리, --remux로 녹화는 두고 낭독만 다시
                                   낭독 영상은 덱 옆(../HowItWorks_Argon_claude_미리보기.mp4)에도 복사됨
@@ -295,32 +295,33 @@ SOL_Q1 = '삼성기술전 시연 내용'
 SOL_QPT = 12.5 * 0.75                              # (2) 검색창 글자 크기(pt)
 # 발표자 노트(말할 글). (클릭)은 그 자리에서 클릭해 다음 효과를 띄운다는 표시. 장 키 → 글. 발표 시간은 python build.py --time [--tts]로 잰다
 NOTES = {
-    'sol1': ('영상 속 세 장면을 하나씩 정리해 보겠습니다. 방금 보신 첫 번째 장면은 기록 통합 검색입니다. '      # 11-12: 영상에서 넘어오는 한 문장을 앞에
+    'sol1': ('방금 영상에서 보신 세 가지 기능을 정리해 보겠습니다. 첫 번째는 기록 통합 검색입니다. '      # 11-12 10차: '장면' → '기능', '다시 한번'은 4쪽에만
              '(클릭) 통화 중이더라도, 간편하게 여러 앱에 흩어진 기록을 찾아 요약할 수 있었습니다.'),
     'sol2': '두 번째는 단서로 찾는 기억입니다. 이름이 떠오르지 않아도, 단서를 통해 정확한 이름을 찾을 수 있었습니다.',
     'sol': '세 번째는 먼저 건네는 기억입니다. 묻기도 전에, 필요한 기억을 먼저 꺼내 주었습니다.',
     'hiw': '이는 어떻게 가능했을까요? 두 번째 시나리오를 다시 한번 차근차근 따라가 보겠습니다.',
     'ask': '친구 집들이에서 마신 와인을 다시 사려는데, 이름이 생각나지 않는 상황입니다.',
-    'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 하지만, 단서는 여러 앱에 흩어져 있죠.',
-    'old': '그럼 지금 쓰는 검색으로 한번 찾아볼까요?',
+    'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 하지만, 단서는 여러 앱에 흩어져 있죠.',      # 10차: 본문에서 뺀 장(흐린 배경 그림을 만들 때만 그림)
+    'old': '그럼 지금 쓰는 두 가지 검색 방식으로 한번 찾아볼까요?',      # 10차: 키워드, 임베딩 둘 다 기존 검색임이 드러나게
     'kw': ('먼저 키워드 검색은 글자가 같은 기록을 찾습니다. '
            '(클릭) ‘지은이네’로는 (클릭) 지은이네 집 주소가, (클릭) ‘집들이’로는 (클릭) 다른 사람 집들이가, '
            '(클릭) ‘와인’으로는 (클릭) 다른 날 결제 내역이 나오죠. '
            '(클릭) 그럼 그날 찍은 사진은요? (클릭) 키워드가 없으니 아예 검색이 안 됩니다.'),
-    'emb': ('임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 고차원 벡터로 바꾸고 '
+    'emb': ('다음으로 임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 고차원 벡터로 바꾸고 '
             '(클릭) 뜻이 비슷할수록 가까이 놓이는 임베딩 공간에서 (클릭) 질문과 가까운 기록을 가져옵니다. '
             '(클릭) 그런데 가져온 건 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. 정작 단서는 멀리 있죠.'),
-    'step': ('왜 이럴까요? 우리는 키워드가 아니라 대화의 맥락으로 기억하기 때문입니다. '
-             '검색도 사람처럼 한 단계씩 생각하면 어떨까요? 저희는 다음과 같이 단계를 거쳐 검색하는 과정을 제시합니다.'),
-    'chain': ('이 질문에는 빠진 고리가 하나 있습니다. (클릭) 바로 이 카카오톡 대화인데요. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
+    'step': ('두 방식 모두 단서를 찾지 못했습니다. 왜 그럴까요? 우리는 정확한 단어보다 그때 나눈 대화의 맥락으로 기억을 떠올리기 때문입니다. '
+             '그렇다면 검색도 사람처럼 한 단계씩 생각하면 어떨까요? 저희는 단서를 하나씩 짚어 가며 답을 찾아가는 방식을 제안합니다.'),
+    'chain': ('이 질문에서 와인 사진으로 한 번에 갈 수는 없습니다. 그 사이를 이어 줄 기록이 하나 필요한데요. '      # 10차: '빠진 고리'를 빼고 화면의 순서(질문 → 물음표 → 사진)대로
+              '(클릭) 바로 이 카카오톡 대화입니다. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
               '집들이라는 말은 없지만, 우리는 이날이 집들이라는 걸 바로 알죠. 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
     'idx': ('먼저, 기록이 쌓일 때마다 미리 색인해 둡니다. '
             '(클릭) 문장은 임베딩 모델을 거쳐 뜻을 담은 숫자, 의미 벡터가 되고요. (클릭) 언제, 어느 앱에서, 누가 보냈는지 등은 메타데이터로 저장합니다.'),
     'trig': '단서를 포함한 질의를 입력하고 실타래 버튼을 누르면, Weave는 사용자가 입력한 질의를 가져옵니다.',
     'split': '이 질문을 의미 단위로 나누어 다시 씁니다. (클릭) 집들이가 언제였는지 먼저 묻고, 와인을 마셨던 날은 빈칸으로 남겨 두게 되죠.',
     'hop1': ('첫 질문인 ‘지은이네 집들이는 언제였지?’를 일반 임베딩으로 찾으면, 지은이의 카톡은 여전히 멀리 있는데요. '
-             '(클릭) Reasoning Embedding은 추론에 필요한 단서도 잘 찾도록 튜닝한 임베딩 모델입니다. '
-             '‘박스 정리, 휴지 안 사 와도 돼’가 함의한 의미가 집들이 초대라는 걸 알아보고, 질문 곁으로 끌어오죠. '
+             '(클릭) 그래서 저희는 뜻이 비슷한 기록을 넘어, 추론에 필요한 단서도 잘 찾도록 튜닝한 최신 임베딩 모델, Reasoning Embedding을 적용했습니다. '
+             '‘박스 정리, 휴지 안 사 와도 돼’에 담긴 뜻이 집들이 초대라는 걸 알아보고, 질문 곁으로 끌어오죠. '
              '이 카톡을 받은 3월 15일이 다음 단서가 됩니다.'),
     'hop2': '이 날짜를 두 번째 질문의 빈칸에 넣으면 (클릭) 메타데이터로 그날 사진만 필터링할 수 있고 (클릭) 그중 와인 사진에서 이름을 찾아낼 수 있습니다.',
     'deliver': '이렇게 찾은 답은 근거와 함께 다듬어 건넵니다. 그럼, Weave가 우리 일상을 어떻게 바꿀까요?',      # 11-12: 클릭 없이 한 구간
@@ -340,7 +341,7 @@ CUES = {
     'hop1.ev2': ('hop1', 1, '휴지 안 사'),          # 15쪽: 카톡 근거 '휴지 안 사 와도 돼' 형광펜
     'hop1.date': ('hop1', 1, '이 카톡을 받은'),     # 15쪽: 받은 날짜 형광펜
 }
-SLIDE_KEYS = ['sol1', 'sol2', 'sol', 'hiw', 'ask', 'cloud', 'old', 'kw', 'emb', 'step', 'chain', 'idx', 'trig', 'split', 'hop1', 'hop2', 'deliver']
+SLIDE_KEYS = ['sol1', 'sol2', 'sol', 'hiw', 'ask', 'old', 'kw', 'emb', 'step', 'chain', 'idx', 'trig', 'split', 'hop1', 'hop2', 'deliver']
 TIMING_NAMES = ('LAT_START', 'LAT_CLICK', 'LAT_MID', 'GAP_SLIDE', 'GAP_SENT', 'GAP_MID', 'GAP_Q', 'S_BEAT', 'Q_BEAT', 'X_BEAT', 'R_BEAT')
 
 
@@ -353,7 +354,7 @@ def use_variant(name):
     import tts_c
     cfg = json.loads((HERE / name / 'notes.json').read_text(encoding='utf-8'))
     notes = {SLIDE_KEYS[int(k) - 1] if str(k).isdigit() else k: ' '.join(v.split()) for k, v in cfg['notes'].items()}
-    assert set(notes) == set(SLIDE_KEYS), '노트는 17장 모두: 빠진 장 %s' % sorted(set(SLIDE_KEYS) - set(notes))
+    assert set(notes) == set(SLIDE_KEYS), '노트는 %d장 모두: 빠진 장 %s' % (len(SLIDE_KEYS), sorted(set(SLIDE_KEYS) - set(notes)))
     for i, k in enumerate(SLIDE_KEYS, 1):
         assert notes[k].count('(클릭)') == NOTES[k].count('(클릭)'), '%d쪽(%s): (클릭)은 %d번이어야 함(지금 %d번)' % (
             i, k, NOTES[k].count('(클릭)'), notes[k].count('(클릭)'))
@@ -767,9 +768,11 @@ def old_title(y=300, size=54):
 
 
 def s_old():
-    s = Slide('old', trans=('fade', 600), bar=False, notes=NOTES['old'])      # 흐려진 앞 장에서 그대로 걷힘
+    """10차(11-12): 앞의 '흩어진 단서' 장(s_cloud)을 본문에서 빼고, 그 장의 흩어진 기록을 흐리게 한 그림을 이 물음 뒤에 깐다."""
+    s = Slide('old', trans=('fade', 600), bar=False, notes=NOTES['old'])
+    s.add('bg/blur', [P('bg/blur', str(OUT / 'blur_cloud.png'), 0, 0, 1280, 720)])
     s.add('old/title', [old_title(300, 56)])
-    s.on('old/title', 'pop', 0, 650, **{'from': 0.7, 'over': 1.05})
+    s.on('old/title', 'pop', 150, 650, **{'from': 0.7, 'over': 1.05})
     return s
 
 
@@ -788,6 +791,18 @@ KW_GAL = (375, 490, 530)
 # 11-10 4차: ✕가 뜰 때 옆에 따라 나오는 한마디(카드 셋 + 갤러리).
 # 5차: '다른 날 와인 결제' → '다른 날 결제 내역', 갤러리는 '읽을 수 없는 사진' → '키워드가 없는 사진'(키워드 검색은 같은 글자를 찾는데 사진에는 '와인'도 '집들이'도 적혀 있지 않음)
 KW_VERDICT = ['관련 없는 주소 정보', '다른 사람 집들이', '다른 날 결제 내역', '키워드가 없는 사진']      # 11-11 8차: '관련 없는 집 주소' → '관련 없는 주소 정보'
+
+
+HEAD_NUM = 29                      # 판 제목 앞 번호 동그라미가 차지하는 폭
+
+
+def panel_head(name, x, y, n, title, label, title_pt=16):
+    """판 제목 줄: 번호 동그라미 + 제목 + 작은 회색 뱃지. 10차: 키워드(1), 임베딩(2) 둘 다 기존 검색임이 보이게 번호를 붙임.
+    번호는 Weave의 보라와 구분되게 회색."""
+    return ([R(name + '/n/c', x, y + 3, 22, 22, prst='ellipse', fill=SUB, line=None),
+             T(name + '/n/t', x, y + 3, 22, 22, str(n), size=10, color='FFFFFF', weight='b', align='c', anchor='ctr'),
+             T(name + '/l', x + HEAD_NUM, y, 200, 28, title, size=title_pt, color=INK, weight='b')] +
+            method_chip(name + '/m', x + HEAD_NUM, y, title, label, title_pt))
 
 
 def method_chip(name, x, y, title, label, title_pt=16):
@@ -813,9 +828,8 @@ def kw_parts(dimmed=()):
     px, py, pw, ph = KW_PANEL
     fx, fy, fw, fh = KW_FIELD
     parts = [('kw/panel', [R('kw/panel/bg', px, py, pw, ph, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.4,
-                             shadow=SHADOW_CARD),
-                           T('kw/panel/l', px + 24, py + 13, 200, 28, '키워드 검색', size=16, color=INK, weight='b')] +
-              method_chip('kw/panel/m', px + 24, py + 13, '키워드 검색', 'BM25') +
+                             shadow=SHADOW_CARD)] +
+              panel_head('kw/panel', px + 24, py + 13, 1, '키워드 검색', 'BM25') +
               [R('kw/panel/f', fx, fy, fw, fh, prst='roundRect', fill='F7F5FC', line=LINE, line_w=1.0)])]
     qpt = 16.5
     S = qpt * 4 / 3
@@ -925,9 +939,8 @@ def s_emb():
     px, py, pw, ph = EM_PANEL
     fx, fy, fw, fh = EM_FIELD
     s.add('em/panel', [R('em/panel/bg', px, py, pw, ph, prst='roundRect', radius=20, fill='FFFFFF', line=LINE2, line_w=1.4,
-                         shadow=SHADOW_CARD),
-                       T('em/panel/l', px + 24, py + 13, 200, 28, '임베딩 검색', size=16, color=INK, weight='b')] +
-          method_chip('em/panel/m', px + 24, py + 13, '임베딩 검색', 'One-hop') +
+                         shadow=SHADOW_CARD)] +
+          panel_head('em/panel', px + 24, py + 13, 2, '임베딩 검색', 'One-hop') +
           [R('em/panel/f', fx, fy, fw, fh, prst='roundRect', fill='F7F5FC', line=LINE, line_w=1.0)])
     qpt = 16.5
     S = qpt * 4 / 3
@@ -1787,7 +1800,7 @@ def s_overview():
     return s
 
 
-SLIDES = [s_hiw, s_ask, s_cloud, s_old, s_kw, s_emb, s_step, s_chain, s_idx, s_trig, s_split, s_hop1, s_hop2, s_deliver]
+SLIDES = [s_hiw, s_ask, s_old, s_kw, s_emb, s_step, s_chain, s_idx, s_trig, s_split, s_hop1, s_hop2, s_deliver]
 
 
 def appendix_specs():
@@ -1799,6 +1812,7 @@ def appendix_specs():
 
 # ------------------------------------------------------------------ 조립
 BLUR_SOL = 22                                   # 'How it works?' 뒤 솔루션 장은 조금 더 흐리게(11-09 사용자 요청, 16 → 22)
+BLUR_CLOUD = (11, 0.34)                         # '기존 검색이라면?' 뒤 흩어진 기록(흐림, 옅게 덮는 정도). 10차: 큰 제목 뒤라 7, 0.12보다 더 흐리고 옅게
 
 
 def blur_png(src, dst, radius=16, veil=0.32):
@@ -1891,13 +1905,14 @@ def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
 def build(dst, auto=False, hold=1700, talk=False, says=None):
     """원본 덱에서 장 틀과 노트 틀만 빌려, 새 장을 끝에 다 넣은 뒤 원본 장을 지운다
     (먼저 지우면 python-pptx가 장 파일 이름을 다시 써서 PowerPoint가 못 여는 일이 있었음).
-    talk=True면 미리보기 영상용: 본문 17장만, 발표 속도로 머물고 자막을 띄움(talk_specs). says는 낭독 길이(narrate)."""
+    talk=True면 미리보기 영상용: 본문 16장만, 발표 속도로 머물고 자막을 띄움(talk_specs). says는 낭독 길이(narrate)."""
     prs = Presentation(str(SRC))
     layout = prs.slides[LAYOUT_INDEX].slide_layout
     note_tpl = [copy.deepcopy(sh._element) for sh in prs.slides[LAYOUT_INDEX].notes_slide.placeholders]
     lst = prs.slides._sldIdLst
     old = list(lst)
-    specs = talk_specs(says=says) if talk else [f() for f in SOL_SLIDES] + [f() for f in SLIDES] + appendix_specs()
+    specs = talk_specs(says=says) if talk else ([f() for f in SOL_SLIDES] + [f() for f in SLIDES] +
+                                                ([s_cloud()] if PASS1 else appendix_specs()))      # 1차 빌드: 흐린 그림의 바탕만(본문 + 흩어진 단서)
     _, report, secs = add_slides(prs, layout, note_tpl, specs, auto, hold)
     for sid in old:
         prs.part.drop_rel(sid.get(q('r:id')))
@@ -2222,7 +2237,7 @@ def subtitle(key, text, code=None, pt=15, maxw=1080):
 
 
 def talk_specs(rate=SPEECH_RATE, says=None):
-    """미리보기 영상용 본문 17장(Appendix는 넣지 않음): 구간마다 그 구간에 할 말을 하는 동안 머물고, 그 말을 아래에 자막으로 띄운다.
+    """미리보기 영상용 본문 16장(Appendix는 넣지 않음): 구간마다 그 구간에 할 말을 하는 동안 머물고, 그 말을 아래에 자막으로 띄운다.
     그래서 영상 길이가 발표 시간 어림(--time)과 같다. says(narrate()의 낭독 길이)를 주면 그 길이만큼 머문다.
     장마다 sp.starts = [구간이 시작하는 때(영상 처음부터, 초)]를 남긴다."""
     specs = [f() for f in SOL_SLIDES + SLIDES]
@@ -2340,7 +2355,7 @@ def main():
     ap.add_argument('--png', action='store_true')
     ap.add_argument('--video', action='store_true')
     ap.add_argument('--skip-blur', action='store_true', help='흐린 그림을 다시 만들지 않음(있는 것을 씀)')
-    ap.add_argument('--time', action='store_true', help='덱을 만들지 않고 발표 시간만 어림(본문 17장)')
+    ap.add_argument('--time', action='store_true', help='덱을 만들지 않고 발표 시간만 어림(본문 16장)')
     ap.add_argument('--tts', action='store_true', help='--time, --video와 함께: 노트를 낭독(기기 안의 음성 합성)해서 그 길이로 재고, 영상에는 소리로 넣음')
     ap.add_argument('--voice', help='낭독 목소리: Supertonic 3의 F1~F5·M1~M5(기본 F2), heami = Windows 한국어 음성')
     ap.add_argument('--check', action='store_true', help='--tts와 함께: 낭독을 받아쓰기로 글과 견줌')
@@ -2370,10 +2385,10 @@ def main():
         build(tmp)
         PASS1 = False
         pngs = render_c.png(tmp, OUT / '_pass1_png')
-        names = [f.__name__[2:] for f in SOL_SLIDES + SLIDES]
+        names = [f.__name__[2:] for f in SOL_SLIDES + SLIDES] + ['cloud']
         blur_png(pngs[names.index('sol3')], OUT / 'blur_sol.png', radius=BLUR_SOL)
         blur_png(pngs[names.index('emb')], OUT / 'blur_emb.png')
-        blur_png(pngs[names.index('cloud')], OUT / 'blur_cloud.png', radius=7, veil=0.12)      # 살짝만 흐리게(5차: 4 → 5.5, 8차: 5.5 → 7로 조금 더)
+        blur_png(pngs[names.index('cloud')], OUT / 'blur_cloud.png', radius=BLUR_CLOUD[0], veil=BLUR_CLOUD[1])
         tmp.unlink()
     says = clips = None
     if a.video and a.tts:               # 낭독을 먼저 만든다: 말에 맞춰 뜨는 효과(cue)가 이 낭독에서 때를 찾음

@@ -609,3 +609,7 @@ mark.rm { color: inherit; padding: 0 1px; }
 
 /* v23 (11-10): 첫 문장과 끝 화면 한 줄 소개를 덱 표지의 부제처럼 굵게, 검정으로(크기는 48px 그대로) */
 #opSub, #sub { font-weight: 700; color: var(--ink); letter-spacing: -0.03em; }
+
+/* ── v24 (2026-11-12) ── */
+/* 오프닝·끝 화면 로고를 덱 표지(1쪽) 제목과 같게: 그라데이션 #4E36CF → #8F66FF, 자간 -0.5pt/48pt = -0.0104em (글꼴은 원래 같은 Samsung Sharp Sans Bold) */
+#logo .word, #op .word { letter-spacing: -0.0104em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #4E36CF 0%, #8F66FF 100%); }

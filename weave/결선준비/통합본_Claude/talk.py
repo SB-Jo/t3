@@ -43,7 +43,7 @@ OUT = MK.OUT
 FFMPEG = HW.FFMPEG
 MP4 = HERE / 'Weave_통합본_Claude_미리보기.mp4'
 MP4_P = HERE / '제안장표_미리보기.mp4'
-MG_MP4 = MK.ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'
+MG_MP4 = MK.MG_MP4
 MG_LEN = 111.1                     # 모션그래픽 길이(초)
 MG_TAIL = 1.4                      # 영상이 끝난 뒤 그 장에 더 머무는 시간
 MG_VOL = 0.8                       # 덱에 넣은 영상 소리 크기(80%)와 같게
@@ -144,6 +144,7 @@ def build_auto(dst, fu, says, part=None):
     intro = {key: F.copy_slide(prs, src[int(key[2:]) - 1], note_tpl) for key in MK.INTRO_KEYS}
     MK.patch_intro(intro, note_tpl)
     MK.patch_cover(cover)           # 덱과 같은 표지(영상 v9, 제목 크기)로 찍는다
+    MK.patch_mg(mg)                 # 덱과 같은 모션그래픽(v24)
     say_of = {key: say for key, _, say in fu}
     order, logos = [], []
     for item in MK.SEQ:

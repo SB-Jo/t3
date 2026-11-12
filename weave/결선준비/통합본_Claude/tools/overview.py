@@ -28,6 +28,7 @@ def labels():
     n_appx = len(MK.HW.appendix_specs()) + 1
     out += [('appx', 'Appendix %d' % (i + 1)) for i in range(n_appx)]
     out += [('prop', '제안 장표 가름')] + [('prop', doc.NAME[sp.key]) for sp in own['prop']]
+    out += [('old', '이전 판 (3차) 가름')] + [('old', '이전 판 · 3차 %d쪽' % i) for i in MK.PREV3_KEEP]
     out += [('old', '이전 판 (2차) 가름')] + [('old', '이전 판 · 2차 %d쪽' % i) for i in MK.PREV2_KEEP]
     out += [('old', '이전 판 (1차) 가름')] + [('old', '이전 판 · 1차 %d쪽' % i) for i in MK.PREV_KEEP] + [('old', '이전 판 · 인트로 덱 13쪽')]
     return out

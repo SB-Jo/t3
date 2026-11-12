@@ -24,7 +24,7 @@ TMP = OUT / '_trim'
 # (클릭)은 그 자리에서 클릭. 위에서부터 차례로 적용한다.
 GROUPS = [   # (차례, 이름, {장: 줄인 글})
     (1, '솔루션 세 장은 이름만(모션그래픽에서 방금 본 장면)', {
-        'sol1': '영상 속 세 장면을 하나씩 정리해 보겠습니다. 방금 보신 첫 번째 장면은 (클릭) 기록 통합 검색입니다.',
+        'sol1': '방금 영상에서 보신 세 가지 기능을 정리해 보겠습니다. 첫 번째는 (클릭) 기록 통합 검색입니다.',
         'sol2': '두 번째는 단서로 찾는 기억입니다.',
         'sol': '세 번째는 먼저 건네는 기억입니다.',
     }),
@@ -39,9 +39,10 @@ GROUPS = [   # (차례, 이름, {장: 줄인 글})
         'scat': "'왜 정작 나에 대한 모든 기록이 담긴 내 휴대폰 안에서는, 아직도 이렇게 찾아 헤매야 할까요?'",
     }),
     (4, '비교 장: 첫 물음을 뺌', {
-        'cmp': ('Finder와 Now Nudge, 카나나는 정해진 범위 안에서 한 번 찾거나 제안합니다. '
+        'cmp': ('Writing Assist는 지금 쓰는 글을 다듬고, 카나나는 카카오톡 대화 안에서, Now Nudge와 Finder는 더 넓은 범위에서 한 번 찾거나 제안합니다. '
                 '(클릭) Weave는 여러 앱에 흩어진 단서를 이어서 찾고, 쓰던 화면의 키보드 위에서 바로 건넵니다.'),
     }),
+    (5, '비교 장을 Appendix로 옮김(질문이 나오면 꺼냄)', {'cmp': None}),      # None = 그 장을 본 발표에서 뺌
 ]
 
 
@@ -57,7 +58,7 @@ def main():
     src = list(talk.Presentation(str(MK.INTRO)).slides)
     HW.OUT = TMP                                    # 낭독은 따로 둔 폴더에(영상용 낭독을 건드리지 않음)
     TMP.mkdir(parents=True, exist_ok=True)
-    proxies = [types.SimpleNamespace(key='g%d_%s' % (n, k), slide=k, notes=v) for n, _, d in GROUPS for k, v in d.items()]
+    proxies = [types.SimpleNamespace(key='g%d_%s' % (n, k), slide=k, notes=v) for n, _, d in GROUPS for k, v in d.items() if v is not None]
     for p in proxies:                               # 말없이 화면을 먼저 보여 주는 장(6쪽)은 그 시간을 그대로
         if (p.slide, 0) in HW.LEAD_EXTRA:
             HW.LEAD_EXTRA[(p.key, 0)] = HW.LEAD_EXTRA[(p.slide, 0)]
@@ -84,7 +85,7 @@ def main():
     for n, name, d in GROUPS:
         slides = []
         for k in d:
-            a = after['g%d_%s' % (n, k)]
+            a = 0.0 if d[k] is None else after['g%d_%s' % (n, k)]
             slides.append(dict(key=k, now=cur[k], after=a))
             cur[k] = a
         cut = sum(x['now'] - x['after'] for x in slides)

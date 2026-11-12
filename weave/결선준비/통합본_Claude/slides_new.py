@@ -17,7 +17,7 @@ from pathlib import Path
 
 import build as HW
 from ui import (BODY, ICON, INK, INK2, LAV, LAV2, LINE, LINE2, MUTE, PURPLE, PURPLE2, RED, RING, SUB, SHADOW_CARD, SHADOW_LIFT, SHADOW_SOFT,
-                C, P, R, T, Xf, caption, magnifier, numdot, spark_icon, star4_icon, tw)
+                C, P, R, T, Xf, caption, magnifier, numdot, spark_icon, star4_icon, thread, tw)
 
 import hook_layout as HL
 
@@ -84,7 +84,8 @@ NOTES = {
            '(클릭) 그리고 69%는 기록을 지우지 않고 쌓아 둔다고 답했습니다. '
            '(클릭) 이렇게 흩어지고 쌓인 기록을 갤럭시 안의 Weave가 하나로 엮습니다. '
            '그래서 쓸수록 쌓이고 갤럭시를 떠나기 어려워지는 Lock-in 효과가 생깁니다.'),
-    'cmp': ('그렇다면 이미 있는 기능과는 무엇이 다를까요? Finder와 Now Nudge, 카나나는 정해진 범위 안에서 한 번 찾거나 제안합니다. '
+    'cmp': ('그렇다면 이미 있는 기능과는 무엇이 다를까요? '      # 11-12 4차: 화면이 표에서 두 축의 지도로 바뀌어, 넷을 왼쪽부터 차례로 짚음
+            'Writing Assist는 지금 쓰는 글을 다듬고, 카나나는 카카오톡 대화 안에서, Now Nudge와 Finder는 더 넓은 범위에서 한 번 찾거나 제안합니다. '
             '(클릭) Weave는 여러 앱에 흩어진 단서를 이어서 찾고, 쓰던 화면의 키보드 위에서 바로 건넵니다.'),
     'tl': ('이 경험이 갤럭시에서, 그리고 지금 가능한 이유입니다. '
            '(클릭) 먼저 기술입니다. 검색은 뜻으로 찾는 임베딩에서 찾아서 답하는 RAG로 발전했고, '
@@ -117,6 +118,7 @@ CUES = {
     'p_fx2.num': ('p_fx2', 0, '93.8%'),
     'p_fx3.num': ('p_fx3', 0, '82.4%'),
     'bi.weave': ('bi', 2, '하나로 엮습니다'),
+    'cmp.wa': ('cmp', 0, 'Writing Assist는'), 'cmp.kn': ('cmp', 0, '카나나는'), 'cmp.nn': ('cmp', 0, 'Now Nudge와'),
     'tl.u0': ('tl', 1, '뜻으로 찾는'), 'tl.u1': ('tl', 1, '찾아서 답하는'), 'tl.u2': ('tl', 1, '지난해에는'), 'tl.u3': ('tl', 1, '올해는'),
     'tl.d0': ('tl', 2, '매일 쓰는'), 'tl.d1': ('tl', 2, '기기 안에서 AI를'), 'tl.d2': ('tl', 2, '2024년에는'), 'tl.d3': ('tl', 2, '지난해에는'),
 }
@@ -667,70 +669,101 @@ def s_bi():
 
 
 # ------------------------------------------------------------------ 뒷부분 3: 기존 기능과의 비교
-CMP_COLS = [   # (키, 이름, 딸린 말, [찾는 곳, 찾는 방식, 쓰는 자리])
-    ('finder', 'Samsung Finder', 'One UI 8.5', ['선택한 앱의 기록', '자연어로 한 번 검색', '홈 화면 검색창']),
-    ('nudge', 'Now Nudge', 'Galaxy S26', ['갤러리 사진, 예약 정보 등', '대화 맥락에 맞춰 한 번 제안', '삼성 키보드 위']),
-    ('kanana', '카나나 인 카카오톡', '카카오', ['카카오톡 대화', '대화를 읽고 먼저 제안', '카카오톡 안']),
-    ('weave', 'Weave Assist', '제안', ['여러 앱에 흩어진 기록', '단서를 이어 여러 단계로', '쓰던 화면의 키보드 위']),
+# 11-12 4차: 표(네 칸 × 세 줄)를 두 축의 지도로. 가로 = 찾는 범위(앱 하나 → 여러 앱), 세로 = 찾는 방식(한 번 → 단서를 이어 여러 단계).
+# 기존 기능 넷(Writing Assist, 카나나, Now Nudge, Finder)은 아래쪽에, Weave는 오른쪽 위. 화면의 글은 축과 이름뿐이고 설명은 발표자가 말한다.
+# 3차의 표는 덱 뒤 '이전 판 (3차)'에 남아 있다.
+MAP_O = (300, 588)                  # 두 축이 만나는 점
+MAP_XE, MAP_YT = 1096, 168          # 가로축의 오른쪽 끝, 세로축의 위 끝
+MAP_Y1, MAP_YN = 488, 262           # '한 번'의 높이, '여러 단계'의 높이
+MAP_X = [436, 622, 808, 994]        # 쓰는 글, 앱 하나, (그 사이), 여러 앱
+MAP_PTS = [   # (키, 아이콘 종류, 이름, 가운데 x) — 왼쪽에서 오른쪽으로 범위가 넓어짐. 넷 모두 '한 번' 줄
+    ('wa', 'writing', 'Writing Assist', MAP_X[0]),      # 지금 쓰는 글만 다듬음
+    ('kanana', 'kanana', '카나나', MAP_X[1]),            # 카카오톡 대화 안에서
+    ('nudge', 'nudge', 'Now Nudge', MAP_X[2]),          # 갤러리 사진, 예약 정보 등
+    ('finder', 'finder', 'Finder', MAP_X[3]),           # 선택한 여러 앱의 기록
 ]
-CMP_ROWS = ['찾는 범위', '찾는 방식', '쓰는 자리']
-CMP_X0, CMP_W, CMP_GAP, CMP_TOP = 178, 228, 16, 162
-CMP_HEAD, CMP_RH = 112, 92
-CMP_SRC = '* Samsung 지원 페이지(Finder), Samsung Newsroom(Galaxy S26, 2026. 2), 카카오 발표(2026. 3)의 공식 설명을 기준으로 함'
+MAP_AX = 'B4ACC9'                   # 축의 색
+CMP_SRC = '* Samsung 지원 페이지(Finder, Writing Assist), Samsung Newsroom(Galaxy S26, 2026. 2), 카카오 발표(2026. 3)의 공식 설명을 바탕으로 배치함'
 
 
-def cmp_icon(key, kind, cx, cy):
-    """열 머리의 작은 그림(38px 칸). 기능마다 색을 달리한다: Finder 파랑, Now Nudge 청록, 카나나는 카카오톡 아이콘, Weave 보라."""
-    z = 38
-    tile = lambda a, b: R(key + '/tile', cx - z / 2, cy - z / 2, z, z, prst='roundRect', radius=11, line=None,
+def cmp_icon(key, kind, cx, cy, z=38):
+    """기능의 작은 그림(z px 칸). 기능마다 색을 달리한다: Finder 파랑, Now Nudge 청록, Writing Assist 주황, 카나나는 카카오톡 아이콘, Weave 보라."""
+    k = z / 38
+    tile = lambda a, b: R(key + '/tile', cx - z / 2, cy - z / 2, z, z, prst='roundRect', radius=11 * k, line=None,
                           grad=dict(stops=[(0, a, None), (100, b, None)], ang=55))
     if kind == 'finder':
-        r = 7.5
-        return [tile('5B9BFF', '2F6BE6'), R(key + '/c', cx - r - 2, cy - r - 2, 2 * r, 2 * r, prst='ellipse', fill=None, line='FFFFFF', line_w=2.4),
-                C(key + '/h', [(cx + 3.6, cy + 3.6)] * 2 + [(cx + 9.5, cy + 9.5)] * 2, color='FFFFFF', w=2.6)]
+        r = 7.5 * k
+        return [tile('5B9BFF', '2F6BE6'),
+                R(key + '/c', cx - r - 2 * k, cy - r - 2 * k, 2 * r, 2 * r, prst='ellipse', fill=None, line='FFFFFF', line_w=2.4 * k),
+                C(key + '/h', [(cx + 3.6 * k, cy + 3.6 * k)] * 2 + [(cx + 9.5 * k, cy + 9.5 * k)] * 2, color='FFFFFF', w=2.6 * k)]
     if kind == 'nudge':
-        return [tile('2CC4B5', '1F8FD6')] + spark_icon(key + '/s', cx - 12, cy - 12, size=24, color='FFFFFF')
+        return [tile('2CC4B5', '1F8FD6')] + spark_icon(key + '/s', cx - 12 * k, cy - 12 * k, size=24 * k, color='FFFFFF')
+    if kind == 'writing':           # 연필(굵은 사선과 뾰족한 끝) + 작은 별
+        return ([tile('FF9E70', 'F26B3A'),
+                 C(key + '/p', [(cx - 4.5 * k, cy + 5.5 * k)] * 2 + [(cx + 6 * k, cy - 5 * k)] * 2, color='FFFFFF', w=4.6 * k),
+                 C(key + '/t', [(cx - 9 * k, cy + 10 * k)] * 2 + [(cx - 6.5 * k, cy + 7.5 * k)] * 2, color='FFFFFF', w=2.2 * k)] +
+                spark_icon(key + '/s', cx - 13 * k, cy - 14 * k, size=13 * k, color='FFFFFF'))
     if kind == 'kanana':
         return [P(key + '/k', ICON['talk'], cx - z / 2, cy - z / 2, z, z)]
-    return [tile('8D6BFF', '5A3FE0'), P(key + '/sp', ICON['spool_w'], cx - 12, cy - 12, 24, 24)]
+    s_ = 24 * k
+    return [tile('8D6BFF', '5A3FE0'), P(key + '/sp', ICON['spool_w'], cx - s_ / 2, cy - s_ / 2, s_, s_)]
+
+
+def map_point(key, kind, name, cx, cy, z=46):
+    """지도 위의 한 점: 아이콘 + 그 아래 이름."""
+    return cmp_icon(key + '/ic', kind, cx, cy, z) + [
+        T(key + '/name', cx - 100, cy + z / 2 + 5, 200, 22, name, size=13.5, color=INK2, weight='b', align='c', anchor='ctr')]
 
 
 def s_cmp():
-    """기존 기능 셋과 Weave를 세 가지로만 견준다(찾는 범위·찾는 방식·쓰는 자리). 네 칸의 틀과 기존 기능이 먼저 뜨고, (클릭) Weave 칸이 켜지며 채워진다."""
+    """두 축 위에 기존 기능 넷을 놓고(말하는 차례대로 뜸), (클릭) 오른쪽 위에 Weave가 뜬다."""
     s = Slide('cmp', trans=('fade', 500), bar=False, notes=NOTES['cmp'])
     s.add('cmp/title', [title('cmp/title', [('한 번의 검색을 넘어, ', INK), ('단서를 이어 찾는 검색', PURPLE), ('으로', INK)])])
-    h = CMP_HEAD + CMP_RH * 3 + 10
-    labs = []
-    for r_, lab in enumerate(CMP_ROWS):
-        y = CMP_TOP + CMP_HEAD + r_ * CMP_RH
-        labs.append(T('cmp/lab%d' % r_, CMP_X0 - 168, y, 150, CMP_RH, lab, size=14, color=SUB, weight='b', align='r', anchor='ctr'))
-    s.add('cmp/labs', labs)
-    for i, (k, name, tag, cells) in enumerate(CMP_COLS):
-        x = CMP_X0 + i * (CMP_W + CMP_GAP)
-        me = k == 'weave'
-        cx = x + CMP_W / 2
-        col = [R('cmp/%s/bg' % k, x, CMP_TOP, CMP_W, h, prst='roundRect', radius=20, fill='FFFFFF', line=LINE, line_w=1.0, shadow=SHADOW_CARD)]
-        col += cmp_icon('cmp/%s/ic' % k, k, cx, CMP_TOP + 34)
-        col += [T('cmp/%s/name' % k, x, CMP_TOP + 60, CMP_W, 26, name, size=15, color=PURPLE if me else INK, weight='b', align='c', anchor='ctr'),
-                T('cmp/%s/tag' % k, x, CMP_TOP + 84, CMP_W, 20, tag, size=10.5, color=PURPLE2 if me else MUTE, align='c', anchor='ctr')]
-        body = []
-        for r_, cell in enumerate(cells):
-            y = CMP_TOP + CMP_HEAD + r_ * CMP_RH
-            col.append(R('cmp/%s/sep%d' % (k, r_), x + 18, y, CMP_W - 36, 1, fill='E4DCF8' if me else 'EEE9F8', line=None))
-            body.append(T('cmp/%s/c%d' % (k, r_), x + 8, y, CMP_W - 16, CMP_RH, cell, size=14.5, color=PURPLE if me else INK2,
-                          weight='b' if me else 'm', align='c', anchor='ctr'))
-        s.add('cmp/' + k, col + ([] if me else body))
-        if me:
-            s.add('cmp/weave/hi', [R('cmp/weave/hi', x, CMP_TOP, CMP_W, h, prst='roundRect', radius=20, fill=None, line=RING, line_w=2.4,
-                                     glow=(10, RING, 24))])
-            s.add('cmp/weave/cells', body)
+    ox, oy = MAP_O
+    s.add('cmp/axx', [C('cmp/axx', [(ox, oy)] * 2 + [(MAP_XE, oy)] * 2, color=MAP_AX, w=1.8, tail='triangle')])
+    s.add('cmp/axy', [C('cmp/axy', [(ox, oy)] * 2 + [(ox, MAP_YT)] * 2, color=MAP_AX, w=1.8, tail='triangle')])
+    lab = lambda k, x, y, w, t, **o: T('cmp/' + k, x, y, w, 24, t, anchor='ctr', **o)
+    s.add('cmp/axl', [
+        # 가로: 찾는 범위(축 이름은 화살표 끝에)
+        lab('xn', MAP_XE + 10, oy - 12, 120, '찾는 범위', size=13.5, color=SUB, weight='b'),
+        lab('x0', MAP_X[0] - 80, oy + 12, 160, '쓰는 글', size=12.5, color=MUTE, align='c'),
+        lab('x1', MAP_X[1] - 80, oy + 12, 160, '앱 하나', size=12.5, color=MUTE, align='c'),
+        lab('x2', MAP_X[3] - 80, oy + 12, 160, '여러 앱', size=12.5, color=PURPLE, weight='b', align='c'),
+        # 세로: 찾는 방식
+        lab('yn', ox - 80, MAP_YT - 34, 160, '찾는 방식', size=13.5, color=SUB, weight='b', align='c'),
+        lab('y1', ox - 176, MAP_Y1 - 12, 160, '한 번', size=12.5, color=MUTE, align='r'),
+        lab('y2', ox - 176, MAP_YN - 12, 160, '여러 단계', size=12.5, color=PURPLE, weight='b', align='r'),
+        # 두 높이를 잇는 옅은 점선
+        C('cmp/g1', [(ox + 8, MAP_Y1)] * 2 + [(MAP_XE - 30, MAP_Y1)] * 2, color='E2DBF5', w=1.2, dash='dash'),
+        C('cmp/g2', [(ox + 8, MAP_YN)] * 2 + [(MAP_XE - 30, MAP_YN)] * 2, color='E2DBF5', w=1.2, dash='dash'),
+    ])
+    for k, kind, name, cx in MAP_PTS:
+        s.add('cmp/' + k, map_point('cmp/' + k, kind, name, cx, MAP_Y1))
+    wx, wy = MAP_X[3], MAP_YN
+    s.add('cmp/wglow', [R('cmp/wglow', wx - 120, wy - 112, 240, 240, prst='ellipse', fill=None, line=None,
+                          grad=dict(stops=[(0, '8B6BFF', 40), (55, 'B9A6FF', 15), (100, 'F2EDFF', 0)], path='circle'))])
+    s.add('cmp/up', thread('cmp/up', [(wx, MAP_Y1 - 34)] * 2 + [(wx, wy + 74)] * 2, w=2.6, tail='triangle'))
+    z = 66
+    s.add('cmp/weave', [R('cmp/weave/tile', wx - z / 2, wy - z / 2, z, z, prst='roundRect', radius=19, line='FFFFFF', line_w=2.5,
+                          shadow=(18, 6, '6B4EFF', 30), grad=dict(stops=[(0, '8D6BFF', None), (100, '5A3FE0', None)], ang=55)),
+                        P('cmp/weave/sp', ICON['spool_w'], wx - 20, wy - 20, 40, 40),
+                        T('cmp/weave/name', wx - 110, wy + z / 2 + 6, 220, 28, 'Weave Assist', size=17, color=PURPLE, weight='b', align='c',
+                          anchor='ctr')])
     s.add('cmp/src', [foot('cmp/src', CMP_SRC)])
-    s.on('cmp/labs', 'fade_in', 150, 400)
-    for i, k in enumerate(('finder', 'nudge', 'kanana', 'weave')):
-        s.on('cmp/' + k, 'rise', 300 + i * 240, 480, dy=14)
-    s.click()      # 1: Weave 칸이 켜지고 채워짐
-    s.on('cmp/weave/hi', 'fade_in', 0, 420)
-    s.on('cmp/weave/cells', 'rise', 200, 480, dy=10)
+    s.on('cmp/axx', 'wipe_in', 150, 600)
+    s.on('cmp/axy', 'wipe_in', 150, 600, dir='up')
+    s.on('cmp/axl', 'fade_in', 600, 450)
+    # 기존 기능은 이름을 말할 때 하나씩(Now Nudge와 Finder는 한 문장에 이어 나와 바로 뒤따름)
+    t_wa, t_kn, t_nn = cue('cmp.wa', 3300, ahead=0.2), cue('cmp.kn', 5600, ahead=0.2), cue('cmp.nn', 7700, ahead=0.2)
+    s.on('cmp/wa', 'zoom_in', t_wa, 380, **{'from': 0.6})
+    s.on('cmp/kanana', 'zoom_in', t_kn, 380, **{'from': 0.6})
+    s.on('cmp/nudge', 'zoom_in', t_nn, 380, **{'from': 0.6})
+    s.on('cmp/finder', 'zoom_in', t_nn + 620, 380, **{'from': 0.6})
+    s.click()      # 1: 한 번을 넘어 위로 → Weave
+    s.on('cmp/up', 'wipe_in', 0, 520, dir='up')
+    s.on('cmp/wglow', 'fade_in', 300, 500)
+    s.on('cmp/weave', 'zoom_in', 420, 420, **{'from': 0.6})
+    s.on('cmp/weave', 'pulse', 880, 180, scale=1.08)
     return s
 
 
@@ -907,5 +940,6 @@ def s_credits2():
     return s
 
 
-SLIDES_BACK = [lambda: s_fx('fx1', first=True), lambda: s_fx('fx2'), lambda: s_fx('fx3'), s_bi, s_cmp, s_tl, s_end1, s_end2, s_end3]
+# 11-12 4차: 비교 장을 Lock-in 앞으로(기대효과 → 비교 → Lock-in → 연표). Lock-in에서 '지금, 갤럭시에서 가능한 이유'로 바로 이어지게
+SLIDES_BACK = [lambda: s_fx('fx1', first=True), lambda: s_fx('fx2'), lambda: s_fx('fx3'), s_cmp, s_bi, s_tl, s_end1, s_end2, s_end3]
 SLIDES_PROPOSAL = [lambda: s_fx('fx1', first=True, effect=True), lambda: s_fx('fx2', effect=True), lambda: s_fx('fx3', effect=True)]

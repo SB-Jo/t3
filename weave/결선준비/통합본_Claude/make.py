@@ -7,9 +7,10 @@
 재료
 - 인트로 2~5, 7~8, 10, 13쪽: 원본/Weave_결선_중간본_도입부수정.pptx (jjun-0824/t3). 장을 그대로 옮기고(도형·그림·전환·효과) 노트와 화면 몇 곳을 손본다(patch_intro).
 - 6쪽(수많은 기록), 9쪽(기록을 남기는 곳), 11~12쪽(흩어진 기록이 이어짐), 14쪽(잇는 장): 새로 그린다(slides_new.py).
-- 바꾸기 전의 장: 원본/통합본_2차.pptx (git show 9a8bddb:…)와 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
-- 표지와 모션그래픽 영상 장: 02_PPT/Weave_결선_중간본.pptx의 1쪽과 4쪽(모션그래픽 v23). 표지는 영상을 v9(10_표지영상/표지_루프.mp4, 18초)로 바꾸고 제목을 조금 줄인다(patch_cover).
-- 솔루션 3장 + How it Works 14장 + Appendix 15장: 09_HowItWorks/장표5_claude/build.py의 장을 그대로 그린다.
+- 바꾸기 전의 장: 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
+- 표지와 모션그래픽 영상 장: 02_PPT/Weave_결선_중간본.pptx의 1쪽과 4쪽. 표지는 영상을 v9(10_표지영상/표지_루프.mp4, 18초)로 바꾸고 제목을 조금 줄인다(patch_cover).
+  모션그래픽은 영상을 v24(08_인트로영상/Weave_모션그래픽.mp4: 제목의 색과 자간을 표지와 같게)로 바꿔 끼운다(patch_mg).
+- 솔루션 3장 + How it Works 13장 + Appendix 15장: 09_HowItWorks/장표5_claude/build.py의 장을 그대로 그린다.
 - 뒷부분: 원본/Weave_BI_아웃트로_통합_1110_v7.pptx (WIWLEE/t3-2)의 내용을 같은 엔진으로 다시 그린다(slides_new.py).
 """
 import argparse
@@ -43,7 +44,7 @@ for _f in ('blur_sol.png', 'blur_emb.png', 'blur_cloud.png'):       # How it Wor
 HW.OUT = OUT                                                      # 낭독(out/tts)과 말에 맞춘 효과의 때를 이 폴더에서 읽고 씀
 
 # ------------------------------------------------------------------ 읽는 소리: 숫자·영문을 소리 나는 대로(How it Works의 tts_text 앞에 한 번 더 거름)
-READ_FIRST = [('Weave Assist', '위브 어시스트'), ('Galaxy AI', '갤럭시 에이아이'), ('Now Nudge', '나우 넛지'), ('Finder', '파인더'), ('RAG', '래그'),
+READ_FIRST = [('Weave Assist', '위브 어시스트'), ('Writing Assist', '라이팅 어시스트'), ('Galaxy AI', '갤럭시 에이아이'), ('Now Nudge', '나우 넛지'), ('Finder', '파인더'), ('RAG', '래그'),
               ('AgentIR', '에이전트 아이알'), ('Hi-Q', '하이큐'), ('NPU', '엔피유'), ('Lock-in', '락인'),
               ('Multi-hop', '멀티홉'), ('PDE', '피디이'), ('KEEP', '킵'), ('AI', '에이아이'), ('Samsung', '삼성'), ('Galaxy', '갤럭시'), ("'", '')]
 DIGIT = '영일이삼사오육칠팔구'
@@ -68,6 +69,8 @@ BASE = ROOT / '02_PPT' / 'Weave_결선_중간본.pptx'
 INTRO = HERE / '원본' / 'Weave_결선_중간본_도입부수정.pptx'
 PREV = HERE / '원본' / '통합본_1차.pptx'                 # 11월 11일 1차 통합본(바꾸기 전의 장을 여기서 옮김)
 PREV2 = HERE / '원본' / '통합본_2차.pptx'                # 11월 11일 2차 통합본
+PREV3 = HERE / '원본' / '통합본_3차.pptx'                # 11월 12일 3차 통합본
+MG_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'      # 모션그래픽 v24(111.1초). 중간본에 든 v23과 길이와 소리가 같음
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'      # 표지 영상 v9(18초)
 COVER_JPG = ROOT / '10_표지영상' / '표지_포스터.jpg'
 COVER_PT = 48                                          # 표지 제목 크기(54 → 48pt: 'Assist'의 t가 뒤 영상의 '부재중 전화' 조각에 닿지 않게)
@@ -142,6 +145,7 @@ SEQ = ['cover', 'in02', 'in03', 'in04', 'in05', ('own', 'hook'), 'in07', 'in08',
        ('own', 'bridge'), 'mg', ('own', 'hiw'), ('own', 'back')]
 PREV_KEEP = list(range(2, 14)) + list(range(32, 42)) + [59]      # 1차 통합본에서 남겨 두는 장: 인트로 2~13쪽, 뒷부분 32~41쪽, 저장 채널 그림(59쪽)
 PREV2_KEEP = list(range(2, 15)) + [26] + list(range(32, 42)) + [62]      # 2차 통합본에서: 인트로 2~14쪽, 빠진 고리(26쪽), 뒷부분 32~41쪽, 두 줄 연표 제안(62쪽)
+PREV3_KEEP = [16] + list(range(21, 27)) + [30, 37]      # 3차 통합본에서: 16쪽(대본), 21쪽(뺀 장), 22~26쪽과 30쪽(화면 번호와 대본), 37쪽(비교 표)
 
 
 def own_specs():
@@ -233,6 +237,13 @@ def patch_cover(cover):
             rp.set('sz', str(round(COVER_PT * 100)))
 
 
+def patch_mg(mg):
+    """모션그래픽 장: 중간본에 든 영상을 지금 것(MG_MP4)으로 바꿔 끼운다. 길이와 소리가 같아 재생 설정은 그대로 둔다."""
+    media = {r.target_part for r in mg.part.rels.values() if r.reltype.endswith(('/video', '/media'))}
+    assert len(media) == 1, len(media)
+    media.pop()._blob = MG_MP4.read_bytes()
+
+
 def patch_bubbles(key, sl):
     """3~5쪽: 제목('기억이 나지 않는 막막한 순간들')을 빼고 그 자리까지 옅은 기록 조각을 흩어 둠. 첫 말풍선의 글, 말풍선 자리와 꼬리도 바꿈."""
     title = by_name(sl, '!!title')
@@ -319,6 +330,7 @@ def build(dst):
     intro = {k: F.copy_slide(prs, src[int(k[2:]) - 1], note_tpl) for k in INTRO_KEYS}
     patch_intro(intro, note_tpl)
     patch_cover(cover)
+    patch_mg(mg)
     F.set_notes(cover, N.INTRO_NOTES['cover'], note_tpl)
     report = []
 
@@ -334,7 +346,11 @@ def build(dst):
     appx = draw(HW.appendix_specs() + [N.s_credits2()])
     prop = draw([N.s_divider('p0', '제안 장표', ['기대효과 세 장: 기능이 있으면 고리 그래프와 왼쪽 말이 바뀌는 안 (%d~%d쪽 자리)' % (n_main - 8, n_main - 6)],
                              '여기부터는 제안 장표입니다. 본 발표에서는 넘기지 않습니다.')] + own_specs()['prop'])
-    prev2, prev1 = list(Presentation(str(PREV2)).slides), list(Presentation(str(PREV)).slides)
+    prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV3, PREV2, PREV))
+    old3 = draw([N.s_divider('o3', '이전 판 (3차)', ['11월 12일 3차 통합본의 16쪽, 뺀 21쪽, 22~26쪽, 30쪽, 비교 표(37쪽)',
+                                                    '노트에 그때의 대본이 그대로 있습니다'],
+                             '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
+    old3 += [F.copy_slide(prs, prev3[i - 1], note_tpl) for i in PREV3_KEEP]
     old2 = draw([N.s_divider('o2', '이전 판 (2차)', ['11월 11일 2차 통합본의 인트로 2~14쪽, 빠진 고리(26쪽), 뒷부분 32~41쪽, 두 줄 연표 제안(62쪽)',
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
@@ -343,12 +359,12 @@ def build(dst):
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
     old1 += [F.copy_slide(prs, prev1[i - 1], note_tpl) for i in PREV_KEEP] + [F.copy_slide(prs, src[12], note_tpl)]
-    order = [*main, *appx, *prop, *old2, *old1]
+    order = [*main, *appx, *prop, *old3, *old2, *old1]
     drop_slides(prs, [s for s in old if s not in (cover, mg)])
     reorder(prs, order)
     samsung_fonts.remap_prs(prs)
     logo_style(own['bridge'])
-    build.n_main, build.n_appx, build.n_prop, build.n_old2, build.n_old1 = n_main, len(appx), len(prop), len(old2), len(old1)
+    build.n_main, build.n_appx, build.n_prop, build.n_old3, build.n_old2, build.n_old1 = n_main, len(appx), len(prop), len(old3), len(old2), len(old1)
     prs.save(str(dst))
     for key, nclick, nnote, _ in report:
         if nclick != nnote:
