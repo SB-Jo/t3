@@ -6,6 +6,8 @@
   python tools/closing_try.py --round 2    → 2차만: 마무리사진_후보/후보2_한눈에.jpg, 시안2_한눈에.jpg
   python tools/closing_try.py --round 3    → 3차만: 후보3_한눈에.jpg, 시안3_한눈에.jpg
   python tools/closing_try.py --round 4    → 4차만: 후보4_한눈에.jpg, 시안4_한눈에.jpg
+  python tools/closing_try.py --round 5    → 5차만: 후보5_한눈에.jpg, 시안5_한눈에.jpg (휴대폰으로 연인을 찍어 주는 모습)
+  python tools/closing_try.py --round 6    → 삼성 공식 이미지(out/마무리사진_삼성공식, 저장소에 올리지 않음): out/시안_삼성공식_한눈에.jpg
 """
 import argparse
 import copy
@@ -20,6 +22,7 @@ from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 from pptx import Presentation  # noqa: E402
 
 CAND = HERE / '마무리사진_후보'
+LOCAL = MK.OUT / '마무리사진_삼성공식'      # Samsung Mobile Press의 보도용 이미지. 저장소에 올리지 않고 이 컴퓨터에만 둠
 FONT = Path.home() / '.cache' / 'weave-tools' / 'fonts' / 'SamsungOneKorean-500.ttf'
 LIGHT = ((0, 46), (55, 36), (100, 34))                    # 얼굴이 보이는 사진: 40쪽의 어둠을 옅게
 BRIGHT39 = ((0, 60), (38, 60), (62, 56), (100, 32))       # 가운데가 밝은 사진: 39쪽 글 자리를 조금 더 어둡게
@@ -71,19 +74,39 @@ TRIES4 = [
     ('', [(40, 'M10', dict(hand=(1020, 150, 340))), (40, 'M9', dict(hand=(250, 320, 320))), (40, 'N2', dict(hand=(215, 200, 280)))]),
 ]
 GROUPS4 = [('K. 아기와 부모', 'K'), ('L. 집에서의 단란한 시간', 'L'), ('M. 야외의 가족', 'M'), ('N. 조부모와 아이', 'N')]
+# 5차(11-13): 휴대폰으로 연인을 찍어 주는 모습. 남녀, 휴대폰이 아이폰으로 보이지 않는 사진만
+TRIES5 = [
+    ('휴대폰으로 연인을 찍어 주는 모습', [(40, 'P1', dict(hand=(160, 150, 230), stops=LIGHT)), (40, 'P2', dict(hand=(1060, 170, 300))),
+                              (40, 'P3', dict(hand=(200, 130, 300)))]),
+    ('', [(40, 'P4', dict(hand=(1000, 110, 280))), (40, 'P5', dict(hand=(620, 400, 260))), (40, 'P6', dict(hand=(590, 110, 230)))]),
+    ('', [(40, 'P7', dict(hand=(1080, 100, 260))), (40, 'P8', dict(hand=(220, 110, 280))), (40, 'P9', dict(hand=(560, 120, 320)))]),
+]
+GROUPS5 = [('P. 휴대폰으로 연인을 찍어 주는 모습 (아이폰으로 보이지 않는 것)', 'P')]
+# 삼성 공식 이미지(Samsung Mobile Press의 Lifestyle 이미지): 갤럭시가 확실한 것
+TRIES6 = [
+    ('삼성 공식 이미지: 갤럭시로 찍어 주는 모습', [(40, 'S1', dict(hand=(660, 120, 260), stops=LIGHT)), (40, 'S2', dict(hand=(190, 140, 250), stops=LIGHT)),
+                                   (40, 'S3', dict(hand=(190, 120, 260), stops=LIGHT))]),
+    ('', [(40, 'S4', dict(hand=(1090, 120, 240), stops=LIGHT)), (40, 'S5', dict(hand=(850, 140, 280), stops=LIGHT)),
+          (40, 'S6', dict(hand=(1040, 330, 300)))]),
+]
 ROUNDS = {1: (GROUPS1, TRIES1, '후보_한눈에.jpg', '시안_한눈에.jpg'), 2: (GROUPS2, TRIES2, '후보2_한눈에.jpg', '시안2_한눈에.jpg'),
-          3: (GROUPS3, TRIES3, '후보3_한눈에.jpg', '시안3_한눈에.jpg'), 4: (GROUPS4, TRIES4, '후보4_한눈에.jpg', '시안4_한눈에.jpg')}
+          3: (GROUPS3, TRIES3, '후보3_한눈에.jpg', '시안3_한눈에.jpg'), 4: (GROUPS4, TRIES4, '후보4_한눈에.jpg', '시안4_한눈에.jpg'),
+          5: (GROUPS5, TRIES5, '후보5_한눈에.jpg', '시안5_한눈에.jpg'), 6: (None, TRIES6, None, '시안_삼성공식_한눈에.jpg')}
 SHEET = {3: dict(cols=5, tw=400), 4: dict(cols=5, tw=400)}                        # 사진이 많은 차수는 한 줄에 다섯 장
 MAKE = {39: N.s_end1, 40: N.s_end2, 41: N.s_end3}
 TW, TH, GAP, LEFT, TOP, CAPH = 640, 360, 14, 16, 16, 30
 
 
+def where(code):
+    return next(p for d in (CAND, LOCAL) for p in d.glob(code + '_*.jpg'))
+
+
 def photo(code):
-    return str(next(p for p in CAND.glob(code + '_*.jpg')))
+    return str(where(code))
 
 
 def name(code):
-    return next(CAND.glob(code + '_*.jpg')).stem.split('_', 1)[1].replace('_', ' ')
+    return where(code).stem.split('_', 1)[1].replace('_', ' ')
 
 
 def fonts(size):
@@ -116,7 +139,7 @@ def candidates_sheet(groups, out_name, cols=4, tw=480):
     print('→', out.name, sheet.size, '%.2f MB' % (out.stat().st_size / 1e6))
 
 
-def tries_sheet(tries, out_name):
+def tries_sheet(tries, out_name, out_dir=CAND):
     """후보 사진을 39~41쪽에 대 보고 PowerPoint로 찍어 한 장에."""
     prs = Presentation(str(MK.BASE))
     old = list(prs.slides)
@@ -144,7 +167,7 @@ def tries_sheet(tries, out_name):
             sheet.paste(Image.open(pngs[k]).convert('RGB').resize((TW, TH), Image.LANCZOS), (x, y + 34))
             d.text((x + 2, y + 34 + TH + 4), '%d쪽  ·  %s %s' % (page, code, name(code)), fill=(40, 40, 50), font=font)
             k += 1
-    out = CAND / out_name
+    out = out_dir / out_name
     sheet.save(out, quality=88, optimize=True)
     print('→', out.name, sheet.size, '%.2f MB' % (out.stat().st_size / 1e6))
 
@@ -153,10 +176,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--round', type=int, choices=sorted(ROUNDS))
     a = ap.parse_args()
-    for n in ([a.round] if a.round else sorted(ROUNDS)):
+    for n in ([a.round] if a.round else [r for r in sorted(ROUNDS) if r != 6]):
         groups, tries, cand_name, try_name = ROUNDS[n]
-        candidates_sheet(groups, cand_name, **SHEET.get(n, {}))
-        tries_sheet(tries, try_name)
+        if groups:
+            candidates_sheet(groups, cand_name, **SHEET.get(n, {}))
+        tries_sheet(tries, try_name, CAND if groups else MK.OUT)
 
 
 if __name__ == '__main__':

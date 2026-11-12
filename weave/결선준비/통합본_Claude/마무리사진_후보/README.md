@@ -10,12 +10,36 @@ Unsplash 라이선스와 Pexels 라이선스 모두 무료로 쓰고 고칠 수 
 | 2차 (D~F) | 연인이나 친구끼리 찍어 주는 모습, 셀카를 찍는 모습 | `후보2_한눈에.jpg` | `시안2_한눈에.jpg` |
 | 3차 (G, H, J) | 파티와 축하(술 없음), 함께하는 식사, 그 밖의 좋은 순간 | `후보3_한눈에.jpg` | `시안3_한눈에.jpg` |
 | 4차 (K~N) | 단란한 가정: 아기와 부모, 집에서의 시간, 야외의 가족, 조부모와 아이 | `후보4_한눈에.jpg` | `시안4_한눈에.jpg` |
+| 5차 (P) | 휴대폰으로 연인을 찍어 주는 모습(남녀, 휴대폰이 아이폰으로 보이지 않는 것) | `후보5_한눈에.jpg` | `시안5_한눈에.jpg` |
 
 - 다시 찍기: `python tools/closing_try.py` (한 차수만은 `--round 4`처럼, 조합은 그 파일의 `TRIES1`~`TRIES4`)
 - 덱에 넣을 때: `slides_new.py`의 `s_end1(photo=…)`, `s_end2(photo=…, hand=…)`, `s_end3(photo=…)`
 
 39쪽과 41쪽은 글이 화면 한가운데에 놓여서, 가운데가 비었거나 사람이 실루엣인 사진이 맞아요(C 묶음, A5, D10, D12, E11, E12, F12, F13, G15, J5, J9, J10, J19, J25, M4, M5, M7, M8, M15, M16).
 40쪽은 손글씨 '순간'만 있어서 어느 사진이든 놓을 수 있어요.
+
+# 5차: 휴대폰으로 연인을 찍어 주는 모습
+
+남녀가 서로를 휴대폰으로 찍어 주는 사진 아홉 장이에요(Pexels 8, Unsplash 1). 휴대폰이 아이폰으로 보이는 사진(노치, iOS 카메라 화면, 애플 카메라 모양)은 뺐어요. 남은 사진은 휴대폰 뒷면이 가려졌거나 흐려서 기종이 드러나지 않아요.
+시안(`시안5_한눈에.jpg`)은 5차 덱의 39쪽(손글씨 '순간'만 있는 장)에 대 본 모습이에요.
+
+## P. 휴대폰으로 연인을 찍어 주는 모습
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| P1 | 발코니에서 남자를 찍어 주는 여자 | Helena Lopes | https://www.pexels.com/photo/27087024/ |
+| P2 | 꽃밭에서 손을 잡고 남자를 찍어 주는 여자 | Chermitove | https://www.pexels.com/photo/31917406/ |
+| P3 | 바위 해변의 여자를 찍어 주는 남자 | Yan Krukov | https://www.pexels.com/photo/7312022/ |
+| P4 | 덩굴 길에서 여자를 찍어 주는 남자 | Franco Monsalvo | https://www.pexels.com/photo/18252229/ |
+| P5 | 집에서 아내를 찍어 주는 남편 | Amina Filkins | https://www.pexels.com/photo/5427241/ |
+| P6 | 부엌에서 웃으며 여자를 찍어 주는 남자 | Vitaly Gariev | https://unsplash.com/photos/znbOGcssIvI |
+| P7 | 이삿짐 사이에서 여자를 찍어 주는 남자 | Ketut Subiyanto | https://www.pexels.com/photo/4246217/ |
+| P8 | 다리 위의 여자를 찍어 주는 사람 | Olly | https://www.pexels.com/photo/3764196/ |
+| P9 | 바닷가에서 장난치는 여자를 찍어 주는 남자 | Chermitove | https://www.pexels.com/photo/9425027/ |
+
+앞선 차수에서는 D10(해 질 녘 바다를 찍는 두 사람)의 휴대폰 화면이 안드로이드 카메라예요.
+
+갤럭시가 확실한 사진은 무료 사진 사이트에서 찾지 못해서, Samsung Mobile Press(samsungmobilepress.com)의 Lifestyle 보도용 이미지에서 여섯 장을 따로 골랐어요(Z 플립5, S23 울트라 두 장, S22 울트라, Z 플립6, Z 폴드5). 보도용 이미지라 공개 저장소에는 올리지 않고 작업 컴퓨터의 `out/마무리사진_삼성공식/`과 `out/시안_삼성공식_한눈에.jpg`에만 뒀어요(`tools/closing_try.py --round 6`).
 
 # 4차: 단란한 가정
 
