@@ -6,6 +6,7 @@
 
 재료
 - 인트로 2~5, 7~14쪽: 원본/통합본_인트로수정_87bf80b.pptx (jjun-0824/t3 87bf80b: 우리 3차 덱의 7~14쪽을 팀원이 손본 판)의 장을 그대로 옮긴다(도형·그림·전환·효과·노트).
+  4·5쪽의 둘째 말풍선만 '그 이름이 뭐였지?' → '정확한 이름이 뭐였지?'로 바꾼다(patch_ask2).
   4차까지는 원본/Weave_결선_중간본_도입부수정.pptx의 장을 옮겨 손보고(patch_intro) 9, 11~12, 14쪽은 새로 그렸다(slides_new.py의 s_hub2, s_scat, s_link, s_bridge).
 - 6쪽(수많은 기록): 새로 그린다(slides_new.py).
 - 바꾸기 전의 장: 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
@@ -326,14 +327,46 @@ def patch_intro(slides, note_tpl):
                 repoint(sl, pic, N.ICON['note'])
 
 
+# 11-12 밤: 덱 전체에서 '이름이' → '정확한 이름이'(설문 6번의 말 '정확한 이름이 떠오르지 않아'와 같게).
+# 옮겨 온 4·5쪽은 둘째 말풍선(b2) '그 이름이 뭐였지?' → '정확한 이름이 뭐였지?', 4쪽 노트는 slides_new.INTRO_NOTES
+ASK2_OLD, ASK2_HEAD = '그 이름이 뭐였지?', ('그 ', '정확한 ')         # 말풍선의 글, 바꾸는 첫 토막
+ASK2_KEYS = ('in04', 'in05')
+NOTE_FIX = [(ASK2_OLD, ASK2_HEAD[1] + ASK2_OLD[len(ASK2_HEAD[0]):]),          # 옮겨 온 덱의 노트에서 우리가 바꾼 곳(견줄 때 먼저 바꿔 놓음)
+            ('둘째, 이름이 떠오르지', '둘째, 정확한 이름이 떠오르지')]
+
+
+def patch_ask2(sl):
+    """둘째 말풍선(b2)의 첫 토막을 바꾸고, 글이 늘어난 만큼 말풍선을 양옆으로 넓힌다(가운데와 꼬리는 그대로)."""
+    body = by_name(sl, '!!b2/body')
+    runs = list(body.iter('{%s}r' % A))
+    ts = [r.find('{%s}t' % A) for r in runs]
+    assert ''.join(t.text for t in ts) == ASK2_OLD and ts[0].text == ASK2_HEAD[0], [t.text for t in ts]
+    pt = int(runs[0].find('{%s}rPr' % A).get('sz')) / 100
+    d = N.tw(ASK2_HEAD[1], pt, 'b') - N.tw(ASK2_HEAD[0], pt, 'b')
+    ts[0].text = ASK2_HEAD[1]
+    x, _, w, _ = box(body)
+    place(body, x=x - d / 2, w=w + d)
+    gx = by_name(sl, '!!b2').find(q('p:grpSpPr')).find('{%s}xfrm' % A)       # 묶음의 상자와 자식 좌표계도 같은 만큼(배율 1 그대로)
+    for o, e in (('off', 'ext'), ('chOff', 'chExt')):
+        off, ext = gx.find('{%s}%s' % (A, o)), gx.find('{%s}%s' % (A, e))
+        off.set('x', str(int(off.get('x')) - round(d / 2 * 9525)))
+        ext.set('cx', str(int(ext.get('cx')) + round(d * 9525)))
+
+
 def copy_intro(prs, note_tpl):
-    """팀원이 손본 덱(INTRO2)에서 인트로 장을 그대로 옮긴다. 노트는 INTRO_NOTES(그 덱의 노트와 같은 글인지 견줘 다르면 알림). 돌려줌: {키: 장}."""
+    """팀원이 손본 덱(INTRO2)에서 인트로 장을 그대로 옮긴다. 노트는 INTRO_NOTES(그 덱의 노트와 같은 글인지 견줘 다르면 알림). 돌려줌: {키: 장}.
+    4·5쪽은 둘째 말풍선의 글만 바꾼다(patch_ask2)."""
     src = list(Presentation(str(INTRO2)).slides)
     out = {}
     for k, page in FOREIGN.items():
         sl = F.copy_slide(prs, src[page - 1], note_tpl)
-        if ' '.join(F.note_text(src[page - 1]).split()) != ' '.join(N.INTRO_NOTES[k].split()):
+        theirs = F.note_text(src[page - 1])
+        for old_, new_ in NOTE_FIX:
+            theirs = theirs.replace(old_, new_)
+        if ' '.join(theirs.split()) != ' '.join(N.INTRO_NOTES[k].split()):
             print('   ! %s(%d쪽): INTRO_NOTES가 옮겨 온 덱의 노트와 다름' % (k, page))
+        if k in ASK2_KEYS:
+            patch_ask2(sl)
         F.set_notes(sl, N.INTRO_NOTES[k], note_tpl)
         out[k] = sl
     return out
