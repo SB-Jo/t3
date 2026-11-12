@@ -1,6 +1,6 @@
 # 마무리 세 장(39~41쪽)에 쓸 사진 후보
 
-122장이에요. 1차 26장(A~C)은 Unsplash, 2차 39장(D~F)과 3차 57장(G, H, J)은 Pexels와 Unsplash에서 받았어요.
+186장이에요. 1차 26장(A~C)은 Unsplash, 2차 39장(D~F), 3차 57장(G, H, J), 4차 64장(K~N)은 Pexels와 Unsplash에서 받았어요.
 Unsplash 라이선스와 Pexels 라이선스 모두 무료로 쓰고 고칠 수 있고 출처 표기 의무가 없어요.
 16:9로 자르고 1920×1080으로 줄였어요. 덱의 39~41쪽은 아직 바꾸지 않았어요.
 
@@ -9,12 +9,103 @@ Unsplash 라이선스와 Pexels 라이선스 모두 무료로 쓰고 고칠 수 
 | 1차 (A~C) | 일상의 행복한 순간 | `후보_한눈에.jpg` | `시안_한눈에.jpg` |
 | 2차 (D~F) | 연인이나 친구끼리 찍어 주는 모습, 셀카를 찍는 모습 | `후보2_한눈에.jpg` | `시안2_한눈에.jpg` |
 | 3차 (G, H, J) | 파티와 축하(술 없음), 함께하는 식사, 그 밖의 좋은 순간 | `후보3_한눈에.jpg` | `시안3_한눈에.jpg` |
+| 4차 (K~N) | 단란한 가정: 아기와 부모, 집에서의 시간, 야외의 가족, 조부모와 아이 | `후보4_한눈에.jpg` | `시안4_한눈에.jpg` |
 
-- 다시 찍기: `python tools/closing_try.py` (한 차수만은 `--round 3`처럼, 조합은 그 파일의 `TRIES1`~`TRIES3`)
+- 다시 찍기: `python tools/closing_try.py` (한 차수만은 `--round 4`처럼, 조합은 그 파일의 `TRIES1`~`TRIES4`)
 - 덱에 넣을 때: `slides_new.py`의 `s_end1(photo=…)`, `s_end2(photo=…, hand=…)`, `s_end3(photo=…)`
 
-39쪽과 41쪽은 글이 화면 한가운데에 놓여서, 가운데가 비었거나 사람이 실루엣인 사진이 맞아요(C 묶음, A5, D10, D12, E11, E12, F12, F13, G15, J5, J9, J10, J19, J25).
+39쪽과 41쪽은 글이 화면 한가운데에 놓여서, 가운데가 비었거나 사람이 실루엣인 사진이 맞아요(C 묶음, A5, D10, D12, E11, E12, F12, F13, G15, J5, J9, J10, J19, J25, M4, M5, M7, M8, M15, M16).
 40쪽은 손글씨 '순간'만 있어서 어느 사진이든 놓을 수 있어요.
+
+# 4차: 단란한 가정
+
+아기와 부모가 함께하는 장면(G6 같은)과 그 밖의 행복한 가족 장면이에요.
+
+## K. 아기와 부모
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| K1 | 침대에서 아기를 사이에 두고 마주 보며 웃는 부부 | William Fortunato | https://www.pexels.com/photo/6393353/ |
+| K2 | 아기와 함께 크게 웃는 부부 | RDNE Stock project | https://www.pexels.com/photo/6849623/ |
+| K3 | 아이를 가운데에 안고 웃는 부부 | Gustavo Fring | https://www.pexels.com/photo/3912350/ |
+| K4 | 아기를 안은 아빠와 뒤에서 웃는 엄마 | William Fortunato | https://www.pexels.com/photo/6392821/ |
+| K5 | 침대에 누워 웃는 세 가족 (따뜻한 실내 빛) | Pavel Danilyuk | https://www.pexels.com/photo/7938035/ |
+| K6 | 정원에서 아기를 들어 올린 아빠와 웃는 엄마 | Tri M. Nguyen | https://www.pexels.com/photo/13020479/ |
+| K7 | 거실에서 아기를 안고 웃는 부부 | ShotPot | https://www.pexels.com/photo/7705881/ |
+| K8 | 아기를 안아 든 부부 | Kenneth Surillo | https://www.pexels.com/photo/21642979/ |
+| K9 | 잔디밭에 앉은 아기와 부부 | Rahul Lavhande | https://www.pexels.com/photo/11708063/ |
+| K10 | 역광 속에서 아기를 바라보는 부부 | Arina Krasnikova | https://www.pexels.com/photo/5416619/ |
+| K11 | 피크닉 담요 위의 아기와 부부 | Helena Lopes | https://www.pexels.com/photo/27176999/ |
+| K12 | 해 질 녘 아기의 두 볼에 입 맞추는 부부 | Misha Kudrich | https://www.pexels.com/photo/28625531/ |
+| K13 | 딸의 두 볼에 입 맞추는 부부 | Greta Hoffman | https://www.pexels.com/photo/9705684/ |
+| K14 | 아이에게 입 맞추는 부부 | Anna Shvets | https://www.pexels.com/photo/11369487/ |
+| K15 | 아이를 안고 활짝 웃는 부부 | Philip White | https://unsplash.com/photos/Vg3l_fjmqXc |
+| K16 | 신난 아기를 안은 부부 | Nilanka Kariyawasam | https://unsplash.com/photos/AKk37Avu6o8 |
+| K17 | 해 질 녘 들판에서 아기를 들어 올린 아빠와 엄마 | Kateryna Hliznitsova | https://unsplash.com/photos/N_6OpdOXcxo |
+| K18 | 노을 진 바닷가에서 아기를 안은 아빠 | Tatiana Syrikova | https://www.pexels.com/photo/3968148/ |
+
+## L. 집에서의 단란한 시간
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| L1 | 스탠드 불빛 아래 침대에서 아이와 책을 보는 부부 | Pavel Danilyuk | https://www.pexels.com/photo/7938207/ |
+| L2 | 아이를 사이에 두고 누워 책을 읽어 주는 부부 | Pavel Danilyuk | https://www.pexels.com/photo/7938052/ |
+| L3 | 침대에 앉아 아이에게 책을 읽어 주는 부부 | Pavel Danilyuk | https://www.pexels.com/photo/7938010/ |
+| L4 | 아들에게 책을 읽어 주는 엄마 | cottonbro studio | https://www.pexels.com/photo/5867248/ |
+| L5 | 이불 속에서 손전등으로 책을 읽는 아빠와 딸 | RDNE Stock project | https://www.pexels.com/photo/10566117/ |
+| L6 | 아들에게 그림책을 읽어 주는 아빠 | Ron Lach | https://www.pexels.com/photo/9873931/ |
+| L7 | 아들의 두 볼에 입 맞추는 부모 | Elina Fairytale | https://www.pexels.com/photo/4008885/ |
+| L8 | 소파에서 서로 껴안은 가족 | Anna Shvets | https://www.pexels.com/photo/11368530/ |
+| L9 | 침대에서 아이와 웃는 부부 | Werner Pfennig | https://www.pexels.com/photo/5442666/ |
+| L10 | 머리를 맞대고 누워 웃는 가족 | Ketut Subiyanto | https://www.pexels.com/photo/4546025/ |
+| L11 | 아침 침대에서 웃는 네 가족 | Ketut Subiyanto | https://www.pexels.com/photo/4545202/ |
+| L12 | 바닥에 엎드려 아이들과 책을 보는 아빠 | Pavel Danilyuk | https://www.pexels.com/photo/8763081/ |
+| L13 | 거실에서 딸과 춤추는 아빠와 소파에서 웃는 엄마 | Annushka Ahuja | https://www.pexels.com/photo/8055527/ |
+| L14 | 아기와 함께 요리하는 부부 | RDNE Stock project | https://www.pexels.com/photo/5593312/ |
+| L15 | 생일을 맞은 딸에게 입 맞추는 부모 | kenan zhang | https://www.pexels.com/photo/33737244/ |
+| L16 | 담요를 쓰고 책을 보는 엄마와 딸 | Artem Podrez | https://www.pexels.com/photo/7504915/ |
+| L17 | 아이의 생일 촛불을 지켜보는 온 가족 | Ivan S | https://www.pexels.com/photo/7922015/ |
+| L18 | 다섯 살 생일 케이크 앞의 가족 (포르투갈) | Kampus Production | https://www.pexels.com/photo/7159858/ |
+| L19 | 이불 속에서 딸과 책을 보는 아빠 | RDNE Stock project | https://www.pexels.com/photo/10566195/ |
+| L20 | 아이들을 목말 태운 부부 | Vlada Karpovich | https://www.pexels.com/photo/4617300/ |
+| L21 | 침대에서 딸과 장난치는 아빠 | RDNE Stock project | https://www.pexels.com/photo/10565625/ |
+| L22 | 두 딸에게 책을 읽어 주는 부모 (왼쪽 옷의 글자가 보이지 않게 오른쪽으로 자름) | cottonbro studio | https://www.pexels.com/photo/6668285/ |
+
+## M. 야외의 가족
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| M1 | 햇살 속에서 마주 보며 웃는 엄마와 아이 (인도) | KOYEL SARKAR | https://www.pexels.com/photo/12159154/ |
+| M2 | 손을 잡고 바닷가 모래 언덕을 걷는 세 가족 | MATEO BASTIDAS | https://www.pexels.com/photo/11889771/ |
+| M3 | 바닷가에서 아이의 손을 잡은 부부 | Ambam Gorilla | https://www.pexels.com/photo/29063346/ |
+| M4 | 노을 진 바다에서 손을 잡은 가족 (인도 구자라트) | Radhika Studio | https://www.pexels.com/photo/11538583/ |
+| M5 | 역광 속에서 아이의 손을 잡고 걷는 부부 | Michael Zolowere Phiri | https://www.pexels.com/photo/31012714/ |
+| M6 | 해변에서 아이의 손을 잡고 걷는 부부 (미국 델마) | Lawrence Crayton | https://www.pexels.com/photo/5276039/ |
+| M7 | 노을 앞에서 아기를 들어 올린 부부의 실루엣 (인도 첸나이) | Aravindhan C | https://www.pexels.com/photo/28950096/ |
+| M8 | 노을 앞에서 손을 잡은 세 가족의 실루엣 (필리핀 미마로파) | Junery Docto | https://www.pexels.com/photo/7927998/ |
+| M9 | 해 질 녘 딸을 들어 올린 아빠 (인도 투니) | Prasad Cameron | https://www.pexels.com/photo/15291660/ |
+| M10 | 들판에서 딸을 들어 올린 아빠와 엄마 | Gustavo Fring | https://www.pexels.com/photo/4894887/ |
+| M11 | 노을 진 숲에서 아이를 안은 부부 | Helena Lopes | https://www.pexels.com/photo/27176627/ |
+| M12 | 아빠 목말을 타고 팔을 벌린 아이 | Kindel Media | https://www.pexels.com/photo/7978516/ |
+| M13 | 바닷가에서 아기를 목말 태운 아빠와 웃는 엄마 (미국 샌디에이고) | Lawrence Crayton | https://unsplash.com/photos/cf1cN3ofKUM |
+| M14 | 숲에서 아기를 들어 올린 아빠와 엄마 | Nilanka Kariyawasam | https://unsplash.com/photos/NnRuRbhZSgs |
+| M15 | 해 지는 바다를 향해 걷는 가족의 실루엣 (프랑스 Quend) | Kevin Delvecchio | https://unsplash.com/photos/7noZJ_4nhU8 |
+| M16 | 금빛 바닷가에서 노는 가족의 실루엣 (인도네시아 욕야카르타) | Aliko Sunawang | https://unsplash.com/photos/yalGpCauYls |
+| M17 | 해 질 녘 길을 걷는 네 가족 | Seljan Salim | https://unsplash.com/photos/El0yVRiFbxs |
+| M18 | 눈을 맞으며 노는 가족 | Yan Krukau | https://www.pexels.com/photo/6618008/ |
+
+## N. 조부모와 아이
+
+N1~N3은 원본 설명에 할아버지라는 말이 없어서 어르신으로 적었어요.
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| N1 | 창가에서 아기를 안은 어르신 | Dragon Pan | https://unsplash.com/photos/MzNoPCDRKaI |
+| N2 | 웃는 아기를 안은 어르신 | Dragon Pan | https://unsplash.com/photos/_7l2FS4FicM |
+| N3 | 아이를 안고 바라보는 어르신 | Iulian Florentin Stefancu | https://www.pexels.com/photo/27567505/ |
+| N4 | 아기에게 입 맞추는 할머니 | Rene Terp | https://www.pexels.com/photo/12774832/ |
+| N5 | 할아버지에게 안겨 웃는 손녀 | RDNE Stock project | https://www.pexels.com/photo/8298434/ |
+| N6 | 아기를 둘러싼 삼대 | Mylena Ike | https://www.pexels.com/photo/39995477/ |
 
 # 3차: 더 다양한 순간
 
@@ -196,6 +287,7 @@ Unsplash 라이선스와 Pexels 라이선스 모두 무료로 쓰고 고칠 수 
 - 1차: Unsplash에서 서른한 가지 검색어로 사진 469장을 모아 미리보기로 보고 골랐어요.
 - 2차: Pexels 서른세 가지, Unsplash 열여섯 가지 검색어로 찾은 사진 가운데 주제에 맞는 290여 장을 미리보기로 보고 골랐어요. 1차에서 본 Unsplash 사진은 뺐어요.
 - 3차: Pexels 서른여섯 가지, Unsplash 네 가지 검색어로 찾은 908장 가운데 설명 글에 술, 사진 찍기, 흑백 같은 말이 든 것을 뺀 782장을 미리보기로 보고 골랐어요. 고른 57장은 크게 키워 술병과 술잔, 상표가 보이는지 다시 봤어요.
-- 1차와 2차에서는 술이 보이는 사진, 실내 사진, 카메라로 찍는 사진을 뺐어요. 3차는 실내 사진도 넣었어요.
+- 4차: Pexels 서른두 가지, Unsplash 일곱 가지 검색어로 찾은 822장 가운데 설명 글에 흑백, 스튜디오, 군복, 화면을 보는 장면 같은 말이 든 것을 뺀 743장을 미리보기로 보고 골랐어요. 고른 사진은 크게 키워 봤고, 옷에 상표나 캐릭터 그림이 보이는 사진은 뺐어요.
+- 1차와 2차에서는 술이 보이는 사진, 실내 사진, 카메라로 찍는 사진을 뺐어요. 3차와 4차는 실내 사진도 넣었어요.
 - 휴대폰은 크게 키워서 봤어요. 아이폰의 카메라 화면이나 뒷면 카메라가 뚜렷한 사진은 뺐어요.
-- 찍은 사람과 라이선스는 사진마다 원본 쪽에서 확인했어요. Unsplash 31장은 "Free to use under the Unsplash License", Pexels 91장은 "Free"로 적혀 있어요.
+- 찍은 사람과 라이선스는 사진마다 원본 쪽에서 확인했어요. Unsplash 41장은 "Free to use under the Unsplash License", Pexels 145장은 "Free"로 적혀 있어요.

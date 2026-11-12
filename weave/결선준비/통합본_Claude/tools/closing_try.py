@@ -2,9 +2,10 @@
 """마무리 세 장(39~41쪽)에 후보 사진을 대 본 시안. `마무리사진_후보/`의 사진을 지금 장의 글, 어둠과 함께 PowerPoint로 찍어 한 장에 모은다.
 덱은 바꾸지 않는다(시안 덱은 out/closing_try.pptx).
 
-  python tools/closing_try.py              → 1차(A~C), 2차(D~F), 3차(G, H, J) 모두
+  python tools/closing_try.py              → 1차(A~C), 2차(D~F), 3차(G, H, J), 4차(K~N) 모두
   python tools/closing_try.py --round 2    → 2차만: 마무리사진_후보/후보2_한눈에.jpg, 시안2_한눈에.jpg
   python tools/closing_try.py --round 3    → 3차만: 후보3_한눈에.jpg, 시안3_한눈에.jpg
+  python tools/closing_try.py --round 4    → 4차만: 후보4_한눈에.jpg, 시안4_한눈에.jpg
 """
 import argparse
 import copy
@@ -58,9 +59,21 @@ TRIES3 = [
     ('', [(40, 'J13', dict(hand=(125, 120, 190), stops=LIGHT)), (40, 'G14', dict(hand=(640, 110, 340))), (40, 'J16', dict(hand=(1010, 250, 300)))]),
 ]
 GROUPS3 = [('G. 파티와 축하 (술 없음)', 'G'), ('H. 함께하는 식사', 'H'), ('J. 그 밖의 좋은 순간', 'J')]
+# 4차(11-12 밤): 단란한 가정 — 아기와 부모가 함께하는 장면(G6 같은), 그 밖의 행복한 가족 장면
+TRIES4 = [
+    ('가. 아기와 부모', [(39, 'M16', {}), (40, 'K5', dict(hand=(1130, 110, 230))), (41, 'M15', {})]),
+    ('나. 집에서의 저녁', [(39, 'M4', {}), (40, 'L2', dict(hand=(300, 520, 300), stops=LIGHT)), (41, 'M8', {})]),
+    ('다. 함께 걷는 가족', [(39, 'M5', dict(stops=BRIGHT39)), (40, 'K12', dict(hand=(260, 110, 300))), (41, 'M7', {})]),
+    ('40쪽에 놓을 다른 사진', [(40, 'K1', dict(hand=(1080, 560, 260))), (40, 'L1', dict(hand=(380, 200, 340), stops=LIGHT)),
+                        (40, 'L5', dict(hand=(170, 190, 240), stops=LIGHT))]),
+    ('', [(40, 'L16', dict(hand=(1080, 130, 280), stops=LIGHT)), (40, 'L19', dict(hand=(170, 220, 240), stops=LIGHT)),
+          (40, 'K18', dict(hand=(260, 160, 320)))]),
+    ('', [(40, 'M10', dict(hand=(1020, 150, 340))), (40, 'M9', dict(hand=(250, 320, 320))), (40, 'N2', dict(hand=(215, 200, 280)))]),
+]
+GROUPS4 = [('K. 아기와 부모', 'K'), ('L. 집에서의 단란한 시간', 'L'), ('M. 야외의 가족', 'M'), ('N. 조부모와 아이', 'N')]
 ROUNDS = {1: (GROUPS1, TRIES1, '후보_한눈에.jpg', '시안_한눈에.jpg'), 2: (GROUPS2, TRIES2, '후보2_한눈에.jpg', '시안2_한눈에.jpg'),
-          3: (GROUPS3, TRIES3, '후보3_한눈에.jpg', '시안3_한눈에.jpg')}
-SHEET = {3: dict(cols=5, tw=400)}                        # 사진이 많은 차수는 한 줄에 다섯 장
+          3: (GROUPS3, TRIES3, '후보3_한눈에.jpg', '시안3_한눈에.jpg'), 4: (GROUPS4, TRIES4, '후보4_한눈에.jpg', '시안4_한눈에.jpg')}
+SHEET = {3: dict(cols=5, tw=400), 4: dict(cols=5, tw=400)}                        # 사진이 많은 차수는 한 줄에 다섯 장
 MAKE = {39: N.s_end1, 40: N.s_end2, 41: N.s_end3}
 TW, TH, GAP, LEFT, TOP, CAPH = 640, 360, 14, 16, 16, 30
 

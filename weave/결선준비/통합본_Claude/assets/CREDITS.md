@@ -10,7 +10,7 @@
 | closing-2-capture.jpg | https://commons.wikimedia.org/wiki/File:Woman_shooting_ocean_sunset_(Unsplash).jpg | Ben White (Unsplash) | CC0 |
 | closing-3-sunset-picnic.jpg | https://commons.wikimedia.org/wiki/File:Sunset_Picnic_(Unsplash).jpg | Arthur Poulin (Unsplash) | CC0 |
 
-마무리 장에 바꿔 넣을 사진 후보 122장과 출처는 `../마무리사진_후보/README.md`에 있어요(Unsplash 라이선스, Pexels 라이선스).
+마무리 장에 바꿔 넣을 사진 후보 186장과 출처는 `../마무리사진_후보/README.md`에 있어요(Unsplash 라이선스, Pexels 라이선스).
 
 ## 3~5쪽의 기록 조각, 13쪽의 흐린 배경 (`intro/`)
 
