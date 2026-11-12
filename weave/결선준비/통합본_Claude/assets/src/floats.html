@@ -2,7 +2,9 @@
 <html lang="ko">
 <meta charset="utf-8">
 <!-- 3~5쪽(막막한 순간들)의 말풍선 위에 옅게 흩어져 있는 기록 조각(제목이 있던 자리까지). 표지 영상의 조각(10_표지영상/소스의 .chip)과 같은 모양.
-     찍기: python tools/intro_assets.py  → assets/intro/floats.png (1280×236 자리, 두 배 화소, 투명 바탕) -->
+     찍기: python tools/intro_assets.py  → assets/intro/floats.png (1280×236 자리, 두 배 화소, 투명 바탕)
+     11-13: 조각을 세 층으로 나눈 그림도 함께 찍는다(floats-a.png, floats-b.png, floats-c.png). 덱에서는 층마다 따로 천천히 떠다닌다(make.py patch_floats).
+     이웃한 조각이 서로 다른 층에 들어가게 번갈아 나눈다(LAYER). -->
 <style>
   @font-face { font-family: SOne; font-weight: 400; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneKorean-400.woff2'); }
   @font-face { font-family: SOne; font-weight: 700; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneKorean-700.woff'); }
@@ -10,7 +12,7 @@
   @font-face { font-family: SOneL; font-weight: 700; src: url('../../../08_인트로영상/소스/assets/fonts/SamsungOneLatin-700.woff2'); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: transparent; font-family: SOneL, SOne, 'Noto Sans KR', sans-serif; }
-  .shot { position: relative; width: 1280px; height: 236px; }
+  .shot { position: relative; width: 1280px; height: 236px; margin-bottom: 60px; }      /* 층 그림끼리 그림자가 번지지 않게 띄움 */
   .chip { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 9px; padding: 9px 15px 9px 9px; background: rgba(255,255,255,.97);
           border-radius: 13px; box-shadow: 0 5px 14px rgba(74,52,160,.13), 0 0 0 1px rgba(107,78,255,.07); transform-origin: 0 0; white-space: nowrap; }
   .chip img { width: 28px; height: 28px; border-radius: 7.5px; flex: none; }
@@ -18,7 +20,10 @@
   .chip .m { font-size: 10px; color: #8E88A0; margin-top: 1px; letter-spacing: -0.01em; line-height: 1.25; }
 </style>
 <body>
-<div class="shot" data-name="floats" id="box"></div>
+<div class="shot" data-name="floats" data-layer="all"></div>
+<div class="shot" data-name="floats-a" data-layer="0"></div>
+<div class="shot" data-name="floats-b" data-layer="1"></div>
+<div class="shot" data-name="floats-c" data-layer="2"></div>
 <script>
 const IC = '../../../10_표지영상/소스/assets/icons/';
 // [아이콘, 제목, 한 줄, x, y, 크기 배율, 진하기, 흐림(px)] — 크기와 진하기를 달리해 세 줄쯤으로 어긋나게. 큰 것은 또렷하게, 작은 것은 옅고 흐리게
@@ -41,15 +46,19 @@ const CHIPS = [
   ['samsung-wallet', '멤버십', '적립 1,200P', 1010, 166, 0.82, 0.38, 0.4],
   ['samsung-email-blue', 'Q1_Demo_v3.pdf', '어제 오후 6:20', 1160, 178, 0.72, 0.32, 0.6],
 ];
-const box = document.getElementById('box');
-for (const [ic, t, m, x, y, s, o, b] of CHIPS) {
-  const el = document.createElement('div');
-  el.className = 'chip';
-  el.innerHTML = `<img src="${IC}${ic}.png" alt=""><div><div class="t">${t}</div><div class="m">${m}</div></div>`;
-  el.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
-  el.style.opacity = o;
-  if (b) el.style.filter = `blur(${b}px)`;
-  box.appendChild(el);
+const LAYER = [0, 1, 2, 0, 1, 2,  2, 0, 1, 2, 0,  1, 2, 0, 1, 2, 0];      // 조각마다의 층(위 줄, 가운데 줄, 아래 줄)
+for (const box of document.querySelectorAll('.shot')) {
+  const layer = box.dataset.layer;
+  CHIPS.forEach(([ic, t, m, x, y, s, o, b], i) => {
+    if (layer !== 'all' && LAYER[i] !== Number(layer)) return;
+    const el = document.createElement('div');
+    el.className = 'chip';
+    el.innerHTML = `<img src="${IC}${ic}.png" alt=""><div><div class="t">${t}</div><div class="m">${m}</div></div>`;
+    el.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    el.style.opacity = o;
+    if (b) el.style.filter = `blur(${b}px)`;
+    box.appendChild(el);
+  });
 }
 </script>
 </body>

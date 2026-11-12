@@ -6,9 +6,9 @@
 - scat, link: 11~12쪽. '지금의 나' 둘레에 흩어져 있던 기록이(11쪽) 가운데로 모여 반듯해지고 선으로 이어진다(12쪽). 인트로 덱 10~11쪽의 차례를 뒤집어 다시 그린 것.
 - bridge: 14쪽. 모션그래픽 첫 화면처럼 가운데 위에 로고, 그 아래 떠 있는 앱들 → (클릭) 실 한 가닥이 넷을 이음.
 뒷부분
-- fx1~3, bi, cmp, tl, end1~3: 아웃트로 덱(Weave_BI_아웃트로_통합_1110_v7.pptx)의 내용을 우리 틀로 다시 그린 것. 연표(tl)는 두 줄이 Weave에서 만나는 모양.
-제안 장표(덱 뒤쪽)
-- p_fx1~3: 기대효과를 고리 그래프의 움직임으로 보여 주는 안.
+- bi, tl, end1~3: 아웃트로 덱(Weave_BI_아웃트로_통합_1110_v7.pptx)의 내용을 우리 틀로 다시 그린 것. 연표(tl)는 두 줄이 Weave에서 만나는 모양.
+- 6차(11-13): 기대효과는 한 장(fx_new.s_fx, 키 fx). 여기의 s_fx(세 장, fx1~3)와 제안 장표(p_fx1~3)는 5차까지 쓰던 것.
+  기존 기능과의 비교는 Appendix로 옮김(cmp_new.s_cmp_apx). 여기의 s_cmp(두 축 지도)는 5차까지 쓰던 것이고 아이콘과 이름표(cmp_icon, map_point)는 계속 씀.
 
 좌표는 1280×720 px. 말할 글은 NOTES((클릭) = 그 자리에서 클릭)와 INTRO_NOTES(옮겨 온 인트로 장의 노트)에 있다.
 """
@@ -38,15 +38,17 @@ SURVEY_SRC = "* 스마트폰 내 개인 기록 탐색 및 재검색 행태에 �
 # 표지와 옮겨 온 인트로 장의 노트. 괄호 속은 무대 지시(팀원 노트 그대로), 나머지가 말할 글.
 # 11-12 5차: 7~14쪽은 팀원이 손본 덱(jjun-0824/t3 87bf80b)의 장과 노트를 그대로 옮긴다. 7, 8, 9, 10, 14쪽의 노트가 바뀌었고 9, 11, 12, 14쪽의 노트도 여기로 옮겨 옴.
 # 11-12 밤: '이름이' → '정확한 이름이'(덱 전체), 기대효과 문장의 '검색으로 바로 찾지' → '검색으로 찾지'. 4쪽은 말풍선(make.patch_ask2)과 노트.
+# 11-13 6차: 2쪽의 끝 문장을 3쪽 첫머리로 옮기고 3쪽에 클릭(그 문장을 말하는 동안에는 떠다니는 기록 조각만 보임), 7쪽은 설문 6번의 말 그대로, 9쪽은 이어 주는 말로.
 INTRO_NOTES = {
     'cover': ('(화면: 흩어진 기억을 엮어, 지금을 완성하다 — Weave Assist)\n'
               '안녕하세요. 흩어진 기억을 엮어 지금을 완성하는 온디바이스 AI, Weave Assist 발표를 맡은 장이준입니다.'),
     'in02': ('(장이 열리면 통화 중 00:48 표시가 뜨고 "잠깐만요, 찾아보고 다시 알려 드릴게요." 문장이 한 글자씩 나타납니다. '
              '문장이 다 뜰 때까지 1초쯤 기다립니다. 클릭 없음)\n'
              "여러분, 통화하다가 이런 말 해 보신 적 있으시죠. '잠깐만요, 찾아보고 다시 알려 드릴게요.'\n"
-             '분명히 내 휴대폰 어딘가에 있는데, 그 자리에서 바로 찾지는 못할 때 나오는 말입니다.\n'
-             '우리는 종종 이어지던 통화를 중단하고, 상대가 물어본 정보를 찾아 여러 앱을 넘나들곤 합니다.'),
-    'in03': ("(장이 열리면 첫 번째 인물과 '어디에 적어 놨더라?' 말풍선이 저절로 나타납니다.)\n"
+             '분명히 내 휴대폰 어딘가에 있는데, 그 자리에서 바로 찾지는 못할 때 나오는 말입니다.'),
+    'in03': ('(장이 열리면 옅은 기록 조각만 떠다닙니다. 인물은 아직 없습니다.)\n'
+             '우리는 종종 이어지던 통화를 중단하고, 상대가 물어본 정보를 찾아 여러 앱을 넘나들곤 합니다.\n'
+             "(클릭) (첫 번째 인물과 '어디에 적어 놨더라?' 말풍선이 나타납니다.)\n"
              '저희는 이러한 순간을 크게 세 가지로 나눌 수 있었습니다.\n'
              '첫째, 어디에 있는지 모를 때입니다. 찾을 내용은 분명한데 어느 앱에 남겼는지 모릅니다.'),
     'in04': ("(장이 열리면 첫 인물이 옆으로 비켜서고, 두 번째 인물과 '정확한 이름이 뭐였지?' 말풍선이 나타납니다.)\n"
@@ -55,12 +57,12 @@ INTRO_NOTES = {
              '셋째, 기억조차 나지 않을 때입니다. 부탁이나 약속은 대화방에 그대로 남아 있지만, 정작 챙겨야 할 순간에는 떠오르지 않습니다.\n'
              '(톤을 한 단계 높여) 세 순간 모두, 필요한 기록은 이미 내 휴대폰 안에 있습니다. (0.5초 쉬고 다음 장)'),
     'in07': ('(장이 열리면 왼쪽 링이 93.8%까지 채워지고 오른쪽 수치 197명이 나타납니다. 따로 클릭하지 않아도 됩니다.)\n'
-             "실제로, 저희가 사용자 210명을 대상으로 설문조사를 진행한 결과, 무려 93.8%가 '찾고 싶은 정보를 바로 찾지 못한 경험이 있다'고 답했습니다."),
+             "실제로, 저희가 사용자 210명을 대상으로 설문조사를 진행한 결과, 무려 93.8%가 '정확한 이름이 떠오르지 않아 검색으로 찾지 못한 경험이 있다'고 답했습니다."),
     'in08': ('(장이 열리면 같은 링 안에서 그 197명 중 187명(94.9%)이 보라색으로 채워지고, 돋보기 표시가 앱 넷을 차례로 건너뛰다 처음 앱으로 되돌아갑니다. '
              '따로 클릭하지 않아도 됩니다.)\n'
              '그리고 그중 94.9%는 단서가 될 기록부터 다시 찾아봤다고 답했습니다.\n'
              '저장했던 곳이 떠오르지 않으니, 결국 사람이 직접 여러 앱을 찾아다니고 있었던 겁니다.'),
-    'hub2': '기록을 남길 때부터 한 사람이 평균 3.8곳에 나눠 저장하기 때문입니다.',
+    'hub2': '이는 우리가 정보를 한 가지 앱에 기록하기보다, 캡처, 메모 앱, 카톡 대화 등으로 분산하여 기록하는 경향이 있기 때문입니다.',
     'in09': ('(장이 열리면 오른쪽 AI 어시스턴트 ("임베딩 모델이 뭐야?" ➔ AI 답변) 대화 화면이 차례로 나타납니다.)\n'
              '여기서 저희는 한 가지 중요한 의문이 들었습니다.\n'
              "'세상의 모든 지식은 이렇게 AI에게 물어 정확하게 답을 받는데,'"),
@@ -569,8 +571,9 @@ def s_fx(key, first=False, effect=False):
 
 
 # ------------------------------------------------------------------ 뒷부분 2: 비즈니스 임팩트
-BI_APPS = ['gallery', 'messages', 'kakao', 'camera', 'calendar', 'music', 'video', 'notes', 'store', 'email', 'health', 'maps', 'cloud',
-           'wallet', 'phone', 'internet', 'penup', 'recorder', 'clock']
+# 11-13 6차: 기록을 남기는 앱이 아닌 다섯(음악, 비디오, 스토어, PENUP, 시계)을 빼서 19 → 14개. 줄마다 4, 6, 4개
+BI_APPS = ['gallery', 'messages', 'kakao', 'camera', 'calendar', 'notes', 'email', 'health', 'maps', 'cloud', 'wallet', 'phone', 'internet', 'recorder']
+BI_ROWS = (4, 6, 4)
 BI_LX, BI_RX = 252, 1028                                    # 왼쪽 묶음 가운데, 오른쪽 묶음 가운데
 BI_PH = (640 - 113, 168, 226, 388)                          # 가운데 휴대폰(몸통 상자)
 BI_WV = (640, 352, 42)                                      # 휴대폰 안의 Weave 동그라미: 가운데 x, y, 반지름
@@ -611,15 +614,17 @@ def s_bi():
     동그라미가 보라로 켜지며 고리 셋과 작은 별이 둥글게 퍼진다(모션그래픽에서 기록이 실타래 버튼에 닿을 때처럼)."""
     s = Slide('bi', trans=('fade', 500), bar=False, notes=NOTES['bi'])
     s.add('bi/title', [title('bi/title', [('쓸수록 쌓여, ', INK), ('갤럭시를 떠나기 어려워집니다', PURPLE)])])
-    # 왼쪽: 앱 19개(6·7·6)
-    apps, sz, gx, gy = [], 44, 54, 54
-    rows = [BI_APPS[:6], BI_APPS[6:13], BI_APPS[13:]]
+    # 왼쪽: 앱 14개(4·6·4). 수가 줄어든 만큼 조금 키우고 사이를 넓힘(44 → 46px, 54 → 58px)
+    apps, sz, gx, gy = [], 46, 58, 56
+    cuts = [sum(BI_ROWS[:i]) for i in range(len(BI_ROWS) + 1)]
+    rows = [BI_APPS[a:b] for a, b in zip(cuts, cuts[1:])]
+    assert sum(BI_ROWS) == len(BI_APPS)
     for r_, names in enumerate(rows):
         x0 = BI_LX - (len(names) - 1) * gx / 2
         for c_, nm in enumerate(names):
             jig = ((r_ * 7 + c_ * 5) % 9) - 4
             icon = ICON['note'] if nm == 'notes' else str(OUTRO / ('app-%s.png' % nm))       # 삼성노트는 가장자리를 다듬은 것
-            apps.append(P('bi/app/%s' % nm, icon, x0 + c_ * gx - sz / 2, 172 + r_ * gy + jig, sz, sz))
+            apps.append(P('bi/app/%s' % nm, icon, x0 + c_ * gx - sz / 2, 170 + r_ * gy + jig, sz, sz))
     s.add('bi/apps', apps)
     s.add('bi/l', bi_stat('bi/l', BI_LX, '41', '개', '사용자가 월평균 쓰는 앱 수¹',
                           [('기록은 ', INK), ('41개 앱에 흩어져', PURPLE), (' 있고', INK)]))
@@ -874,7 +879,10 @@ def photo_bg(key, fname, stops):
 END1_Y = 285                       # 인용 글상자의 위(11-12: 두 줄과 출처 묶음의 가운데가 화면 세로 가운데 y = 360에 오게, 168 → 285)
 
 
-def s_end1(photo='closing-1-sunset-chairs.jpg', stops=((0, 68), (42, 52), (70, 30), (100, 26))):
+END_BY = 'Samsung Galaxy 「A Billion Reasons to Switch」 광고 카피 중'      # 11-13 6차: '— Samsung Galaxy 광고 카피 중'에서(팀원 덱의 표기)
+
+
+def s_end1(photo='closing-1-sparklers.jpg', stops=((0, 68), (42, 52), (70, 30), (100, 26))):
     """인용 두 줄과 출처를 화면 한가운데(가로, 세로)에. 글은 모두 흰색. photo, stops: 다른 사진을 대 볼 때(tools/closing_try.py)."""
     s = Slide('end1', trans=('fade', 900), bar=False, bg=False, notes=NOTES['end1'])
     s.add('end/bg', photo_bg('end/bg', photo, list(stops)))
@@ -882,7 +890,7 @@ def s_end1(photo='closing-1-sunset-chairs.jpg', stops=((0, 68), (42, 52), (70, 3
     s.add('end1/q', [T('end1/q', 220, y, 840, 110,
                        ['당신이 사랑하는 모든 것에 더 가까이 다가가고,', '오래도록 이야기하게 될 순간을 담아보세요'],
                        size=30, color=WHITE, weight='b', align='c', lnspc=40, spc=-0.4)])
-    s.add('end1/by', [T('end1/by', 340, y + 122, 600, 26, '— Samsung Galaxy 광고 카피 중', size=13, color=WHITE, alpha=78, align='c', anchor='ctr')])
+    s.add('end1/by', [T('end1/by', 340, y + 122, 600, 26, END_BY, size=13, color=WHITE, alpha=78, align='c', anchor='ctr')])
     s.on('end1/q', 'rise', 500, 800, dy=14)
     s.on('end1/by', 'fade_in', 1500, 600)
     return s
@@ -891,8 +899,8 @@ def s_end1(photo='closing-1-sunset-chairs.jpg', stops=((0, 68), (42, 52), (70, 3
 HAND = (670, 436)                  # 손글씨 '순간' 그림의 크기(px)
 
 
-def s_end2(photo='closing-2-capture.jpg', stops=((0, 60), (55, 50), (100, 46)), hand=(318, 318, 400)):
-    """해 질 녘을 휴대폰으로 담는 사람. 왼쪽 하늘에 손글씨 '순간'. hand = 손글씨의 (가운데 x, 가운데 y, 폭)."""
+def s_end2(photo='closing-2-samsung-phone.jpg', stops=((0, 60), (55, 50), (100, 46)), hand=(215, 112, 300)):
+    """순간을 휴대폰으로 담는 사람(6차: 앞면에 SAMSUNG이 보이는 휴대폰). 왼쪽 위에 손글씨 '순간'. hand = 손글씨의 (가운데 x, 가운데 y, 폭)."""
     s = Slide('end2', trans=('fade', 900), bar=False, bg=False, notes=NOTES['end2'])
     s.add('end/bg', photo_bg('end/bg', photo, list(stops)))
     cx, cy, w = hand
@@ -901,7 +909,7 @@ def s_end2(photo='closing-2-capture.jpg', stops=((0, 60), (55, 50), (100, 46)), 
     return s
 
 
-def s_end3(photo='closing-3-sunset-picnic.jpg', stops=((0, 54), (30, 58), (62, 58), (100, 30))):
+def s_end3(photo='closing-3-family-sea.jpg', stops=((0, 54), (30, 58), (62, 58), (100, 30))):
     """손글씨 '순간'이 문장 속으로. 두 줄만 화면 가운데에 두고 말로 맺는다("지금까지 Weave Assist였습니다.").
     11-12: 글 묶음을 화면 가운데로, 로고 뒤의 어두운 둥근 그늘과 끝 로고(Weave 글자와 아이콘)는 없앰. 글은 모두 흰색."""
     s = Slide('end3', trans=('morph', 1100), bar=False, bg=False, notes=NOTES['end3'])
@@ -929,26 +937,36 @@ def s_divider(key, head, lines, note):
     return s
 
 
-PHOTO_CREDITS = [('마무리 1 (해 질 녘)', 'Harli Marten, "Pink sunset couple", Unsplash (Wikimedia Commons 사본), CC0'),
-                 ('마무리 2 (순간을 담는 사람)', 'Ben White, "Woman shooting ocean sunset", Unsplash (Wikimedia Commons 사본), CC0'),
-                 ('마무리 3 (노을 소풍)', 'Arthur Poulin, "Sunset Picnic", Unsplash (Wikimedia Commons 사본), CC0'),
-                 ('6쪽 화면 속 사진', 'Unsplash 사진 63장 (Wikimedia Commons 사본), 모두 CC0. 목록은 assets/src/photos/credits.json')]
+# 11-13 6차: 마무리 사진 셋을 바꿈(마무리사진_후보의 G15, A2, M4). 모션그래픽의 음악도 함께 적음. How it Works의 사진은 앞 장(apx_credit)에 있음
+PHOTO_CREDITS = [('마무리 1 (노을 앞의 불꽃 막대)', 'Vitaly Gariev, Pexels (pexels.com/photo/36713116), Pexels 라이선스'),
+                 ('마무리 2 (순간을 담는 휴대폰)', 'Stefan Maass, Unsplash (unsplash.com/photos/zu68hhvQM2M), Unsplash 라이선스'),
+                 ('마무리 3 (노을 진 바다의 가족)', 'Radhika Studio, Pexels (pexels.com/photo/11538583), Pexels 라이선스'),
+                 ('6쪽 화면 속 사진', 'Unsplash 사진 63장 (Wikimedia Commons 사본), 모두 CC0. 목록은 assets/src/photos/credits.json'),
+                 ('15쪽 모션그래픽의 음악', 'Michael Ramir C., "A Special Feeling", Mixkit (Mixkit Stock Music Free License)')]
 
 
 def s_credits2():
-    s = Slide('apx_credit2', trans=('fade', 400), bar=False, notes='마무리 장과 6쪽에 쓴 사진의 출처입니다.')
-    s.add('cr2/title', [caption('cr2/title', [[('사진 출처', INK)]], 640, 54, size=24)])
-    s.add('cr2/sub', [T('cr2/sub', 100, 54 + 24 * 1.42 + 6, 1080, 24, '마무리 장의 배경 사진과 6쪽 휴대폰 화면 속 사진', size=13, color=SUB, align='c')])
+    s = Slide('apx_credit2', trans=('fade', 400), bar=False, notes='마무리 장과 6쪽에 쓴 사진, 모션그래픽에 쓴 음악의 출처입니다.')
+    s.add('cr2/title', [caption('cr2/title', [[('사진과 음악 출처', INK)]], 640, 54, size=24)])
+    s.add('cr2/sub', [T('cr2/sub', 100, 54 + 24 * 1.42 + 6, 1080, 24, '마무리 장의 배경 사진, 6쪽 휴대폰 화면 속 사진, 모션그래픽의 배경음악', size=13, color=SUB,
+                        align='c')])
     out = []
     for i, (a, b) in enumerate(PHOTO_CREDITS):
         y = 160 + i * 64
         out += [R('cr2/%d/bg' % i, 160, y, 960, 52, prst='roundRect', radius=14, fill='FFFFFF', line=LINE2, line_w=1.0),
-                T('cr2/%d/a' % i, 184, y, 220, 52, a, size=12, color=PURPLE, weight='b', anchor='ctr'),
-                T('cr2/%d/b' % i, 410, y, 700, 52, b, size=10.5, color=BODY, anchor='ctr')]
+                T('cr2/%d/a' % i, 184, y, 240, 52, a, size=12, color=PURPLE, weight='b', anchor='ctr'),
+                T('cr2/%d/b' % i, 430, y, 680, 52, b, size=10.5, color=BODY, anchor='ctr')]
     s.add('cr2/rows', out)
     return s
 
 
+def s_fx_one():
+    """기대효과 한 장(6차). fx_new가 이 파일을 불러 쓰므로 그릴 때 불러온다."""
+    import fx_new
+    return fx_new.s_fx()
+
+
 # 11-12 4차: 비교 장을 Lock-in 앞으로(기대효과 → 비교 → Lock-in → 연표). Lock-in에서 '지금, 갤럭시에서 가능한 이유'로 바로 이어지게
-SLIDES_BACK = [lambda: s_fx('fx1', first=True), lambda: s_fx('fx2'), lambda: s_fx('fx3'), s_cmp, s_bi, s_tl, s_end1, s_end2, s_end3]
-SLIDES_PROPOSAL = [lambda: s_fx('fx1', first=True, effect=True), lambda: s_fx('fx2', effect=True), lambda: s_fx('fx3', effect=True)]
+# 11-13 6차: 기대효과 세 장 → 한 장, 비교 장은 Appendix로(make.appendix_specs). 차례: 기대효과 → Lock-in → 연표 → 마무리
+SLIDES_BACK = [s_fx_one, s_bi, s_tl, s_end1, s_end2, s_end3]
+SLIDES_PROPOSAL = []               # 6차: 제안 장표 묶음은 없음(기대효과를 고리의 움직임으로 보여 주던 세 장은 이전 판 (5차)에)

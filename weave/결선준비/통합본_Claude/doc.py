@@ -19,13 +19,14 @@ NAME = {
     'mg': '모션그래픽 (말 없음)', 'sol1': '솔루션 ① 기록 통합 검색', 'sol2': '솔루션 ② 단서로 찾는 기억',
     'sol': '솔루션 ③ 먼저 건네는 기억', 'hiw': 'How it works?', 'ask': '질문', 'old': '기존 검색이라면?', 'kw': '키워드 검색',
     'emb': '임베딩 검색', 'step': "Let's think step by step!", 'chain': '중간 단서', 'idx': '00 데이터 색인', 'trig': '01 상황 인식', 'split': '02 질의 재작성',
-    'hop1': '03 연쇄 탐색 (Hop 1)', 'hop2': '03 연쇄 탐색 (Hop 2)', 'deliver': '04 결과 제공', 'fx1': '기대효과 ①', 'fx2': '기대효과 ②', 'fx3': '기대효과 ③',
+    'hop1': '03 연쇄 탐색 (Hop 1)', 'hop2': '03 연쇄 탐색 (Hop 2)', 'deliver': '04 결과 제공', 'fx': '기대효과 (AS-IS → TO-BE)',
+    'fx1': '기대효과 ①', 'fx2': '기대효과 ②', 'fx3': '기대효과 ③',
     'bi': '비즈니스 임팩트', 'cmp': '기존 기능과의 비교 (두 축 지도)', 'tl': 'Why Now · Why Samsung 연표', 'end1': '마무리 ① 인용', 'end2': "마무리 ② '순간'",
     'end3': '마무리 ③ 문장',
     'p_fx1': '제안 · 기대효과 ①', 'p_fx2': '제안 · 기대효과 ②', 'p_fx3': '제안 · 기대효과 ③',
 }
-SECTION = [('표지와 인트로', 'cover', 'bridge'), ('모션그래픽', 'mg', 'mg'), ('솔루션과 How it Works', 'sol1', 'deliver'), ('뒷부분', 'fx1', 'end3')]
-PREV = {'표지와 인트로': '2분 58.1초', '모션그래픽': '1분 52.8초', '솔루션과 How it Works': '3분 33.8초', '뒷부분': '2분 15.6초', '모두': '10분 40.3초'}      # 4차
+SECTION = [('표지와 인트로', 'cover', 'bridge'), ('모션그래픽', 'mg', 'mg'), ('솔루션과 How it Works', 'sol1', 'deliver'), ('뒷부분', 'fx', 'end3')]
+PREV = {'표지와 인트로': '2분 48.2초', '모션그래픽': '1분 52.8초', '솔루션과 How it Works': '3분 35.1초', '뒷부분': '2분 15.9초', '모두': '10분 31.9초'}      # 5차(11월 12일 밤)
 
 
 def mmss(t):
@@ -42,16 +43,17 @@ def main():
     say = {p['key']: ' (클릭) '.join(flat(s) for s in p['segs']) for p in plan}
     rows = tm['rows']
     keys = [r[0] for r in rows]
-    L = ['# Weave 통합본(Claude) 대본과 시간 (5차)', '',
+    L = ['# Weave 통합본(Claude) 대본과 시간 (6차)', '',
          '`Weave_통합본_Claude_미리보기.mp4`에서 잰 시간이에요. 낭독은 이 컴퓨터 안에서 만든 목소리(Supertonic 3, F2F1_70, 속도 1.15)이고, '
          '문장 사이 숨과 클릭 전후의 틈은 How it Works 낭독 영상과 같은 값이에요.', '',
-         '## 구역별 시간', '', '| 구역 | 쪽 | 시간 | 4차 때 |', '| --- | --- | --- | --- |']
+         '## 구역별 시간', '', '| 구역 | 쪽 | 시간 | 5차 때 |', '| --- | --- | --- | --- |']
     for name, a, b in SECTION:
         i, j = keys.index(a), keys.index(b)
         L.append('| %s | %s | %s | %s |' % (name, '%d' % (i + 1) if i == j else '%d~%d' % (i + 1, j + 1), mmss(sum(r[2] for r in rows[i:j + 1])), PREV[name]))
     L += ['| **모두** | 1~%d | **%s** | %s |' % (len(rows), mmss(tm['total']), PREV['모두']), '',
           '## 장마다 말할 글과 시간', '',
-          '(클릭)은 그 자리에서 클릭이에요. 옮겨 온 인트로 장(2~5쪽, 7~14쪽)은 효과가 저절로 나와서 클릭이 없어요. '
+          '(클릭)은 그 자리에서 클릭이에요. 옮겨 온 인트로 장(2~5쪽, 7~14쪽)은 효과가 저절로 나와서 클릭이 없어요. 3쪽만 한 번 눌러요: '
+          '장이 열리면 옅은 기록 조각만 떠다니고, 클릭하면 첫 인물과 말풍선이 떠요. '
           '6쪽은 장이 열리면 검색 화면이 "검색 결과가 없습니다"를 띄우는 3초 동안 말없이 기다렸다가, 화면이 물러나며 벽이 드러날 때 말을 시작하고, '
           '"카톡 대화, 사진, 메모, 일정, 메일까지"는 쉼표마다 한 번씩 클릭해요.', '',
           '| 쪽 | 장 | 말할 글 | 시작 | 길이 |', '| --- | --- | --- | --- | --- |']
@@ -75,13 +77,14 @@ def main():
                 L.append('| %s | %.1f초 | %.1f초 | %s |' % (NAME.get(x['key'], x['key']), x['now'], x['after'],
                                                            flat(txt) if txt else '(본 발표에서 빼고 Appendix 맨 앞에 둠)'))
             L.append('')
-    L += ['## 제안 장표에서 할 말', '', '덱 뒤쪽 제안 장표의 노트예요(`제안장표_미리보기.mp4`).', '']
-    f = OUT / 'timing_p.json'
-    tp = {k: d for k, a, d in json.loads(f.read_text(encoding='utf-8'))['rows']} if f.exists() else {}
-    L += ['| 장 | 말할 글 | 길이 |', '| --- | --- | --- |']
-    for k in ('p_fx1', 'p_fx2', 'p_fx3'):
-        L.append('| %s | %s | %s |' % (NAME[k], flat(N.NOTES[k]), ('%.1f초' % tp[k]) if k in tp else '—'))
-    L += ['']
+    if N.SLIDES_PROPOSAL:           # 6차부터 제안 장표 묶음은 없음
+        L += ['## 제안 장표에서 할 말', '', '덱 뒤쪽 제안 장표의 노트예요(`제안장표_미리보기.mp4`).', '']
+        f = OUT / 'timing_p.json'
+        tp = {k: d for k, a, d in json.loads(f.read_text(encoding='utf-8'))['rows']} if f.exists() else {}
+        L += ['| 장 | 말할 글 | 길이 |', '| --- | --- | --- |']
+        for k in ('p_fx1', 'p_fx2', 'p_fx3'):
+            L.append('| %s | %s | %s |' % (NAME[k], flat(N.NOTES[k]), ('%.1f초' % tp[k]) if k in tp else '—'))
+        L += ['']
     L += (HERE / '대본_이전판.md').read_text(encoding='utf-8').rstrip('\n').split('\n') + ['']
     (HERE / '대본.md').write_text('\n'.join(L), encoding='utf-8')
     print('→ 대본.md', len(L), '줄')

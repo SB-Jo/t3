@@ -1,4 +1,5 @@
-"""기대효과 한 장(후보 셋) — 지금의 세 장(fx1~3)을 한 장 + 여러 효과로 바꾸는 안. 11-12 6차.
+"""기대효과 한 장 — 5차까지의 세 장(fx1~3)을 한 장 + 여러 효과로. 11-13에 후보 L을 손본 판으로 정해 덱에 들어감(s_fx, 키 fx. 이 파일 끝).
+아래는 고르기까지 만든 후보들(A~L). tools/fx_try.py로 다시 찍어 볼 수 있다.
 
 같은 뼈대
 - 설문 셋이 하나씩 뜬다: 첫째는 가운데 → (클릭) 왼쪽으로 비키고 둘째가 가운데 → (클릭) 셋째가 오른쪽. 인트로 3~5쪽의 세 사람이 뜨던 차례와 같다.
@@ -763,12 +764,12 @@ def ring_open(s, key, cols):
     ring_in(s, cols[2], 0, 260)
 
 
-def ring_smile(s, k, t, dur=780, turn=230):
-    """고리가 보라로 한 바퀴 닫히고(그래프 → 얼굴의 테두리) 입꼬리가 돌아 웃는다. turn = 입꼬리가 돌기 시작하는 때(t부터)."""
+def ring_smile(s, k, t, dur=780, turn=230, spin=330):
+    """고리가 보라로 한 바퀴 닫히고(그래프 → 얼굴의 테두리) 입꼬리가 돌아 웃는다. turn = 입꼬리가 돌기 시작하는 때(t부터), spin = 도는 시간."""
     s.on(k + '/full', 'wheel_in', t, dur)
-    s.on(k + '/m0', 'spin', t + turn, 330, by=180, accel=30000, decel=70000)
-    s.on([k + '/eyes0', k + '/m0'], 'fade_out', t + turn + 330, 200)
-    s.on([k + '/eyes', k + '/m'], 'fade_in', t + turn + 310, 220)
+    s.on(k + '/m0', 'spin', t + turn, spin, by=180, accel=30000, decel=70000)
+    s.on([k + '/eyes0', k + '/m0'], 'fade_out', t + turn + spin, 200)
+    s.on([k + '/eyes', k + '/m'], 'fade_in', t + turn + spin - 20, 220)
     s.on(k + '/arc0', 'fade_out', t + dur, 150)
 
 
@@ -864,8 +865,123 @@ def s_fxk(key='fxk', count=False):
     return s
 
 
+# ------------------------------------------------------------------ 확정(11-13 6차): 후보 L(숫자가 0으로)을 손본 판 — 덱의 기대효과 한 장(키 fx)
+# 사용자 검토로 바꾼 곳
+# - 위 제목은 AS-IS(짙은 고리가 뜨는 동안) → Weave가 뜨면 TO-BE. 예전 제목(찾는 시간은 줄이고, 놓친 기억은 되살립니다)은 아래 가운데로.
+#   위에서부터 위 제목, 고리 얼굴, Weave 아이콘, 아래 제목 차례가 되게 고리를 조금 줄이고 아이콘을 올림.
+# - Weave 아이콘에서 칸마다 실이 뻗는다(후보 J처럼, 달라진 글 바로 아래까지). 기능을 말하는 차례로 한 칸씩 풀린다.
+# - 고리 아래 숫자를 고리 한가운데에 맞춤(왼쪽으로 4px 치우쳐 있었음). 숫자가 줄어드는 속도와 표정이 바뀌는 속도를 조금 늦춤.
+# - 글: '앱을 하나씩 열어 봤어요' → '하나씩 열어 봤어요', '검색으로 찾지 못했어요' → '검색하지 못했어요'. 달라진 글은 더 짧게.
+FX_ROWS = [     # (%, 불편 두 줄, 달라진 두 줄)
+    (83.8, ['어느 앱인지 몰라', '하나씩 열어 봤어요'], ['어느 앱인지 몰라도', '통합 검색으로 찾아요']),
+    (93.8, ['정확한 이름이 떠오르지 않아', '검색하지 못했어요'], ['정확한 이름을 몰라도', '단서로 찾아요']),
+    (82.4, ['챙겨야 할 부탁, 약속을', '나중에야 떠올렸어요'], ['챙겨야 할 부탁, 약속을', '묻기 전에 알려 줘요']),
+]
+FX_NOTE = ('저희 설문에서 83.8%는 어느 앱에 남겼는지 몰라 앱을 하나씩 열어 봤고, '
+           '(클릭) 앞서 보신 것처럼 93.8%는 정확한 이름이 떠오르지 않아 검색하지 못했으며, '       # 93.8%는 인트로 7쪽에서 본 숫자(같은 설문 6번)
+           '(클릭) 82.4%는 부탁이나 약속을 잊었다가, 나중에야 떠올렸습니다. '
+           '(클릭) Weave가 있다면, 통합 검색, 단서로 찾는 기억, 먼저 건네는 기억을 통해, 찾는 시간은 줄이고, 놓친 기억은 되살립니다.')
+FX_CUES = {'fx.n1': ('fx', 0, '83.8%'), 'fx.n2': ('fx', 1, '93.8%'),
+           'fx.f1': ('fx', 3, '통합 검색,'), 'fx.f2': ('fx', 3, '단서로 찾는 기억,'), 'fx.f3': ('fx', 3, '먼저 건네는 기억을'),
+           'fx.title': ('fx', 3, '찾는 시간은')}
+NOTES['fx'] = FX_NOTE
+CUES.update(FX_CUES)
+HW.NOTES['fx'] = FX_NOTE
+HW.CUES.update(FX_CUES)
+FX_RO = 82                          # 고리의 바깥 반지름(후보 때는 90)
+FX_CY, FX_YN, FX_YST, FX_YG = 236, 326, 392, 338      # 고리 가운데, 숫자, 불편 문장, 달라진 문장의 위 끝
+FX_ICY, FX_YB = 520, 584            # Weave 아이콘의 가운데, 아래 제목의 위 끝
+FX_TC, FX_TURN = 1300, 400          # 숫자가 0까지 줄어드는 시간, 입꼬리가 도는 시간(후보 L은 1100, 330)
+
+
+def num_mid(key, cx, y, text, color, pt=40, small=20):
+    """고리 아래 숫자: 고리의 가운데 x에 가운데 맞춤."""
+    return T(key, cx - 120, y, 240, round(pt * 1.42), [[(text, dict(size=pt)), ('%', dict(size=small))]], size=pt, color=color, weight='b',
+             align='c', anchor='ctr', spc=-0.5)
+
+
+def s_fx():
+    """기대효과 한 장. 설문 셋이 고리 얼굴로 하나씩 뜨고(위 제목 AS-IS) → (클릭) Weave 아이콘이 뜨며 제목이 TO-BE로 뒤집히고,
+    기능을 말할 때마다 아이콘에서 실이 뻗어 그 칸에 닿는다. 닿은 칸은 숫자가 0까지 줄며 고리가 보라로 닫히고 웃는다.
+    숫자가 사라진 자리에 달라진 두 줄이 올라오고, '찾는 시간은 …'을 말할 때 아래 제목이 뜬다."""
+    key = 'fx'
+    s = Slide(key, trans=('fade', 500), bar=False, notes=NOTES[key])
+    s.add(key + '/to', [N.title(key + '/to', [('TO-BE', PURPLE)])])
+    s.add(key + '/as', [N.title(key + '/as', [('AS-IS', NAVY)])], temp=True)
+    thick = N.RING_K * 2 * FX_RO
+    cols, frames = [], {}
+    for i, (pct, stmt, after) in enumerate(FX_ROWS):
+        cx, k = CXS[i], '%s/c%d' % (key, i + 1)
+        st = (SHIFT, 0) if i == 0 else None
+        track, navy, _ = ring_set(k, cx, FX_CY, pct, ro=FX_RO)
+        s.add(k + '/track', track, start=st)
+        s.add(k + '/arc0', navy, temp=True)
+        s.add(k + '/full', [donut(k + '/full', cx, FX_CY, FX_RO + PAD, thick + 2 * PAD, PURPLE)])     # 짙은 호와 빈 자리를 함께 덮음
+        d = 150 * FX_RO / RO
+        e0, m0 = big_face(k + '/f0', cx, FX_CY, NAVY, d=d)
+        e1, m1 = big_face(k + '/f1', cx, FX_CY, PURPLE, d=d)
+        s.add(k + '/eyes0', e0, temp=True)
+        s.add(k + '/m0', [m0], temp=True)
+        s.add(k + '/eyes', e1)
+        s.add(k + '/m', [m1])
+        s.add(k + '/num0', [num_mid(k + '/num0', cx, FX_YN, '%.1f' % pct, NAVY)], temp=True)
+        s.add(k + '/st0', [caption(k + '/st0', [[(ln, INK)] for ln in stmt], cx, FX_YST, size=ST_PT, lh=ST_LH)], temp=True)
+        s.add(k + '/st', [caption(k + '/st', [[(after[0], INK)], [(after[1], PURPLE)]], cx, FX_YG, size=21, lh=32)])
+        frames[k] = [s.add('%s/n%d' % (k, j), [num_mid('%s/n%d' % (k, j), cx, FX_YN, str(v), NAVY)], temp=True)
+                     for j, v in enumerate(count_down(pct) + [0])]
+        cols.append((k, cx, st))
+    # 아래 가운데의 Weave와 칸마다 뻗는 실(달라진 글 바로 아래까지)
+    z, ey = 56, FX_YG + 2 * 32 + 14
+    paths = [[(640 - z / 2 - 3, FX_ICY), (460, FX_ICY), (CXS[0], FX_ICY + 6), (CXS[0], ey)],
+             [(640, FX_ICY - z / 2 - 3)] * 2 + [(CXS[1], ey)] * 2,
+             [(640 + z / 2 + 3, FX_ICY), (820, FX_ICY), (CXS[2], FX_ICY + 6), (CXS[2], ey)]]
+    for i, pts in enumerate(paths):
+        s.add('%s/th%d' % (key, i + 1), thread('%s/th%d' % (key, i + 1), pts, w=2.6))
+    s.add(key + '/halo', [halo(key + '/halo', 640, FX_ICY, 96)])
+    s.add(key + '/rg', [R(key + '/rg', 640 - 56, FX_ICY - 56, 112, 112, prst='ellipse', fill=None, line=PURPLE2, line_w=2.6, line_alpha=80)], temp=True)      # 위의 불편 문장에 닿지 않는 크기
+    s.add(key + '/icon', weave_mark(key + '/icon', 640, FX_ICY, z))
+    s.add(key + '/sub', [N.title(key + '/sub', N.FX_TITLE, y=FX_YB)])
+    s.add(key + '/src', [N.foot(key + '/src', N.SURVEY_SRC)])
+    # 장이 열리면: AS-IS, 첫째 설문이 가운데에 → (클릭) 왼쪽으로 비키고 둘째 → (클릭) 셋째
+    show(s, key + '/as', 'fade_in', 100, 350, temp=True)
+    ring_in(s, cols[0], 150, max(cue(key + '.n1', 1500, ahead=0.35), 600))
+    s.click()
+    slide_left(s, [cols[0][0] + x for x in RING_FIRST])
+    ring_in(s, cols[1], 380, max(cue(key + '.n2', 1200, ahead=0.35), 640))      # '앞서 보신 것처럼' 뒤에 숫자를 말할 때 차오름
+    s.click()
+    ring_in(s, cols[2], 0, 260)
+    s.click()      # 3: Weave가 뜨고 제목이 TO-BE로 → 기능을 말할 때마다 그 칸이 풀림 → 아래 제목
+    s.on(key + '/icon', 'zoom_in', 0, 340, **{'from': 0.6})
+    s.on(key + '/halo', 'fade_in', 100, 500)
+    s.on(key + '/rg', 'jump', 160)
+    s.on(key + '/rg', 'ring', 160, 900, **{'from': 0.4, 'to': 1.0})
+    s.on(key + '/as', 'flip_out', 220, 190)
+    s.on(key + '/to', 'flip_in', 410, 260)
+    ts = [cue(key + '.f1', 1500, ahead=0.4), cue(key + '.f2', 2700, ahead=0.4), cue(key + '.f3', 4300, ahead=0.4)]
+    ts[0] = max(ts[0], 760)
+    for i, (k, _, _) in enumerate(cols):
+        t = max(ts[i], ts[i - 1] + 500) if i else ts[0]
+        ts[i] = t
+        s.on(k + '/st0', 'fade_out', t, 240)                       # 불편 문장이 먼저 물러나고(실 끝이 그 자리를 지남)
+        s.on('%s/th%d' % (key, i + 1), 'wipe_in', t + 60, 420, dir=('right', 'up', 'left')[i])
+        t2 = t + 400                                               # 실이 닿으면 숫자가 줄며 고리가 닫힘
+        fr = frames[k]
+        dt = FX_TC / len(fr)
+        ring_smile(s, k, t2, dur=FX_TC, turn=FX_TC - FX_TURN - 120, spin=FX_TURN)      # 숫자가 0에 가까워질 때 웃음
+        s.on(k + '/num0', 'fade_out', t2 + dt, 1)
+        for j, fk in enumerate(fr):
+            s.on(fk, 'jump', t2 + (j + 1) * dt)
+            s.on(fk, 'appear', t2 + (j + 1) * dt, 1)
+            last = j == len(fr) - 1
+            s.on(fk, 'fade_out', t2 + (j + 2) * dt + (300 if last else 0), 260 if last else 1)      # 0은 잠깐 머물다 사라짐
+        s.on(k + '/st', 'rise', t2 + FX_TC + dt + 560, 460, dy=10)
+    s.on(key + '/sub', 'rise', max(cue(key + '.title', 6000, ahead=0.3), ts[2] + 900), 520, dy=12)       # 아래 제목은 그 말을 할 때
+    return s
+
+
 CANDIDATES = [('A', 'fxa', s_fxa, '실 세 가닥'), ('B', 'fxb', s_fxb, '세 물음'), ('C', 'fxc', s_fxc, '물결'),
               ('D', 'fxd', s_fxd, '고리 얼굴'), ('E', 'fxe', s_fxe, '고리 속 얼굴'), ('F', 'fxf', lambda: s_fxd('fxf', badge=True), 'AS-IS → TO-BE'),
               ('G', 'fxg', s_fxg, '줄어드는 숫자'), ('H', 'fxh', lambda: s_fxc('fxh', people=True), '몸통 있는 사람'),
-              ('J', 'fxj', s_fxj, '숫자가 기능 이름으로'), ('K', 'fxk', s_fxk, '숫자가 물러남'), ('L', 'fxl', lambda: s_fxk('fxl', count=True), '숫자가 0으로')]
-CURRENT = 'JKL'                     # 지금 고르는 후보(3차). A~H는 앞선 차수(영상은 기대효과_후보/이전판, 저장소에는 올리지 않음)
+              ('J', 'fxj', s_fxj, '숫자가 기능 이름으로'), ('K', 'fxk', s_fxk, '숫자가 물러남'), ('L', 'fxl', lambda: s_fxk('fxl', count=True), '숫자가 0으로'),
+              ('M', 'fx', s_fx, 'L을 손본 판')]
+CURRENT = 'M'                       # 지금 장(11-13: 3차의 L을 골라 손본 판, 덱의 32쪽). A~L은 앞선 차수(영상은 기대효과_후보/이전판, 저장소에는 올리지 않음)

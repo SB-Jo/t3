@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""기대효과 한 장 후보(fx_new.py)를 앞뒤 장과 함께 말하며 넘기는 영상으로 찍는다. 덱은 바꾸지 않는다.
+"""기대효과 한 장(fx_new.py)을 앞뒤 장과 함께 말하며 넘기는 영상으로 찍는다. 덱은 바꾸지 않는다.
 
-  python tools/fx_try.py              → 지금 고르는 후보(fx_new.CURRENT = J, K, L): 기대효과_후보/후보J_….mp4 … 과 기대효과_후보.pptx(클릭으로 넘김), 한눈에.jpg
-  python tools/fx_try.py --only D,E   → 그 후보만(앞선 차수 A~H는 기대효과_후보/이전판에 나옴)
+  python tools/fx_try.py              → 지금 장(fx_new.CURRENT = M, 11-13에 후보 L을 손본 판): 기대효과_후보/확정_L을손본판.mp4와 기대효과_후보.pptx(클릭으로 넘김), 한눈에.jpg
+  python tools/fx_try.py --only D,E   → 그 후보만(앞선 차수 A~L은 기대효과_후보/이전판에 나옴)
   python tools/fx_try.py --quick J    → 낭독 없이 그 장만 빨리 찍어 봄(out/fx_try/quick_J.mp4와 한눈에 보는 그림. 구간마다 잠깐 머묾)
-  python tools/fx_try.py --deck       → 지금 고르는 후보를 모은 덱만
+  python tools/fx_try.py --deck       → 지금 장을 담은 덱만
   python tools/fx_try.py --remux      → 녹화는 두고 낭독과 자막만 다시 얹음
   python tools/fx_try.py --check      → 영상에 넣은 낭독을 받아쓰기로 글과 견줌
   python tools/fx_try.py --sheet      → 찍어 둔 영상에서 후보마다 세 순간을 뽑아 한 장에(기대효과_후보/한눈에.jpg)
 
-영상 = 31쪽(결과 제공) → 후보 장 → 35쪽(기존 기능과의 비교). 낭독은 이 컴퓨터 안에서만 만든다(talk.py와 같은 목소리).
+영상 = 31쪽(결과 제공) → 그 장 → 33쪽(비즈니스 임팩트). 낭독은 이 컴퓨터 안에서만 만든다(talk.py와 같은 목소리).
 낭독과 녹화는 out/fx_try/<후보>/에 따로 둔다(본 발표의 낭독 out/tts는 건드리지 않음).
 """
 import argparse
@@ -30,9 +30,11 @@ HW, N = MK.HW, MK.N
 WORK = MK.OUT / 'fx_try'
 DST = HERE / '기대효과_후보'
 FILE = {'A': '후보A_실세가닥', 'B': '후보B_세물음', 'C': '후보C_물결', 'D': '후보D_고리얼굴', 'E': '후보E_고리속얼굴', 'F': '후보F_뱃지',
-        'G': '후보G_줄어드는숫자', 'H': '후보H_몸통있는사람', 'J': '후보J_숫자가기능이름으로', 'K': '후보K_숫자가물러남', 'L': '후보L_숫자가0으로'}
-OLD = DST / '이전판'                # 앞선 차수(A~H)의 영상과 그림. 저장소에는 올리지 않음
-SHEETS = [('한눈에.jpg', FX.CURRENT), ('이전판/한눈에_1차.jpg', 'ABC'), ('이전판/한눈에_2차.jpg', 'DEFGH')]
+        'G': '후보G_줄어드는숫자', 'H': '후보H_몸통있는사람', 'J': '후보J_숫자가기능이름으로', 'K': '후보K_숫자가물러남', 'L': '후보L_숫자가0으로',
+        'M': '확정_L을손본판'}
+OLD = DST / '이전판'                # 앞선 차수(A~L)의 영상과 그림. 저장소에는 올리지 않음
+SHEETS = [('한눈에.jpg', FX.CURRENT), ('이전판/한눈에_1차.jpg', 'ABC'), ('이전판/한눈에_2차.jpg', 'DEFGH'), ('이전판/한눈에_3차.jpg', 'JKL')]
+HEAD = {'M': '32쪽'}               # 한눈에 그림의 줄 이름(없으면 '후보 X')
 
 
 def out_dir(code):
@@ -61,7 +63,7 @@ def use(code):
 def trio(fn):
     d = HW.s_deliver()
     d.trans = ('fade', 320)             # 영상의 첫 장: 앞 장이 없으므로 모핑 대신 가볍게
-    return [d, fn(), N.s_cmp()]
+    return [d, fn(), N.s_bi()]
 
 
 def sheet(mp4, dst, fps=4, cols=6, w=480):
@@ -129,7 +131,7 @@ def check(code):
 
 
 def deck():
-    """지금 고르는 후보를 모은 덱(클릭으로 넘김, 노트에 대본). 효과의 때는 후보마다 자기 낭독에서 잰 값."""
+    """지금 장(fx_new.CURRENT)을 담은 덱(클릭으로 넘김, 노트에 대본). 효과의 때는 자기 낭독에서 잰 값."""
     specs = []
     for code, key, fn, label in FX.CANDIDATES:
         if code not in FX.CURRENT:
@@ -175,7 +177,7 @@ def sheet_of(name, cands):
         _, a, n = next(r for r in rows if r[0] == key)
         ss, t0 = p_['seg_secs'], a + p_['trans']
         y = head + i * (h + pad)
-        d.text((left / 2 + 6, y + h / 2 - 18), '후보 ' + code, font=font, fill='#1C1A24', anchor='mm')
+        d.text((left / 2 + 6, y + h / 2 - 18), HEAD.get(code, '후보 ' + code), font=font, fill='#1C1A24', anchor='mm')
         d.text((left / 2 + 6, y + h / 2 + 16), label, font=small, fill='#6B4EFF', anchor='mm')
         for j, t in enumerate((t0 + ss[0] - 0.35, t0 + sum(ss[:3]) - 0.35, a + n - 0.45)):
             png = wd / ('_still%d.png' % j)

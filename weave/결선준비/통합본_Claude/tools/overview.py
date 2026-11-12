@@ -25,9 +25,11 @@ def labels():
     for item in MK.SEQ:
         for k in ([sp.key for sp in own[item[1]]] if isinstance(item, tuple) else [item]):
             out.append(('main', doc.NAME.get(k, k).split(' (')[0]))
-    n_appx = len(MK.HW.appendix_specs()) + 1
+    n_appx = len(MK.appendix_specs())
     out += [('appx', 'Appendix %d' % (i + 1)) for i in range(n_appx)]
-    out += [('prop', '제안 장표 가름')] + [('prop', doc.NAME[sp.key]) for sp in own['prop']]
+    if own['prop']:
+        out += [('prop', '제안 장표 가름')] + [('prop', doc.NAME[sp.key]) for sp in own['prop']]
+    out += [('old', '이전 판 (5차) 가름')] + [('old', '이전 판 · 5차 %d쪽' % i) for i in MK.PREV5_KEEP]
     out += [('old', '이전 판 (4차) 가름')] + [('old', '이전 판 · 4차 %d쪽' % i) for i in MK.PREV4_KEEP]
     out += [('old', '이전 판 (3차) 가름')] + [('old', '이전 판 · 3차 %d쪽' % i) for i in MK.PREV3_KEEP]
     out += [('old', '이전 판 (2차) 가름')] + [('old', '이전 판 · 2차 %d쪽' % i) for i in MK.PREV2_KEEP]

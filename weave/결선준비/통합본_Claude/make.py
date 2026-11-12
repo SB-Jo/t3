@@ -7,13 +7,16 @@
 재료
 - 인트로 2~5, 7~14쪽: 원본/통합본_인트로수정_87bf80b.pptx (jjun-0824/t3 87bf80b: 우리 3차 덱의 7~14쪽을 팀원이 손본 판)의 장을 그대로 옮긴다(도형·그림·전환·효과·노트).
   4·5쪽의 둘째 말풍선만 '그 이름이 뭐였지?' → '정확한 이름이 뭐였지?'로 바꾼다(patch_ask2).
+  6차(11-13)에 더 손본 곳: 3쪽은 인물과 말풍선이 클릭해야 뜨고(patch_person_click), 3~5쪽의 옅은 기록 조각이 세 층으로 떠다닌다(patch_floats).
+  7쪽 머리글, 9쪽 퍼센트와 이름의 글자 크기, 10쪽 AI 답변의 글(patch_heading7, patch_hub, patch_answer).
   4차까지는 원본/Weave_결선_중간본_도입부수정.pptx의 장을 옮겨 손보고(patch_intro) 9, 11~12, 14쪽은 새로 그렸다(slides_new.py의 s_hub2, s_scat, s_link, s_bridge).
 - 6쪽(수많은 기록): 새로 그린다(slides_new.py).
-- 바꾸기 전의 장: 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
+- 바꾸기 전의 장: 원본/통합본_5차.pptx (git show fcf8346:…), 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
 - 표지와 모션그래픽 영상 장: 02_PPT/Weave_결선_중간본.pptx의 1쪽과 4쪽. 표지는 영상을 v9(10_표지영상/표지_루프.mp4, 18초)로 바꾸고 제목을 조금 줄인다(patch_cover).
   모션그래픽은 영상을 v24(08_인트로영상/Weave_모션그래픽.mp4: 제목의 색과 자간을 표지와 같게)로 바꿔 끼운다(patch_mg).
 - 솔루션 3장 + How it Works 13장 + Appendix 15장: 09_HowItWorks/장표5_claude/build.py의 장을 그대로 그린다.
 - 뒷부분: 원본/Weave_BI_아웃트로_통합_1110_v7.pptx (WIWLEE/t3-2)의 내용을 같은 엔진으로 다시 그린다(slides_new.py).
+  6차: 기대효과는 한 장(fx_new.s_fx), 기존 기능과의 비교는 Appendix 맨 앞으로(cmp_new.s_cmp_apx), 제안 장표 묶음은 없앰.
 """
 import argparse
 import copy
@@ -24,6 +27,7 @@ import shutil
 import sys
 from pathlib import Path
 
+from lxml import etree
 from pptx import Presentation
 
 HERE = Path(__file__).resolve().parent
@@ -73,6 +77,7 @@ PREV = HERE / '원본' / '통합본_1차.pptx'                 # 11월 11일 1�
 PREV2 = HERE / '원본' / '통합본_2차.pptx'                # 11월 11일 2차 통합본
 PREV3 = HERE / '원본' / '통합본_3차.pptx'                # 11월 12일 3차 통합본
 PREV4 = HERE / '원본' / '통합본_4차.pptx'                # 11월 12일 4차 통합본
+PREV5 = HERE / '원본' / '통합본_5차.pptx'                # 11월 12일 5차 통합본(밤의 낱말 수정까지, fcf8346)
 INTRO2 = HERE / '원본' / '통합본_인트로수정_87bf80b.pptx'   # 팀원이 7~14쪽을 손본 덱(jjun-0824/t3 87bf80b). 2~5쪽과 7~14쪽을 여기서 옮김
 MG_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'      # 모션그래픽 v24(111.1초). 중간본에 든 v23과 길이와 소리가 같음
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'      # 표지 영상 v9(18초)
@@ -151,6 +156,9 @@ SEQ = ['cover', 'in02', 'in03', 'in04', 'in05', ('own', 'hook'), 'in07', 'in08',
        'mg', ('own', 'hiw'), ('own', 'back')]
 PREV_KEEP = list(range(2, 14)) + list(range(32, 42)) + [59]      # 1차 통합본에서 남겨 두는 장: 인트로 2~13쪽, 뒷부분 32~41쪽, 저장 채널 그림(59쪽)
 PREV2_KEEP = list(range(2, 15)) + [26] + list(range(32, 42)) + [62]      # 2차 통합본에서: 인트로 2~14쪽, 빠진 고리(26쪽), 뒷부분 32~41쪽, 두 줄 연표 제안(62쪽)
+# 5차 통합본에서: 6차에 화면이나 대본이 바뀐 장(2, 3, 7, 9, 10, 17, 18, 21~25, 28~30쪽), 기대효과 세 장(32~34), 비교 지도(35), 비즈니스 임팩트(36),
+# 마무리 세 장(38~40), 제안 장표 묶음(57~60)
+PREV5_KEEP = [2, 3, 7, 9, 10, 17, 18, 21, 22, 23, 24, 25, 28, 29, 30, 32, 33, 34, 35, 36, 38, 39, 40, 57, 58, 59, 60]
 PREV4_KEEP = list(range(7, 15))                         # 4차 통합본에서: 우리가 그리거나 손본 7~14쪽(팀원이 손본 장으로 바뀜)
 PREV3_KEEP = [16] + list(range(21, 27)) + [30, 37]      # 3차 통합본에서: 16쪽(대본), 21쪽(뺀 장), 22~26쪽과 30쪽(화면 번호와 대본), 37쪽(비교 표)
 
@@ -160,6 +168,13 @@ def own_specs():
     return dict(hook=[N.s_hook()],
                 hiw=[f() for f in HW.SOL_SLIDES] + [f() for f in HW.SLIDES], back=[f() for f in N.SLIDES_BACK],
                 prop=[f() for f in N.SLIDES_PROPOSAL])
+
+
+def appendix_specs():
+    """Appendix: 가름 장 → 기존 기능과의 비교(6차: 본 발표에서 옮김) → How it Works Appendix → 사진과 영상 출처."""
+    import cmp_new
+    hw = HW.appendix_specs()
+    return hw[:1] + [cmp_new.s_cmp_apx()] + hw[1:] + [N.s_credits2()]
 
 
 # ------------------------------------------------------------------ 옮겨 온 장을 손보는 도구
@@ -353,9 +368,129 @@ def patch_ask2(sl):
         ext.set('cx', str(int(ext.get('cx')) + round(d * 9525)))
 
 
+# ------------------------------------------------------------------ 6차(11-13): 옮겨 온 인트로 장에서 더 손보는 곳
+P_NS = F.NS['p']
+FLOAT_LAYERS = (('a', 7, -11, 4000), ('b', -6, 10, 4800), ('c', 5, 11, 3400))      # 층, 떠 가는 만큼(x, y px), 한쪽으로 가는 데 걸리는 시간(ms)
+GROUP_XML = ('<p:par xmlns:p="%s"><p:cTn id="%%d" fill="hold"><p:stCondLst><p:cond delay="indefinite"/><p:cond evt="onBegin" delay="0">'
+             '<p:tn val="%%s"/></p:cond></p:stCondLst><p:childTnLst><p:par><p:cTn id="%%d" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst>'
+             '<p:childTnLst/></p:cTn></p:par></p:childTnLst></p:cTn></p:par>') % P_NS
+DRIFT_XML = ('<p:par xmlns:p="%s"><p:cTn id="%%d" presetID="0" presetClass="path" presetSubtype="0" repeatCount="indefinite" autoRev="1" '
+             'accel="50000" decel="50000" fill="hold" nodeType="%%s"><p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>'
+             '<p:animMotion origin="layout" path="M 0 0 L %%.5f %%.5f E" pathEditMode="relative" rAng="0" ptsTypes="">'
+             '<p:cBhvr><p:cTn id="%%d" dur="%%d" fill="hold"/><p:tgtEl><p:spTgt spid="%%d"/></p:tgtEl>'
+             '<p:attrNameLst><p:attrName>ppt_x</p:attrName><p:attrName>ppt_y</p:attrName></p:attrNameLst></p:cBhvr>'
+             '<p:rCtr x="0" y="0"/></p:animMotion></p:childTnLst></p:cTn></p:par>') % P_NS
+
+
+def patch_person_click(sl):
+    """3쪽: 장이 열리면 저절로 뜨던 인물과 말풍선을 클릭해야 뜨게 한다(그 전에는 떠다니는 기록 조각만 보임).
+    저절로 시작하던 묶음을 클릭 묶음으로 바꾸고, 첫 효과가 클릭하자마자 시작하게 앞의 틈을 없앤다."""
+    (g, auto), = F.groups(sl)
+    assert auto
+    ct = g.find(q('p:cTn'))
+    for c in ct.find(q('p:stCondLst')).findall(q('p:cond')):
+        if c.get('evt') == 'onBegin':
+            c.getparent().remove(c)
+    effs = [e for e in ct.iter(q('p:cTn')) if e.get('presetID')]
+    d0 = F._delay(effs[0])
+    for e in effs:
+        e.find(q('p:stCondLst')).find(q('p:cond')).set('delay', str(F._delay(e) - d0))
+    effs[0].set('nodeType', 'clickEffect')
+
+
+def patch_floats(sl):
+    """3~5쪽: 옅은 기록 조각 한 장(!!floats)을 세 층으로 나눠 끼우고(assets/intro/floats-a·b·c.png), 층마다 다른 쪽으로 천천히 갔다가 되돌아오기를
+    되풀이하게 한다(장이 열리면 저절로, 장이 넘어갈 때까지). 세 장의 층 이름이 같아 장이 넘어가도 이어진다."""
+    old = by_name(sl, '!!floats')
+    x, y, w, h = box(old)
+    pa = painter(sl)
+    prev, spids = old, []
+    for n, *_ in FLOAT_LAYERS:
+        el = pa.el(P('floats/' + n, str(INTRO_AS / ('floats-%s.png' % n)), x, y, w, h))
+        prev.addnext(el)
+        prev = el
+        spids.append(int(el.find(q('p:nvPicPr')).find(q('p:cNvPr')).get('id')))
+    rid = old.find('.//{%s}blip' % A).get(q('r:embed'))
+    old.getparent().remove(old)
+    if not any(rid in e.attrib.values() for e in sl._element.iter()):
+        sl.part.drop_rel(rid)
+    ids = itertools.count(F._next_id(sl))
+    auto = next((g for g, a in F.groups(sl) if a), None)
+    if auto is None:                                        # 저절로 시작하는 묶음이 없으면(3쪽) 맨 앞에 만든다
+        main = sl._element.find('.//' + q('p:cTn') + '[@nodeType="mainSeq"]')
+        auto = etree.fromstring(GROUP_XML % (next(ids), main.get('id'), next(ids)))
+        main.find(q('p:childTnLst')).insert(0, auto)
+    inner = auto.find(q('p:cTn')).find(q('p:childTnLst'))[0].find(q('p:cTn')).find(q('p:childTnLst'))
+    for (n, dx, dy, ms), spid in zip(FLOAT_LAYERS, spids):
+        node = 'withEffect' if len(inner) else 'afterEffect'
+        inner.append(etree.fromstring(DRIFT_XML % (next(ids), node, dx / 1280, dy / 720, next(ids), ms, spid)))
+
+
+HEAD7 = ('원하는 정보를 한 번에 찾지 못한 경험', '정확한 이름이 떠오르지 않아 검색으로 찾지 못한 경험')      # 7쪽 머리글: 설문 6번의 말 그대로(33쪽과 같은 숫자, 같은 말)
+
+
+def patch_heading7(sl):
+    hit = [e for e in by_name(sl, '!!stat1/heading').iter('{%s}t' % A) if e.text == HEAD7[0]]
+    assert len(hit) == 1, len(hit)
+    hit[0].text = HEAD7[1]
+
+
+HUB_PT = {'p': (1550, 1800), 'n': (1200, 1300)}       # 9쪽: 퍼센트와 그 아래 이름의 글자 크기(1/100pt). 지금 → 6차(퍼센트는 한 단계, 이름은 반 단계)
+
+
+def patch_hub(sl):
+    for i in range(7):
+        for part, (a, b) in HUB_PT.items():
+            rps = list(by_name(sl, '!!hub2/l%d/%s' % (i, part)).iter('{%s}rPr' % A, '{%s}endParaRPr' % A))
+            assert rps and all(rp.get('sz') == str(a) for rp in rps), (i, part, [rp.get('sz') for rp in rps])
+            for rp in rps:
+                rp.set('sz', str(b))
+
+
+# 10쪽 AI 답변: 세 줄. 가장 긴 첫 줄(17pt에 427px)이 말풍선 오른쪽 끝에 거의 닿는 크기(오른쪽 여백 7px). 묶음을 키워도 글자 크기는 그대로임(15pt였음).
+# (글, 보라 굵게인가)
+ANSWER = [[('임베딩 모델은 텍스트, 이미지, 오디오 같은 복잡한', 0)],
+          [('데이터를 컴퓨터가 이해할 수 있도록 고차원의', 0)],
+          [('숫자 배열(벡터)', 1), ('로 변환하는 모델입니다.', 0)]]
+ANSWER_PT, ANSWER_LN = 1700, 130000                   # 글자 크기(1/100pt), 줄 간격(1/1000 %, 15pt 때는 135%): 셋째 줄 아래에 말풍선 끝까지 13px쯤 남게
+
+
+def patch_answer(sl):
+    """10쪽: AI 답변의 글을 바꾼다. 문단(줄) 셋의 틀은 그대로 두고 글 토막만 새로 넣는다."""
+    body = by_name(sl, 'Answer text').find(q('p:txBody'))
+    paras = body.findall('{%s}p' % A)
+    assert len(paras) == len(ANSWER), len(paras)
+    plain = copy.deepcopy(paras[0].findall('{%s}r' % A)[0])           # 보통 글 토막의 틀
+    bold = copy.deepcopy(paras[0].findall('{%s}r' % A)[1])            # 보라 굵은 글 토막의 틀
+    assert plain.find('{%s}rPr' % A).find('{%s}latin' % A).get('typeface').endswith('400')
+    assert bold.find('{%s}rPr' % A).find('{%s}latin' % A).get('typeface').endswith('700')
+    for p, runs in zip(paras, ANSWER):
+        for r in p.findall('{%s}r' % A):
+            p.remove(r)
+        p.find('{%s}pPr' % A).find('{%s}lnSpc' % A).find('{%s}spcPct' % A).set('val', str(ANSWER_LN))
+        end = p.find('{%s}endParaRPr' % A)
+        for text, hl in runs:
+            r = copy.deepcopy(bold if hl else plain)
+            r.find('{%s}rPr' % A).set('sz', str(ANSWER_PT))
+            r.find('{%s}t' % A).text = text
+            if end is not None:
+                end.addprevious(r)
+            else:
+                p.append(r)
+        if end is not None:
+            end.set('sz', str(ANSWER_PT))
+
+
+NOTE_OURS = {'in02', 'in03', 'in07', 'hub2'}          # 6차에 우리가 노트를 바꾼 장(옮겨 온 덱의 노트와 견주지 않음)
+INTRO_PATCH = {                                       # 옮겨 온 장마다 6차에 더 손보는 일
+    'in03': [patch_person_click, patch_floats], 'in04': [patch_floats], 'in05': [patch_floats],
+    'in07': [patch_heading7], 'hub2': [patch_hub], 'in09': [patch_answer],
+}
+
+
 def copy_intro(prs, note_tpl):
     """팀원이 손본 덱(INTRO2)에서 인트로 장을 그대로 옮긴다. 노트는 INTRO_NOTES(그 덱의 노트와 같은 글인지 견줘 다르면 알림). 돌려줌: {키: 장}.
-    4·5쪽은 둘째 말풍선의 글만 바꾼다(patch_ask2)."""
+    4·5쪽은 둘째 말풍선의 글을 바꾸고(patch_ask2), 6차에 더 손본 곳은 INTRO_PATCH."""
     src = list(Presentation(str(INTRO2)).slides)
     out = {}
     for k, page in FOREIGN.items():
@@ -363,10 +498,12 @@ def copy_intro(prs, note_tpl):
         theirs = F.note_text(src[page - 1])
         for old_, new_ in NOTE_FIX:
             theirs = theirs.replace(old_, new_)
-        if ' '.join(theirs.split()) != ' '.join(N.INTRO_NOTES[k].split()):
+        if k not in NOTE_OURS and ' '.join(theirs.split()) != ' '.join(N.INTRO_NOTES[k].split()):
             print('   ! %s(%d쪽): INTRO_NOTES가 옮겨 온 덱의 노트와 다름' % (k, page))
         if k in ASK2_KEYS:
             patch_ask2(sl)
+        for fn in INTRO_PATCH.get(k, []):
+            fn(sl)
         F.set_notes(sl, N.INTRO_NOTES[k], note_tpl)
         out[k] = sl
     return out
@@ -389,15 +526,21 @@ def build(dst):
         slides, rep, _ = HW.add_slides(prs, layout, note_tpl, specs)
         report.extend(rep)
         return slides
-    own = {k: draw(v) for k, v in own_specs().items() if k != 'prop'}
+    specs = own_specs()
+    own = {k: draw(v) for k, v in specs.items() if k != 'prop'}
     main = []
     for item in SEQ:
         main += own[item[1]] if isinstance(item, tuple) else [cover if item == 'cover' else mg if item == 'mg' else intro[item]]
     n_main = len(main)
-    appx = draw(HW.appendix_specs() + [N.s_credits2()])
-    prop = draw([N.s_divider('p0', '제안 장표', ['기대효과 세 장: 기능이 있으면 고리 그래프와 왼쪽 말이 바뀌는 안 (%d~%d쪽 자리)' % (n_main - 8, n_main - 6)],
-                             '여기부터는 제안 장표입니다. 본 발표에서는 넘기지 않습니다.')] + own_specs()['prop'])
-    prev4, prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV4, PREV3, PREV2, PREV))
+    appx = draw(appendix_specs())
+    prop = draw([N.s_divider('p0', '제안 장표', ['본 발표에 넣을지 정하지 않은 장'],
+                             '여기부터는 제안 장표입니다. 본 발표에서는 넘기지 않습니다.')] + specs['prop']) if specs['prop'] else []      # 6차: 없음
+    prev5, prev4, prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV5, PREV4, PREV3, PREV2, PREV))
+    old5 = draw([N.s_divider('o5', '이전 판 (5차)', ['11월 12일 5차 통합본에서 6차에 화면이나 대본이 바뀐 장: 2, 3, 7, 9, 10, 17, 18, 21~25, 28~30쪽',
+                                                    '기대효과 세 장(32~34쪽), 비교 지도(35쪽), 비즈니스 임팩트(36쪽), 마무리 세 장(38~40쪽), 제안 장표(57~60쪽)',
+                                                    '노트에 그때의 대본이 그대로 있습니다'],
+                             '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
+    old5 += [F.copy_slide(prs, prev5[i - 1], note_tpl) for i in PREV5_KEEP]
     old4 = draw([N.s_divider('o4', '이전 판 (4차)', ['11월 12일 4차 통합본의 7~14쪽 (팀원이 손본 장으로 바뀌기 전)',
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
@@ -414,11 +557,11 @@ def build(dst):
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
     old1 += [F.copy_slide(prs, prev1[i - 1], note_tpl) for i in PREV_KEEP] + [F.copy_slide(prs, src[12], note_tpl)]
-    order = [*main, *appx, *prop, *old4, *old3, *old2, *old1]
+    order = [*main, *appx, *prop, *old5, *old4, *old3, *old2, *old1]
     drop_slides(prs, [s for s in old if s not in (cover, mg)])
     reorder(prs, order)
     samsung_fonts.remap_prs(prs)
-    build.n_old4 = len(old4)
+    build.n_old5, build.n_old4 = len(old5), len(old4)
     build.n_main, build.n_appx, build.n_prop, build.n_old3, build.n_old2, build.n_old1 = n_main, len(appx), len(prop), len(old3), len(old2), len(old1)
     prs.save(str(dst))
     for key, nclick, nnote, _ in report:

@@ -1,4 +1,5 @@
-"""기존 기능과의 비교 장(35쪽) 후보 — 지금의 두 축 지도(slides_new.s_cmp)를 바꾸는 안. 11-12 밤.
+"""기존 기능과의 비교 장(5차 35쪽) 후보 — 두 축 지도(slides_new.s_cmp)를 바꾸는 안. 11-12 밤.
+11-13 6차: 비교 장은 본 발표에서 빼고, 후보 나에 글을 보탠 판을 Appendix 맨 앞에 둔다(s_cmp_apx. 이 파일 끝).
 
 사용자 검토
 - 그림이 조금 오른쪽으로 치우쳐 있다.
@@ -207,6 +208,59 @@ def s_cmpd():
     s.on(key + '/up', 'rise', 0, 460, dy=18)
     s.on(key + '/arrow', 'wipe_in', 300, 460, dir='left')
     weave_on(s, key, 560)
+    return s
+
+
+# ------------------------------------------------------------------ Appendix의 비교 장(11-13 6차): 본 발표에서는 빼고, 질문이 나오면 꺼냄
+# 후보 나(넓이와 깊이)에 글을 보탬: Writing Assist와 Finder 앞에 Samsung, 이름 아래에 무슨 기능인지 한 줄.
+APX_SERV = [    # (키, 아이콘, 이름, 한 줄 설명, 축 원점에서의 자리(x, 위로 y))
+    ('wa', 'writing', 'Samsung Writing Assist', '글을 다듬는 키보드 AI', (126, 92)),
+    ('kanana', 'kanana', '카나나', '카카오톡 안의 AI 비서', (284, 158)),
+    ('nudge', 'nudge', 'Now Nudge', '대화에 맞춰 건네는 제안', (426, 134)),
+    ('finder', 'finder', 'Samsung Finder', '기기 안 기록 검색 앱', (592, 96)),
+]
+APX_WEAVE = '단서를 이어 찾는 키보드 AI'
+
+
+def s_cmp_apx():
+    """Appendix의 '기존 기능과의 비교'. 가로 찾는 범위(좁게 → 넓게), 세로 찾는 깊이(얕게 → 깊게). 기존 기능 넷은 장이 열리면 차례로 뜨고, (클릭) Weave.
+    기능마다 이름 아래에 무슨 기능인지 한 줄을 붙였다."""
+    key = 'apx_map'
+    s = Slide(key, trans=('fade', 400), bar=False, notes=N.NOTES['cmp'])
+    s.add(key + '/title', [N.title(key + '/title', TITLE)])
+    ox, oy, xe, yt = 262, 566, 1000, 176
+    wx, wy = ox + 652, yt + 66
+    s.add(key + '/axx', [C(key + '/axx', [(ox, oy)] * 2 + [(xe, oy)] * 2, color=N.MAP_AX, w=1.8, tail='triangle')])
+    s.add(key + '/axy', [C(key + '/axy', [(ox, oy)] * 2 + [(ox, yt)] * 2, color=N.MAP_AX, w=1.8, tail='triangle')])
+    lab = lambda k, x, y, w, t, **o: T('%s/axl/%s' % (key, k), x, y, w, 24, t, anchor='ctr', **o)
+    s.add(key + '/axl', [lab('xn', xe + 10, oy - 12, 90, '찾는 범위', size=13.5, color=SUB, weight='b'),
+                         lab('yn', ox - 80, yt - 34, 160, '찾는 깊이', size=13.5, color=SUB, weight='b', align='c'),
+                         lab('x0', ox + 14, oy + 10, 80, '좁게', size=12.5, color=MUTE),
+                         lab('x1', xe - 100, oy + 10, 80, '넓게', size=12.5, color=PURPLE, weight='b', align='r'),
+                         lab('y0', ox - 72, oy - 40, 60, '얕게', size=12.5, color=MUTE, align='r'),
+                         lab('y1', ox - 72, yt + 20, 60, '깊게', size=12.5, color=PURPLE, weight='b', align='r')])
+    pts = {}
+    for k, kind, name, what, (dx, dy) in APX_SERV:
+        cx, cy = ox + dx, oy - dy
+        pts[k] = (cx, cy)
+        kk = '%s/%s' % (key, k)
+        s.add(kk, N.map_point(kk, kind, name, cx, cy) + [
+            T(kk + '/what', cx - 110, cy + 23 + 27, 220, 18, what, size=10.5, color=SUB, align='c', anchor='ctr')])
+    s.add(key + '/wglow', [glow(key + '/wglow', wx, wy)])
+    fx, fy = pts['finder']
+    s.add(key + '/arrow', thread(key + '/arrow', [(fx + 8, fy - 36), (fx + 8, fy - 104), (wx, wy + 172), (wx, wy + 98)], w=2.6, tail='triangle'))
+    s.add(key + '/weave', weave_tile(key + '/weave', wx, wy) + [
+        T(key + '/weave/what', wx - 120, wy + 33 + 6 + 28, 240, 20, APX_WEAVE, size=11.5, color=PURPLE, align='c', anchor='ctr')])
+    s.add(key + '/src', [N.foot(key + '/src', N.CMP_SRC)])
+    s.on(key + '/axx', 'wipe_in', 150, 600)
+    s.on(key + '/axy', 'wipe_in', 150, 600, dir='up')
+    s.on(key + '/axl', 'fade_in', 600, 450)
+    for i, (k, *_) in enumerate(APX_SERV):
+        s.on('%s/%s' % (key, k), 'zoom_in', 900 + i * 260, 380, **{'from': 0.6})
+    s.click()      # 1: 얕은 쪽을 넘어 깊은 쪽으로 → Weave
+    s.on(key + '/arrow', 'wipe_in', 0, 520, dir='up')
+    s.on(key + '/wglow', 'fade_in', 300, 500)
+    weave_on(s, key, 420)
     return s
 
 

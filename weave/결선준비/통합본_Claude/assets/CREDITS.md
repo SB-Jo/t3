@@ -2,19 +2,22 @@
 
 ## 마무리 장의 사진 (`photo/`)
 
-위키미디어 공용에 올라온 Unsplash 사진이에요. 세 장 모두 CC0(퍼블릭 도메인)라서 출처 표기 의무가 없어요. 16:9로 자르고 1920×1080으로 줄였어요.
+6차(11월 13일)에 고른 세 장이에요. Pexels 라이선스와 Unsplash 라이선스 모두 무료로 쓰고 고칠 수 있고 출처 표기 의무가 없어요. 16:9로 자르고 1920×1080으로 줄였어요. 덱의 54쪽(사진과 음악 출처)에도 적었어요.
 
-| 파일 | 원본 | 찍은 사람 | 라이선스 |
-|---|---|---|---|
-| closing-1-sunset-chairs.jpg | https://commons.wikimedia.org/wiki/File:Pink_sunset_couple_(Unsplash).jpg | Harli Marten (Unsplash) | CC0 |
-| closing-2-capture.jpg | https://commons.wikimedia.org/wiki/File:Woman_shooting_ocean_sunset_(Unsplash).jpg | Ben White (Unsplash) | CC0 |
-| closing-3-sunset-picnic.jpg | https://commons.wikimedia.org/wiki/File:Sunset_Picnic_(Unsplash).jpg | Arthur Poulin (Unsplash) | CC0 |
+| 파일 | 후보 코드 | 원본 | 찍은 사람 | 라이선스 |
+|---|---|---|---|---|
+| closing-1-sparklers.jpg | G15 | https://www.pexels.com/photo/36713116/ | Vitaly Gariev | Pexels 라이선스 |
+| closing-2-samsung-phone.jpg | A2 | https://unsplash.com/photos/zu68hhvQM2M | Stefan Maass | Unsplash 라이선스 |
+| closing-3-family-sea.jpg | M4 | https://www.pexels.com/photo/11538583/ | Radhika Studio | Pexels 라이선스 |
 
-마무리 장에 바꿔 넣을 사진 후보 186장과 출처는 `../마무리사진_후보/README.md`에 있어요(Unsplash 라이선스, Pexels 라이선스).
+5차까지 쓰던 세 장(해 질 녘의 두 사람, 노을을 휴대폰으로 담는 사람, 노을 소풍. 위키미디어 공용에 올라온 Unsplash 사진, CC0)은 뺐어요. 덱 뒤쪽 이전 판 (5차)의 장에는 그대로 들어 있어요.
+
+마무리 장의 사진 후보 195장과 출처는 `../마무리사진_후보/README.md`에 있어요(Unsplash 라이선스, Pexels 라이선스).
 
 ## 3~5쪽의 기록 조각, 13쪽의 흐린 배경 (`intro/`)
 
 - `intro/floats.png`: `src/floats.html`에 그린 기록 조각이에요. 표지 영상의 조각과 같은 모양이고, 아이콘은 `../10_표지영상/소스/assets/icons`의 것을 써요. `tools/intro_assets.py`가 찍어요.
+- `intro/floats-a.png`, `intro/floats-b.png`, `intro/floats-c.png`: 같은 조각을 세 층으로 나눈 그림이에요(6차). 3~5쪽에서 층마다 다른 쪽으로 천천히 떠다녀요. `floats.png`는 5차까지 쓰던 한 장짜리예요.
 - `intro/blur_link.jpg`: 4차까지 13쪽 배경으로 쓰던 그림이에요(우리가 그린 12쪽을 흐리게 함, `tools/intro_assets.py --blur`). 5차부터 13쪽은 팀원이 손본 덱의 장을 그대로 옮겨서, 배경도 그 덱의 것이에요.
 
 ## 연표의 NPU 아이콘 (`outro/ic-npu.png`)
@@ -97,4 +100,5 @@
 ## 아웃트로 덱에서 가져온 그림 (`outro/`)
 
 `Weave_BI_아웃트로_통합_1110_v7.pptx`(WIWLEE/t3-2)에 들어 있던 그림이에요. 앱 아이콘 19개, 연표 아이콘 7개, 손글씨 '순간', 끝 화면 바탕과 로고예요.
+6차부터 33쪽(비즈니스 임팩트)에는 앱 아이콘 가운데 14개만 써요(음악, 비디오, 스토어, PENUP, 시계를 뺌).
 끝 화면 바탕(`end-bg.png`)은 2차부터 쓰지 않아 뺐어요. `moment-hand-white.png`는 손글씨 '순간'을 사진 위에 얹으려고 흰색으로 바꾼 거예요.

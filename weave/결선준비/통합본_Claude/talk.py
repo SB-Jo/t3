@@ -12,6 +12,7 @@
 하는 일
 - 낭독은 이 컴퓨터 안에서만 만든다(09_HowItWorks/장표5_claude의 tts_c: Supertonic 3, 목소리 F2F1_70, 속도 1.15).
 - 인트로 장(다른 덱에서 옮긴 장)은 효과가 저절로 나오므로, 그 장의 말이 끝날 때까지 머물게만 한다. 말할 글은 노트(slides_new.INTRO_NOTES)에서 괄호 속 무대 지시를 뺀 것.
+  노트에 (클릭)이 있는 장(6차의 3쪽)은 클릭 묶음을 그 구간의 말이 끝난 때에 저절로 나오게 바꿔 찍는다(foreign.auto_play).
 - 새로 그린 장은 How it Works 낭독 영상과 같은 방식: 클릭 묶음마다 그 구간의 말이 끝날 때까지 머문다.
 - 장(또는 구간)마다 왼쪽 아래 구석에 작은 색 표를 두고, 녹화에서 그 표가 뜬 때를 찾아 낭독을 그 자리에 놓는다. 표는 마지막에 덮어 지운다.
 - 모션그래픽 장은 원본 영상(08_인트로영상/Weave_모션그래픽.mp4)의 화면과 소리를 녹화 속 재생이 시작한 때에 맞춰 얹는다.
@@ -58,9 +59,12 @@ SUB_H = 150                        # 자막 띠 높이(px, 1920×1080 기준). �
 
 
 # ------------------------------------------------------------------ 말할 글
+CLICK = '(클릭)'
+
+
 def say_text(key, note):
-    """옮겨 온 장의 노트 → 소리 내어 말할 글(괄호 속 지시를 뺌)."""
-    return F.spoken(note).replace('[발표자 이름]', SPEAKER)
+    """옮겨 온 장의 노트 → 소리 내어 말할 글(괄호 속 지시를 뺌). (클릭)은 남긴다(그 자리에서 클릭하는 장)."""
+    return (' %s ' % CLICK).join(F.spoken(part) for part in note.split(CLICK)).replace('[발표자 이름]', SPEAKER)
 
 
 def foreign_units():
@@ -87,9 +91,9 @@ def narrate_all(check=False):
     own = own_specs()
     specs = proxies + [sp for name in ('hook', 'hiw', 'back', 'prop') for sp in own[name] if sp.notes.strip()]
     says, clips = HW.narrate(specs, None, check)
-    for p in proxies:               # 옮겨 온 장: 말 떼기까지의 틈을 장마다 따로
+    for p in proxies:               # 옮겨 온 장: 장이 열린 뒤 말 떼기까지의 틈을 장마다 따로(첫 구간만. 클릭 뒤의 구간은 새로 그린 장과 같음)
         lead = LEADS.get(p.key, HW.LAT_START)
-        says[p.key] = [lead + tts_c.wav_len(clips[p.key][0]) + HW.seg_gaps(p)[0]]
+        says[p.key] = [lead + tts_c.wav_len(clips[p.key][0]) + HW.seg_gaps(p)[0]] + list(says[p.key][1:])
     return fu, says, clips
 
 
@@ -157,9 +161,18 @@ def build_auto(dst, fu, says, part=None):
             k += 1
             continue
         key, slide = item, (cover if item == 'cover' else intro[item])
-        hold = says[key][0]
-        if key != 'cover':
-            hold = max(hold, F.anim_len(slide) / 1000 + 0.3)
+        segs = say_of[key].split(CLICK)
+        assert len(says[key]) == len(segs), (key, len(says[key]), len(segs))
+        hold, starts = says[key][0], []
+        if key != 'cover':          # 구간마다 max(말, 그 구간의 효과). 클릭 묶음은 앞 구간이 끝난 때에 저절로 나오게
+            clicks = F.click_lens(slide)
+            assert len(clicks) == len(segs) - 1, '%s: 클릭 %d번 ≠ 노트의 (클릭) %d번' % (key, len(clicks), len(segs) - 1)
+            holds = [max(hold, F.anim_len(slide) / 1000 + (0 if clicks else 0.3))]
+            holds += [max(says[key][j + 1], ms / 1000 + (0.3 if j == len(clicks) - 1 else 0)) for j, ms in enumerate(clicks)]
+            starts = [sum(holds[:j]) * 1000 for j in range(1, len(holds))]
+            F.auto_play(slide, starts)
+            hold = sum(holds)
+            F.cap_repeats(slide, hold * 1000)                # 떠다니는 조각(끝없이 되풀이)이 장을 붙들지 않게
         else:                       # 표지 영상(18초)이 끝나야 PowerPoint가 장을 넘기므로, 녹화용 사본에서는 머무는 시간만큼만 재생(뒤를 잘라 둠)
             media_ms = F.anim_len(slide)
             for c in slide._element.iter(F.q('p:cmd')):
@@ -170,10 +183,13 @@ def build_auto(dst, fu, says, part=None):
                 if media_ms > hold * 1000 + 500:
                     etree.SubElement(m, '{%s}trim' % P14).set('end', str(round(media_ms - hold * 1000)))
         F.add_mark(slide, MARK_BOX, MARK_RGB[k % 3], 'mk_' + key)
-        plan.append(dict(key=key, kind='foreign', marks=[k], leads=[LEADS.get(key, HW.LAT_START)], segs=[say_of[key]], secs=hold,
+        for j, at in enumerate(starts, 1):                  # 클릭 구간이 시작하는 때의 표
+            F.add_mark(slide, MARK_BOX, MARK_RGB[(k + j) % 3], 'mk_%s_%d' % (key, j), at=at)
+        leads = [LEADS.get(key, HW.LAT_START)] + HW.seg_leads(types.SimpleNamespace(key=key, notes=say_of[key]))[1:]
+        plan.append(dict(key=key, kind='foreign', marks=list(range(k, k + len(segs))), leads=leads, segs=segs, secs=hold,
                          trans=F.trans_ms(slide) / 1000))
         order.append(slide)
-        k += 1
+        k += len(segs)
     MK.drop_slides(prs, [s for s in old if s not in (cover, mg)])
     MK.reorder(prs, order)
     MK.samsung_fonts.remap_prs(prs)
@@ -439,6 +455,9 @@ def main():
     ap.add_argument('--check', action='store_true')
     a = ap.parse_args()
     part = 'proposal' if a.proposal else ('new' if a.new else None)
+    if part == 'proposal' and not N.SLIDES_PROPOSAL:
+        print('제안 장표가 없음(6차부터)')
+        return
     tag = {'proposal': '_p', 'new': '_n', None: ''}[part]
     mp4 = {'proposal': MP4_P, 'new': OUT / '새장_미리보기.mp4', None: MP4}[part]
     silent, auto, meta = OUT / ('_silent%s.mp4' % tag), OUT / ('_auto%s.pptx' % tag), OUT / ('_talk%s.json' % tag)

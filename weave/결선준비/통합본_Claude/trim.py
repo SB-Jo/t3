@@ -29,7 +29,8 @@ GROUPS = [   # (차례, 이름, {장: 줄인 글})
         'sol': '세 번째는 먼저 건네는 기억입니다.',
     }),
     (2, '인트로 3~5쪽: 세 순간은 이름만', {
-        'in03': '저희는 이러한 순간을 크게 세 가지로 나눌 수 있었습니다. 첫째, 어디에 있는지 모를 때입니다.',
+        'in03': ('우리는 종종 이어지던 통화를 중단하고, 상대가 물어본 정보를 찾아 여러 앱을 넘나들곤 합니다. '
+                 '(클릭) 저희는 이러한 순간을 크게 세 가지로 나눌 수 있었습니다. 첫째, 어디에 있는지 모를 때입니다.'),
         'in04': '둘째, 정확한 이름이 떠오르지 않을 때입니다.',
         'in05': '셋째, 기억조차 나지 않을 때입니다. 세 순간 모두, 필요한 기록은 이미 내 휴대폰 안에 있습니다.',
     }),
@@ -38,12 +39,7 @@ GROUPS = [   # (차례, 이름, {장: 줄인 글})
                  '(클릭) 수많은 기억 속에서, 지금 필요한 기억을 찾아 헤맵니다.'),
         'scat': "'왜 정작 나에 대한 모든 기록이 담긴 내 휴대폰 안에서는, 아직도 이렇게 찾아 헤매야 할까요?'",
     }),
-    (4, '비교 장: 첫 물음을 뺌', {
-        'cmp': ('Writing Assist는 지금 쓰는 글을 다듬고, 카나나는 카카오톡 대화 안에서, Now Nudge와 Finder는 더 넓은 범위에서 한 번 찾거나 제안합니다. '
-                '(클릭) Weave는 여러 앱에 흩어진 단서를 이어서 찾고, 쓰던 화면의 키보드 위에서 바로 건넵니다.'),
-    }),
-    (5, '비교 장을 Appendix로 옮김(질문이 나오면 꺼냄)', {'cmp': None}),      # None = 그 장을 본 발표에서 뺌
-]
+]       # 6차(11-13): 비교 장은 이미 Appendix로 옮겨서(본 발표에 없음) 그 장을 줄이던 4, 5번은 없앰
 
 
 def main():
@@ -55,7 +51,8 @@ def main():
     total = json.loads(f.read_text(encoding='utf-8'))['total']
     own = {sp.key: sp for name, specs in talk.own_specs().items() for sp in specs}      # 지금 낭독에 맞춘 효과 길이
     fu = {k: say for k, _, say in talk.foreign_units()}
-    src = list(talk.Presentation(str(MK.INTRO2)).slides)
+    deck = list(talk.Presentation(str(MK.DST)).slides)      # 지금 덱(옮겨 온 장을 손본 뒤의 모습)에서 효과 길이를 잼
+    page = {k: i for i, k in enumerate(now)}                # 장 키 → 덱에서의 차례
     HW.OUT = TMP                                    # 낭독은 따로 둔 폴더에(영상용 낭독을 건드리지 않음)
     TMP.mkdir(parents=True, exist_ok=True)
     proxies = [types.SimpleNamespace(key='g%d_%s' % (n, k), slide=k, notes=v) for n, _, d in GROUPS for k, v in d.items() if v is not None]
@@ -73,11 +70,13 @@ def main():
             sec = (sp.trans[1] / 1000 if sp.trans else 0) + 0.15
             for j, t in enumerate(says[p.key]):
                 sec += max(t, anim[j] if j < len(anim) else 0)
-        else:                                       # 옮겨 온 장: 장 넘김 + max(말, 저절로 나오는 효과)
-            sl = src[MK.FOREIGN[k] - 1]
-            lead = talk.LEADS.get(k, HW.LAT_START)
-            hold = lead + tts_c.wav_len(clips[p.key][0]) + HW.seg_gaps(p)[0]
-            sec = F.trans_ms(sl) / 1000 + max(hold, F.anim_len(sl) / 1000 + 0.3)
+        else:                                       # 옮겨 온 장: 장 넘김 + 구간마다 max(말, 그 구간의 효과). 클릭이 있는 장(3쪽)은 구간이 둘
+            sl = deck[page[k]]
+            say = [talk.LEADS.get(k, HW.LAT_START) + tts_c.wav_len(clips[p.key][0]) + HW.seg_gaps(p)[0]] + list(says[p.key][1:])
+            clicks = F.click_lens(sl)
+            assert len(clicks) == len(say) - 1, (k, len(clicks), len(say))
+            sec = F.trans_ms(sl) / 1000 + max(say[0], F.anim_len(sl) / 1000 + (0 if clicks else 0.3))
+            sec += sum(max(say[j + 1], ms / 1000 + (0.3 if j == len(clicks) - 1 else 0)) for j, ms in enumerate(clicks))
         after[p.key] = round(sec, 1)
     shutil.rmtree(TMP, ignore_errors=True)
     print('지금 대본의 시간: %s (%d:%04.1f)\n' % (how, total // 60, total % 60))

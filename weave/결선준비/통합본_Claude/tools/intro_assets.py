@@ -2,6 +2,7 @@
 """인트로 장과 연표에 쓰는 그림을 만든다.
 
   python tools/intro_assets.py            assets/src/floats.html → assets/intro/floats.png (3~5쪽 제목과 말풍선 사이의 옅은 기록 조각)
+                                                                    + floats-a.png, floats-b.png, floats-c.png (세 층으로 나눈 것. 덱에서 따로 떠다님)
                                           assets/src/icons.html → assets/outro/ic-npu.png (38쪽 연표의 NPU 마디 아이콘)
   python tools/intro_assets.py --blur     out/png의 12쪽(기록이 이어진 모습)을 흐리게 → assets/intro/blur_link.jpg (13쪽 배경). 먼저 make.py --png
 """
@@ -31,8 +32,8 @@ def main():
         print('→', (DST / 'blur_link.jpg').relative_to(HERE), src.name)
         return
     subprocess.run(['node', str(HERE / 'tools' / 'shot.cjs'), str(SRC / 'floats.html'), str(DST), '--scale', '2'], check=True)
-    im = Image.open(DST / 'floats.png')
-    print('→ assets/intro/floats.png', im.size)
+    for n in ('floats', 'floats-a', 'floats-b', 'floats-c'):
+        print('→ assets/intro/%s.png' % n, Image.open(DST / (n + '.png')).size)
     subprocess.run(['node', str(HERE / 'tools' / 'shot.cjs'), str(SRC / 'icons.html'), str(HERE / 'assets' / 'outro')], check=True)
 
 
