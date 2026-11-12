@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """기대효과 한 장 후보(fx_new.py)를 앞뒤 장과 함께 말하며 넘기는 영상으로 찍는다. 덱은 바꾸지 않는다.
 
-  python tools/fx_try.py              → 후보 A, B, C 모두: 기대효과_후보/후보A_….mp4 … 과 기대효과_후보/기대효과_후보.pptx(후보 세 장, 클릭으로 넘김)
-  python tools/fx_try.py --only A     → 그 후보만
-  python tools/fx_try.py --quick A    → 낭독 없이 그 장만 빨리 찍어 봄(out/fx_try/quick_A.mp4와 한눈에 보는 그림. 구간마다 잠깐 머묾)
-  python tools/fx_try.py --deck       → 후보 세 장을 모은 덱만
+  python tools/fx_try.py              → 지금 고르는 후보(fx_new.CURRENT = J, K, L): 기대효과_후보/후보J_….mp4 … 과 기대효과_후보.pptx(클릭으로 넘김), 한눈에.jpg
+  python tools/fx_try.py --only D,E   → 그 후보만(앞선 차수 A~H는 기대효과_후보/이전판에 나옴)
+  python tools/fx_try.py --quick J    → 낭독 없이 그 장만 빨리 찍어 봄(out/fx_try/quick_J.mp4와 한눈에 보는 그림. 구간마다 잠깐 머묾)
+  python tools/fx_try.py --deck       → 지금 고르는 후보를 모은 덱만
   python tools/fx_try.py --remux      → 녹화는 두고 낭독과 자막만 다시 얹음
   python tools/fx_try.py --check      → 영상에 넣은 낭독을 받아쓰기로 글과 견줌
   python tools/fx_try.py --sheet      → 찍어 둔 영상에서 후보마다 세 순간을 뽑아 한 장에(기대효과_후보/한눈에.jpg)
@@ -29,7 +29,16 @@ from pptx import Presentation  # noqa: E402
 HW, N = MK.HW, MK.N
 WORK = MK.OUT / 'fx_try'
 DST = HERE / '기대효과_후보'
-FILE = {'A': '후보A_실세가닥', 'B': '후보B_세물음', 'C': '후보C_물결'}
+FILE = {'A': '후보A_실세가닥', 'B': '후보B_세물음', 'C': '후보C_물결', 'D': '후보D_고리얼굴', 'E': '후보E_고리속얼굴', 'F': '후보F_뱃지',
+        'G': '후보G_줄어드는숫자', 'H': '후보H_몸통있는사람', 'J': '후보J_숫자가기능이름으로', 'K': '후보K_숫자가물러남', 'L': '후보L_숫자가0으로'}
+OLD = DST / '이전판'                # 앞선 차수(A~H)의 영상과 그림. 저장소에는 올리지 않음
+SHEETS = [('한눈에.jpg', FX.CURRENT), ('이전판/한눈에_1차.jpg', 'ABC'), ('이전판/한눈에_2차.jpg', 'DEFGH')]
+
+
+def out_dir(code):
+    d = DST if code in FX.CURRENT else OLD
+    d.mkdir(parents=True, exist_ok=True)
+    return d
 
 
 def frame():
@@ -103,8 +112,7 @@ def record(code, remux=False):
         print(MK.render_c.video(auto, silent, secs))
     full = d / (FILE[code] + '_1080p.mp4')
     rows, end = TK.finish(silent, full, plan, clips)
-    DST.mkdir(exist_ok=True)
-    TK.shrink(full, DST / (FILE[code] + '.mp4'))
+    TK.shrink(full, out_dir(code) / (FILE[code] + '.mp4'))
     (d / 'timing.json').write_text(json.dumps(dict(rows=rows, total=round(end, 2)), ensure_ascii=False), encoding='utf-8')
     for k, a, n in rows:
         print('   %-8s %5.1f초부터 %5.1f초' % (k, a, n))
@@ -121,9 +129,11 @@ def check(code):
 
 
 def deck():
-    """후보 세 장을 모은 덱(클릭으로 넘김, 노트에 대본). 효과의 때는 후보마다 자기 낭독에서 잰 값."""
+    """지금 고르는 후보를 모은 덱(클릭으로 넘김, 노트에 대본). 효과의 때는 후보마다 자기 낭독에서 잰 값."""
     specs = []
     for code, key, fn, label in FX.CANDIDATES:
+        if code not in FX.CURRENT:
+            continue
         use(code)
         specs.append(fn())
     prs, old, layout, note_tpl = frame()
@@ -141,17 +151,23 @@ def deck():
 
 
 def overview():
-    """후보마다 세 순간(첫 설문, 세 설문이 다 뜬 때, 풀린 뒤)을 영상에서 뽑아 한 장에 모은다 → 기대효과_후보/한눈에.jpg"""
+    """후보마다 세 순간(첫 설문, 세 설문이 다 뜬 때, 풀린 뒤)을 영상에서 뽑아 한 장에 모은다 → 기대효과_후보/한눈에.jpg, 한눈에_2차.jpg"""
+    for name, codes in SHEETS:
+        if all((WORK / c / 'timing.json').exists() for c in codes):
+            sheet_of(name, [c for c in FX.CANDIDATES if c[0] in codes])
+
+
+def sheet_of(name, cands):
     from PIL import Image, ImageDraw, ImageFont
     font = ImageFont.truetype(str(TK.FONT), 26)
     small = ImageFont.truetype(str(TK.FONT), 19)
-    w, h, pad, head, left = 640, 360, 14, 46, 150
+    w, h, pad, head, left = 640, 360, 14, 46, 210
     cols = ['첫 설문이 가운데에', '세 설문이 다 뜬 때', 'Weave로 풀린 뒤']
-    im = Image.new('RGB', (left + 3 * (w + pad) + pad, head + len(FX.CANDIDATES) * (h + pad) + pad), '#FFFFFF')
+    im = Image.new('RGB', (left + 3 * (w + pad) + pad, head + len(cands) * (h + pad) + pad), '#FFFFFF')
     d = ImageDraw.Draw(im)
     for j, t in enumerate(cols):
         d.text((left + pad + j * (w + pad) + w / 2, head / 2 + 4), t, font=small, fill='#6A6474', anchor='mm')
-    for i, (code, key, _, label) in enumerate(FX.CANDIDATES):
+    for i, (code, key, _, label) in enumerate(cands):
         wd = WORK / code
         plan = json.loads((wd / '_talk.json').read_text(encoding='utf-8'))['plan']
         rows = json.loads((wd / 'timing.json').read_text(encoding='utf-8'))['rows']
@@ -168,9 +184,9 @@ def overview():
             fr = Image.open(png).convert('RGB')
             im.paste(fr, (left + pad + j * (w + pad), y + (h - fr.height) // 2))
             png.unlink()
-    DST.mkdir(exist_ok=True)
-    im.save(DST / '한눈에.jpg', quality=90)
-    print('→', (DST / '한눈에.jpg').name, im.size)
+    (DST / name).parent.mkdir(parents=True, exist_ok=True)
+    im.save(DST / name, quality=90)
+    print('→', name, im.size)
 
 
 def main():
@@ -193,17 +209,17 @@ def main():
         return
     if a.check:
         for code, _, _, _ in FX.CANDIDATES:
-            if not a.only or code in a.only.split(','):
+            if code in (a.only.split(',') if a.only else FX.CURRENT):
                 check(code)
         return
     if not a.deck:
         for code, _, _, _ in FX.CANDIDATES:
-            if not a.only or code in a.only.split(','):
+            if code in (a.only.split(',') if a.only else FX.CURRENT):
                 record(code, a.remux)
     dst = deck()
     if a.png or a.deck:
         print(MK.render_c.png(dst, WORK / 'png', 1600, 900))
-    if not a.deck and all((WORK / c[0] / 'timing.json').exists() for c in FX.CANDIDATES):
+    if not a.deck:
         overview()
 
 
