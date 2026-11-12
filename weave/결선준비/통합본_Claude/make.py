@@ -5,9 +5,10 @@
   python make.py --png            + out/png/s01.png… 와 out/한눈에.png (PowerPoint로 렌더)
 
 재료
-- 인트로 2~5, 7~8, 10, 13쪽: 원본/Weave_결선_중간본_도입부수정.pptx (jjun-0824/t3). 장을 그대로 옮기고(도형·그림·전환·효과) 노트와 화면 몇 곳을 손본다(patch_intro).
-- 6쪽(수많은 기록), 9쪽(기록을 남기는 곳), 11~12쪽(흩어진 기록이 이어짐), 14쪽(잇는 장): 새로 그린다(slides_new.py).
-- 바꾸기 전의 장: 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
+- 인트로 2~5, 7~14쪽: 원본/통합본_인트로수정_87bf80b.pptx (jjun-0824/t3 87bf80b: 우리 3차 덱의 7~14쪽을 팀원이 손본 판)의 장을 그대로 옮긴다(도형·그림·전환·효과·노트).
+  4차까지는 원본/Weave_결선_중간본_도입부수정.pptx의 장을 옮겨 손보고(patch_intro) 9, 11~12, 14쪽은 새로 그렸다(slides_new.py의 s_hub2, s_scat, s_link, s_bridge).
+- 6쪽(수많은 기록): 새로 그린다(slides_new.py).
+- 바꾸기 전의 장: 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
 - 표지와 모션그래픽 영상 장: 02_PPT/Weave_결선_중간본.pptx의 1쪽과 4쪽. 표지는 영상을 v9(10_표지영상/표지_루프.mp4, 18초)로 바꾸고 제목을 조금 줄인다(patch_cover).
   모션그래픽은 영상을 v24(08_인트로영상/Weave_모션그래픽.mp4: 제목의 색과 자간을 표지와 같게)로 바꿔 끼운다(patch_mg).
 - 솔루션 3장 + How it Works 13장 + Appendix 15장: 09_HowItWorks/장표5_claude/build.py의 장을 그대로 그린다.
@@ -70,6 +71,8 @@ INTRO = HERE / '원본' / 'Weave_결선_중간본_도입부수정.pptx'
 PREV = HERE / '원본' / '통합본_1차.pptx'                 # 11월 11일 1차 통합본(바꾸기 전의 장을 여기서 옮김)
 PREV2 = HERE / '원본' / '통합본_2차.pptx'                # 11월 11일 2차 통합본
 PREV3 = HERE / '원본' / '통합본_3차.pptx'                # 11월 12일 3차 통합본
+PREV4 = HERE / '원본' / '통합본_4차.pptx'                # 11월 12일 4차 통합본
+INTRO2 = HERE / '원본' / '통합본_인트로수정_87bf80b.pptx'   # 팀원이 7~14쪽을 손본 덱(jjun-0824/t3 87bf80b). 2~5쪽과 7~14쪽을 여기서 옮김
 MG_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'      # 모션그래픽 v24(111.1초). 중간본에 든 v23과 길이와 소리가 같음
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'      # 표지 영상 v9(18초)
 COVER_JPG = ROOT / '10_표지영상' / '표지_포스터.jpg'
@@ -125,7 +128,9 @@ def logo_style(slides):
     return n
 
 
-INTRO_KEYS = ['in02', 'in03', 'in04', 'in05', 'in07', 'in08', 'in09', 'in12']      # 인트로 덱에서 옮기는 장(숫자 = 그 덱의 쪽). 6, 10~11, 13쪽은 새로 그림
+# 옮겨 오는 인트로 장: {키: INTRO2의 쪽}. in..의 숫자는 처음 인트로 덱의 쪽(이름을 그대로 둠). 6쪽은 새로 그림(hook)
+FOREIGN = {'in02': 2, 'in03': 3, 'in04': 4, 'in05': 5, 'in07': 7, 'in08': 8, 'hub2': 9, 'in09': 10, 'scat': 11, 'link': 12, 'in12': 13, 'bridge': 14}
+INTRO_KEYS = list(FOREIGN)
 RING_ADJ = ('7741', '9800')                        # 7·8쪽 고리 굵기(도형 크기의 7.7% → 9.8%, 298px에 23px → 29px)
 OLD_SRC = '* 출처: 스마트폰 내 개인 기록 탐색 및 재검색 행태 설문조사 (응답 210명, 2026. 11)'
 INTRO_TEXT = {                                      # 옮겨 온 장의 화면 글을 바꾸는 곳: {장: [(원래, 지금)]}
@@ -141,16 +146,17 @@ BUBBLE_TAIL = {'b2': lambda w: (w / 2, w / 2 - 7),             # 가운데 인�
 FLOATS_BOX = (0, 16, 1280, 236)                     # 3~5쪽 말풍선 위에 흩어진 옅은 기록 조각(assets/intro/floats.png). 제목은 빼고 그 자리까지 씀
 NOTE_OLD_SHA1 = 'd9375bd6e2'                        # 가장자리에 흰 테가 남은 삼성노트 아이콘(sha1 앞 10자리). 옮겨 온 장에서는 다듬은 것으로 바꿔 끼움
 # 덱 차례(본 발표). 글자 = 옮겨 온 장, ('own', 이름) = 새로 그린 묶음, 'mg' = 모션그래픽
-SEQ = ['cover', 'in02', 'in03', 'in04', 'in05', ('own', 'hook'), 'in07', 'in08', ('own', 'hub2'), 'in09', ('own', 'rec'), 'in12',
-       ('own', 'bridge'), 'mg', ('own', 'hiw'), ('own', 'back')]
+SEQ = ['cover', 'in02', 'in03', 'in04', 'in05', ('own', 'hook'), 'in07', 'in08', 'hub2', 'in09', 'scat', 'link', 'in12', 'bridge',
+       'mg', ('own', 'hiw'), ('own', 'back')]
 PREV_KEEP = list(range(2, 14)) + list(range(32, 42)) + [59]      # 1차 통합본에서 남겨 두는 장: 인트로 2~13쪽, 뒷부분 32~41쪽, 저장 채널 그림(59쪽)
 PREV2_KEEP = list(range(2, 15)) + [26] + list(range(32, 42)) + [62]      # 2차 통합본에서: 인트로 2~14쪽, 빠진 고리(26쪽), 뒷부분 32~41쪽, 두 줄 연표 제안(62쪽)
+PREV4_KEEP = list(range(7, 15))                         # 4차 통합본에서: 우리가 그리거나 손본 7~14쪽(팀원이 손본 장으로 바뀜)
 PREV3_KEEP = [16] + list(range(21, 27)) + [30, 37]      # 3차 통합본에서: 16쪽(대본), 21쪽(뺀 장), 22~26쪽과 30쪽(화면 번호와 대본), 37쪽(비교 표)
 
 
 def own_specs():
     """새로 그린 장의 묶음(덱과 낭독 영상이 같은 것을 씀)."""
-    return dict(hook=[N.s_hook()], hub2=[N.s_hub2()], rec=[N.s_scat(), N.s_link()], bridge=[N.s_bridge()],
+    return dict(hook=[N.s_hook()],
                 hiw=[f() for f in HW.SOL_SLIDES] + [f() for f in HW.SLIDES], back=[f() for f in N.SLIDES_BACK],
                 prop=[f() for f in N.SLIDES_PROPOSAL])
 
@@ -320,15 +326,27 @@ def patch_intro(slides, note_tpl):
                 repoint(sl, pic, N.ICON['note'])
 
 
+def copy_intro(prs, note_tpl):
+    """팀원이 손본 덱(INTRO2)에서 인트로 장을 그대로 옮긴다. 노트는 INTRO_NOTES(그 덱의 노트와 같은 글인지 견줘 다르면 알림). 돌려줌: {키: 장}."""
+    src = list(Presentation(str(INTRO2)).slides)
+    out = {}
+    for k, page in FOREIGN.items():
+        sl = F.copy_slide(prs, src[page - 1], note_tpl)
+        if ' '.join(F.note_text(src[page - 1]).split()) != ' '.join(N.INTRO_NOTES[k].split()):
+            print('   ! %s(%d쪽): INTRO_NOTES가 옮겨 온 덱의 노트와 다름' % (k, page))
+        F.set_notes(sl, N.INTRO_NOTES[k], note_tpl)
+        out[k] = sl
+    return out
+
+
 def build(dst):
     prs = Presentation(str(BASE))
     old = list(prs.slides)
     cover, mg = old[0], old[3]
     layout = old[5].slide_layout                       # How it Works 장과 같은 틀
     note_tpl = [copy.deepcopy(sh._element) for sh in old[5].notes_slide.placeholders]
-    src = list(Presentation(str(INTRO)).slides)
-    intro = {k: F.copy_slide(prs, src[int(k[2:]) - 1], note_tpl) for k in INTRO_KEYS}
-    patch_intro(intro, note_tpl)
+    src = list(Presentation(str(INTRO)).slides)        # 처음 인트로 덱: '이전 판 (1차)'의 마지막 장에만 씀
+    intro = copy_intro(prs, note_tpl)
     patch_cover(cover)
     patch_mg(mg)
     F.set_notes(cover, N.INTRO_NOTES['cover'], note_tpl)
@@ -346,7 +364,11 @@ def build(dst):
     appx = draw(HW.appendix_specs() + [N.s_credits2()])
     prop = draw([N.s_divider('p0', '제안 장표', ['기대효과 세 장: 기능이 있으면 고리 그래프와 왼쪽 말이 바뀌는 안 (%d~%d쪽 자리)' % (n_main - 8, n_main - 6)],
                              '여기부터는 제안 장표입니다. 본 발표에서는 넘기지 않습니다.')] + own_specs()['prop'])
-    prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV3, PREV2, PREV))
+    prev4, prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV4, PREV3, PREV2, PREV))
+    old4 = draw([N.s_divider('o4', '이전 판 (4차)', ['11월 12일 4차 통합본의 7~14쪽 (팀원이 손본 장으로 바뀌기 전)',
+                                                    '노트에 그때의 대본이 그대로 있습니다'],
+                             '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
+    old4 += [F.copy_slide(prs, prev4[i - 1], note_tpl) for i in PREV4_KEEP]
     old3 = draw([N.s_divider('o3', '이전 판 (3차)', ['11월 12일 3차 통합본의 16쪽, 뺀 21쪽, 22~26쪽, 30쪽, 비교 표(37쪽)',
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
@@ -359,11 +381,11 @@ def build(dst):
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
     old1 += [F.copy_slide(prs, prev1[i - 1], note_tpl) for i in PREV_KEEP] + [F.copy_slide(prs, src[12], note_tpl)]
-    order = [*main, *appx, *prop, *old3, *old2, *old1]
+    order = [*main, *appx, *prop, *old4, *old3, *old2, *old1]
     drop_slides(prs, [s for s in old if s not in (cover, mg)])
     reorder(prs, order)
     samsung_fonts.remap_prs(prs)
-    logo_style(own['bridge'])
+    build.n_old4 = len(old4)
     build.n_main, build.n_appx, build.n_prop, build.n_old3, build.n_old2, build.n_old1 = n_main, len(appx), len(prop), len(old3), len(old2), len(old1)
     prs.save(str(dst))
     for key, nclick, nnote, _ in report:

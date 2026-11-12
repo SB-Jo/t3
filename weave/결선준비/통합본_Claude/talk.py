@@ -85,7 +85,7 @@ def narrate_all(check=False):
     fu = foreign_units()
     proxies = [types.SimpleNamespace(key=k, notes=say) for k, _, say in fu]
     own = own_specs()
-    specs = proxies + [sp for name in ('hook', 'hub2', 'rec', 'bridge', 'hiw', 'back', 'prop') for sp in own[name] if sp.notes.strip()]
+    specs = proxies + [sp for name in ('hook', 'hiw', 'back', 'prop') for sp in own[name] if sp.notes.strip()]
     says, clips = HW.narrate(specs, None, check)
     for p in proxies:               # 옮겨 온 장: 말 떼기까지의 틈을 장마다 따로
         lead = LEADS.get(p.key, HW.LAT_START)
@@ -112,7 +112,7 @@ def talkify(specs, says, k, plan):
     return k
 
 
-PART = {'proposal': ['prop'], 'new': ['hook', 'hub2', 'rec', 'bridge', 'back', 'prop']}       # 따로 찍는 묶음
+PART = {'proposal': ['prop'], 'new': ['hook', 'back', 'prop']}       # 따로 찍는 묶음
 
 
 def build_auto(dst, fu, says, part=None):
@@ -140,9 +140,7 @@ def build_auto(dst, fu, says, part=None):
         MK.logo_style(slides)
         prs.save(str(dst))
         return [p['secs'] for p in plan], plan
-    src = list(Presentation(str(MK.INTRO)).slides)
-    intro = {key: F.copy_slide(prs, src[int(key[2:]) - 1], note_tpl) for key in MK.INTRO_KEYS}
-    MK.patch_intro(intro, note_tpl)
+    intro = MK.copy_intro(prs, note_tpl)      # 덱과 같은 인트로 장(팀원이 손본 덱에서 옮김)
     MK.patch_cover(cover)           # 덱과 같은 표지(영상 v9, 제목 크기)로 찍는다
     MK.patch_mg(mg)                 # 덱과 같은 모션그래픽(v24)
     say_of = {key: say for key, _, say in fu}
@@ -151,7 +149,6 @@ def build_auto(dst, fu, says, part=None):
         if isinstance(item, tuple):
             slides, k = draw(own[item[1]], k)
             order += slides
-            logos += slides if item[1] == 'bridge' else []
             continue
         if item == 'mg':
             F.add_mark(mg, MARK_BOX, MARK_RGB[k % 3], 'mk_mg')

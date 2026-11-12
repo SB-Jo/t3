@@ -55,7 +55,7 @@ def main():
     total = json.loads(f.read_text(encoding='utf-8'))['total']
     own = {sp.key: sp for name, specs in talk.own_specs().items() for sp in specs}      # 지금 낭독에 맞춘 효과 길이
     fu = {k: say for k, _, say in talk.foreign_units()}
-    src = list(talk.Presentation(str(MK.INTRO)).slides)
+    src = list(talk.Presentation(str(MK.INTRO2)).slides)
     HW.OUT = TMP                                    # 낭독은 따로 둔 폴더에(영상용 낭독을 건드리지 않음)
     TMP.mkdir(parents=True, exist_ok=True)
     proxies = [types.SimpleNamespace(key='g%d_%s' % (n, k), slide=k, notes=v) for n, _, d in GROUPS for k, v in d.items() if v is not None]
@@ -74,7 +74,7 @@ def main():
             for j, t in enumerate(says[p.key]):
                 sec += max(t, anim[j] if j < len(anim) else 0)
         else:                                       # 옮겨 온 장: 장 넘김 + max(말, 저절로 나오는 효과)
-            sl = src[int(k[2:]) - 1]
+            sl = src[MK.FOREIGN[k] - 1]
             lead = talk.LEADS.get(k, HW.LAT_START)
             hold = lead + tts_c.wav_len(clips[p.key][0]) + HW.seg_gaps(p)[0]
             sec = F.trans_ms(sl) / 1000 + max(hold, F.anim_len(sl) / 1000 + 0.3)
