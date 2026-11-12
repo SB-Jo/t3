@@ -25,3 +25,17 @@ GitHub 저장소(gnueaj/t3)는 공개로 유지하므로 삼성 글꼴 파일은
 - 로컬에는 그대로 있습니다: `06_에셋/글꼴`, `07_소스/teaser/assets/fonts`, `08_인트로영상/소스/assets/fonts`, `10_표지영상/소스/assets/fonts`.
 - 다른 컴퓨터에서 영상을 다시 렌더하려면 위 주소에서 받아 같은 이름으로 넣습니다.
 - PowerPoint용 TTF(SamsungOneKorean 400·500·700, SamsungOne 400, Samsung Sharp Sans)는 웹 글꼴을 변환해 `~/.cache/weave-tools/fonts`에 두고, Windows 사용자 글꼴로 설치했습니다. 이것도 저장소 밖입니다.
+
+## 2026-11-09 추가 (글꼴 시안: 한글 Korean Sans + 영문 Sharp Sans)
+
+같은 날 시안을 본 뒤 덱과 영상은 SamsungOne 그대로 가기로 했어요. 시안 파일은 작업 컴퓨터의 `11_중간본/이전판/SharpSans시안_1109/`에만 있어요.
+
+
+- `SamsungKoreanSans-Medium.woff2`, `SamsungKoreanSans-Bold.woff2`: https://www.samsung.com/sec/static/_font/_kor_sans/SamsungKoreanSans-Medium.woff2 , https://www.samsung.com/sec/static/_font/_kor_sans/SamsungKoreanSans-Bold.woff2
+  - https://www.samsung.com/sec/static/_css/common.css 에 'Samsung Korea Sans'로 선언돼 있어요(주석 "21-11-01 NEW KOR font"). `.kor-sans`가 'Samsung Korea Sans', 'Samsung Sharp Sans' 순서로 써요.
+  - 글꼴 정보: Samsung Korean Sans Medium·Bold, Copyright © 2021 Yoondesigngroup, 한글 2,350자, 영문 알파벳은 없어요(fontTools로 확인).
+- `SamsungSharpSans-Medium.woff`: 위(2026-09-26)의 cloudfront 주소에서 다시 받았어요. 보통 굵기 글에서 Korean Sans Medium과 굵기를 맞추는 데 써요.
+- PowerPoint용 파일은 `~/.cache/weave-tools/fonts`에 두고 Windows 사용자 글꼴로 설치했어요.
+  - `SamsungKoreanSans-Medium.ttf`, `SamsungKoreanSans-Bold.ttf`: Windows 가족 이름을 'Samsung Korean Sans' 하나로 묶었어요(Medium = 보통, Bold = 굵게).
+  - `SamsungSharpSans-Medium.otf`: Windows 가족 이름은 'Samsung Sharp Sans Medium'이에요.
+- 위와 같은 주의가 그대로 적용돼요. 사내 발표용으로만 쓰고 저장소에는 올리지 않아요(`결선준비/.gitignore`).

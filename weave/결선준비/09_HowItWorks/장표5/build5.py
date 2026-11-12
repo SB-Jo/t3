@@ -54,13 +54,13 @@ def hits(a, b, m=0):
 
 
 LINES = ('th', 'gth', 'fl', 'bk', 'sth', 'sbk', 'lc')
-CUT_SKIP = ('ui.glogo', 'ui.head', 'ui.msg', 'ui.sbox', 'res', 'ui.res', 'qp.head')
+CUT_SKIP = ('ui.glogo', 'ui.head', 'ui.msg', 'ui.sbox', 'ui.sbox.done', 'res', 'ui.res', 'qp.head')
 
 
 def is_frame(key):
     """잘려도 되는 큰 바탕(폰·질문 판·엔진 판). 가까이 볼 때 화면 끝에 걸치는 게 자연스러움."""
     return (key == 'ui' or (key.startswith('ui.') and key not in CUT_SKIP) or key in ('qp', 'gen', 'kw', 'emb') or key.startswith('re:')
-            or key.startswith('fl') or '.th' in key
+            or key.startswith('fl') or '.th' in key or key.startswith(('intro0', 'fail.', 'step.', 'hy.', 'ov.', 're1.'))
             or key.startswith('th') or key.startswith('gth') or key.startswith('bk') or key.startswith('sth') or key.startswith('sbk'))
 
 
@@ -147,16 +147,20 @@ def add_steps(prs, sc, layout, note_tpl, video_hold=None):
         for key, alpha in items:
             prims = sc.items[key](step.styles.get(key))
             spids[key] = [int(pa.prim(p, cam=step.cam, alpha=alpha).find('.//' + q('p:cNvPr')).get('id')) for p in prims]
-        for p in over_prims():
-            pa.prim(p)
-        for p in scene5.topbar_prims(step.hud):
-            pa.prim(p)
+        if not (step.hud and step.hud.get('intro0')):
+            for p in over_prims():
+                pa.prim(p)
+        top_ps = scene5.topbar_prims(step.hud)
+        if top_ps:
+            spids['__top__'] = [int(pa.prim(p).find('.//' + q('p:cNvPr')).get('id')) for p in top_ps]
         crect, side = step.cap_rect
-        spids['__cap__'] = [int(pa.prim(p).find('.//' + q('p:cNvPr')).get('id')) for p in scene5.caption_prims(i, step.cap, side, crect)]
+        cap_ps = scene5.caption_prims(i, step.cap, side, crect) if step.cap and step.cap.get('t') else []
+        if cap_ps:
+            spids['__cap__'] = [int(pa.prim(p).find('.//' + q('p:cNvPr')).get('id')) for p in cap_ps]
         if i > 0:
             S.morph_transition(slide, step.morph_ms)
         groups = [step.anim or {}] + [dict(b) for b in (getattr(step, 'beats', None) or [])]
-        if getattr(step, 'cap_beat', None) is not None:      # 맺음 설명처럼 설명을 클릭에 나오게
+        if getattr(step, 'cap_beat', None) is not None and '__cap__' in spids:      # 맺음 설명처럼 설명을 클릭에 나오게
             groups[step.cap_beat + 1]['__cap__'] = dict(kind='fade_in', delay=0, dur=300)
         tl = L.Timeline()
         for g in groups:
@@ -208,6 +212,7 @@ def sheet(pngs, dst, labels, cols=4, w=560):
 
 
 def main():
+    import shutil
     ap = argparse.ArgumentParser()
     ap.add_argument('versions', nargs='+')
     ap.add_argument('--png', action='store_true')
@@ -223,6 +228,10 @@ def main():
         dst = OUT / (name + '.pptx')
         n, warns = render(sc, dst)
         print(v, '장', n, '→', dst.name)
+        if v in ('a1_deck00', 'a1_deck', 'a1'):
+            argon_dst = HERE.parent / 'HowItWorks_Argon.pptx'
+            shutil.copy2(dst, argon_dst)
+            print('   ★ 복사 완료 →', argon_dst)
         for w in warns:
             print('   !', w)
         zs = ' '.join('%.2f' % st.cam[2] for st in sc.steps)

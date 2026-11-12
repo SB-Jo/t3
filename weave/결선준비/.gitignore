@@ -1,4 +1,4 @@
-# 삼성 글꼴(SamsungOne, Samsung Sharp Sans)은 "허가 없는 사용·배포 금지"라서 공개 저장소에 올리지 않고 로컬에만 둔다.
+# 삼성 글꼴(SamsungOne, Samsung Sharp Sans, Samsung Korean Sans)은 "허가 없는 사용·배포 금지"라서 공개 저장소에 올리지 않고 로컬에만 둔다.
 # 받는 곳: 06_에셋/글꼴/SOURCES.md. 영상을 다시 렌더하려면 같은 이름으로 각 소스의 assets/fonts에 넣는다.
 SamsungOne*.woff
 SamsungOne*.woff2
@@ -8,9 +8,35 @@ SamsungSharpSans*.woff
 SamsungSharpSans*.woff2
 SamsungSharpSans*.ttf
 SamsungSharpSans*.otf
+SamsungKoreanSans*.woff
+SamsungKoreanSans*.woff2
+SamsungKoreanSans*.ttf
+SamsungKoreanSans*.otf
 
 # PowerPoint가 파일을 열 때 만드는 잠금 파일
 ~$*
 
 # 파이썬 캐시
 __pycache__/
+
+# 저장소에는 지금 쓰는 판만 둔다(2026-11-06). 아래는 작업 컴퓨터에만 남는다
+08_인트로영상/이전판/
+08_인트로영상/*_무음.mp4
+08_인트로영상/소스/assets/img/trio/
+08_인트로영상/배경음악/*.wav
+10_표지영상/이전판/
+11_중간본/이전판/
+통합본_Claude/기대효과_후보/이전판/
+09_HowItWorks/장표/
+09_HowItWorks/장표2/
+09_HowItWorks/장표3/
+09_HowItWorks/장표4/
+09_HowItWorks/장표5/out/
+Argon/
+07_소스/slides/comic/
+07_소스/slides/p68/*
+!07_소스/slides/p68/scenario.css
+!07_소스/slides/p68/scenario.js
+09_HowItWorks/Claude/out/
+09_HowItWorks/Claude/assets_cand/
+09_HowItWorks/장표5_claude/out/

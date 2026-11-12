@@ -71,7 +71,7 @@ def refill(prs, slide, notes):
     c = [sh for sh in texts if sh.text_frame.text.strip() == CHIP]
     assert len(c) == 1, CHIP
     c[0].name = 'Header chip'
-    tops = sorted((sh for sh in texts if sh is not c[0] and (sh.top or 0) / 9525 < 150), key=lambda s: s.top)
+    tops = sorted((sh for sh in texts if sh is not c[0] and (sh.top or 0) / 9525 < 110), key=lambda s: s.top)
     assert len(tops) == 2, [t.text_frame.text for t in tops]
     tops[0].name, tops[1].name = 'Header title', 'Header subtitle'
     pg.drop_unused_images(slide)

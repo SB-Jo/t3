@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """결선 중간본 덱 조립. 원본 02_PPT/Weave_결선.pptx는 고치지 않고, 새 파일 02_PPT/Weave_결선_중간본.pptx를 만든다.
 
-본편: 표지(반복 영상) → Motivation → Pain Points → 인포그래픽 영상(세 시나리오) → Solution
-      → How it Works(장표5 A1 덱용 00판, --hiw a1_deck이면 00 없는 판) → Why Samsung → Why Now → 차별화 → 기대효과 1~3 → END
-부록: 파이프라인, 관련 연구, Reasoning Embedding, UX 1~3 상세, 비교, Q&A 2장
+본편: 표지(반복 영상) → Motivation → Pain Points → 모션그래픽 영상(세 시나리오) → Solution
+      → How it Works(Argon판 15장) → Why Samsung → Why Now → 차별화 → 기대효과 1~3 → END
+부록: Argon판 Appendix 13장
+      How it Works와 Appendix는 09_HowItWorks/장표5/build.py(→ HowItWorks_Argon.pptx)의 add_slides로 이 덱에 바로 그린다(두 파일의 장이 같음).
+      솔루션 장도 Argon판처럼 노트를 바꾸고 오른쪽 위 노란 빛을 보라로(fix_solution).
 참고(발표에서 안 씀): 구분 장 → 앱 데모, 이전 표지, 만화, 이전 시나리오 1~3, 이전 How it Works
 
   python build_deck.py              조립 → 삼성 글꼴로 바꾸기 → PowerPoint로 영상 넣기 → 장별 PNG·한눈에
   python build_deck.py --no-png     PNG 없이
-  python build_deck.py --hiw a1_deck --out /tmp/중간본_00없음.pptx   How it Works를 00 없는 판으로
+  python build_deck.py --hiw a1_deck00 --out /tmp/중간본_00판.pptx   예전 How it Works(장표5 A1 덱용 00판 12장)와 예전 Appendix 7장 + Q&A 2장으로
   python build_deck.py --team-style side      표지 팀 이름을 '이름 둘 | 팀 두 줄'로
   python build_deck.py --embed-fonts          글꼴을 pptx 안에 넣어 저장(받는 사람이 글꼴 없이도 보게, 용량 늘어남)
 
-영상은 PowerPoint(COM)로 넣는다: 표지 = 자동 재생 + 끝나면 반복, 인포그래픽 = 자동 재생 한 번.
+영상은 PowerPoint(COM)로 넣는다: 표지 = 자동 재생 + 끝나면 반복, 모션그래픽 = 자동 재생 한 번.
 열려 있는 PowerPoint 창은 건드리지 않는다(C:\\Temp 사본을 창 없이 열고 그 사본만 닫음).
 """
 import argparse
@@ -36,7 +38,7 @@ HIW = ROOT / '09_HowItWorks' / '장표5'
 SOL = ROOT / '07_소스' / 'slides' / 'p05_결선' / 'apply_solution.py'
 APX = ROOT / '07_소스' / 'slides' / 'appendix_결선' / 'apply_appendix.py'
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'
-INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_인포그래픽_85초.mp4'
+INTRO_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'
 VENV_PY = Path.home() / '.cache' / 'weave-tools' / 'venv' / 'bin' / 'python'
 
 sys.path.insert(0, str(HIW))
@@ -71,7 +73,7 @@ def text_slide(prs, layout, name, lines, notes):
 TEAMS = [('Samsung Research', 'AI System Team', ['이재웅', '양서윤']), ('Samsung Research', 'AI Core Team', ['장이준', '이지현']), ('하만협력', '오디오개발Lab', ['조성빈'])]
 TITLE, TAGLINE = 'Weave Assist', '흩어진 기억을 엮어, 지금을 완성하다'     # 이전 표지와 같은 문구
 CX = 70                                         # 표지 글 왼쪽 끝. 영상의 왼쪽 빈 자리는 x < 564(1280 기준)
-MARK = 56                                       # 'Weave' 앞 아이콘(인트로 끝 화면의 보라 네모 + 흰 실타래)
+MARK = 63                                       # 'Weave' 앞 아이콘(인트로 끝 화면의 보라 네모 + 흰 실타래). 15차: 제목 54pt에 맞춰 56 → 63
 FONTS = Path.home() / '.cache' / 'weave-tools' / 'fonts'
 GRAD = ('<a:gradFill xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" rotWithShape="1">'
         '<a:gsLst><a:gs pos="0"><a:srgbClr val="4E36CF"/></a:gs><a:gs pos="100000"><a:srgbClr val="8F66FF"/>'
@@ -94,14 +96,14 @@ def cover_text(slide, team_style='under'):
                 'side'  = 이름 둘을 위아래로, 오른쪽에 팀 이름을 두 줄로(사용자 제안 'AI System / Team')
     """
     pa = S.Painter(slide)                        # 바탕은 영상이 깔므로 도형 바탕은 그리지 않음(영상이 그 뒤로 숨지 않게)
-    cy = 260                                     # 제목 줄 가운데
-    pa.prim(S.R('cover/mark', CX, cy - MARK / 2, MARK, MARK, prst='roundRect', radius=15, line=None,
+    cy = 268                                     # 제목 줄 가운데(8차: 260 → 276, 무게중심이 위에 있어 조금 내림. 15차: 커진 'Assist'가 영상의 '부재중 전화' 카드에 닿지 않게 268)
+    pa.prim(S.R('cover/mark', CX, cy - MARK / 2, MARK, MARK, prst='roundRect', radius=MARK * 15 / 56, line=None,
                 grad=dict(stops=[(0, '8D6BFF', None), (55, '6B4EFF', None), (100, '5A3FE0', None)], ang=55),
-                shadow=(18, 7, '6B4EFF', 30)))
+                shadow=(20, 8, '6B4EFF', 30)))
     ic = MARK * 2 / 3
     pa.prim(S.P('cover/mark_icon', 'weave-spool-white.png', CX + (MARK - ic) / 2, cy - ic / 2, ic, ic))
-    tx = CX + MARK + 13
-    t = pa.prim(S.T('cover/title', tx - 2, cy - 38, 470, 76, TITLE, size=48, color=S.PURPLE, weight='b', anchor='ctr',
+    tx = CX + MARK + 15
+    t = pa.prim(S.T('cover/title', tx - 2, cy - 43, 530, 86, TITLE, size=54, color=S.PURPLE, weight='b', anchor='ctr',
                     spc=-0.5))
     for rp in t.iter(q('a:rPr'), q('a:endParaRPr')):
         for tag in ('a:latin', 'a:ea', 'a:cs'):          # 로고 글꼴(인트로 끝 화면과 같음). 굵게는 이 글꼴의 Bold
@@ -113,7 +115,7 @@ def cover_text(slide, team_style='under'):
             continue
         old.addprevious(etree.fromstring(GRAD))
         rp.remove(old)
-    pa.prim(S.T('cover/sub', CX + 1, 306, 520, 40, TAGLINE, size=20, color=S.INK2, weight='b', anchor='ctr'))
+    pa.prim(S.T('cover/sub', CX + 1, cy + 52, 580, 44, TAGLINE, size=22, color=S.INK2, weight='b', anchor='ctr'))
 
     x = CX + 1
     if team_style == 'under':
@@ -144,7 +146,7 @@ def cover_text(slide, team_style='under'):
             x = lx + 11 + tw_ + 36
 
 
-INFO_NOTES = ('인포그래픽 영상입니다(1분 25초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
+INFO_NOTES = ('모션그래픽 영상입니다(1분 51초, 자동 재생). 영상이 재생되는 동안에는 말하지 않고, 스크린 옆으로 반 걸음 물러서서 화면을 함께 봅니다. '
               '마지막 로고가 뜨면 무대 중앙으로 돌아와 다음 장으로 넘어갑니다. '
               '현장 음향이 작을 때만 장면 카드가 뜰 때 한 문장씩 얹습니다. '
               '첫째, 급한 통화 중에도 앱을 뒤질 필요 없이, 아래에서 쓸어 올리면 끝납니다. '
@@ -169,6 +171,16 @@ def set_notes(slide, text):
         for e in NOTE_TPL:
             ns.shapes._spTree.append(copy.deepcopy(e))
     ns.notes_text_frame.text = text
+
+
+def drop_slides(prs, slides):
+    """장을 덱에서 뺀다(그 장만 가리키던 그림·링크도 저장할 때 함께 빠짐)."""
+    parts = {s.part for s in slides}
+    lst = prs.slides._sldIdLst
+    for e in list(lst):
+        if prs.part.related_part(e.get(q('r:id'))) in parts:
+            prs.part.drop_rel(e.get(q('r:id')))
+            lst.remove(e)
 
 
 def reorder(prs, order):
@@ -305,7 +317,7 @@ $pres = $app.Presentations.Open($Pptx, 0, 0, 0)
 try {
   $W = $pres.PageSetup.SlideWidth; $H = $pres.PageSetup.SlideHeight
   $log = @()
-  foreach ($job in @(@($CoverIdx, $CoverMp4, "Cover loop video", -1, $CoverPoster), @($IntroIdx, $IntroMp4, "Infographic video 85s", 0, $IntroPoster))) {
+  foreach ($job in @(@($CoverIdx, $CoverMp4, "Cover loop video", -1, $CoverPoster), @($IntroIdx, $IntroMp4, "Motion graphic video", 0, $IntroPoster))) {
     if (-not $job[1]) { continue }
     $s = $pres.Slides.Item($job[0])
     $v = $s.Shapes.AddMediaObject2($job[1], 0, -1, 0, 0, $W, $H)
@@ -357,8 +369,8 @@ def add_media(pptx, cover_idx, intro_idx, embed_fonts=False):
     else:
         print('   ! 표지 영상이 아직 없음:', COVER_MP4)
     shutil.copyfile(INTRO_MP4, tmpd / 'intro.mp4')
-    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 인포그래픽 미리보기 그림 = 오프닝 로고(2.2초)
-    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '2.2', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
+    ff = Path.home() / '.cache' / 'weave-tools' / 'bin' / 'ffmpeg'          # 모션그래픽 미리보기 그림 = 오프닝 로고(3초, 빛이 다 지나간 뒤)
+    subprocess.run([str(ff), '-y', '-loglevel', 'error', '-ss', '3.4', '-i', str(INTRO_MP4), '-frames:v', '1', str(tmpd / 'intro.png')],
                    check=True)
     args += ['-IntroMp4', render2.winpath(tmpd / 'intro.mp4'), '-IntroPoster', render2.winpath(tmpd / 'intro.png')]
     code, log = render2.ps(tmpd / 'media.ps1', *args)
@@ -386,7 +398,7 @@ def sheet(pngs, dst, labels, cols=6, w=400):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--no-png', action='store_true')
-    ap.add_argument('--hiw', default='a1_deck00', help='장표5의 SPEC 모듈(a1_deck00 = 00 있는 덱용, a1_deck = 00 없는 판)')
+    ap.add_argument('--hiw', default='argon', help='argon = 장표5/build.py의 Argon판(기본), a1_deck00·a1_deck = 예전 장표5 SPEC 모듈')
     ap.add_argument('--out', default=str(DST))
     ap.add_argument('--team-style', default='under', choices=['under', 'side'])
     ap.add_argument('--embed-fonts', action='store_true')
@@ -410,33 +422,51 @@ def main():
     NOTE_TPL[:] = [copy.deepcopy(sh._element) for sh in orig[8].notes_slide.placeholders]
     change_log = apply_edits(orig)
 
-    # 2. How it Works(장표5 A1 덱용)
-    import importlib
-    sc = scene5.build(importlib.import_module(a.hiw).SPEC)
-    hiw, warns = build5.add_steps(prs, sc, layout, NOTE_TPL)
-    for w in warns:
-        print('   !', w)
-    hy = [i for i, st in enumerate(sc.steps) if st.key == 'hybrid']
-    assert hy, '빠진 한 단계 장이 없음'
-    S.Painter(hiw[hy[0]]).prim(S.T('hiw/reason_note', 86, 664, 1100, 20, HYBRID_NOTE, size=10, color='8E88A0', anchor='ctr'))
-    S.morph_transition(hiw[0], 1000)          # 솔루션 → How it Works 첫 장은 부드럽게(겹치는 도형이 없어 페이드처럼)
+    # 2. How it Works와 Appendix
+    if a.hiw == 'argon':                      # 11-09부터 Argon판: HowItWorks_Argon.pptx와 같은 장을 이 덱에 그림
+        import build as HW
+        import appendix as HA
+        miss = [f for f in ('blur_sol.png', 'blur_emb.png') if not (HW.OUT / f).exists()]
+        assert not miss, '흐린 배경 %s 없음: 먼저 09_HowItWorks/장표5/build.py를 한 번 돌리세요' % miss
+        HW.fix_solution(orig[4])
+        hiw, rep, _ = HW.add_slides(prs, layout, NOTE_TPL, [f() for f in HW.SLIDES])
+        new_app, rep2, _ = HW.add_slides(prs, layout, NOTE_TPL, [f() for f in HA.APPENDIX])
+        for key, nclick, nnote, _ in rep + rep2:
+            if nclick != nnote:
+                print('   ! %s: 클릭 %d ≠ 노트 (클릭) %d' % (key, nclick, nnote))
+        dropped = [*orig[19:26], orig[16], orig[17]]       # 예전 Appendix 7장과 Q&A 2장은 Argon판 Appendix로 바뀜(3단계 뒤에 뺌)
+        change_log = [c for c in change_log if not c[0].startswith('Q&A')]
+        appx = new_app
+    else:                                     # 예전 판: 장표5 A1 덱용(00판) + 예전 Appendix
+        import importlib
+        sc = scene5.build(importlib.import_module(a.hiw).SPEC)
+        hiw, warns = build5.add_steps(prs, sc, layout, NOTE_TPL)
+        for w in warns:
+            print('   !', w)
+        hy = [i for i, st in enumerate(sc.steps) if st.key == 'hybrid']
+        assert hy, '빠진 한 단계 장이 없음'
+        S.Painter(hiw[hy[0]]).prim(S.T('hiw/reason_note', 86, 664, 1100, 20, HYBRID_NOTE, size=10, color='8E88A0', anchor='ctr'))
+        S.morph_transition(hiw[0], 1000)          # 솔루션 → How it Works 첫 장은 부드럽게(겹치는 도형이 없어 페이드처럼)
+        new_app = orig[19:26]                                  # 파이프라인, 관련 연구, Reasoning Embedding, UX 1~3 상세, 비교
+        appx = [*new_app, orig[17], orig[16]]
+        dropped = []
 
-    # 3. 새 표지(영상은 4단계에서), 인포그래픽 영상 장, 참고 구분 장
+    # 3. 새 표지(영상은 4단계에서), 모션그래픽 영상 장, 참고 구분 장
     cover = blank_slide(prs, layout, COVER_NOTES)
     cover_text(cover, a.team_style)
     info = blank_slide(prs, layout, INFO_NOTES)     # 바탕은 영상이 깖(도형 바탕을 그리면 영상이 그 뒤로 숨음)
     ref = text_slide(prs, layout, 'REFERENCE', ['참고 · 발표에서 쓰지 않는 장표',
                                                 '앱 데모, 이전 표지, 만화, 이전 시나리오 1~3, 이전 How it Works',
-                                                '새 구성(표지 영상, 인포그래픽, 솔루션, How it Works)으로 바뀌기 전 장표입니다.'],
+                                                '새 구성(표지 영상, 모션그래픽, 솔루션, How it Works)으로 바뀌기 전 장표입니다.'],
                      '참고용 구분 장. 이 뒤의 장표는 발표에서 쓰지 않습니다.')
 
-    new_app = orig[19:26]                                  # 파이프라인, 관련 연구, Reasoning Embedding, UX 1~3 상세, 비교
+    drop_slides(prs, dropped)          # 장을 더 만들지 않은 뒤에 뺌(먼저 빼면 새 장 파일 이름이 남은 장과 겹침)
     main_ = [cover, orig[2], orig[3], info, orig[4], *hiw, orig[9], orig[10], orig[11], orig[12], orig[13], orig[14], orig[18]]
-    appx = [*new_app, orig[17], orig[16]]
     refs = [ref, orig[15], orig[0], orig[1], orig[5], orig[6], orig[7], orig[8]]
     order = main_ + appx + refs
     reorder(prs, order)
-    add_links(new_app[0], new_app)                         # 파이프라인 장의 칸을 누르면 해당 Appendix 장으로
+    if a.hiw != 'argon':
+        add_links(new_app[0], new_app)                     # 파이프라인 장의 칸을 누르면 해당 Appendix 장으로
     n = samsung_fonts.remap_prs(prs)                 # 글꼴: Inter·Noto Sans KR → SamsungOneKorean 400·500·700
     left = {f: c for f, c in samsung_fonts.faces_used(prs).items() if not f.startswith(('SamsungOne', '+', 'Samsung Sharp'))}
     print('글꼴 바꿈', dict(n), '| 남은 다른 글꼴', left)

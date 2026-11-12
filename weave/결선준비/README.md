@@ -11,7 +11,24 @@
 | `05_아이콘/` | 바로 넣어 쓰는 아이콘이에요. 앱, 갤럭시앱(캘린더·파란 @ 이메일·갤러리·전화), 실타래, 손(터치 표시), 브랜드(Galaxy AI·Samsung 워드마크) |
 | `06_에셋/` | 표지 티저, 인물(4·6~8쪽, 19쪽 멤버), 6~8쪽 배경 장면, 2쪽 만화, 앱 화면, 참고자료(팀 사진·Nudge·자판 등), 글꼴 |
 | `07_소스/` | 장표 원본 HTML·렌더·도구예요. 파일끼리 상대 경로로 이어져 있으니 **안쪽 배치는 바꾸지 마세요** |
-| `08_인트로영상/` | 결선 발표용 인트로 영상 v8(79초, `Weave_인트로_79초.mp4`, 01·02·03 장면 카드, 단계마다 멈추며 단서가 이어지는 걸 보여 주는 카메라·형광펜, 밝은 Mixkit 곡 편집 + 작은 효과음, 곡2 Uplift Me 판, 끝 화면 Galaxy AI)·소스·음악 라이선스·참고 영상 목록(그 폴더의 README). v1~v7은 `이전판/` |
+| `08_인트로영상/` | 결선 모션그래픽 영상 v18(118초, `Weave_모션그래픽.mp4`)·소스·음악 라이선스·참고 영상 목록(그 폴더의 README) |
+| `09_HowItWorks/` | `장표5/`: How it Works 빌더(지금 쓰는 판), `리서치/`, `논문스터디/` |
+| `10_표지영상/` | 표지 반복 영상 `표지_루프.mp4`, 포스터, 소스 |
+| `11_중간본/` | 중간본 덱 빌드 `build_deck.py`, 쪽별 PNG, `한눈에.png`, `문구_변경목록.md`. 결과는 `02_PPT/Weave_결선_중간본.pptx` |
+| `12_설문/` | 소비자 설문 결과(휴대폰 번호를 뺀 CSV와 xlsx) |
+
+## 저장소에 두는 것 (2026-11-06)
+
+저장소에는 지금 쓰는 판만 둬요. 아래는 `.gitignore`에 있어서 작업 컴퓨터에만 남아요.
+
+| 작업 컴퓨터에만 있는 것 | 내용 |
+| --- | --- |
+| `weave/final/` | 예선 작업 폴더(제출본은 `01_최종제출본/`) |
+| `08_인트로영상/이전판/`, `10_표지영상/이전판/` | 지난 판 영상 |
+| `08_인트로영상/*_무음.mp4`, `08_인트로영상/배경음악/*.wav`, `08_인트로영상/소스/assets/img/trio/` | 다시 만들 수 있는 파일(무음판은 완성본에서, wav는 `tools/music.py`로, 끝 장면 그림 432장은 `tools/trio.cjs`로) |
+| `09_HowItWorks/장표/` ~ `장표4/`, `장표5/out/` | 지난 판 How it Works, 빌드 결과 |
+| `Argon/` | 다른 안으로 만든 덱과 스크립트 |
+| `07_소스/slides/comic/`, `07_소스/slides/p68/` | 예전 2쪽과 6~8쪽 원본(`p68/scenario.css·js`는 5쪽이 쓰므로 저장소에 둬요) |
 
 ## 이름을 바꾼 파일
 
@@ -34,10 +51,10 @@
 | 경로 | 쪽 | 내용 |
 | --- | --- | --- |
 | `teaser/` | 1쪽 | 표지 티저(vEsB) 렌더 소스와 필요한 원본(삼성 글꼴, UI SVG, 사진) |
-| `slides/comic/` | 2쪽 | 만화 `index.html`과 revision CSS들. `render-claude.cjs`를 돌리면 `out/overview-comic.png`가 나와요 |
+| `slides/comic/` | 2쪽 | 만화 `index.html`과 revision CSS들. `render-claude.cjs`를 돌리면 `out/overview-comic.png`가 나와요(작업 컴퓨터에만 있어요) |
 | `slides/characters/` | 4쪽 | 인물(성빈·지현)과 생성 프롬프트 |
 | `slides/p05/` | 5쪽 | SOLUTION |
-| `slides/p68/` | 6~8쪽 | USER SCENARIO(`scenario.css/js`, 인물·배경 장면·잘라 쓴 화면) |
+| `slides/p68/` | 6~8쪽 | USER SCENARIO(`scenario.css/js`, 인물·배경 장면·잘라 쓴 화면). 저장소에는 `scenario.css/js`만 있어요 |
 | `pages/` | 9·17·18쪽 | HOW IT WORKS(`page-07-pipeline.html`), Q&A(`page-15-qna.html`), 용어(`page-16-glossary.html`). 렌더 결과는 `out/` |
 | `slides/demo/`, `slides/tools/make_demo_gif.py` | 16쪽 | App Demo GIF(입력은 `04_동영상·데모`의 녹화 GIF) |
 | `members/` | 19쪽 | Members HTML·인물 |

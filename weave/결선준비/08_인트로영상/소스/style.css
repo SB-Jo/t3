@@ -287,8 +287,6 @@ body { font-family: 'SamsungOneKorean', 'SamsungOne', sans-serif; color: var(--i
 /* ── v5 ─────────────────────────────────────────── */
 /* 01: 사슬 레이어(카메라), 위쪽 제목 */
 #w1 { position: absolute; inset: 0; transform-origin: 0 0; }
-#topScrim { position: absolute; left: 0; right: 0; top: 0; height: 260px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(252,251,255,.97) 0%, rgba(252,251,255,.93) 52%, rgba(252,251,255,0) 100%); }
 #h1 { left: 0; right: 0; top: 40px; text-align: center; }
 #h1 h3 { font-size: 54px; }
 #flyChip { position: absolute; left: 0; top: 0; padding: 8px 26px 10px; border-radius: 30px; background: #fff; color: var(--purple); font-size: 44px; font-weight: 700;
@@ -340,7 +338,7 @@ mark { background: linear-gradient(transparent 56%, rgba(166,124,242,.42) 56%) n
 
 /* ── v6 ─────────────────────────────────────────── */
 /* 공통: 같은 단서를 표시하는 형광펜(너비 0 → 100%) */
-.hl, .card .mm .dt, mark.rm, #callQ .qk, #callA u, #gpsDj, #kkDj {
+.hl, .card .mm .dt, mark.rm, #callQ .qk, #callA u, #gpsDj, #kkDj, #qa1, #qa2 {
   background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; }
 #kkDj { background-image: linear-gradient(transparent 52%, rgba(107,78,255,.30) 52%); }
 .card .mm .dt { color: var(--ink2); font-weight: 700; padding: 0 2px; }
@@ -474,11 +472,6 @@ mark.rm { color: inherit; padding: 0 1px; }
 #wC .mc .c.cph { display: flex; gap: 8px; align-items: center; }
 #wC .mc .c.cph img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; flex: none; }
 #sgK { background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
-#trio { position: absolute; left: 0; right: 0; top: 96px; display: flex; justify-content: center; gap: 76px; pointer-events: none; }
-#trio .tp { display: flex; flex-direction: column; align-items: center; width: 400px; }
-#trio .tp img { width: 356px; height: auto; display: block; }
-#trio .tc { margin-top: 18px; display: flex; align-items: center; gap: 12px; font-size: 36px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; }
-#trio .tc b { width: 46px; height: 46px; border-radius: 50%; background: var(--purple); color: #fff; font-family: 'Samsung Sharp Sans', 'SamsungOne'; font-size: 26px; display: grid; place-items: center; }
 
 /* v10: UX 3 두 번째 기록(저장한 사진). 카톡 글자 → 갤러리 사진 라벨 */
 #fp { left: 1080px; width: 640px; padding-top: 20px; padding-bottom: 22px; }
@@ -489,3 +482,134 @@ mark.rm { color: inherit; padding: 0 1px; }
 #fp .pimg img { width: 100%; height: 100%; object-fit: cover; display: block; }
 #scanP { position: absolute; left: 0; right: 0; top: 0; height: 40px; background: linear-gradient(180deg, rgba(166,124,242,0), rgba(166,124,242,.55) 85%, rgba(255,255,255,.95)); mix-blend-mode: screen; opacity: 0; }
 #fp .plab { font-family: 'SamsungOne', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: .05em; color: var(--violet); padding: 10px 18px; background: var(--lav); border-radius: 14px; white-space: nowrap; }
+
+/* ── v11 (2026-11-06): 한 번에 하나씩. 제목·말풍선·기록 카드를 크게, 장면 카드는 별 없이 빛만 ── */
+.chap .tt { padding: 0 .06em .14em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--ink) 0%, var(--ink) 100%);
+  background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tl { display: block; }
+#hdB { left: 110px; top: 396px; }
+#hdB h3 { font-size: 80px; line-height: 1.32; }
+#hdC { left: 830px; top: 408px; }
+#hdC h3 { font-size: 70px; line-height: 1.32; }
+#h1 h3 { font-size: 64px; }
+/* 01: 재웅 선배 말풍선 → 그 아래 상상 말풍선 → (요약 뒤) 답변 말풍선 */
+#callQ { left: auto; right: 706px; top: 214px; width: auto; padding: 24px 36px 30px 32px; border-radius: 30px; }
+#callQ::after { top: 116px; }
+#callQ .who { font-size: 24px; gap: 12px; }
+#callQ .who .av { width: 42px; height: 42px; }
+#callQ .who .av svg { width: 22px; height: 22px; }
+#callQ .who .st { font-size: 19px; }
+#callQ .q { margin-top: 16px; font-size: 44px; line-height: 1.4; }
+#callQ .w, #callA .w { display: inline-block; }
+#callT { left: auto; right: 756px; top: 566px; font-size: 40px; letter-spacing: -0.03em; color: #6E6880; z-index: 20; }
+#callT .bb { padding: 22px 44px 26px; background: #fff; border-radius: 60px; box-shadow: 0 22px 50px rgba(64,40,140,.14), 0 0 0 1.5px #E6DEFF inset; white-space: nowrap; }
+#callT i { position: absolute; display: block; border-radius: 50%; background: #fff; box-shadow: 0 6px 14px rgba(64,40,140,.12), 0 0 0 1.5px #E6DEFF inset; }
+#callT .c1 { width: 26px; height: 26px; right: -10px; bottom: -6px; }
+#callT .c2 { width: 14px; height: 14px; right: -30px; bottom: -22px; }
+#callA { left: auto; right: 706px; top: 552px; width: auto; padding: 18px 36px 26px 30px; }
+#callA .q { margin-top: 10px; font-size: 38px; line-height: 1.42; }
+/* 01: 기록 카드 */
+#fl1, #fl2, #fl3, #fl4 { left: 150px; width: 780px; grid-template-columns: 62px 1fr; column-gap: 20px; padding: 18px 26px 18px 22px; }
+#fl1 > img, #fl2 > img, #fl3 > img, #fl4 > img { width: 62px; height: 62px; border-radius: 16px; }
+#fl1 .t, #fl2 .t, #fl3 .t, #fl4 .t { font-size: 31px; }
+#fl1 .m, #fl2 .m, #fl3 .m, #fl4 .m { font-size: 19px; }
+#fl1 .sn, #fl2 .sn, #fl3 .sn, #fl4 .sn { font-size: 25px; margin-top: 10px; padding: 9px 16px; }
+#flChip { font-size: 20px; padding: 5px 14px; }
+/* 01: 시트. 메일 버튼을 빼고, 요약은 상자를 채우는 세 문장 */
+#wB { min-height: 545px; }
+#wB .sg { padding: 11px 12px 13px; }
+.sumv { height: 84px; margin-top: 7px; font-size: 17.1px; line-height: 28px; letter-spacing: -0.03em; }
+#sl1 { top: 0; } #sl2 { top: 28px; } #sl3 { top: 56px; }
+.sumv .skel:nth-child(1) { top: 8px; width: 94%; } .sumv .skel:nth-child(2) { top: 36px; width: 95%; } .sumv .skel:nth-child(3) { top: 64px; width: 98%; }
+/* 02: 단서 질문은 Weave가 묻는 말풍선처럼 진하게 */
+.pen { font-size: 34px; color: #fff; background: var(--purple); border: 0; border-radius: 20px; padding: 9px 22px 11px; box-shadow: 0 14px 30px rgba(107,78,255,.34); }
+.pen::after { content: ''; position: absolute; left: 34px; bottom: -11px; border: 12px solid transparent; border-top-color: var(--purple); border-bottom: 0; }
+/* 03: 탑승권 → 위치 → 아내 카톡 */
+#fw { left: 830px; top: 64px; width: 510px; padding: 20px 22px 22px; }
+#fg { left: 1354px; top: 64px; width: 510px; padding: 20px 22px 22px; }
+#fg .loc, #fw .loc { margin-top: 8px; font-size: 38px; }
+#fk { left: 1000px; top: 250px; width: 700px; }
+.bigf .mini .mcol { gap: 6px; }
+.bigf .mini .mm { font-size: 26px; }
+/* 카카오톡 링크 말풍선과 미리보기: URL 말풍선 아래 흰 카드, 카드 안은 2:1 이미지 → 제목 → 도메인 */
+.lnk { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 470px; }
+.bigf .mini .mm.url { font-size: 22px; color: #1B62C4; text-decoration: underline; text-underline-offset: 3px; letter-spacing: -0.01em; }
+.lpv { width: 470px; background: #fff; border-radius: 14px; overflow: hidden; }
+.lpv > img { display: block; width: 100%; height: 235px; }
+.lpv .lt { padding: 12px 16px 0; font-size: 24px; font-weight: 500; line-height: 1.36; letter-spacing: -0.02em; color: #1d2430; }
+.lpv .ld { padding: 6px 16px 14px; font-size: 18px; color: #8a93a0; }
+#kkNm { background: linear-gradient(transparent 56%, rgba(166,124,242,.5) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
+/* 03: 추천은 한 줄 */
+#wC .sg .v { font-size: 20.5px; white-space: nowrap; letter-spacing: -0.035em; }
+
+/* ── v13 (2026-11-06 5차 피드백) ── */
+/* 인트로·아웃트로 로고: 그라데이션을 조금 더 */
+#logo .word, #op .word { background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #3C22C0 0%, #6A47EE 52%, #AE88FF 100%); }
+/* 01: 기록 카드는 글 길이만큼 */
+#callA .who .me { font-size: 24px; border-radius: 14px; padding: 3px 14px 4px; }
+#fl1, #fl2, #fl3, #fl4 { width: max-content; }
+#fl1 .sn, #fl2 .sn, #fl3 .sn, #fl4 .sn { width: fit-content; }
+/* 02: 검색어의 두 조각이 떨어져 나와 두 질문이 된다 */
+#pill { top: 150px; }
+#qa1, #qa2 { padding: 0 2px; }
+.qchip { position: absolute; left: 0; top: 0; font-size: 36px; font-weight: 600; letter-spacing: -0.025em; color: var(--purple); background: #EFE9FF; border-radius: 14px; padding: 3px 12px 5px; white-space: nowrap; box-shadow: 0 10px 22px rgba(107,78,255,.28); z-index: 6; }
+#tokA { font-size: 26px; padding: 6px 16px 8px; }
+/* 03: 제목은 한 번 뜨고, 읽었을 때 빛이 한 번. 플로팅은 위치 → 탑승권 → 카톡을 세로로(셋 다 실이 보이게) */
+#hdC .tl { padding: 0 .04em .12em; margin-bottom: -.12em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--ink) 0%, var(--ink) 100%); background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 170% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+#hdC em.tl { background-image: linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, var(--purple) 0%, var(--purple) 100%); }
+
+/* ── v14 (2026-11-07 6차 피드백) ── */
+/* 01: 왼쪽 제목 · 가운데 말풍선 둘 · 오른쪽 휴대폰(휴대폰을 40px 오른쪽으로). 제목은 옮기지 않고 그 자리에 남는다 */
+#hdB { left: 80px; top: 372px; }
+#hdB h3 { font-size: 70px; line-height: 1.32; }
+#callQ { right: 666px; top: 150px; padding: 22px 32px 26px 30px; }
+#callQ .q { margin-top: 14px; font-size: 41px; line-height: 1.4; }
+#callQ::after { top: 108px; }
+#callA { right: 666px; top: 448px; padding: 16px 32px 22px 28px; }
+#callA .q { margin-top: 8px; font-size: 36px; line-height: 1.42; }
+/* 02: 처음에 왼쪽에 뜨는 큰 글(휴대폰은 오른쪽) */
+#hd2 { left: 80px; top: 372px; }
+#hd2 h3 { margin-top: 0; font-size: 70px; line-height: 1.32; }
+/* 03: 위치와 탑승권을 나란히, 그 아래 아내 카톡 */
+#fg, #fw { width: max-content; top: 131px; }
+#fg { left: 880px; }
+#fw { left: 1387px; }
+#fk { left: 880px; top: 289px; }
+/* 03: 추천 문장이 입력창에 들어오면 두 줄(입력창 안에 들어가게 줄 간격을 좁힘) */
+.kin .tx { line-height: 1.22; }
+/* 끝 화면: 로고와 문구 사이를 조금 좁히고 전체를 가운데로 */
+#logo { top: 366px; }
+#tag { top: 572px; }
+#sub { top: 670px; }
+
+/* ── v15 (2026-11-07 7차 피드백) ── */
+/* 02: 위쪽 문장 자리. 배경에 띠를 덮지 않고, 사슬만 위쪽에서 흐려져 사라진다 */
+#w1mask { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 96px, #000 150px); mask-image: linear-gradient(180deg, transparent 0, transparent 96px, #000 150px); }
+/* 03: 추천 문장의 두 번째 형광펜, 답장의 하트 */
+#sgK2 { background: linear-gradient(transparent 56%, rgba(166,124,242,.45) 56%) no-repeat 0 0 / 0% 100%; border-radius: 3px; padding: 0 2px; }
+.bub .hrt { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; }
+
+/* ── v16 (2026-11-08 8차 피드백) ── */
+/* 오프닝·끝 화면 로고: 글자 끝(st)이 흰 바탕에서 흐려 보이지 않게 끝 색의 채도를 올림 */
+#logo .word, #op .word { background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #3C22C0 0%, #6A47EE 50%, #9A5CFF 100%); }
+/* 01: 답변 문장이 길어져 다섯 줄. 줄 길이가 고르게 글자를 조금 작게 */
+#callA .q { font-size: 34px; }
+#callA { padding: 16px 28px 22px 24px; }
+/* 02: 갤러리 카드는 날짜가 건너오기 전까지 사진 자리만 비어 있음 */
+#cB .photo { background: #F0ECFA; }
+/* 03: 제목을 오른쪽으로 조금(아래 플로팅과 같은 왼쪽 끝) */
+#hdC { left: 880px; }
+
+/* ── v17 (2026-11-08 9차 피드백) ── */
+/* 03: 추천 시트 맨 위 'Weave'를 보라로(실타래 아이콘과 같은 색) */
+#wC .row .ttl { color: var(--purple); }
+/* v21 수미상관: 첫 문장(#opSub)은 끝 화면 한 줄 소개(#sub)와 같은 글꼴, 끝 화면은 '그때 그거?' 줄 없이 로고 아래 44px(오프닝과 같은 간격)에 한 줄 */
+#opSub { font-size: 48px; font-weight: 400; color: var(--gray); letter-spacing: -0.02em; }
+#sub { top: 560px; font-size: 48px; }   /* 33 → 40 → 54 → 48px(사용자 요청) */
+
+/* v23 (11-10): 첫 문장과 끝 화면 한 줄 소개를 덱 표지의 부제처럼 굵게, 검정으로(크기는 48px 그대로) */
+#opSub, #sub { font-weight: 700; color: var(--ink); letter-spacing: -0.03em; }
+
+/* ── v24 (2026-11-12) ── */
+/* 오프닝·끝 화면 로고를 덱 표지(1쪽) 제목과 같게: 그라데이션 #4E36CF → #8F66FF, 자간 -0.5pt/48pt = -0.0104em (글꼴은 원래 같은 Samsung Sharp Sans Bold) */
+#logo .word, #op .word { letter-spacing: -0.0104em; background-image: linear-gradient(100deg, rgba(255,255,255,0) 42%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 58%), linear-gradient(90deg, #4E36CF 0%, #8F66FF 100%); }

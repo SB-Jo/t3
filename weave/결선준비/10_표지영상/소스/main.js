@@ -1,19 +1,23 @@
-/* Weave 결선 표지 루프 v5 — 24초, 끝과 처음이 똑같아 끊김 없이 반복된다.
-   모든 상태는 시간 t의 순수 함수(render(t)). 떠다니는 움직임은 주기가 24초(또는 12초)인 사인파.
+/* Weave 결선 표지 루프 v9 — 18초, 끝과 처음이 똑같아 끊김 없이 반복된다.
+   모든 상태는 시간 t의 순수 함수(render(t)). 떠다니는 움직임은 주기가 LOOP초(또는 그 절반)인 사인파.
    window.__seek(t), window.__DURATION, window.__ready, window.__probe(t)
    이야기는 How it Works A1(장표5/a1.py)과 같다:
    빈 구글 검색창에 '지은이네 집들이 때 마셨던 와인'을 침 → 실타래 버튼 → 지은 카톡
-   → 질문의 '지은'이 카드의 보낸 사람 '지은'으로, 질문의 '집들이'가 메시지 '박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼'로 건너가 '= 집들이'가 붙음
-   → 단서 '3/15 (일)'가 그날 사진(3/15 20:14)으로 → 라벨 'SAUVIGNON BLANC' → 추천 '배비치 소비뇽 블랑'
+   → 실이 그날 사진(3/15 20:14)으로 → 사진을 읽어 라벨 'BABICH SAUVIGNON BLANC' → 추천 '배비치 소비뇽 블랑'
    → 입력하기 → 검색어가 '배비치 소비뇽 블랑'으로 바뀜 → 검색 키 → 쇼핑 결과 → 처음 화면(빈 검색창)으로
-   v5: 전체를 천천히(18 → 24초), 첫 연결에서 추론이 보이게 */
-const LOOP = 24.0;
+   v5: 전체를 천천히(18 → 24초), 첫 연결에서 추론이 보이게
+   v6: 입력을 마쳐도 검색창 글자 폭이 그대로, 검색어 형광펜은 '지은이네 집들이'와 '와인', 라벨 글자는 사진을 읽은 뒤에 뜸
+   v7: 24 → 22초(실이 이어지는 구간을 조금 빠르게), '집들이' 표가 먼저 건너간 뒤 메시지에 형광펜, 라벨 글자 전체에 형광펜
+   v8: 실은 카드 바깥 보라 테두리까지만(흰 카드 안까지 들어가 테두리와 카드 사이에 보라 실이 비치던 것을 없앰)
+   v9: 22 → 18초. 표지에서는 추론을 풀어 보이지 않는다: 실이 지은 카톡에 닿으면 곧바로 그날 사진으로 이어지고(낱말 표, 형광펜, 날짜 표 없음),
+       사진을 읽어 라벨 글자가 뜨는 것은 그대로. 타자에서 실타래 버튼까지는 1.15배 빠르게 */
+const LOOP = 18.0;
 // 오른쪽 장면(#world)은 (846, 540)을 기준으로 줄임. 안쪽 계산은 모두 줄이기 전 좌표(1920×1080)로 하고, 검사용 값만 화면 좌표로 바꿈
 const WS = 0.93, WO = { x: 846, y: 540 };
 const toScreen = p => ({ x: WO.x + (p.x - WO.x) * WS, y: WO.y + (p.y - WO.y) * WS });
 const QTEXT = '지은이네 집들이 때 마셨던 와인';   // 2026-11-05 최종 시나리오(화이트/레드 구분 없음)
 const ANS = '배비치 소비뇽 블랑';
-const QHTML = '<span class="hl" id="qJ">지은</span>이네 <span class="hl" id="qH">집들이</span> 때 마셨던 와인';   // 다 친 뒤의 검색어(낱말을 짚을 수 있게)
+const QHTML = '<span class="hl" id="qH"><span id="qJ">지은</span>이네 <span id="qHw">집들이</span></span> 때 마셨던 <span class="hl" id="qW">와인</span>';   // 다 친 뒤의 검색어(형광펜과 표가 나가는 자리)
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const lerp = (a, b, u) => a + (b - a) * u;
@@ -25,23 +29,20 @@ const seg = (t, t0, d) => clamp((t - t0) / d);
 const pulse = (t, t0, d0, t1, d1, ein = e2o, eout = e2io) => Math.min(ein(seg(t, t0, d0)), 1 - eout(seg(t, t1, d1)));
 
 /* ── 시각(초) ── */
-const THR = { A: 0.9, B: 0.85, C: 0.9 };   // 실 한 가닥이 그려지는 시간
+const THR = { A: 0.8, B: 0.75, C: 0.8 };   // 실 한 가닥이 그려지는 시간
 const T = {
-  type0: 0.9, cps: 9,                // 타자 시작, 초당 글자 수(띄어쓰기는 더 빠르게)
-  tap: 4.1, wave: 4.2, shim: 4.3,    // 실타래 버튼(손은 0.8초 전부터 들어옴)
-  t1: 4.7, litJ: 5.35,               // 실 → 지은 카톡이 켜짐
-  qJ: 5.7, tJ: 5.85, tJd: 0.85, hlN: 6.65,                // 질문의 '지은' → 카드의 보낸 사람 '지은'
-  qH: 7.25, tH: 7.4, tHd: 0.9, hlB: 8.2, hlJ: 8.6, eq: 9.0,   // 질문의 '집들이' → 메시지에 형광펜 → '= 집들이'
-  hlK: 9.95,                         // 이 카톡을 받은 날이 단서
-  t2: 10.45, tokIn: 10.5, tokRide: 10.6, tokDur: 0.95, litP: 11.4, hlD: 11.5,
-  scan: 12.05, ocrbox: 12.6, hlL: 12.95,
-  t3: 13.5, sug: 14.2,               // 추천 카드
-  tapIn: 16.6,                       // 입력하기(추천 카드를 2.4초 읽을 시간)
-  sel: 16.75, swap: 17.15,           // 검색어가 선택됐다가 '배비치 소비뇽 블랑'으로 바뀜
-  reset: 16.9,                       // 실·카드·형광펜이 걷힘
-  tapS: 18.0,                        // 검색 키
-  res: 18.15, mark: 19.1,            // 쇼핑 결과, 결과 속 이름에 형광펜
-  back: 21.7,                        // 처음 화면(빈 검색창)으로 0.9초, 22.6초부터 쉬는 모습
+  type0: 0.9, cps: 10.4,             // 타자 시작, 초당 글자 수(띄어쓰기는 더 빠르게). v9: 타자 시작에서 버튼까지 3.2 → 2.8초
+  tap: 3.7, wave: 3.8, shim: 3.9,    // 실타래 버튼(손은 0.8초 전부터 들어옴)
+  t1: 4.2, litJ: 4.8,                // 실 → 지은 카톡이 켜짐
+  t2: 5.2, litP: 6.05,               // 곧바로 실이 그날 사진으로 → 사진 카드가 켜짐
+  scan: 6.6, ocrbox: 7.1, ocrT: 7.5, hlL: 7.9,            // 사진을 읽은 다음에 라벨 글자가 뜸
+  t3: 8.4, sug: 9.0,                 // 추천 카드
+  tapIn: 11.3,                       // 입력하기(추천 카드를 2.3초 읽을 시간)
+  sel: 11.45, swap: 11.85,           // 검색어가 선택됐다가 '배비치 소비뇽 블랑'으로 바뀜
+  reset: 11.6,                       // 실·카드·형광펜이 걷힘
+  tapS: 12.7,                        // 검색 키
+  res: 12.85, mark: 13.8,            // 쇼핑 결과, 결과 속 이름에 형광펜
+  back: 16.1,                        // 처음 화면(빈 검색창)으로 0.9초, 17초부터 쉬는 모습
 };
 // 타자 시각: 글자마다 조금씩 다르게(씨앗 고정이라 늘 같음)
 const TYPE_T = (() => {
@@ -127,14 +128,23 @@ function cardBox(base, d, s, t) {        // 화면에서의 카드 상자
 }
 const inCard = (box, base, p) => ({ x: box.cx + (p.x - base.cx) * box.s, y: box.cy + (p.y - base.cy) * box.s });
 const sJ = t => 1 + 0.035 * litJ(t), sP = t => 1 + 0.035 * litP(t);
+const ocrV = t => pulse(t, T.ocrT, 0.42, T.reset + 0.1, 0.45, e2io, e2io);   // 0: 라벨 글자 접힘, 1: 펼침
+const baseP = v => ({ cx: G.cP.cx, cy: lerp(G.cP0.cy, G.cP.cy, v), w: G.cP.w, h: lerp(G.cP0.h, G.cP.h, v) });
 
-function threadPts(t) {
-  const J = cardBox(G.cJ, DJ, sJ(t), t), P = cardBox(G.cP, DP, sP(t), t);
-  const A = bezH({ x: G.frame.l + 5, y: G.tb.cy }, { x: J.r - 3, y: J.cy }, 0.55);
-  const hj = inCard(J, G.cJ, { x: G.hlJ.cx, y: G.hlJ.cy }), hd = inCard(P, G.cP, { x: G.hlD.cx, y: G.hlD.cy });
-  const B = bezV({ x: hj.x, y: J.t + 3 }, { x: hd.x, y: P.b - 3 }, 0.5);
-  const C = bezH({ x: P.r - 3, y: P.cy }, { x: G.frame.l + 5, y: G.sug.cy }, 0.55);
-  return { A, B, C, J, P };
+// 실의 끝: 카드 바깥 보라 테두리(.ring, 카드에서 6px 밖, 두께 3px). 보라 실(반지름 3)은 테두리에 1px 겹치고(테두리가 위에 그려져 끝이 숨음),
+// 실의 흰 테두리(반지름 6.5)는 HALO만큼 덜 그려 보라 테두리 바깥 선에서 멈춘다. 그래서 보라 테두리와 흰 카드 사이 틈에는 아무것도 비치지 않는다
+const RING = 6, CAP = 2.0, HALO = 4.5;
+const pull = (P, i, dx, dy) => P.map((q, k) => (k === i || k === (i ? 2 : 1)) ? { x: q.x + dx, y: q.y + dy } : q);   // 끝점과 옆 조절점을 같이 옮김(끝 방향 그대로)
+function threadPts(t, v = ocrV(t), ring = true) {                // ring = false: v7까지의 끝(카드 안쪽 3px). 조각 배치는 이 모양으로 계산해 배치가 그대로
+  const bP = baseP(v);
+  const J = cardBox(G.cJ, DJ, sJ(t), t), P = cardBox(bP, DP, sP(t), t);
+  const oJ = ring ? RING * J.s + CAP : -3, oP = ring ? RING * P.s + CAP : -3;
+  const A = bezH({ x: G.frame.l + 5, y: G.tb.cy }, { x: J.r + oJ, y: J.cy }, 0.55);
+  const hj = inCard(J, G.cJ, { x: G.hlJ.cx, y: G.hlJ.cy }), hd = inCard(P, bP, { x: G.hlD.cx, y: lerp(G.hlD0.cy, G.hlD.cy, v) });
+  const B = bezV({ x: hj.x, y: J.t - oJ }, { x: hd.x, y: P.b + oP }, 0.5);
+  const C = bezH({ x: P.r + oP, y: P.cy }, { x: G.frame.l + 5, y: G.sug.cy }, 0.55);
+  const hA = ring ? pull(A, 3, HALO, 0) : A, hB = ring ? pull(pull(B, 0, 0, -HALO), 3, 0, HALO) : B, hC = ring ? pull(C, 0, HALO, 0) : C;
+  return { A, B, C, hA, hB, hC, J, P };
 }
 
 /* ── 조각 배치: 왼쪽 글자 자리(PPT 제목·이름)·휴대폰·두 카드를 피해 고르게. 실은 조각 사이를 지나가게(실 길에서 조금 띄움).
@@ -143,7 +153,7 @@ const TEXT_SAFE = { l: -200, t: -200, r: 846, b: 1300 };   // x 0–846은 비�
 function tryLayout(sd) {
   let s_ = sd;
   const rn = () => (s_ = (s_ * 16807) % 2147483647) / 2147483647;
-  const th = threadPts(0);
+  const th = threadPts(0, 1, false);      // 라벨 글자가 펼쳐진 카드 기준(그때 실이 다 그려져 있음). v7의 실 모양으로 재서 조각 배치가 바뀌지 않게
   const lane = [];
   for (const P of [th.A, th.B, th.C]) for (let i = 0; i <= 60; i++) lane.push(bAt(P, i / 60));
   const avoid = [TEXT_SAFE, grow(G.frame, 22), grow(G.cJ, 24), grow(G.cP, 24)];
@@ -218,13 +228,16 @@ async function build() {
   $('#sug').style.opacity = '1';
   G = { frame: R('#phone .frame'), tb: R('#kb .tb'), wv: R('#kb .wv'), sug: R('#sug'), btn: R('#sug .b'), srch: R('#kb .srch'),
         cJ: R('#cJ'), cP: R('#cP'), hlJ: R('#hlJ'), hlD: R('#hlD'), hlL: R('#hlL'), hlN: R('#hlN'), eqH: R('#eqH'), kb: R('#kb'), q: R('#q') };
-  $('#q').innerHTML = QHTML; G.qJ = R('#qJ'); G.qH = R('#qH'); $('#q').innerHTML = '';
+  $('#q').innerHTML = QHTML; G.qJ = R('#qJ'); G.qH = R('#qHw'); $('#q').innerHTML = '';
+  // 사진 카드: 라벨 글자를 접었을 때의 자리도 잰다(처음에는 접혀 있음)
+  G.ocrH = R('#ocrW').h; $('#ocrW').style.height = '0px'; G.cP0 = R('#cP'); G.hlD0 = R('#hlD');
   $('#sug').style.opacity = '0';
   // 버튼 효과를 버튼 한가운데에(키보드 기준, 휴대폰 배율을 되돌려서)
   { const k = G.kb, w = G.wv, sc = G.frame.w / 452; const fx = $('#kb .wvfx'); fx.style.left = `${(w.cx - k.l) / sc}px`; fx.style.top = `${(w.cy - k.t) / sc}px`; }
   // 바뀐 검색어 밑줄: '배비치 소비뇽 블랑' 너비만큼(검색창 안 좌표)
   { const q = $('#q'), tx = $('.gbox .tx'); q.textContent = ANS;
     Object.assign($('#gsweep').style, { left: `${tx.offsetLeft + q.offsetLeft}px`, width: `${q.offsetWidth + 2}px` }); q.textContent = ''; }
+  $$('.tok').forEach(el => { el.style.opacity = '0'; });      // v9: 낱말 표와 날짜 표는 쓰지 않음
   layoutChips();
   $('#world').style.transform = `scale(${WS})`;       // 재고 배치한 뒤에 줄임(안쪽 좌표는 그대로)
   render(0);
@@ -291,18 +304,9 @@ function render(t) {
 
   // 형광펜(같은 단서) — 켜질 때 왼쪽에서 오른쪽으로, 걷힐 때 반대로
   const hl = (el, v) => { el.style.setProperty('--w', `${(100 * v).toFixed(1)}%`); el.style.color = v > 0.02 ? '#5B3FE6' : ''; };
-  hl($('#hlN'), pulse(t, T.hlN, 0.4, T.reset, 0.45, e2io, e2io));
-  hl($('#hlB'), pulse(t, T.hlB, 0.42, T.reset, 0.45, e2io, e2io));
-  hl($('#hlJ'), pulse(t, T.hlJ, 0.42, T.reset, 0.45, e2io, e2io));
-  hl($('#hlK'), pulse(t, T.hlK, 0.4, T.reset, 0.45, e2io, e2io));
-  // 메시지 끝에 내려앉는 '= 집들이'
-  { const v = pulse(t, T.eq, 0.36, T.reset, 0.4, eBack, e2io);
-    $('#eqH').style.opacity = clamp(v).toFixed(3);
-    $('#eqH').style.transform = `scale(${lerp(0.7, 1, v).toFixed(3)})`; }
-  hl($('#hlD'), pulse(t, T.hlD, 0.46, T.reset + 0.05, 0.45, e2io, e2io));
-  hl($('#hlL'), pulse(t, T.hlL, 0.48, T.reset + 0.1, 0.45, e2io, e2io));
+  hl($('#hlL'), pulse(t, T.hlL, 0.48, T.reset + 0.1, 0.45, e2io, e2io));   // v9: 형광펜은 라벨 글자에만
 
-  // 사진 라벨 읽기: 훑는 빛 → 라벨 테두리
+  // 사진 라벨 읽기: 훑는 빛 → 라벨 테두리 → 라벨 글자(카드가 그만큼 늘어남)
   const su = seg(t, T.scan, 0.62);
   $('#scan').style.opacity = (su > 0 && su < 1) ? String(Math.sin(Math.PI * su)) : '0';
   $('#scan').style.transform = `translateY(${lerp(-64, 202, e2io(su)).toFixed(1)}px)`;
@@ -310,42 +314,17 @@ function render(t) {
   $('#ocrbox').style.opacity = clamp(ob).toFixed(3);
   $('#ocrbox').style.transform = `scale(${lerp(1.25, 1, clamp(seg(t, T.ocrbox, 0.42) ? eBack(seg(t, T.ocrbox, 0.42)) : 0)).toFixed(3)})`;
 
+  { const v = ocrV(t);
+    $('#ocrW').style.height = `${(G.ocrH * v).toFixed(2)}px`;
+    $('#ocr').style.opacity = clamp(v * 1.5 - 0.5).toFixed(3); }
+
   // 실 세 가닥: 그려지고(머리가 나아감) → 입력하기 뒤 함께 옅어짐
   const fade = 1 - e2io(seg(t, T.reset, 0.7));
-  [['#tA', th.A, T.t1, THR.A], ['#tB', th.B, T.t2, THR.B], ['#tC', th.C, T.t3, THR.C]].forEach(([id, P, t0, d]) => {
-    const p = e2io(seg(t, t0, d)), d_ = dOf(P);
-    $$(`${id} path`).forEach(pa => { pa.setAttribute('d', d_); pa.style.strokeDashoffset = (1 - p).toFixed(4); });
+  [['#tA', th.A, th.hA, T.t1, THR.A], ['#tB', th.B, th.hB, T.t2, THR.B], ['#tC', th.C, th.hC, T.t3, THR.C]].forEach(([id, P, H, t0, d]) => {
+    const p = e2io(seg(t, t0, d));
+    $$(`${id} path`).forEach(pa => { pa.setAttribute('d', dOf(pa.classList.contains('thr-halo') ? H : P)); pa.style.strokeDashoffset = (1 - p).toFixed(4); });
     $(id).style.opacity = p > 0.002 ? fade.toFixed(3) : '0';
   });
-
-  // 단서 표 '3/15 (일)': 지은 카톡에서 나와 실을 타고 그날 사진의 날짜로
-  {
-    const tok = $('#tok');
-    const a = clamp(eBack(seg(t, T.tokIn, 0.28))), out = e2i(seg(t, T.tokRide + T.tokDur - 0.05, 0.24));
-    const vis = a * (1 - out);
-    if (vis <= 0.001) tok.style.opacity = '0';
-    else {
-      const u = e2io(seg(t, T.tokRide, T.tokDur));
-      const p3 = inCard(th.P, G.cP, { x: G.hlD.cx, y: G.hlD.cy });   // 실의 끝과 x가 같음
-      const B = th.B, U0 = 0.1;
-      let p;
-      if (u < 0.9) p = bAt(B, U0 + (1 - U0) * u / 0.9);
-      else p = { x: lerp(B[3].x, p3.x, (u - 0.9) / 0.1), y: lerp(B[3].y, p3.y, (u - 0.9) / 0.1) };
-      tok.style.opacity = vis.toFixed(3);
-      tok.style.transform = `translate(${p.x.toFixed(2)}px, ${p.y.toFixed(2)}px) translate(-50%, -50%) scale(${lerp(0.6, 1, a).toFixed(3)})`;
-    }
-  }
-
-  // 질문의 낱말 표: '지은' → 카드의 보낸 사람, '집들이' → 메시지 끝. 표가 날아가는 동안 카드는 천천히 떠다님
-  const rideTok = (el, tIn, tRide, dur, P) => {
-    const a = clamp(eBack(seg(t, tIn, 0.28))), out = e2i(seg(t, tRide + dur - 0.05, 0.2)), vis = a * (1 - out);
-    if (vis <= 0.001) { el.style.opacity = '0'; return; }
-    const p = bAt(P, e2io(seg(t, tRide, dur)));
-    el.style.opacity = vis.toFixed(3);
-    el.style.transform = `translate(${p.x.toFixed(2)}px, ${p.y.toFixed(2)}px) translate(-50%, -50%) scale(${lerp(0.6, 1, a).toFixed(3)})`;
-  };
-  rideTok($('#tokN'), T.tJ, T.tJ + 0.1, T.tJd, bezH({ x: G.qJ.cx, y: G.qJ.cy }, inCard(th.J, G.cJ, { x: G.hlN.cx, y: G.hlN.cy }), 0.55));
-  rideTok($('#tokH'), T.tH, T.tH + 0.1, T.tHd, bezH({ x: G.qH.cx, y: G.qH.cy }, inCard(th.J, G.cJ, { x: G.eqH.cx, y: G.eqH.cy }), 0.55));
 
   // 휴대폰: 버튼 누름 → 버튼이 보라로, 빛·물결, 휴대폰 테두리 빛, 도구줄을 지나는 빛
   const bt = pulse(t, T.tap, 0.25, T.tap + 1.25, 0.45);
@@ -366,10 +345,6 @@ function render(t) {
   // 검색창 글자와 깜빡이
   const qs = qState(t);
   if (qs.html !== lastQ) { $('#q').innerHTML = qs.html; lastQ = qs.html; }
-  if (qs.html === QHTML) {                                  // 질문 속 낱말: 추론하는 동안 형광펜(글자가 바뀌기 전에 걷힘)
-    hl($('#qJ'), pulse(t, T.qJ, 0.35, T.reset - 0.45, 0.4, e2io, e2io));
-    hl($('#qH'), pulse(t, T.qH, 0.35, T.reset - 0.45, 0.4, e2io, e2io));
-  }
   $('#caret').style.opacity = qs.caret ? '1' : '0';
   const sw = seg(t, T.swap, 0.5);
   $('#gsweep').style.transform = `scaleX(${e2o(sw).toFixed(4)})`;
@@ -437,6 +412,7 @@ window.__probe = t => {
     wave: ['#wv1', '#wv2'].map(s => ({ r: +$(s).getAttribute('r') * WS, op: +$(s).style.opacity })), waveO: toScreen({ x: G.wv.cx, y: G.wv.cy }),
     lanes: [th.A, th.B, th.C].map(P => { const pts = []; for (let i = 0; i <= 40; i++) pts.push(toScreen(bAt(P, i / 40))); return pts; }),
     ends: { A: [th.A[0], th.A[3]].map(toScreen), B: [th.B[0], th.B[3]].map(toScreen), C: [th.C[0], th.C[3]].map(toScreen) },
+    ringOut: { J: (RING * th.J.s + CAP) * WS, P: (RING * th.P.s + CAP) * WS },   // 카드 가장자리에서 실 끝까지(화면 px)
     edges: (() => {   // 화면 가장자리까지 남은 여백(보이는 조각·카드·휴대폰)
       const bs = [...chips.filter(c => +c.el.style.opacity > 0.01).map(c => box(c.el)), box($('#cJ')), box($('#cP')), box($('#phone .frame'))];
       return { top: Math.min(...bs.map(b => b[1])), bottom: 1080 - Math.max(...bs.map(b => b[3])), right: 1920 - Math.max(...bs.map(b => b[2])), phoneRight: 1920 - box($('#phone .frame'))[2], phoneTop: box($('#phone .frame'))[1], phoneBottom: 1080 - box($('#phone .frame'))[3] };
