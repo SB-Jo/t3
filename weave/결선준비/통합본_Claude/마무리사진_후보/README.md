@@ -1,6 +1,6 @@
 # 마무리 세 장(39~41쪽)에 쓸 사진 후보
 
-65장이에요. 1차 26장(A~C)은 Unsplash, 2차 39장(D~F)은 Pexels와 Unsplash에서 받았어요.
+122장이에요. 1차 26장(A~C)은 Unsplash, 2차 39장(D~F)과 3차 57장(G, H, J)은 Pexels와 Unsplash에서 받았어요.
 Unsplash 라이선스와 Pexels 라이선스 모두 무료로 쓰고 고칠 수 있고 출처 표기 의무가 없어요.
 16:9로 자르고 1920×1080으로 줄였어요. 덱의 39~41쪽은 아직 바꾸지 않았어요.
 
@@ -8,12 +8,89 @@ Unsplash 라이선스와 Pexels 라이선스 모두 무료로 쓰고 고칠 수 
 |---|---|---|---|
 | 1차 (A~C) | 일상의 행복한 순간 | `후보_한눈에.jpg` | `시안_한눈에.jpg` |
 | 2차 (D~F) | 연인이나 친구끼리 찍어 주는 모습, 셀카를 찍는 모습 | `후보2_한눈에.jpg` | `시안2_한눈에.jpg` |
+| 3차 (G, H, J) | 파티와 축하(술 없음), 함께하는 식사, 그 밖의 좋은 순간 | `후보3_한눈에.jpg` | `시안3_한눈에.jpg` |
 
-- 다시 찍기: `python tools/closing_try.py` (2차만은 `--round 2`, 조합은 그 파일의 `TRIES1`, `TRIES2`)
+- 다시 찍기: `python tools/closing_try.py` (한 차수만은 `--round 3`처럼, 조합은 그 파일의 `TRIES1`~`TRIES3`)
 - 덱에 넣을 때: `slides_new.py`의 `s_end1(photo=…)`, `s_end2(photo=…, hand=…)`, `s_end3(photo=…)`
 
-39쪽과 41쪽은 글이 화면 한가운데에 놓여서, 가운데가 비었거나 사람이 실루엣인 사진이 맞아요(C 묶음, A5, D10, D12, E11, E12, F12, F13).
+39쪽과 41쪽은 글이 화면 한가운데에 놓여서, 가운데가 비었거나 사람이 실루엣인 사진이 맞아요(C 묶음, A5, D10, D12, E11, E12, F12, F13, G15, J5, J9, J10, J19, J25).
 40쪽은 손글씨 '순간'만 있어서 어느 사진이든 놓을 수 있어요.
+
+# 3차: 더 다양한 순간
+
+사진을 찍는 모습이 아닌 장면이에요. 술병이나 술잔이 보이는 사진은 뺐어요.
+
+## G. 파티와 축하
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| G1 | 케이크와 불꽃 막대를 든 세 친구 | Helena Lopes | https://www.pexels.com/photo/27176823/ |
+| G2 | 공원 생일 파티에서 두 팔을 든 친구와 박수 치는 친구들 | Vitaly Gariev | https://www.pexels.com/photo/36713411/ |
+| G3 | 케이크의 촛불을 함께 부는 가족 (미국) | PNW Production | https://www.pexels.com/photo/7328336/ |
+| G4 | 두 살 생일 촛불을 부는 가족 (브라질) | Breno Cardoso | https://www.pexels.com/photo/38428152/ |
+| G5 | 야외 생일 파티에서 촛불을 부는 아이들 | Ron Lach | https://www.pexels.com/photo/10033207/ |
+| G6 | 촛불 빛 속의 아이와 부모 | FURKAN GÜNEŞ | https://www.pexels.com/photo/30307073/ |
+| G7 | 케이크 앞의 아기와 부모 | Pavel Danilyuk | https://www.pexels.com/photo/7221137/ |
+| G8 | 꽃가루 속에서 환호하는 친구들 (인도네시아 서자바) | Andaru Firmansyah | https://www.pexels.com/photo/35397654/ |
+| G9 | 생일 풍선을 들어 올린 친구들 (인도 뭄바이) | Captian Jayu | https://www.pexels.com/photo/9398257/ |
+| G10 | 꽃가루를 뿌리는 아이들 | Ivan S | https://www.pexels.com/photo/8104206/ |
+| G11 | 졸업장을 든 세 친구 | George Pak | https://www.pexels.com/photo/7972741/ |
+| G12 | 학사모를 던지는 졸업생들 | George Pak | https://www.pexels.com/photo/7972745/ |
+| G13 | 불꽃놀이를 하는 친구들 (인도, 디왈리) | RDNE Stock project | https://www.pexels.com/photo/7686379/ |
+| G14 | 노을 아래 불꽃 막대를 든 친구들 | Vitaly Gariev | https://www.pexels.com/photo/36713120/ |
+| G15 | 노을 앞에서 불꽃 막대를 든 실루엣 | Vitaly Gariev | https://www.pexels.com/photo/36713116/ |
+| G16 | 생일 왕관을 쓴 친구와 함께 | Maccy | https://unsplash.com/photos/oXFFPOdmH7c |
+| G17 | 선물을 여는 가족 (콴자) | Greta Hoffman | https://www.pexels.com/photo/9705936/ |
+
+## H. 함께하는 식사
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| H1 | 야외 식탁에서 웃는 가족 | Julia M Cameron | https://www.pexels.com/photo/8841224/ |
+| H2 | 해바라기가 놓인 식탁의 친구들 | RDNE Stock project | https://www.pexels.com/photo/5738255/ |
+| H3 | 카페에서 피자를 나누는 친구들 | Vitaly Gariev | https://www.pexels.com/photo/36729761/ |
+| H4 | 바다 앞에서 피자를 먹는 친구들 | RDNE Stock project | https://www.pexels.com/photo/7348858/ |
+| H5 | 바닷가에서 수박을 먹는 친구들 | Kaba Camara | https://www.pexels.com/photo/5700518/ |
+| H6 | 공원 피크닉의 세 친구 (인도네시아 자카르타) | kandhi bharata | https://www.pexels.com/photo/35699827/ |
+| H7 | 명절 음식을 나누는 가족 (인도네시아 자카르타) | Faisal (@Photobapak) | https://www.pexels.com/photo/36068791/ |
+| H8 | 아이에게 먹여 주는 아침 식탁 | Werner Pfennig | https://www.pexels.com/photo/5442694/ |
+| H9 | 아이들과 웃으며 먹는 아침 | Alex Green | https://www.pexels.com/photo/5693043/ |
+| H10 | 아침 식탁의 가족 (포르투갈) | Kampus Production | https://www.pexels.com/photo/7983150/ |
+| H11 | 바닥에 둘러앉아 먹는 친구들 | Huỳnh Như Mavi | https://www.pexels.com/photo/38766048/ |
+| H12 | 식당에서 웃는 세 친구 | Allan González | https://www.pexels.com/photo/31650401/ |
+| H13 | 함께 밥을 먹는 가족 | National Cancer Institute | https://unsplash.com/photos/BQPi8F_UON0 |
+| H14 | 와플을 먹는 남매 | cottonbro studio | https://www.pexels.com/photo/5990489/ |
+| H15 | 식탁에 모인 가족 | Jelly Marketing | https://unsplash.com/photos/qYo9shxqA6g |
+
+## J. 그 밖의 좋은 순간
+
+| 코드 | 장면 | 찍은 사람 | 원본 |
+|---|---|---|---|
+| J1 | 노을빛 속에서 웃는 친구들 (브라질) | Helena Lopes | https://www.pexels.com/photo/1139370/ |
+| J2 | 갈대밭에서 웃는 세 친구 | Jeff Vinluan | https://www.pexels.com/photo/8445576/ |
+| J3 | 해변에 앉아 웃는 세 친구 | Kindel Media | https://www.pexels.com/photo/7148409/ |
+| J4 | 모닥불에 마시멜로를 굽는 친구들 | Ivan S | https://www.pexels.com/photo/9630132/ |
+| J5 | 별 아래의 모닥불 | Deniz Özgür | https://www.pexels.com/photo/4401697/ |
+| J6 | 해 질 녘 오픈카의 친구들 (몰타) | Andrea Piacquadio | https://www.pexels.com/photo/3753039/ |
+| J7 | 차 트렁크에서 기타를 치는 친구들 | ArtHouse Studio | https://www.pexels.com/photo/4572220/ |
+| J8 | 손잡고 바다를 달리는 친구들 (인도네시아 팡안다란) | Ruyat Supriazi | https://www.pexels.com/photo/36526810/ |
+| J9 | 노을 앞에서 뛰어오르는 실루엣 | IKRAM NASMA | https://www.pexels.com/photo/9294673/ |
+| J10 | 노을 바다를 달리는 아이들 | Garrison Gao | https://www.pexels.com/photo/10834798/ |
+| J11 | 하늘로 딸을 들어 올린 아빠 | Anastasia Shuraeva | https://www.pexels.com/photo/8945225/ |
+| J12 | 아이를 들어 올리며 웃는 아빠 | Micah Eleazar | https://www.pexels.com/photo/10498204/ |
+| J13 | 조부모와 손녀들 | RDNE Stock project | https://www.pexels.com/photo/5637736/ |
+| J14 | 서로 안아 주는 노부부 | Gustavo Fring | https://www.pexels.com/photo/4894645/ |
+| J15 | 노을 진 풀밭의 가족 | Danik Prihodko | https://www.pexels.com/photo/19510865/ |
+| J16 | 숲길을 걷는 엄마와 아이 | Helena Lopes | https://www.pexels.com/photo/5354551/ |
+| J17 | 할머니와 요리하는 아이들 | Los Muertos Crew | https://www.pexels.com/photo/8064896/ |
+| J18 | 함께 요리하는 부부와 아기 | ShotPot | https://www.pexels.com/photo/7705360/ |
+| J19 | 노을 앞에서 춤추는 실루엣 | Vitaly Gariev | https://www.pexels.com/photo/36713130/ |
+| J20 | 노란 옷을 입고 춤추는 사람들 (인도) | Nitin Prajapati | https://www.pexels.com/photo/33885305/ |
+| J21 | 어깨동무한 세 아이 | RENDAN CATIPAY | https://www.pexels.com/photo/10838444/ |
+| J22 | 비눗방울을 부는 아이들 | Antonius Ferret | https://www.pexels.com/photo/5275826/ |
+| J23 | 아이스크림을 먹는 아이들 | Fernanda De Freitas-Escande | https://www.pexels.com/photo/17883326/ |
+| J24 | 산 정상에 오른 등산객들 (베트남 사무산) | Quý Nguyễn | https://www.pexels.com/photo/30784222/ |
+| J25 | 산에서 노을을 보는 친구들 | Rachel Claire | https://www.pexels.com/photo/6125822/ |
 
 # 2차: 찍어 주는 모습과 셀카
 
@@ -118,6 +195,7 @@ Unsplash 라이선스와 Pexels 라이선스 모두 무료로 쓰고 고칠 수 
 
 - 1차: Unsplash에서 서른한 가지 검색어로 사진 469장을 모아 미리보기로 보고 골랐어요.
 - 2차: Pexels 서른세 가지, Unsplash 열여섯 가지 검색어로 찾은 사진 가운데 주제에 맞는 290여 장을 미리보기로 보고 골랐어요. 1차에서 본 Unsplash 사진은 뺐어요.
-- 술이 보이는 사진, 실내 사진, 카메라로 찍는 사진은 뺐어요.
+- 3차: Pexels 서른여섯 가지, Unsplash 네 가지 검색어로 찾은 908장 가운데 설명 글에 술, 사진 찍기, 흑백 같은 말이 든 것을 뺀 782장을 미리보기로 보고 골랐어요. 고른 57장은 크게 키워 술병과 술잔, 상표가 보이는지 다시 봤어요.
+- 1차와 2차에서는 술이 보이는 사진, 실내 사진, 카메라로 찍는 사진을 뺐어요. 3차는 실내 사진도 넣었어요.
 - 휴대폰은 크게 키워서 봤어요. 아이폰의 카메라 화면이나 뒷면 카메라가 뚜렷한 사진은 뺐어요.
-- 찍은 사람과 라이선스는 사진마다 원본 쪽에서 확인했어요. Unsplash 28장은 "Free to use under the Unsplash License", Pexels 37장은 "Free"로 적혀 있어요.
+- 찍은 사람과 라이선스는 사진마다 원본 쪽에서 확인했어요. Unsplash 31장은 "Free to use under the Unsplash License", Pexels 91장은 "Free"로 적혀 있어요.

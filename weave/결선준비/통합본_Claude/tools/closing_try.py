@@ -2,8 +2,9 @@
 """마무리 세 장(39~41쪽)에 후보 사진을 대 본 시안. `마무리사진_후보/`의 사진을 지금 장의 글, 어둠과 함께 PowerPoint로 찍어 한 장에 모은다.
 덱은 바꾸지 않는다(시안 덱은 out/closing_try.pptx).
 
-  python tools/closing_try.py              → 1차(A~C)와 2차(D~F) 모두
+  python tools/closing_try.py              → 1차(A~C), 2차(D~F), 3차(G, H, J) 모두
   python tools/closing_try.py --round 2    → 2차만: 마무리사진_후보/후보2_한눈에.jpg, 시안2_한눈에.jpg
+  python tools/closing_try.py --round 3    → 3차만: 후보3_한눈에.jpg, 시안3_한눈에.jpg
 """
 import argparse
 import copy
@@ -46,7 +47,20 @@ TRIES2 = [
           (40, 'F15', dict(hand=(190, 130, 250), stops=LIGHT))]),
 ]
 GROUPS2 = [('D. 찍어 주는 모습 (연인, 친구)', 'D'), ('E. 연인의 셀카', 'E'), ('F. 친구들의 셀카', 'F')]
-ROUNDS = {1: (GROUPS1, TRIES1, '후보_한눈에.jpg', '시안_한눈에.jpg'), 2: (GROUPS2, TRIES2, '후보2_한눈에.jpg', '시안2_한눈에.jpg')}
+# 3차(11-12 밤): 사진 찍는 모습 말고 더 다양한 순간 — 파티(술 없음), 식사, 그 밖의 좋은 순간
+TRIES3 = [
+    ('가. 파티와 축하', [(39, 'G15', {}), (40, 'G3', dict(hand=(1020, 150, 300), stops=LIGHT)), (41, 'J19', {})]),
+    ('나. 함께하는 식사', [(39, 'J9', {}), (40, 'H1', dict(hand=(560, 150, 320), stops=LIGHT)), (41, 'J5', {})]),
+    ('다. 가족과 아이', [(39, 'J10', dict(stops=BRIGHT39)), (40, 'J12', dict(hand=(930, 110, 280))), (41, 'J25', {})]),
+    ('40쪽에 놓을 다른 사진', [(40, 'G6', dict(hand=(1130, 140, 230))), (40, 'H4', dict(hand=(380, 110, 320), stops=LIGHT)),
+                        (40, 'H7', dict(hand=(800, 120, 320), stops=LIGHT))]),
+    ('', [(40, 'H10', dict(hand=(180, 110, 240), stops=LIGHT)), (40, 'J1', dict(hand=(640, 120, 340))), (40, 'J6', dict(hand=(190, 160, 260)))]),
+    ('', [(40, 'J13', dict(hand=(125, 120, 190), stops=LIGHT)), (40, 'G14', dict(hand=(640, 110, 340))), (40, 'J16', dict(hand=(1010, 250, 300)))]),
+]
+GROUPS3 = [('G. 파티와 축하 (술 없음)', 'G'), ('H. 함께하는 식사', 'H'), ('J. 그 밖의 좋은 순간', 'J')]
+ROUNDS = {1: (GROUPS1, TRIES1, '후보_한눈에.jpg', '시안_한눈에.jpg'), 2: (GROUPS2, TRIES2, '후보2_한눈에.jpg', '시안2_한눈에.jpg'),
+          3: (GROUPS3, TRIES3, '후보3_한눈에.jpg', '시안3_한눈에.jpg')}
+SHEET = {3: dict(cols=5, tw=400)}                        # 사진이 많은 차수는 한 줄에 다섯 장
 MAKE = {39: N.s_end1, 40: N.s_end2, 41: N.s_end3}
 TW, TH, GAP, LEFT, TOP, CAPH = 640, 360, 14, 16, 16, 30
 
@@ -63,10 +77,10 @@ def fonts(size):
     return ImageFont.truetype(str(FONT), size) if FONT.exists() else ImageFont.load_default()
 
 
-def candidates_sheet(groups, out_name):
+def candidates_sheet(groups, out_name, cols=4, tw=480):
     """후보 사진을 묶음별로 한 장에."""
-    font, head = fonts(17), fonts(22)
-    cols, tw, th = 4, 480, 270
+    font, head = fonts(17 if tw >= 480 else 15), fonts(22)
+    th = tw * 9 // 16
     rows = []
     for label, g in groups:
         files = sorted(CAND.glob(g + '[0-9]*_*.jpg'), key=lambda p: int(p.stem.split('_')[0][1:]))
@@ -128,7 +142,7 @@ def main():
     a = ap.parse_args()
     for n in ([a.round] if a.round else sorted(ROUNDS)):
         groups, tries, cand_name, try_name = ROUNDS[n]
-        candidates_sheet(groups, cand_name)
+        candidates_sheet(groups, cand_name, **SHEET.get(n, {}))
         tries_sheet(tries, try_name)
 
 
