@@ -10,6 +10,8 @@
 | closing-2-capture.jpg | https://commons.wikimedia.org/wiki/File:Woman_shooting_ocean_sunset_(Unsplash).jpg | Ben White (Unsplash) | CC0 |
 | closing-3-sunset-picnic.jpg | https://commons.wikimedia.org/wiki/File:Sunset_Picnic_(Unsplash).jpg | Arthur Poulin (Unsplash) | CC0 |
 
+마무리 장에 바꿔 넣을 사진 후보 26장과 출처는 `../마무리사진_후보/README.md`에 있어요(Unsplash 라이선스).
+
 ## 3~5쪽의 기록 조각, 13쪽의 흐린 배경 (`intro/`)
 
 - `intro/floats.png`: `src/floats.html`에 그린 기록 조각이에요. 표지 영상의 조각과 같은 모양이고, 아이콘은 `../10_표지영상/소스/assets/icons`의 것을 써요. `tools/intro_assets.py`가 찍어요.

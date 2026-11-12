@@ -832,10 +832,10 @@ def photo_bg(key, fname, stops):
 END1_Y = 285                       # 인용 글상자의 위(11-12: 두 줄과 출처 묶음의 가운데가 화면 세로 가운데 y = 360에 오게, 168 → 285)
 
 
-def s_end1():
-    """인용 두 줄과 출처를 화면 한가운데(가로, 세로)에. 글은 모두 흰색."""
+def s_end1(photo='closing-1-sunset-chairs.jpg', stops=((0, 68), (42, 52), (70, 30), (100, 26))):
+    """인용 두 줄과 출처를 화면 한가운데(가로, 세로)에. 글은 모두 흰색. photo, stops: 다른 사진을 대 볼 때(tools/closing_try.py)."""
     s = Slide('end1', trans=('fade', 900), bar=False, bg=False, notes=NOTES['end1'])
-    s.add('end/bg', photo_bg('end/bg', 'closing-1-sunset-chairs.jpg', [(0, 68), (42, 52), (70, 30), (100, 26)]))
+    s.add('end/bg', photo_bg('end/bg', photo, list(stops)))
     y = END1_Y
     s.add('end1/q', [T('end1/q', 220, y, 840, 110,
                        ['당신이 사랑하는 모든 것에 더 가까이 다가가고,', '오래도록 이야기하게 될 순간을 담아보세요'],
@@ -849,21 +849,21 @@ def s_end1():
 HAND = (670, 436)                  # 손글씨 '순간' 그림의 크기(px)
 
 
-def s_end2():
-    """해 질 녘을 휴대폰으로 담는 사람. 왼쪽 하늘에 손글씨 '순간'."""
+def s_end2(photo='closing-2-capture.jpg', stops=((0, 60), (55, 50), (100, 46)), hand=(318, 318, 400)):
+    """해 질 녘을 휴대폰으로 담는 사람. 왼쪽 하늘에 손글씨 '순간'. hand = 손글씨의 (가운데 x, 가운데 y, 폭)."""
     s = Slide('end2', trans=('fade', 900), bar=False, bg=False, notes=NOTES['end2'])
-    s.add('end/bg', photo_bg('end/bg', 'closing-2-capture.jpg', [(0, 60), (55, 50), (100, 46)]))
-    w = 400
-    s.add('end/hand', [P('end/hand', str(OUTRO / 'moment-hand-white.png'), 318 - w / 2, 318 - w * HAND[1] / HAND[0] / 2, w, w * HAND[1] / HAND[0])])
+    s.add('end/bg', photo_bg('end/bg', photo, list(stops)))
+    cx, cy, w = hand
+    s.add('end/hand', [P('end/hand', str(OUTRO / 'moment-hand-white.png'), cx - w / 2, cy - w * HAND[1] / HAND[0] / 2, w, w * HAND[1] / HAND[0])])
     s.on('end/hand', 'wipe_in', 500, 1100, dir='left')
     return s
 
 
-def s_end3():
+def s_end3(photo='closing-3-sunset-picnic.jpg', stops=((0, 54), (30, 58), (62, 58), (100, 30))):
     """손글씨 '순간'이 문장 속으로. 두 줄만 화면 가운데에 두고 말로 맺는다("지금까지 Weave Assist였습니다.").
     11-12: 글 묶음을 화면 가운데로, 로고 뒤의 어두운 둥근 그늘과 끝 로고(Weave 글자와 아이콘)는 없앰. 글은 모두 흰색."""
     s = Slide('end3', trans=('morph', 1100), bar=False, bg=False, notes=NOTES['end3'])
-    s.add('end/bg', photo_bg('end/bg', 'closing-3-sunset-picnic.jpg', [(0, 54), (30, 58), (62, 58), (100, 30)]))
+    s.add('end/bg', photo_bg('end/bg', photo, list(stops)))
     pt = 36
     a, b = '갤럭시의 모든 ', '이'
     hw = 118                                             # 문장 속 손글씨 '순간'의 폭
