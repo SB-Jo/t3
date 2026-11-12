@@ -10,6 +10,7 @@
 | `대본.md` | 장마다 말할 글과 영상에서 잰 시간, 4차에서 바꾼 곳, 더 줄일 곳, 이전 대본 |
 | `한눈에.jpg` | 130장을 한 장에 모은 그림 |
 | `마무리사진_후보/` | 마무리 세 장에 바꿔 넣을 사진 후보 186장과 시안(덱에는 아직 넣지 않음) |
+| `기대효과_후보/` | 기대효과 세 장(32~34쪽)을 한 장으로 바꾸는 후보 셋: 앞뒤 장과 함께 말하며 넘긴 영상, 후보 세 장을 모은 덱(덱에는 아직 넣지 않음) |
 | `assets/` | 6쪽의 앱 화면과 그 소스, 3~5쪽의 기록 조각, 마무리 사진 세 장(CC0), 아웃트로 덱에서 가져온 그림. 출처는 `assets/CREDITS.md` |
 
 ## 덱 차례
@@ -45,6 +46,7 @@
 ~/.cache/weave-tools/venv/bin/python trim.py                # 더 줄인 대본 안의 시간을 같은 목소리로 잼
 ~/.cache/weave-tools/venv/bin/python doc.py                 # 대본.md
 ~/.cache/weave-tools/venv/bin/python tools/overview.py      # 한눈에.jpg
+~/.cache/weave-tools/venv/bin/python tools/fx_try.py        # 기대효과 한 장 후보(fx_new.py)의 영상과 덱 → 기대효과_후보/
 ```
 
 - `원본/`에 일곱 덱을 둬야 해요(저장소에는 올리지 않아요).

@@ -21,6 +21,7 @@ PRESET = {
     'type': (1, 'entr', 0), 'blink': (35, 'emph', 0), 'dim': (9, 'emph', 0), 'undim': (9, 'emph', 0),
     'fly': (0, 'path', 0), 'move': (0, 'path', 0), 'pulse': (6, 'emph', 0), 'ring': (53, 'entr', 16),
     'zoom_out': (53, 'exit', 16), 'sink': (42, 'exit', 0), 'wheel_in': (21, 'entr', 1), 'wheel_out': (21, 'exit', 1),
+    'spin': (8, 'emph', 0), 'flip_in': (1, 'entr', 0), 'flip_out': (1, 'exit', 0),
 }
 # 닦아 내기 방향. left·right는 시작하는 쪽(왼쪽에서, 오른쪽에서), down·up은 나아가는 쪽(아래로, 위로).
 # PowerPoint의 필터 이름은 반대라서(wipe(up) = 위에서부터 아래로, wipe(down) = 아래에서부터 위로) 여기서 바꿔 적는다(11-10 영상으로 확인).
@@ -294,6 +295,22 @@ class Timeline:
         elif kind == 'move':          # 지금 자리에서 (dx, dy)px 옮겨 가 머묾
             path = self._curve_path(e['dx'], e['dy'], e.get('bend', 0.0), to_zero=False, base=e.get('base', (0, 0)))
             self._motion(ck, ids, spid, path, dur, accel=e.get('accel', 40000), decel=e.get('decel', 60000))
+        elif kind == 'spin':          # 제자리에서 돎(by 도, 시계 방향이 +). 통합본 기대효과 장의 입꼬리
+            ar = el('p:animRot', ck, by=int(round(e.get('by', 180) * 60000)))
+            cb = el('p:cBhvr', ar)
+            ct = el('p:cTn', cb, id=next(ids), dur=dur, fill='hold')
+            if e.get('accel'):
+                ct.set('accel', str(int(e['accel'])))
+            if e.get('decel'):
+                ct.set('decel', str(int(e['decel'])))
+            self._tgt(cb, spid)
+            el('p:attrName', el('p:attrNameLst', cb)).text = 'r'
+        elif kind == 'flip_in':       # 위아래로 접혀 있다가 펴지며 나타남
+            self._set(ck, ids, spid, 'style.visibility', 'visible')
+            self._anim(ck, ids, spid, 'ppt_h', '#ppt_h*0.04', '#ppt_h', dur, decel=100000)
+        elif kind == 'flip_out':      # 위아래로 접히며 사라짐
+            self._anim(ck, ids, spid, 'ppt_h', '#ppt_h', '#ppt_h*0.04', dur, accel=100000)
+            self._set(ck, ids, spid, 'style.visibility', 'hidden', delay=max(dur - 1, 0))
         elif kind == 'pulse':
             sc = int(e.get('scale', 1.06) * 100000)
             asc = el('p:animScale', ck)
