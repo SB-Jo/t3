@@ -9,14 +9,16 @@
   4·5쪽의 둘째 말풍선만 '그 이름이 뭐였지?' → '정확한 이름이 뭐였지?'로 바꾼다(patch_ask2).
   6차(11-13)에 더 손본 곳: 3쪽은 인물과 말풍선이 클릭해야 뜨고(patch_person_click), 3~5쪽의 옅은 기록 조각이 세 층으로 떠다닌다(patch_floats).
   7쪽 머리글, 9쪽 퍼센트와 이름의 글자 크기, 10쪽 AI 답변의 글(patch_heading7, patch_hub, patch_answer).
+  7차(11-13): 3~5쪽 인물 뒤에 아주 옅은 보라 그라데이션(patch_aura).
   4차까지는 원본/Weave_결선_중간본_도입부수정.pptx의 장을 옮겨 손보고(patch_intro) 9, 11~12, 14쪽은 새로 그렸다(slides_new.py의 s_hub2, s_scat, s_link, s_bridge).
 - 6쪽(수많은 기록): 새로 그린다(slides_new.py).
-- 바꾸기 전의 장: 원본/통합본_5차.pptx (git show fcf8346:…), 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
+- 바꾸기 전의 장: 원본/통합본_6차.pptx (git show 9c91050:…), 원본/통합본_5차.pptx (git show fcf8346:…), 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
 - 표지와 모션그래픽 영상 장: 02_PPT/Weave_결선_중간본.pptx의 1쪽과 4쪽. 표지는 영상을 v9(10_표지영상/표지_루프.mp4, 18초)로 바꾸고 제목을 조금 줄인다(patch_cover).
   모션그래픽은 영상을 v24(08_인트로영상/Weave_모션그래픽.mp4: 제목의 색과 자간을 표지와 같게)로 바꿔 끼운다(patch_mg).
 - 솔루션 3장 + How it Works 13장 + Appendix 15장: 09_HowItWorks/장표5_claude/build.py의 장을 그대로 그린다.
 - 뒷부분: 원본/Weave_BI_아웃트로_통합_1110_v7.pptx (WIWLEE/t3-2)의 내용을 같은 엔진으로 다시 그린다(slides_new.py).
   6차: 기대효과는 한 장(fx_new.s_fx), 기존 기능과의 비교는 Appendix 맨 앞으로(cmp_new.s_cmp_apx), 제안 장표 묶음은 없앰.
+  7차: 비교 장을 다시 본 발표로(cmp_new.s_cmp, 기대효과 다음), 맺는 인사를 하는 마지막 장(slides_new.s_bye)을 더함.
 """
 import argparse
 import copy
@@ -50,7 +52,7 @@ for _f in ('blur_sol.png', 'blur_emb.png', 'blur_cloud.png'):       # How it Wor
 HW.OUT = OUT                                                      # 낭독(out/tts)과 말에 맞춘 효과의 때를 이 폴더에서 읽고 씀
 
 # ------------------------------------------------------------------ 읽는 소리: 숫자·영문을 소리 나는 대로(How it Works의 tts_text 앞에 한 번 더 거름)
-READ_FIRST = [('Weave Assist', '위브 어시스트'), ('Writing Assist', '라이팅 어시스트'), ('Galaxy AI', '갤럭시 에이아이'), ('Now Nudge', '나우 넛지'), ('Finder', '파인더'), ('RAG', '래그'),
+READ_FIRST = [('Personal Data Engine', '퍼스널 데이터 엔진'), ('Weave Assist', '위브 어시스트'), ('Writing Assist', '라이팅 어시스트'), ('Galaxy AI', '갤럭시 에이아이'), ('Now Nudge', '나우 넛지'), ('Finder', '파인더'), ('RAG', '래그'),
               ('AgentIR', '에이전트 아이알'), ('Hi-Q', '하이큐'), ('NPU', '엔피유'), ('Lock-in', '락인'),
               ('Multi-hop', '멀티홉'), ('PDE', '피디이'), ('KEEP', '킵'), ('AI', '에이아이'), ('Samsung', '삼성'), ('Galaxy', '갤럭시'), ("'", '')]
 DIGIT = '영일이삼사오육칠팔구'
@@ -78,6 +80,7 @@ PREV2 = HERE / '원본' / '통합본_2차.pptx'                # 11월 11일 2�
 PREV3 = HERE / '원본' / '통합본_3차.pptx'                # 11월 12일 3차 통합본
 PREV4 = HERE / '원본' / '통합본_4차.pptx'                # 11월 12일 4차 통합본
 PREV5 = HERE / '원본' / '통합본_5차.pptx'                # 11월 12일 5차 통합본(밤의 낱말 수정까지, fcf8346)
+PREV6 = HERE / '원본' / '통합본_6차.pptx'                # 11월 13일 6차 통합본(9c91050)
 INTRO2 = HERE / '원본' / '통합본_인트로수정_87bf80b.pptx'   # 팀원이 7~14쪽을 손본 덱(jjun-0824/t3 87bf80b). 2~5쪽과 7~14쪽을 여기서 옮김
 MG_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'      # 모션그래픽 v24(111.1초). 중간본에 든 v23과 길이와 소리가 같음
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'      # 표지 영상 v9(18초)
@@ -160,6 +163,8 @@ PREV2_KEEP = list(range(2, 15)) + [26] + list(range(32, 42)) + [62]      # 2차 
 # 마무리 세 장(38~40), 제안 장표 묶음(57~60)
 PREV5_KEEP = [2, 3, 7, 9, 10, 17, 18, 21, 22, 23, 24, 25, 28, 29, 30, 32, 33, 34, 35, 36, 38, 39, 40, 57, 58, 59, 60]
 PREV4_KEEP = list(range(7, 15))                         # 4차 통합본에서: 우리가 그리거나 손본 7~14쪽(팀원이 손본 장으로 바뀜)
+# 6차 통합본에서: 7차에 화면이나 대본이 바뀐 장. 인물 셋(3~5쪽), 기대효과(32), 비즈니스 임팩트(33), 연표(34), 마무리 ③(37), Appendix에 두었던 비교 장(39)
+PREV6_KEEP = [3, 4, 5, 32, 33, 34, 37, 39]
 PREV3_KEEP = [16] + list(range(21, 27)) + [30, 37]      # 3차 통합본에서: 16쪽(대본), 21쪽(뺀 장), 22~26쪽과 30쪽(화면 번호와 대본), 37쪽(비교 표)
 
 
@@ -171,10 +176,8 @@ def own_specs():
 
 
 def appendix_specs():
-    """Appendix: 가름 장 → 기존 기능과의 비교(6차: 본 발표에서 옮김) → How it Works Appendix → 사진과 영상 출처."""
-    import cmp_new
-    hw = HW.appendix_specs()
-    return hw[:1] + [cmp_new.s_cmp_apx()] + hw[1:] + [N.s_credits2()]
+    """Appendix: 가름 장 → How it Works Appendix → 사진과 음악 출처. (6차에 맨 앞에 두었던 비교 장은 7차에 다시 본 발표로 감)"""
+    return HW.appendix_specs() + [N.s_credits2()]
 
 
 # ------------------------------------------------------------------ 옮겨 온 장을 손보는 도구
@@ -481,9 +484,42 @@ def patch_answer(sl):
             end.set('sz', str(ANSWER_PT))
 
 
+# 7차(11-13): 3~5쪽 인물 뒤에 아주 옅은 보라 그라데이션. 인물의 윤곽을 크게 흐린 그림(assets/intro/aura-N.png, tools/intro_assets.py --aura)을
+# 모든 인물보다 아래 층에 깐다. 처음에는 그림의 빛 효과(윤곽을 따라 50pt 번짐)를 썼는데 '그라데이션이 아니라 테두리, 띠 같다'는 검토를 받아 바꿈:
+# 흐린 윤곽은 몸 안쪽에서 가장 진하고 바깥으로 고르게 옅어져 띠가 생기지 않는다. 인물이 뜨는 장에서는 같은 효과로 함께 뜨고, 이름이 같아 Morph로 함께 옮겨 간다.
+AURA_PAD = 170                                        # 그라데이션 그림이 인물 그림보다 왼쪽, 오른쪽, 위로 넓은 만큼(px). tools/intro_assets.py의 AURA_PAD와 같아야 함
+
+
+def patch_aura(sl):
+    pa = painter(sl)
+    ids = itertools.count(F._next_id(sl))
+    first = by_name(sl, '!!p1')
+    for n in ('1', '2', '3'):
+        if not has(sl, '!!p' + n):
+            continue
+        pic = by_name(sl, '!!p' + n)
+        x, y, w, h = box(pic)
+        el = pa.el(P('aura' + n, str(INTRO_AS / ('aura-%s.png' % n)), x - AURA_PAD, y - AURA_PAD, w + 2 * AURA_PAD, h + AURA_PAD))
+        first.addprevious(el)                               # 세 인물 모두의 아래(이웃 인물의 몸 위에 얹히지 않게)
+        spid = el.find(q('p:nvPicPr')).find(q('p:cNvPr')).get('id')
+        pid = pic.find(q('p:nvPicPr')).find(q('p:cNvPr')).get('id')
+        for par in sl._element.iter(q('p:par')):            # 그 인물이 이 장에서 뜨는 효과가 있으면 그라데이션도 같은 효과로 함께
+            ct = par.find(q('p:cTn'))
+            if ct is None or not ct.get('presetID') or {t.get('spid') for t in par.iter(q('p:spTgt'))} != {pid}:
+                continue
+            twin = copy.deepcopy(par)
+            for c in twin.iter(q('p:cTn')):
+                c.set('id', str(next(ids)))
+            for t in twin.iter(q('p:spTgt')):
+                t.set('spid', spid)
+            twin.find(q('p:cTn')).set('nodeType', 'withEffect')
+            par.addnext(twin)
+            break
+
+
 NOTE_OURS = {'in02', 'in03', 'in07', 'hub2'}          # 6차에 우리가 노트를 바꾼 장(옮겨 온 덱의 노트와 견주지 않음)
-INTRO_PATCH = {                                       # 옮겨 온 장마다 6차에 더 손보는 일
-    'in03': [patch_person_click, patch_floats], 'in04': [patch_floats], 'in05': [patch_floats],
+INTRO_PATCH = {                                       # 옮겨 온 장마다 6차부터 더 손보는 일
+    'in03': [patch_person_click, patch_floats, patch_aura], 'in04': [patch_floats, patch_aura], 'in05': [patch_floats, patch_aura],
     'in07': [patch_heading7], 'hub2': [patch_hub], 'in09': [patch_answer],
 }
 
@@ -535,7 +571,12 @@ def build(dst):
     appx = draw(appendix_specs())
     prop = draw([N.s_divider('p0', '제안 장표', ['본 발표에 넣을지 정하지 않은 장'],
                              '여기부터는 제안 장표입니다. 본 발표에서는 넘기지 않습니다.')] + specs['prop']) if specs['prop'] else []      # 6차: 없음
-    prev5, prev4, prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV5, PREV4, PREV3, PREV2, PREV))
+    prev6, prev5, prev4, prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV6, PREV5, PREV4, PREV3, PREV2, PREV))
+    old6 = draw([N.s_divider('o6', '이전 판 (6차)', ['11월 13일 6차 통합본에서 7차에 화면이나 대본이 바뀐 장: 인물 셋(3~5쪽), 기대효과(32쪽)',
+                                                    '비즈니스 임팩트(33쪽), 연표(34쪽), 마무리 ③(37쪽), Appendix에 두었던 비교 장(39쪽)',
+                                                    '노트에 그때의 대본이 그대로 있습니다'],
+                             '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
+    old6 += [F.copy_slide(prs, prev6[i - 1], note_tpl) for i in PREV6_KEEP]
     old5 = draw([N.s_divider('o5', '이전 판 (5차)', ['11월 12일 5차 통합본에서 6차에 화면이나 대본이 바뀐 장: 2, 3, 7, 9, 10, 17, 18, 21~25, 28~30쪽',
                                                     '기대효과 세 장(32~34쪽), 비교 지도(35쪽), 비즈니스 임팩트(36쪽), 마무리 세 장(38~40쪽), 제안 장표(57~60쪽)',
                                                     '노트에 그때의 대본이 그대로 있습니다'],
@@ -557,11 +598,12 @@ def build(dst):
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
     old1 += [F.copy_slide(prs, prev1[i - 1], note_tpl) for i in PREV_KEEP] + [F.copy_slide(prs, src[12], note_tpl)]
-    order = [*main, *appx, *prop, *old5, *old4, *old3, *old2, *old1]
+    order = [*main, *appx, *prop, *old6, *old5, *old4, *old3, *old2, *old1]
     drop_slides(prs, [s for s in old if s not in (cover, mg)])
     reorder(prs, order)
     samsung_fonts.remap_prs(prs)
-    build.n_old5, build.n_old4 = len(old5), len(old4)
+    logo_style(own['back'])                             # 맺는 장의 'Weave' 글자를 표지 제목처럼(Samsung Sharp Sans, 보라 그라데이션)
+    build.n_old6, build.n_old5, build.n_old4 = len(old6), len(old5), len(old4)
     build.n_main, build.n_appx, build.n_prop, build.n_old3, build.n_old2, build.n_old1 = n_main, len(appx), len(prop), len(old3), len(old2), len(old1)
     prs.save(str(dst))
     for key, nclick, nnote, _ in report:

@@ -80,8 +80,10 @@ ANSWER = '배비치 소비뇽 블랑'
 
 # ------------------------------------------------------------------ 장
 class Slide:
-    def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, cur=None, done=(), bg=True):
-        self.key, self.notes, self.advance = key, notes, advance
+    def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, cur=None, done=(), bg=True, free=False):
+        """free: 클릭해도 앞 묶음의 효과를 끝으로 당기지 않고 그대로 이어 가게 한다(본 차례의 nextAc="none").
+        말이 짧아 효과가 끝나기 전에 다음 클릭을 누르는 장에 쓴다(통합본의 기대효과 장: 기능 이름마다 클릭, 칸마다 숫자가 줄어드는 효과가 겹쳐 흐름)."""
+        self.key, self.notes, self.advance, self.free = key, notes, advance, free
         self.trans = (trans[0], round(trans[1] * SPEED)) if trans else trans
         self.bar, self.cur, self.done, self.bg = bar, cur, set(done), bg
         self.items = []
@@ -1912,10 +1914,13 @@ def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
             if auto:
                 holds = getattr(sp, 'holds', None) or [(500 if j == 0 else hold) for j in range(len(tl.steps))]
                 slide._element.append(tl.xml(sp_ids, auto=(150, holds)))
-                total = 150 + sum(tl.step_len(j) + holds[j] for j in range(len(tl.steps)))
-                adv = max(adv or 0, total)
+                total, t = 0, 150                   # 머무는 시간이 음수인 묶음(free 장: 효과가 끝나기 전에 다음 묶음이 시작)이 있어도 모든 효과가 끝난 뒤에 넘김
+                for j in range(len(tl.steps)):
+                    total = max(total, t + tl.step_len(j))
+                    t += tl.step_len(j) + holds[j]
+                adv = max(adv or 0, total, t)
             else:
-                slide._element.append(tl.xml(sp_ids, first_auto=True))
+                slide._element.append(tl.xml(sp_ids, first_auto=True, next_ac='none' if getattr(sp, 'free', False) else 'seek'))
         set_transition(slide, sp.trans, adv if (auto or sp.advance) else None)
         if getattr(sp, 'holds', None):          # 발표 속도 미리보기: PowerPoint가 장 넘김 시간을 따로 더하므로 여기서는 더하지 않음
             secs.append((adv or 2500) / 1000)
@@ -2085,7 +2090,8 @@ def _sents(seg):
     return out
 
 
-LEAD_EXTRA = {}                    # {(장 키, 구간): 초} 말없이 화면을 먼저 보여 주는 구간은 그만큼 더 기다렸다 말을 뗌(통합본의 6쪽)
+LEAD_EXTRA = {}                    # {(장 키, 구간): 초} 말없이 화면을 먼저 보여 주는 구간은 그만큼 더 기다렸다 말을 뗌(통합본의 6쪽). 음수면 더 빨리 뗌
+GAP_EXTRA = {}                     # {(장 키, 구간): 초} 그 구간의 말을 마친 뒤의 틈에 더함(음수면 줄임: 통합본 기대효과 장에서 기능 이름을 0.2초 간격으로 늘어놓을 때)
 
 
 def _lead(segs, j, key=None):
@@ -2105,8 +2111,17 @@ def seg_gaps(sp):
     """구간마다 말을 마친 뒤의 틈(초): 그 장의 끝 구간은 GAP_SLIDE, 문장이 끝난 구간은 GAP_SENT, 문장 중간에서 누르는 클릭은 GAP_MID.
     물음으로 끝난 구간은 GAP_Q만큼, (쉼)으로 끝난 구간은 R_BEAT만큼 더 둔다."""
     segs = sp.notes.split('(클릭)')
-    return [(GAP_SLIDE if j == len(segs) - 1 else (GAP_SENT if _ends(seg) else GAP_MID)) +
-            (R_BEAT if seg.rstrip().endswith(REST) else (GAP_Q if seg.rstrip().endswith('?') else 0)) for j, seg in enumerate(segs)]
+    return [max((GAP_SLIDE if j == len(segs) - 1 else (GAP_SENT if _ends(seg) else GAP_MID)) +
+                (R_BEAT if seg.rstrip().endswith(REST) else (GAP_Q if seg.rstrip().endswith('?') else 0)) + GAP_EXTRA.get((sp.key, j), 0), 0)
+            for j, seg in enumerate(segs)]
+
+
+def seg_holds(sp, say):
+    """구간마다 효과가 끝난 뒤 더 머무는 시간(ms): 그 구간의 말(say, 초)이 끝날 때까지.
+    free 장은 효과가 끝나지 않아도 말을 마치면 다음 클릭을 누르므로 음수가 될 수 있다(마지막 구간은 효과가 다 끝날 때까지 머묾)."""
+    last = len(sp.groups) - 1
+    free = getattr(sp, 'free', False)
+    return [h if (free and j < last) else max(h, 0) for j, h in enumerate(round(say[j] * 1000) - _group_len(g) for j, g in enumerate(sp.groups))]
 
 
 def _say_times(sp, rate=SPEECH_RATE):
@@ -2127,8 +2142,9 @@ def rehearse(specs, rate=SPEECH_RATE, says=None):
         say = says[sp.key] if says else _say_times(sp, rate)
         anim = [_group_len(g) / 1000 for g in sp.groups]
         sec = ((sp.trans[1] / 1000) if sp.trans else 0) + 0.15
+        free = getattr(sp, 'free', False)
         for i in range(len(segs)):
-            sec += max(say[i], anim[i] if i < len(anim) else 0)
+            sec += say[i] if (free and i < len(segs) - 1) else max(say[i], anim[i] if i < len(anim) else 0)
         total += sec
         rows.append((sp.key, len(segs) - 1, sum(syllables(g) for g in segs), sec, total))
     return rows
@@ -2276,7 +2292,7 @@ def talk_specs(rate=SPEECH_RATE, says=None):
     for sp in specs:
         segs = sp.notes.split('(클릭)')
         say = says[sp.key] if says else _say_times(sp, rate)
-        sp.holds = [max(round(say[j] * 1000) - _group_len(g), 0) for j, g in enumerate(sp.groups)]
+        sp.holds = seg_holds(sp, say)
         t += (sp.trans[1] / 1000 if sp.trans else 0) + 0.15
         sp.starts = []
         for j, grp in enumerate(sp.groups):

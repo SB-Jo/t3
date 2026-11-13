@@ -50,14 +50,16 @@ class Timeline:
         return out
 
     # -------------------------------------------------------------- XML
-    def xml(self, sp_ids, auto=None, first_auto=True):
+    def xml(self, sp_ids, auto=None, first_auto=True, next_ac='seek'):
         """auto = (첫 대기 ms, [묶음별 머무는 ms])면 클릭 없이 저절로(미리보기 영상용).
-        first_auto면 첫 묶음은 장이 열리자마자(모핑이 끝난 뒤 바로), 나머지는 클릭마다."""
+        first_auto면 첫 묶음은 장이 열리자마자(모핑이 끝난 뒤 바로), 나머지는 클릭마다.
+        next_ac: 클릭했을 때 앞 묶음을 어떻게 할지. 'seek'(PowerPoint 기본)는 앞 묶음의 효과를 끝으로 당기고 다음으로, 'none'은 앞 묶음을 그대로 두고
+        다음 묶음을 함께 시작한다(11-13 시험: 클릭 때를 적어 둔 사본을 영상으로 내보내 보니 'none'일 때 앞 효과가 끊기지 않고 이어짐)."""
         ids = count(1)
         grp_of = {}
         timing = etree.Element(q('p:timing'), nsmap=NS)
         root = el('p:cTn', el('p:par', el('p:tnLst', timing)), id=next(ids), dur='indefinite', restart='never', nodeType='tmRoot')
-        seq = el('p:seq', el('p:childTnLst', root), concurrent=1, nextAc='seek')
+        seq = el('p:seq', el('p:childTnLst', root), concurrent=1, nextAc='seek' if auto else next_ac)
         main = el('p:cTn', seq, id=next(ids), dur='indefinite', nodeType='mainSeq')
         mkids = el('p:childTnLst', main)
         if auto:

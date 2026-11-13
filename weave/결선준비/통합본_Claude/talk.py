@@ -103,7 +103,7 @@ def talkify(specs, says, k, plan):
     for sp in specs:
         say = says.get(sp.key) or [END_HOLD] * len(sp.groups)
         assert len(say) == len(sp.groups), (sp.key, len(say), len(sp.groups))
-        sp.holds = [max(round(say[j] * 1000) - HW._group_len(g), 0) for j, g in enumerate(sp.groups)]
+        sp.holds = HW.seg_holds(sp, say)        # free 장(기대효과)은 말을 마치면 효과가 남아 있어도 다음 구간으로(음수)
         marks = []
         for j, grp in enumerate(sp.groups):
             key = 'mk/%s/%d' % (sp.key, j)
@@ -153,6 +153,7 @@ def build_auto(dst, fu, says, part=None):
         if isinstance(item, tuple):
             slides, k = draw(own[item[1]], k)
             order += slides
+            logos += slides         # 맺는 장의 'Weave' 글자(이름이 logo_word로 끝나는 글상자)에 덱과 같은 글꼴과 그라데이션
             continue
         if item == 'mg':
             F.add_mark(mg, MARK_BOX, MARK_RGB[k % 3], 'mk_mg')

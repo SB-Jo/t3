@@ -1,5 +1,6 @@
 """기존 기능과의 비교 장(5차 35쪽) 후보 — 두 축 지도(slides_new.s_cmp)를 바꾸는 안. 11-12 밤.
-11-13 6차: 비교 장은 본 발표에서 빼고, 후보 나에 글을 보탠 판을 Appendix 맨 앞에 둔다(s_cmp_apx. 이 파일 끝).
+11-13 6차: 비교 장은 본 발표에서 빼고, 후보 나에 글을 보탠 판을 Appendix 맨 앞에 둔다(s_cmp_apx).
+11-13 7차: 다시 본 발표로(기대효과 다음, 33쪽). 축 글자를 키우고, 이름을 영문 정식 이름으로, 넓은 쪽에 '임베딩 검색', '키워드 매칭' 뱃지를 더한 판(s_cmp. 이 파일 끝).
 
 사용자 검토
 - 그림이 조금 오른쪽으로 치우쳐 있다.
@@ -17,7 +18,7 @@
 기존 기능은 이름을 말할 때 하나씩 뜨고, (클릭) Weave가 뜬다(지금 장과 같은 차례).
 """
 import build as HW
-from ui import ICON, INK, INK2, LAV, LINE, LINE2, MUTE, PURPLE, SUB, C, P, R, T, thread
+from ui import ICON, INK, INK2, LAV, LINE, LINE2, MUTE, PURPLE, SUB, C, P, R, T, chip, thread
 
 import slides_new as N
 
@@ -257,6 +258,74 @@ def s_cmp_apx():
     s.on(key + '/axl', 'fade_in', 600, 450)
     for i, (k, *_) in enumerate(APX_SERV):
         s.on('%s/%s' % (key, k), 'zoom_in', 900 + i * 260, 380, **{'from': 0.6})
+    s.click()      # 1: 얕은 쪽을 넘어 깊은 쪽으로 → Weave
+    s.on(key + '/arrow', 'wipe_in', 0, 520, dir='up')
+    s.on(key + '/wglow', 'fade_in', 300, 500)
+    weave_on(s, key, 420)
+    return s
+
+
+# ------------------------------------------------------------------ 본 발표의 비교 장(11-13 7차): Appendix에 두었던 판을 다시 본 발표로(기대효과 다음, 33쪽)
+# 사용자 검토로 바꾼 곳
+# - 축 이름과 끝 이름을 크게(13.5pt → 20pt, 12.5pt → 15pt). 무엇의 축인지 멀리서도 보이게.
+# - 기능 이름은 영문 정식 이름으로: Samsung Writing Assist, Kanana in KakaoTalk(카카오의 영문 표기), Samsung Now Nudge, Samsung Finder.
+# - 넓은 쪽에 Finder만 있던 자리에 글만 적은 뱃지 둘('키워드 매칭', '임베딩 검색'). 범위는 넓고 깊이는 Finder보다 조금 얕게, 키워드 매칭은 더 얕게.
+#   How it Works에서 본 기존 검색 두 가지라서 말로는 짚지 않는다(대본은 5차 그대로).
+CM_O, CM_XE, CM_YT = (205, 574), 1025, 168          # 두 축이 만나는 점, 가로축의 오른쪽 끝, 세로축의 위 끝
+CM_SERV = [     # (키, 아이콘, 이름, 한 줄 설명, 가운데 x, 축에서 위로)
+    ('wa', 'writing', 'Samsung Writing Assist', '글을 다듬는 키보드 AI', 336, 96),
+    ('kanana', 'kanana', 'Kanana in KakaoTalk', '카카오톡 안의 AI 비서', 480, 190),
+    ('nudge', 'nudge', 'Samsung Now Nudge', '대화에 맞춰 건네는 제안', 660, 150),
+    ('finder', 'finder', 'Samsung Finder', '기기 안 기록 검색 앱', 818, 104),
+]
+CM_TECH = [('emb', '임베딩 검색', 962, 82), ('kw', '키워드 매칭', 954, 40)]      # 글만 적은 뱃지: (키, 글, 가운데 x, 축에서 위로)
+CM_WEAVE = (884, 336)                               # Weave의 가운데 x, 축에서 위로
+CM_NAME_PT, CM_WHAT_PT = 15, 11.5
+
+
+def s_cmp():
+    """기존 기능과의 비교(본 발표). 가로 찾는 범위(좁게 → 넓게), 세로 찾는 깊이(얕게 → 깊게). 기존 기능 넷은 이름을 말할 때 하나씩 뜨고,
+    Finder 곁에 '임베딩 검색', '키워드 매칭' 뱃지가 뒤따른다. (클릭) 얕은 쪽을 넘어 깊은 쪽으로 화살표가 뻗고 Weave가 뜬다."""
+    key = 'cmp'
+    s = Slide(key, trans=('fade', 500), bar=False, notes=N.NOTES['cmp'])
+    s.add(key + '/title', [N.title(key + '/title', TITLE)])
+    (ox, oy), xe, yt = CM_O, CM_XE, CM_YT
+    s.add(key + '/axx', [C(key + '/axx', [(ox, oy)] * 2 + [(xe, oy)] * 2, color=N.MAP_AX, w=2.2, tail='triangle')])
+    s.add(key + '/axy', [C(key + '/axy', [(ox, oy)] * 2 + [(ox, yt)] * 2, color=N.MAP_AX, w=2.2, tail='triangle')])
+    lab = lambda k, x, y, w, t, **o: T('%s/axl/%s' % (key, k), x, y, w, 30, t, anchor='ctr', **o)
+    s.add(key + '/axl', [lab('xn', xe + 12, oy - 15, 130, '찾는 범위', size=20, color=INK2, weight='b'),
+                         lab('yn', ox - 90, yt - 42, 180, '찾는 깊이', size=20, color=INK2, weight='b', align='c'),
+                         lab('x0', ox + 16, oy + 10, 80, '좁게', size=15, color=SUB),
+                         lab('x1', xe - 98, oy + 10, 80, '넓게', size=15, color=PURPLE, weight='b', align='r'),
+                         lab('y0', ox - 96, oy - 44, 80, '얕게', size=15, color=SUB, align='r'),
+                         lab('y1', ox - 96, yt + 14, 80, '깊게', size=15, color=PURPLE, weight='b', align='r')])
+    pts = {}
+    for k, kind, name, what, cx, up in CM_SERV:
+        cy = oy - up
+        pts[k] = (cx, cy)
+        kk = '%s/%s' % (key, k)
+        s.add(kk, N.cmp_icon(kk + '/ic', kind, cx, cy, 46) + [
+            T(kk + '/name', cx - 130, cy + 28, 260, 24, name, size=CM_NAME_PT, color=INK, weight='b', align='c', anchor='ctr'),
+            T(kk + '/what', cx - 130, cy + 52, 260, 18, what, size=CM_WHAT_PT, color=SUB, align='c', anchor='ctr')])
+    for k, text, cx, up in CM_TECH:
+        kk = '%s/%s' % (key, k)
+        s.add(kk, chip(kk, cx, oy - up - 14, text, style='gray', pt=13, h=28, padx=14, align='c')[0])
+    wx, wy = CM_WEAVE[0], oy - CM_WEAVE[1]
+    s.add(key + '/wglow', [glow(key + '/wglow', wx, wy)])
+    fx, fy = pts['finder']
+    s.add(key + '/arrow', thread(key + '/arrow', [(fx + 8, fy - 36), (fx + 8, fy - 104), (wx, wy + 176), (wx, wy + 102)], w=2.6, tail='triangle'))
+    s.add(key + '/weave', weave_tile(key + '/weave', wx, wy) + [
+        T(key + '/weave/what', wx - 120, wy + 33 + 6 + 28, 240, 20, APX_WEAVE, size=12, color=PURPLE, align='c', anchor='ctr')])
+    s.add(key + '/src', [N.foot(key + '/src', N.CMP_SRC)])
+    s.on(key + '/axx', 'wipe_in', 150, 600)
+    s.on(key + '/axy', 'wipe_in', 150, 600, dir='up')
+    s.on(key + '/axl', 'fade_in', 600, 450)
+    # 기존 기능은 이름을 말할 때 하나씩(Now Nudge와 Finder는 한 문장에 이어 나와 바로 뒤따르고, 그 곁에 뱃지 둘)
+    t_wa, t_kn, t_nn = cue(key + '.wa', 3300, ahead=0.2), cue(key + '.kn', 5600, ahead=0.2), cue(key + '.nn', 7700, ahead=0.2)
+    for k, t in (('wa', t_wa), ('kanana', t_kn), ('nudge', t_nn), ('finder', t_nn + 620)):
+        s.on('%s/%s' % (key, k), 'zoom_in', t, 380, **{'from': 0.6})
+    s.on(key + '/emb', 'fade_in', t_nn + 620 + 560, 380)
+    s.on(key + '/kw', 'fade_in', t_nn + 620 + 820, 380)
     s.click()      # 1: 얕은 쪽을 넘어 깊은 쪽으로 → Weave
     s.on(key + '/arrow', 'wipe_in', 0, 520, dir='up')
     s.on(key + '/wglow', 'fade_in', 300, 500)

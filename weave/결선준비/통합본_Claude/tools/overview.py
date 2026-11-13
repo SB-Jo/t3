@@ -29,6 +29,7 @@ def labels():
     out += [('appx', 'Appendix %d' % (i + 1)) for i in range(n_appx)]
     if own['prop']:
         out += [('prop', '제안 장표 가름')] + [('prop', doc.NAME[sp.key]) for sp in own['prop']]
+    out += [('old', '이전 판 (6차) 가름')] + [('old', '이전 판 · 6차 %d쪽' % i) for i in MK.PREV6_KEEP]
     out += [('old', '이전 판 (5차) 가름')] + [('old', '이전 판 · 5차 %d쪽' % i) for i in MK.PREV5_KEEP]
     out += [('old', '이전 판 (4차) 가름')] + [('old', '이전 판 · 4차 %d쪽' % i) for i in MK.PREV4_KEEP]
     out += [('old', '이전 판 (3차) 가름')] + [('old', '이전 판 · 3차 %d쪽' % i) for i in MK.PREV3_KEEP]

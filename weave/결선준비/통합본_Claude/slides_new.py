@@ -9,6 +9,8 @@
 - bi, tl, end1~3: 아웃트로 덱(Weave_BI_아웃트로_통합_1110_v7.pptx)의 내용을 우리 틀로 다시 그린 것. 연표(tl)는 두 줄이 Weave에서 만나는 모양.
 - 6차(11-13): 기대효과는 한 장(fx_new.s_fx, 키 fx). 여기의 s_fx(세 장, fx1~3)와 제안 장표(p_fx1~3)는 5차까지 쓰던 것.
   기존 기능과의 비교는 Appendix로 옮김(cmp_new.s_cmp_apx). 여기의 s_cmp(두 축 지도)는 5차까지 쓰던 것이고 아이콘과 이름표(cmp_icon, map_point)는 계속 씀.
+- 7차(11-13): 비교 장이 다시 본 발표로(cmp_new.s_cmp, 키 cmp. 말할 글은 여기 NOTES['cmp']), 맺는 인사를 하는 마지막 장(s_bye: 아이콘과 Weave 글자만).
+  bi는 앱 아이콘을 5차의 묶음(19개)으로 되돌리고 휴대폰 안 동그라미 아래에 'Weave Assist'.
 
 좌표는 1280×720 px. 말할 글은 NOTES((클릭) = 그 자리에서 클릭)와 INTRO_NOTES(옮겨 온 인트로 장의 노트)에 있다.
 """
@@ -94,19 +96,20 @@ NOTES = {
     'bi': ('스마트폰 사용자는 한 달에 평균 41개의 앱을 씁니다. '
            '(클릭) 그리고 69%는 기록을 지우지 않고 쌓아 둔다고 답했습니다. '
            '(클릭) 이렇게 흩어지고 쌓인 기록을 갤럭시 안의 Weave가 하나로 엮습니다. '
-           '그래서 쓸수록 쌓이고 갤럭시를 떠나기 어려워지는 Lock-in 효과가 생깁니다.'),
+           '그래서 쓸수록 기억이 쌓이고 갤럭시를 떠나기 어려워지는 Lock-in 효과가 생깁니다.'),      # 11-13 7차: '쓸수록 쌓이고' → '쓸수록 기억이 쌓이고'
     'cmp': ('그렇다면 이미 있는 기능과는 무엇이 다를까요? '      # 11-12 4차: 화면이 표에서 두 축의 지도로 바뀌어, 넷을 왼쪽부터 차례로 짚음
             'Writing Assist는 지금 쓰는 글을 다듬고, 카나나는 카카오톡 대화 안에서, Now Nudge와 Finder는 더 넓은 범위에서 한 번 찾거나 제안합니다. '
             '(클릭) Weave는 여러 앱에 흩어진 단서를 이어서 찾고, 쓰던 화면의 키보드 위에서 바로 건넵니다.'),
     'tl': ('이 경험이 갤럭시에서, 그리고 지금 가능한 이유입니다. '
-           '(클릭) 먼저 기술입니다. 검색은 뜻으로 찾는 임베딩에서 찾아서 답하는 RAG로 발전했고, '
+           '(클릭) 먼저 기술입니다. 검색은 뜻으로 찾는 임베딩에서 벡터를 찾아 답하는 RAG로 발전했고, '      # 11-13 7차: '찾아서 답하는' → '벡터를 찾아 답하는'
            '지난해에는 추론하며 찾는 Reasoning Embedding이, 올해는 단서를 이어 찾는 AgentIR과 Hi-Q가 나왔습니다. '
-           '(클릭) 갤럭시도 준비를 마쳤습니다. 매일 쓰는 키보드와 기기 위에 기기 안에서 AI를 돌리는 NPU가 들어왔고, '
-           '2024년에는 Galaxy AI가, 지난해에는 개인 데이터를 기기 안에서 다루는 PDE가 더해졌습니다. '
+           '(클릭) 갤럭시도 준비를 마쳤습니다. 매일 쓰는 키보드와 기기 위에 온디바이스 AI 연산을 위한 NPU가 들어왔고, '      # 7차: '기기 안에서 AI를 돌리는' → '온디바이스 AI 연산을 위한'
+           '2024년에는 Galaxy AI가, 지난해에는 개인 데이터를 기기 안에서 다루는 Personal Data Engine, 즉 PDE가 더해졌습니다. '      # 7차: 'PDE가' → 'Personal Data Engine, 즉 PDE가'
            '(클릭) 기술과 기기가 모두 준비된 지금이, 두 흐름을 Weave로 엮을 때입니다.'),
     'end1': '당신이 사랑하는 모든 것에 더 가까이 다가가고, 오래도록 이야기하게 될 순간을 담아보세요.',
     'end2': '기기 안에는 그렇게 담아 둔 순간이 쌓여 있습니다.',
-    'end3': '갤럭시의 모든 순간이 다시 이야기가 되도록, Weave가 이어 가겠습니다. 지금까지 Weave Assist였습니다. 감사합니다.',
+    'end3': '갤럭시의 모든 순간이 다시 이야기가 되도록, Weave가 이어 가겠습니다.',
+    'bye': '지금까지 Weave Assist였습니다. 감사합니다.',      # 11-13 7차: 맺는 인사는 마지막 장(아이콘과 Weave 글자만)에서
     # 제안 장표(본 발표 흐름에는 넣지 않음. 넣는다면 이렇게 말함)
     'p_fx1': ('저희 설문에서 응답자의 83.8%는 어느 앱에 남겼는지 몰라 앱을 하나씩 열어 봤다고 답했습니다. '
               '(클릭) 기록 통합 검색이 있으면, 이 83.8%는 앱을 하나씩 여는 대신 한 번의 검색으로 찾습니다.'),
@@ -130,8 +133,8 @@ CUES = {
     'p_fx3.num': ('p_fx3', 0, '82.4%'),
     'bi.weave': ('bi', 2, '하나로 엮습니다'),
     'cmp.wa': ('cmp', 0, 'Writing Assist는'), 'cmp.kn': ('cmp', 0, '카나나는'), 'cmp.nn': ('cmp', 0, 'Now Nudge와'),
-    'tl.u0': ('tl', 1, '뜻으로 찾는'), 'tl.u1': ('tl', 1, '찾아서 답하는'), 'tl.u2': ('tl', 1, '지난해에는'), 'tl.u3': ('tl', 1, '올해는'),
-    'tl.d0': ('tl', 2, '매일 쓰는'), 'tl.d1': ('tl', 2, '기기 안에서 AI를'), 'tl.d2': ('tl', 2, '2024년에는'), 'tl.d3': ('tl', 2, '지난해에는'),
+    'tl.u0': ('tl', 1, '뜻으로 찾는'), 'tl.u1': ('tl', 1, '벡터를 찾아 답하는'), 'tl.u2': ('tl', 1, '지난해에는'), 'tl.u3': ('tl', 1, '올해는'),
+    'tl.d0': ('tl', 2, '매일 쓰는'), 'tl.d1': ('tl', 2, '온디바이스 AI 연산을'), 'tl.d2': ('tl', 2, '2024년에는'), 'tl.d3': ('tl', 2, '지난해에는'),
 }
 HK_LEAD = 3.0                      # 6쪽: 검색 화면('검색 결과가 없습니다')을 말없이 보여 주는 시간(초). 그 뒤에 말을 뗌
 HW.NOTES.update(NOTES)
@@ -165,25 +168,25 @@ def ring(key, cx, cy, ro, pct, color=PURPLE, track=TRACK, k=RING_K):
             [R(key + '/arc', *box, prst='blockArc', fill=color, line=None, adj=dict(adj1=16200000, adj2=end, adj3=adj))])
 
 
-def logo_word_w(pt):
-    """'Weave Assist'(Samsung Sharp Sans Bold, 자간 -0.5pt)의 폭(px). 글꼴 파일이 없으면 어림."""
+def logo_word_w(pt, text='Weave Assist'):
+    """로고 글자(Samsung Sharp Sans Bold, 자간 -0.5pt)의 폭(px). 글꼴 파일이 없으면 어림."""
     f = Path.home() / '.cache' / 'weave-tools' / 'fonts' / 'SamsungSharpSans-Bold.ttf'
     if f.exists():
         from PIL import ImageFont
-        return ImageFont.truetype(str(f), 1000).getlength('Weave Assist') * pt * 4 / 3 / 1000 - 11 * 0.5 * 4 / 3
-    return tw('Weave Assist', pt, 'b') * 1.1
+        return ImageFont.truetype(str(f), 1000).getlength(text) * pt * 4 / 3 / 1000 - (len(text) - 1) * 0.5 * 4 / 3
+    return tw(text, pt, 'b') * 1.1
 
 
-def logo(key, x, cy, mark=58, pt=44):
+def logo(key, x, cy, mark=58, pt=44, text='Weave Assist'):
     """표지와 같은 로고: 보라 네모 + 흰 실타래, 그 옆에 'Weave Assist'(글꼴과 그라데이션은 make.py의 logo_style이 입힘).
     돌려줌: (네모 원시 목록, 글 원시 목록, 전체 폭)."""
     ic = mark * 2 / 3
     gap = mark * 0.22
-    ww = logo_word_w(pt)
+    ww = logo_word_w(pt, text)
     return ([R(key + '/mark', x, cy - mark / 2, mark, mark, prst='roundRect', radius=mark * 15 / 56, line=None,
                grad=dict(stops=[(0, '8D6BFF', None), (55, '6B4EFF', None), (100, '5A3FE0', None)], ang=55), shadow=(20, 8, '6B4EFF', 30)),
              P(key + '/icon', ICON['spool_w'], x + (mark - ic) / 2, cy - ic / 2, ic, ic)],
-            [T(key + '/logo_word', x + mark + gap, cy - pt * 0.8, ww + 24, pt * 1.6, 'Weave Assist', size=pt, color=PURPLE, weight='b', anchor='ctr',
+            [T(key + '/logo_word', x + mark + gap, cy - pt * 0.8, ww + 24, pt * 1.6, text, size=pt, color=PURPLE, weight='b', anchor='ctr',
                spc=-0.5)],
             mark + gap + ww)
 
@@ -571,9 +574,12 @@ def s_fx(key, first=False, effect=False):
 
 
 # ------------------------------------------------------------------ 뒷부분 2: 비즈니스 임팩트
-# 11-13 6차: 기록을 남기는 앱이 아닌 다섯(음악, 비디오, 스토어, PENUP, 시계)을 빼서 19 → 14개. 줄마다 4, 6, 4개
-BI_APPS = ['gallery', 'messages', 'kakao', 'camera', 'calendar', 'notes', 'email', 'health', 'maps', 'cloud', 'wallet', 'phone', 'internet', 'recorder']
-BI_ROWS = (4, 6, 4)
+# 11-13 6차에 기록을 남기는 앱이 아닌 다섯(음악, 비디오, 스토어, PENUP, 시계)을 빼서 14개(4·6·4)로 했다가,
+# 7차에 5차까지 쓰던 묶음으로 되돌림(19개, 6·7·6. '예전 것이 오밀조밀해서 더 낫다')
+BI_APPS = ['gallery', 'messages', 'kakao', 'camera', 'calendar', 'music', 'video', 'notes', 'store', 'email', 'health', 'maps', 'cloud',
+           'wallet', 'phone', 'internet', 'penup', 'recorder', 'clock']
+BI_ROWS = (6, 7, 6)
+BI_NAME_PT = 14                                             # 휴대폰 안 Weave 동그라미 아래의 'Weave Assist'(7차)
 BI_LX, BI_RX = 252, 1028                                    # 왼쪽 묶음 가운데, 오른쪽 묶음 가운데
 BI_PH = (640 - 113, 168, 226, 388)                          # 가운데 휴대폰(몸통 상자)
 BI_WV = (640, 352, 42)                                      # 휴대폰 안의 Weave 동그라미: 가운데 x, y, 반지름
@@ -614,8 +620,8 @@ def s_bi():
     동그라미가 보라로 켜지며 고리 셋과 작은 별이 둥글게 퍼진다(모션그래픽에서 기록이 실타래 버튼에 닿을 때처럼)."""
     s = Slide('bi', trans=('fade', 500), bar=False, notes=NOTES['bi'])
     s.add('bi/title', [title('bi/title', [('쓸수록 쌓여, ', INK), ('갤럭시를 떠나기 어려워집니다', PURPLE)])])
-    # 왼쪽: 앱 14개(4·6·4). 수가 줄어든 만큼 조금 키우고 사이를 넓힘(44 → 46px, 54 → 58px)
-    apps, sz, gx, gy = [], 46, 58, 56
+    # 왼쪽: 앱 19개(6·7·6), 44px을 54px 간격으로
+    apps, sz, gx, gy = [], 44, 54, 54
     cuts = [sum(BI_ROWS[:i]) for i in range(len(BI_ROWS) + 1)]
     rows = [BI_APPS[a:b] for a, b in zip(cuts, cuts[1:])]
     assert sum(BI_ROWS) == len(BI_APPS)
@@ -624,7 +630,7 @@ def s_bi():
         for c_, nm in enumerate(names):
             jig = ((r_ * 7 + c_ * 5) % 9) - 4
             icon = ICON['note'] if nm == 'notes' else str(OUTRO / ('app-%s.png' % nm))       # 삼성노트는 가장자리를 다듬은 것
-            apps.append(P('bi/app/%s' % nm, icon, x0 + c_ * gx - sz / 2, 170 + r_ * gy + jig, sz, sz))
+            apps.append(P('bi/app/%s' % nm, icon, x0 + c_ * gx - sz / 2, 172 + r_ * gy + jig, sz, sz))
     s.add('bi/apps', apps)
     s.add('bi/l', bi_stat('bi/l', BI_LX, '41', '개', '사용자가 월평균 쓰는 앱 수¹',
                           [('기록은 ', INK), ('41개 앱에 흩어져', PURPLE), (' 있고', INK)]))
@@ -652,6 +658,10 @@ def s_bi():
     s.add('bi/wv_on', [R('bi/wv_on/c', cx - r, cy - r, 2 * r, 2 * r, prst='ellipse', line=None, shadow=(22, 6, '6B4EFF', 46),
                          grad=dict(stops=[(0, '8D6BFF', None), (55, '6B4EFF', None), (100, '5A3FE0', None)], ang=55)),
                        P('bi/wv_on/sp', ICON['spool_w'], cx - 23, cy - 23, 46, 46)])
+    ny = cy + r + 11                                        # 동그라미 아래 이름: 불이 켜지기 전에는 옅게, 켜지면 보라
+    name = lambda k, col: [T(k, cx - 80, ny, 160, 24, 'Weave Assist', size=BI_NAME_PT, color=col, weight='b', align='c', anchor='ctr')]
+    s.add('bi/wvn', name('bi/wvn', 'C3B8EE'))
+    s.add('bi/wvn_on', name('bi/wvn_on', PURPLE))
     sparks = [(-62, -50, 10), (66, -40, 7.5), (58, 56, 9), (-54, 60, 7)]
     for i, (dx, dy, sr) in enumerate(sparks):               # 반짝이는 작은 별(잠깐만 보임)
         s.add('bi/sk%d' % i, star4_icon('bi/sk%d' % i, cx + dx, cy + dy, r=sr, color=PURPLE2), temp=True)
@@ -664,12 +674,12 @@ def s_bi():
     s.on('bi/arc', 'wheel_in', 150, 850)
     s.on('bi/r', 'rise', 420, 520, dy=12)
     s.click()      # 2: 갤럭시가 뜨고 → 양쪽 기록이 Weave로 이어짐 → 동그라미가 켜지며 빛이 퍼짐
-    s.on(['bi/phone', 'bi/wv'], 'rise', 0, 560, dy=16)
+    s.on(['bi/phone', 'bi/wv', 'bi/wvn'], 'rise', 0, 560, dy=16)
     tt = max(cue('bi.weave', 3000, ahead=0.5), 760)
     s.on('bi/thl', 'wipe_in', tt, 440, dir='left')
     s.on('bi/thr', 'wipe_in', tt, 440, dir='right')
     on = tt + 440
-    s.on('bi/wv_on', 'fade_in', on, 280)
+    s.on(['bi/wv_on', 'bi/wvn_on'], 'fade_in', on, 280)
     s.on(['bi/halo', 'bi/glow'], 'fade_in', on, 600)
     for i, d in enumerate(BI_RINGS):
         s.on('bi/rg%d' % i, 'jump', on + i * 260)
@@ -795,7 +805,7 @@ TL_UP = [    # (x, 해, 한마디, 근거, 아이콘)
 ]
 TL_DN = [
     (270, '2010', '키보드와 기기', 'Galaxy · Keyboard⁵', 'ic-keyboard.png'),
-    (420, '2019', '기기 안 AI 연산', 'NPU · Galaxy S10⁶', 'ic-npu.png'),
+    (420, '2019', '온디바이스 AI 연산', 'NPU · Galaxy S10⁶', 'ic-npu.png'),      # 11-13 7차: '기기 안 AI 연산'에서(대본도 '온디바이스 AI 연산을 위한 NPU')
     (706, '2024', 'Galaxy AI 등장', 'Galaxy S24⁷', 'ic-galaxyai.png'),
     (846, '2025', '개인 데이터 엔진', 'PDE · Galaxy S25⁸', 'ic-pde.png'),
 ]
@@ -929,6 +939,19 @@ def s_end3(photo='closing-3-family-sea.jpg', stops=((0, 54), (30, 58), (62, 58),
     return s
 
 
+BYE_MARK, BYE_PT = 86, 68          # 맺는 장의 아이콘 한 변과 글자 크기(14쪽 가운데의 로고와 같은 크기)
+
+
+def s_bye():
+    """맺는 인사("지금까지 Weave Assist였습니다. 감사합니다.")를 하는 마지막 장(11-13 7차): 덱의 기본 바탕 한가운데에 아이콘과 'Weave' 글자만."""
+    s = Slide('bye', trans=('fade', 900), bar=False, notes=NOTES['bye'])
+    w = BYE_MARK * 1.22 + logo_word_w(BYE_PT, 'Weave')
+    mark, word, _ = logo('bye', 640 - w / 2 - 5, 360, mark=BYE_MARK, pt=BYE_PT, text='Weave')      # 글상자의 왼쪽 여백만큼 당겨 보이는 묶음이 한가운데에 오게
+    s.add('bye/logo', mark + word)
+    s.on('bye/logo', 'rise', 350, 800, dy=12)
+    return s
+
+
 # ------------------------------------------------------------------ 가름 장, 사진 출처
 def s_divider(key, head, lines, note):
     s = Slide(key, trans=('fade', 500), bar=False, notes=note)
@@ -966,7 +989,14 @@ def s_fx_one():
     return fx_new.s_fx()
 
 
+def s_cmp_main():
+    """기존 기능과의 비교(7차: 다시 본 발표로). cmp_new가 이 파일을 불러 쓰므로 그릴 때 불러온다."""
+    import cmp_new
+    return cmp_new.s_cmp()
+
+
 # 11-12 4차: 비교 장을 Lock-in 앞으로(기대효과 → 비교 → Lock-in → 연표). Lock-in에서 '지금, 갤럭시에서 가능한 이유'로 바로 이어지게
 # 11-13 6차: 기대효과 세 장 → 한 장, 비교 장은 Appendix로(make.appendix_specs). 차례: 기대효과 → Lock-in → 연표 → 마무리
-SLIDES_BACK = [s_fx_one, s_bi, s_tl, s_end1, s_end2, s_end3]
+# 11-13 7차: 비교 장을 다시 본 발표로(4차와 같은 자리), 맺는 인사를 하는 마지막 장(s_bye)을 더함. 차례: 기대효과 → 비교 → Lock-in → 연표 → 마무리 셋 → 맺는 장
+SLIDES_BACK = [s_fx_one, s_cmp_main, s_bi, s_tl, s_end1, s_end2, s_end3, s_bye]
 SLIDES_PROPOSAL = []               # 6차: 제안 장표 묶음은 없음(기대효과를 고리의 움직임으로 보여 주던 세 장은 이전 판 (5차)에)
