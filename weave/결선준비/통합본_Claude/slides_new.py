@@ -575,9 +575,11 @@ def s_fx(key, first=False, effect=False):
 
 # ------------------------------------------------------------------ 뒷부분 2: 비즈니스 임팩트
 # 11-13 6차에 기록을 남기는 앱이 아닌 다섯(음악, 비디오, 스토어, PENUP, 시계)을 빼서 14개(4·6·4)로 했다가,
-# 7차에 5차까지 쓰던 묶음으로 되돌림(19개, 6·7·6. '예전 것이 오밀조밀해서 더 낫다')
-BI_APPS = ['gallery', 'messages', 'kakao', 'camera', 'calendar', 'music', 'video', 'notes', 'store', 'email', 'health', 'maps', 'cloud',
-           'wallet', 'phone', 'internet', 'penup', 'recorder', 'clock']
+# 7차에 5차까지 쓰던 묶음으로 되돌림(19개, 6·7·6. '예전 것이 오밀조밀해서 더 낫다').
+# 7차 뒤(11-13): 아이콘 그림과 앱 차례를 팀원 덱(SB-Jo/t3 weave/결선준비/outro/weave_outro_bimpact.pptx)의 왼쪽 묶음 그대로. 자리와 크기는 같고 그림만 실제 앱 아이콘 19개로 바뀜
+# (캘린더, 음악, 비디오, 이메일, 지도, PENUP 자리에 리마인더, 연락처, 계산기, 설정, 내 파일, 날씨). 그림은 assets/outro/app-*.png
+BI_APPS = ['gallery', 'messages', 'kakao', 'camera', 'reminder', 'contacts', 'calculator', 'notes', 'store', 'settings', 'health', 'myfiles', 'cloud',
+           'wallet', 'phone', 'internet', 'weather', 'recorder', 'clock']
 BI_ROWS = (6, 7, 6)
 BI_NAME_PT = 14                                             # 휴대폰 안 Weave 동그라미 아래의 'Weave Assist'(7차)
 BI_LX, BI_RX = 252, 1028                                    # 왼쪽 묶음 가운데, 오른쪽 묶음 가운데
@@ -629,8 +631,7 @@ def s_bi():
         x0 = BI_LX - (len(names) - 1) * gx / 2
         for c_, nm in enumerate(names):
             jig = ((r_ * 7 + c_ * 5) % 9) - 4
-            icon = ICON['note'] if nm == 'notes' else str(OUTRO / ('app-%s.png' % nm))       # 삼성노트는 가장자리를 다듬은 것
-            apps.append(P('bi/app/%s' % nm, icon, x0 + c_ * gx - sz / 2, 172 + r_ * gy + jig, sz, sz))
+            apps.append(P('bi/app/%s' % nm, str(OUTRO / ('app-%s.png' % nm)), x0 + c_ * gx - sz / 2, 172 + r_ * gy + jig, sz, sz))
     s.add('bi/apps', apps)
     s.add('bi/l', bi_stat('bi/l', BI_LX, '41', '개', '사용자가 월평균 쓰는 앱 수¹',
                           [('기록은 ', INK), ('41개 앱에 흩어져', PURPLE), (' 있고', INK)]))
