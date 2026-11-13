@@ -1,6 +1,7 @@
 """기존 기능과의 비교 장(5차 35쪽) 후보 — 두 축 지도(slides_new.s_cmp)를 바꾸는 안. 11-12 밤.
 11-13 6차: 비교 장은 본 발표에서 빼고, 후보 나에 글을 보탠 판을 Appendix 맨 앞에 둔다(s_cmp_apx).
 11-13 7차: 다시 본 발표로(기대효과 다음, 33쪽). 축 글자를 키우고, 이름을 영문 정식 이름으로, 넓은 쪽에 '임베딩 검색', '키워드 매칭' 뱃지를 더한 판(s_cmp. 이 파일 끝).
+11-13 8차: 그 판을 다시 Appendix 맨 앞으로(s_cmp_apx2). 기존 기능은 장이 열릴 때부터 다 떠 있고, 클릭하면 Weave가 뜬다. 대본은 발표자가 다시 쓴 글(N.NOTES['cmp']).
 
 사용자 검토
 - 그림이 조금 오른쪽으로 치우쳐 있다.
@@ -283,11 +284,11 @@ CM_WEAVE = (884, 336)                               # Weave의 가운데 x, 축�
 CM_NAME_PT, CM_WHAT_PT = 15, 11.5
 
 
-def s_cmp():
-    """기존 기능과의 비교(본 발표). 가로 찾는 범위(좁게 → 넓게), 세로 찾는 깊이(얕게 → 깊게). 기존 기능 넷은 이름을 말할 때 하나씩 뜨고,
-    Finder 곁에 '임베딩 검색', '키워드 매칭' 뱃지가 뒤따른다. (클릭) 얕은 쪽을 넘어 깊은 쪽으로 화살표가 뻗고 Weave가 뜬다."""
-    key = 'cmp'
-    s = Slide(key, trans=('fade', 500), bar=False, notes=N.NOTES['cmp'])
+def s_cmp(key='cmp', shown=False):
+    """기존 기능과의 비교. 가로 찾는 범위(좁게 → 넓게), 세로 찾는 깊이(얕게 → 깊게). 기존 기능 넷은 이름을 말할 때 하나씩 뜨고,
+    Finder 곁에 '임베딩 검색', '키워드 매칭' 뱃지가 뒤따른다. (클릭) 얕은 쪽을 넘어 깊은 쪽으로 화살표가 뻗고 Weave가 뜬다.
+    shown(8차의 Appendix 판): 축과 기존 기능, 뱃지는 장이 열릴 때부터 떠 있고(뜨는 효과 없음) 클릭하면 Weave만 뜬다."""
+    s = Slide(key, trans=('fade', 400 if shown else 500), bar=False, notes=N.NOTES['cmp'])
     s.add(key + '/title', [N.title(key + '/title', TITLE)])
     (ox, oy), xe, yt = CM_O, CM_XE, CM_YT
     s.add(key + '/axx', [C(key + '/axx', [(ox, oy)] * 2 + [(xe, oy)] * 2, color=N.MAP_AX, w=2.2, tail='triangle')])
@@ -317,20 +318,26 @@ def s_cmp():
     s.add(key + '/weave', weave_tile(key + '/weave', wx, wy) + [
         T(key + '/weave/what', wx - 120, wy + 33 + 6 + 28, 240, 20, APX_WEAVE, size=12, color=PURPLE, align='c', anchor='ctr')])
     s.add(key + '/src', [N.foot(key + '/src', N.CMP_SRC)])
-    s.on(key + '/axx', 'wipe_in', 150, 600)
-    s.on(key + '/axy', 'wipe_in', 150, 600, dir='up')
-    s.on(key + '/axl', 'fade_in', 600, 450)
-    # 기존 기능은 이름을 말할 때 하나씩(Now Nudge와 Finder는 한 문장에 이어 나와 바로 뒤따르고, 그 곁에 뱃지 둘)
-    t_wa, t_kn, t_nn = cue(key + '.wa', 3300, ahead=0.2), cue(key + '.kn', 5600, ahead=0.2), cue(key + '.nn', 7700, ahead=0.2)
-    for k, t in (('wa', t_wa), ('kanana', t_kn), ('nudge', t_nn), ('finder', t_nn + 620)):
-        s.on('%s/%s' % (key, k), 'zoom_in', t, 380, **{'from': 0.6})
-    s.on(key + '/emb', 'fade_in', t_nn + 620 + 560, 380)
-    s.on(key + '/kw', 'fade_in', t_nn + 620 + 820, 380)
+    if not shown:
+        s.on(key + '/axx', 'wipe_in', 150, 600)
+        s.on(key + '/axy', 'wipe_in', 150, 600, dir='up')
+        s.on(key + '/axl', 'fade_in', 600, 450)
+        # 기존 기능은 이름을 말할 때 하나씩(Now Nudge와 Finder는 한 문장에 이어 나와 바로 뒤따르고, 그 곁에 뱃지 둘)
+        t_wa, t_kn, t_nn = cue(key + '.wa', 3300, ahead=0.2), cue(key + '.kn', 5600, ahead=0.2), cue(key + '.nn', 7700, ahead=0.2)
+        for k, t in (('wa', t_wa), ('kanana', t_kn), ('nudge', t_nn), ('finder', t_nn + 620)):
+            s.on('%s/%s' % (key, k), 'zoom_in', t, 380, **{'from': 0.6})
+        s.on(key + '/emb', 'fade_in', t_nn + 620 + 560, 380)
+        s.on(key + '/kw', 'fade_in', t_nn + 620 + 820, 380)
     s.click()      # 1: 얕은 쪽을 넘어 깊은 쪽으로 → Weave
     s.on(key + '/arrow', 'wipe_in', 0, 520, dir='up')
     s.on(key + '/wglow', 'fade_in', 300, 500)
     weave_on(s, key, 420)
     return s
+
+
+def s_cmp_apx2():
+    """8차(11-13): Appendix 맨 앞의 '기존 기능과의 비교'. 7차에 본 발표에 있던 판 그대로이고, 기존 기능은 처음부터 떠 있다가 클릭하면 Weave가 뜬다."""
+    return s_cmp('apx_map', shown=True)
 
 
 CANDIDATES = [('가', 'cmpa', s_cmpa, '두 띠'), ('나', 'cmpb', s_cmpb, '넓이와 깊이'), ('다', 'cmpc', s_cmpc, '네 칸'), ('라', 'cmpd', s_cmpd, '계단')]

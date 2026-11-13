@@ -12,13 +12,16 @@
   7차(11-13): 3~5쪽 인물 뒤에 아주 옅은 보라 그라데이션(patch_aura).
   4차까지는 원본/Weave_결선_중간본_도입부수정.pptx의 장을 옮겨 손보고(patch_intro) 9, 11~12, 14쪽은 새로 그렸다(slides_new.py의 s_hub2, s_scat, s_link, s_bridge).
 - 6쪽(수많은 기록): 새로 그린다(slides_new.py).
-- 바꾸기 전의 장: 원본/통합본_6차.pptx (git show 9c91050:…), 원본/통합본_5차.pptx (git show fcf8346:…), 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
+- 바꾸기 전의 장: 원본/통합본_7차.pptx (git show e0a4e14:…), 원본/통합본_6차.pptx (git show 9c91050:…), 원본/통합본_5차.pptx (git show fcf8346:…), 원본/통합본_4차.pptx (git show 406c351:…), 원본/통합본_3차.pptx (git show ab0c460:…), 원본/통합본_2차.pptx (git show 9a8bddb:…), 원본/통합본_1차.pptx (git show ab7ab74:…)에서 옮겨 덱 맨 뒤에 둔다.
 - 표지와 모션그래픽 영상 장: 02_PPT/Weave_결선_중간본.pptx의 1쪽과 4쪽. 표지는 영상을 v9(10_표지영상/표지_루프.mp4, 18초)로 바꾸고 제목을 조금 줄인다(patch_cover).
   모션그래픽은 영상을 v24(08_인트로영상/Weave_모션그래픽.mp4: 제목의 색과 자간을 표지와 같게)로 바꿔 끼운다(patch_mg).
 - 솔루션 3장 + How it Works 13장 + Appendix 15장: 09_HowItWorks/장표5_claude/build.py의 장을 그대로 그린다.
 - 뒷부분: 원본/Weave_BI_아웃트로_통합_1110_v7.pptx (WIWLEE/t3-2)의 내용을 같은 엔진으로 다시 그린다(slides_new.py).
   6차: 기대효과는 한 장(fx_new.s_fx), 기존 기능과의 비교는 Appendix 맨 앞으로(cmp_new.s_cmp_apx), 제안 장표 묶음은 없앰.
   7차: 비교 장을 다시 본 발표로(cmp_new.s_cmp, 기대효과 다음), 맺는 인사를 하는 마지막 장(slides_new.s_bye)을 더함.
+  8차(11-13 낮): 발표자가 다시 쓴 대본. 12쪽을 둘로 나눔(patch_gather: 기록 그림만 가운데로 옮겨 오는 장을 11쪽과 12쪽 사이에),
+  10쪽 AI 답변 글자를 한 단계 작게 하고 말풍선의 네 변 여백을 맞춤(patch_answer), 15쪽 로고를 조금 오른쪽으로(patch_logo_center),
+  비교 장은 다시 Appendix 맨 앞으로(cmp_new.s_cmp_apx2), 모션그래픽은 v25(03 장면의 대화, 탑승권, 링크, 병 사진).
 """
 import argparse
 import copy
@@ -81,8 +84,9 @@ PREV3 = HERE / '원본' / '통합본_3차.pptx'                # 11월 12일 3�
 PREV4 = HERE / '원본' / '통합본_4차.pptx'                # 11월 12일 4차 통합본
 PREV5 = HERE / '원본' / '통합본_5차.pptx'                # 11월 12일 5차 통합본(밤의 낱말 수정까지, fcf8346)
 PREV6 = HERE / '원본' / '통합본_6차.pptx'                # 11월 13일 6차 통합본(9c91050)
+PREV7 = HERE / '원본' / '통합본_7차.pptx'                # 11월 13일 7차 통합본(7차 뒤의 손질까지, e0a4e14)
 INTRO2 = HERE / '원본' / '통합본_인트로수정_87bf80b.pptx'   # 팀원이 7~14쪽을 손본 덱(jjun-0824/t3 87bf80b). 2~5쪽과 7~14쪽을 여기서 옮김
-MG_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'      # 모션그래픽 v24(111.1초). 중간본에 든 v23과 길이와 소리가 같음
+MG_MP4 = ROOT / '08_인트로영상' / 'Weave_모션그래픽.mp4'      # 모션그래픽 v25(111.1초). 중간본에 든 v23과 길이와 소리가 같음
 COVER_MP4 = ROOT / '10_표지영상' / '표지_루프.mp4'      # 표지 영상 v9(18초)
 COVER_JPG = ROOT / '10_표지영상' / '표지_포스터.jpg'
 COVER_PT = 48                                          # 표지 제목 크기(54 → 48pt: 'Assist'의 t가 뒤 영상의 '부재중 전화' 조각에 닿지 않게)
@@ -138,7 +142,9 @@ def logo_style(slides):
 
 
 # 옮겨 오는 인트로 장: {키: INTRO2의 쪽}. in..의 숫자는 처음 인트로 덱의 쪽(이름을 그대로 둠). 6쪽은 새로 그림(hook)
-FOREIGN = {'in02': 2, 'in03': 3, 'in04': 4, 'in05': 5, 'in07': 7, 'in08': 8, 'hub2': 9, 'in09': 10, 'scat': 11, 'link': 12, 'in12': 13, 'bridge': 14}
+# 8차: gath는 11쪽(scat)을 한 번 더 옮겨 기록 그림만 가운데에 둔 장(patch_gather). 덱에서는 11쪽과 예전 12쪽(link) 사이, 새 12쪽
+FOREIGN = {'in02': 2, 'in03': 3, 'in04': 4, 'in05': 5, 'in07': 7, 'in08': 8, 'hub2': 9, 'in09': 10, 'scat': 11, 'gath': 11, 'link': 12, 'in12': 13,
+           'bridge': 14}
 INTRO_KEYS = list(FOREIGN)
 RING_ADJ = ('7741', '9800')                        # 7·8쪽 고리 굵기(도형 크기의 7.7% → 9.8%, 298px에 23px → 29px)
 OLD_SRC = '* 출처: 스마트폰 내 개인 기록 탐색 및 재검색 행태 설문조사 (응답 210명, 2026. 11)'
@@ -155,7 +161,7 @@ BUBBLE_TAIL = {'b2': lambda w: (w / 2, w / 2 - 7),             # 가운데 인�
 FLOATS_BOX = (0, 16, 1280, 236)                     # 3~5쪽 말풍선 위에 흩어진 옅은 기록 조각(assets/intro/floats.png). 제목은 빼고 그 자리까지 씀
 NOTE_OLD_SHA1 = 'd9375bd6e2'                        # 가장자리에 흰 테가 남은 삼성노트 아이콘(sha1 앞 10자리). 옮겨 온 장에서는 다듬은 것으로 바꿔 끼움
 # 덱 차례(본 발표). 글자 = 옮겨 온 장, ('own', 이름) = 새로 그린 묶음, 'mg' = 모션그래픽
-SEQ = ['cover', 'in02', 'in03', 'in04', 'in05', ('own', 'hook'), 'in07', 'in08', 'hub2', 'in09', 'scat', 'link', 'in12', 'bridge',
+SEQ = ['cover', 'in02', 'in03', 'in04', 'in05', ('own', 'hook'), 'in07', 'in08', 'hub2', 'in09', 'scat', 'gath', 'link', 'in12', 'bridge',
        'mg', ('own', 'hiw'), ('own', 'back')]
 PREV_KEEP = list(range(2, 14)) + list(range(32, 42)) + [59]      # 1차 통합본에서 남겨 두는 장: 인트로 2~13쪽, 뒷부분 32~41쪽, 저장 채널 그림(59쪽)
 PREV2_KEEP = list(range(2, 15)) + [26] + list(range(32, 42)) + [62]      # 2차 통합본에서: 인트로 2~14쪽, 빠진 고리(26쪽), 뒷부분 32~41쪽, 두 줄 연표 제안(62쪽)
@@ -166,6 +172,9 @@ PREV4_KEEP = list(range(7, 15))                         # 4차 통합본에서: 
 # 6차 통합본에서: 7차에 화면이나 대본이 바뀐 장. 인물 셋(3~5쪽), 기대효과(32), 비즈니스 임팩트(33), 연표(34), 마무리 ③(37), Appendix에 두었던 비교 장(39)
 PREV6_KEEP = [3, 4, 5, 32, 33, 34, 37, 39]
 PREV3_KEEP = [16] + list(range(21, 27)) + [30, 37]      # 3차 통합본에서: 16쪽(대본), 21쪽(뺀 장), 22~26쪽과 30쪽(화면 번호와 대본), 37쪽(비교 표)
+# 7차 통합본에서: 8차에 화면이나 대본이 바뀐 장. 인트로 2~5, 7~12, 14쪽, 솔루션 ③(18), 기존 검색 물음(21), 키워드(22), 임베딩(23), step(24), 중간 단서(25),
+# Hop 1(29), 결과 제공(31), 기대효과(32), 비교(33), 비즈니스 임팩트(34), 연표(35), 마무리 ①②(36, 37), 맺는 장(39)
+PREV7_KEEP = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14, 18, 21, 22, 23, 24, 25, 29, 31, 32, 33, 34, 35, 36, 37, 39]
 
 
 def own_specs():
@@ -176,8 +185,11 @@ def own_specs():
 
 
 def appendix_specs():
-    """Appendix: 가름 장 → How it Works Appendix → 사진과 음악 출처. (6차에 맨 앞에 두었던 비교 장은 7차에 다시 본 발표로 감)"""
-    return HW.appendix_specs() + [N.s_credits2()]
+    """Appendix: 가름 장 → 기존 기능과의 비교 → How it Works Appendix → 사진과 음악 출처.
+    비교 장은 6차에 여기 있다가 7차에 본 발표로 갔고, 8차에 다시 가름 장 바로 뒤로 옴(cmp_new.s_cmp_apx2: 기존 기능은 처음부터 떠 있고 클릭하면 Weave)."""
+    import cmp_new
+    hw = HW.appendix_specs()
+    return [hw[0], cmp_new.s_cmp_apx2()] + hw[1:] + [N.s_credits2()]
 
 
 # ------------------------------------------------------------------ 옮겨 온 장을 손보는 도구
@@ -450,16 +462,24 @@ def patch_hub(sl):
                 rp.set('sz', str(b))
 
 
-# 10쪽 AI 답변: 세 줄. 가장 긴 첫 줄(17pt에 427px)이 말풍선 오른쪽 끝에 거의 닿는 크기(오른쪽 여백 7px). 묶음을 키워도 글자 크기는 그대로임(15pt였음).
+# 10쪽 AI 답변: 세 줄. 묶음을 키워도 글자 크기는 그대로임(묶음의 배율 1.25는 자리와 크기에만 듦).
+# 6차: 가장 긴 첫 줄이 말풍선 오른쪽 끝에 거의 닿는 크기(17pt, 오른쪽 여백 7px).
+# 8차(11-13): 글자를 한 단계 작게(17 → 16pt) 하고, 말풍선의 왼쪽, 오른쪽, 위, 아래 여백이 같아지게 말풍선 크기와 글 자리를 다시 잡음.
+#   여백은 말풍선 가장자리에서 글자(잉크)까지 ANS_PAD px: 왼쪽은 이름표의 별과 본문 첫 글자, 오른쪽은 가장 긴 첫 줄의 끝, 위는 이름표, 아래는 셋째 줄.
 # (글, 보라 굵게인가)
 ANSWER = [[('임베딩 모델은 텍스트, 이미지, 오디오 같은 복잡한', 0)],
           [('데이터를 컴퓨터가 이해할 수 있도록 고차원의', 0)],
           [('숫자 배열(벡터)', 1), ('로 변환하는 모델입니다.', 0)]]
-ANSWER_PT, ANSWER_LN = 1700, 130000                   # 글자 크기(1/100pt), 줄 간격(1/1000 %, 15pt 때는 135%): 셋째 줄 아래에 말풍선 끝까지 13px쯤 남게
+ANSWER_PT, ANSWER_LN = 1600, 130000                   # 글자 크기(1/100pt), 줄 간격(1/1000 %)
+ANS_PAD = 20                                          # 말풍선 가장자리에서 글자까지(px, 1280×720 기준)
+# PowerPoint로 찍어 잰 값(16pt): 본문 잉크 폭 401.6, 높이 85.6, 이름표 잉크 높이 13.6, 이름표와 본문 사이 24.0
+ANS_BOX = (ANS_PAD + 401.6 + ANS_PAD, ANS_PAD + 13.6 + 24.0 + 85.6 + ANS_PAD)      # 말풍선의 폭과 높이(px): 441.6 × 163.2 (17pt 때는 455 × 161.25)
+ANS_LABEL = (40.4, 14.4)                              # 이름표('AI 답변') 글상자의 왼쪽 위(말풍선 왼쪽 위에서, px). 별은 그 왼쪽에 함께 옮김: 잉크가 왼쪽 20, 위 20
+ANS_TEXT = (19.5, 49.4)                               # 본문 글상자의 왼쪽 위(px): 잉크가 왼쪽 20, 위 57.6
 
 
 def patch_answer(sl):
-    """10쪽: AI 답변의 글을 바꾼다. 문단(줄) 셋의 틀은 그대로 두고 글 토막만 새로 넣는다."""
+    """10쪽: AI 답변의 글을 바꾸고(문단 셋의 틀은 그대로 두고 글 토막만 새로 넣음) 말풍선 크기와 글 자리를 다시 잡는다(ANS_*)."""
     body = by_name(sl, 'Answer text').find(q('p:txBody'))
     paras = body.findall('{%s}p' % A)
     assert len(paras) == len(ANSWER), len(paras)
@@ -482,6 +502,26 @@ def patch_answer(sl):
                 p.append(r)
         if end is not None:
             end.set('sz', str(ANSWER_PT))
+    # 말풍선과 그 안의 자리. 묶음(!!ai/ans)의 자식 좌표는 배율 k(= 1.25)로 화면에 놓이므로 px를 k로 나눠 넣고, 묶음의 상자와 자식 좌표계도 말풍선에 맞춤
+    grp = by_name(sl, '!!ai/ans')
+    gx = grp.find(q('p:grpSpPr')).find('{%s}xfrm' % A)
+    off, ext, cho, che = (gx.find('{%s}%s' % (A, t)) for t in ('off', 'ext', 'chOff', 'chExt'))
+    k = int(ext.get('cx')) / int(che.get('cx'))
+    bub, lab, spark, txt = (by_name(sl, n) for n in ('Answer bubble', 'Answer label', '!!ai/spark2', 'Answer text'))
+    bx, by_, _, _ = box(bub)
+    assert abs(bx - int(cho.get('x')) / 9525) < 0.01 and abs(by_ - int(cho.get('y')) / 9525) < 0.01      # 말풍선이 묶음의 왼쪽 위
+    w, h = ANS_BOX[0] / k, ANS_BOX[1] / k
+    place(bub, w=w, h=h)
+    sx, _, _, _ = box(spark)
+    lx0, ly0, _, _ = box(lab)
+    lx, ly = bx + ANS_LABEL[0] / k, by_ + ANS_LABEL[1] / k
+    shift(spark, dx=lx - lx0, dy=ly - ly0)                # 별은 이름표와 함께
+    place(lab, x=lx, y=ly)
+    place(txt, x=bx + ANS_TEXT[0] / k, y=by_ + ANS_TEXT[1] / k, w=(ANS_BOX[0] - ANS_TEXT[0] - 4) / k)
+    ext.set('cx', str(round(ANS_BOX[0] * 9525)))
+    ext.set('cy', str(round(ANS_BOX[1] * 9525)))
+    che.set('cx', str(round(w * 9525)))
+    che.set('cy', str(round(h * 9525)))
 
 
 # 7차(11-13): 3~5쪽 인물 뒤에 아주 옅은 보라 그라데이션. 인물의 윤곽을 크게 흐린 그림(assets/intro/aura-N.png, tools/intro_assets.py --aura)을
@@ -517,10 +557,44 @@ def patch_aura(sl):
             break
 
 
-NOTE_OURS = {'in02', 'in03', 'in07', 'hub2'}          # 6차에 우리가 노트를 바꾼 장(옮겨 온 덱의 노트와 견주지 않음)
+# ------------------------------------------------------------------ 8차(11-13 낮): 12쪽을 둘로, 15쪽 로고의 자리
+GATH_DX = -289                                        # 11쪽의 기록 그림('지금의 나'의 가운데 x 929)을 화면 가운데(640)로 옮기는 만큼(px)
+
+
+def patch_gather(sl):
+    """새 12쪽: 11쪽(scat)을 한 번 더 옮긴 장에서 왼쪽의 물음을 빼고, 흩어진 기록 그림을 기울기와 흩어진 모양 그대로 화면 가운데로 옮긴다.
+    11쪽에서 넘어올 때는 Morph로 그림만 가운데로 미끄러져 오고(물음은 걷힘), 다음 장(link)으로 넘어갈 때는 예전 12쪽의 움직임 그대로
+    기록이 반듯해지며 선으로 이어진다. 11쪽의 뜨는 효과는 이 장에서는 필요 없어 없앤다."""
+    cap = by_name(sl, '!!cap8/2')
+    cap.getparent().remove(cap)
+    n = 0
+    for el in list(live_tree(sl)):
+        nv = el.find('.//' + q('p:cNvPr'))
+        name = nv.get('name') if nv is not None else ''
+        if name.startswith('!!bg/') or not name.startswith('!!'):
+            continue
+        shift(el, dx=GATH_DX)                                 # 묶음은 묶음의 상자만 옮기면 자식이 따라옴
+        n += 1
+    assert n == 17, n                                       # 옅은 앱 넷, 선 여덟(작게 숨어 있음), 기록 넷, '지금의 나'
+    for t in sl._element.findall(q('p:timing')):
+        sl._element.remove(t)
+
+
+LOGO_DX = 12                                          # 15쪽 로고(아이콘과 Weave Assist)를 오른쪽으로 옮기는 만큼(px)
+
+
+def patch_logo_center(sl):
+    """15쪽(잇는 장): 로고 묶음을 조금 오른쪽으로. 묶음의 좌우 끝은 화면 한가운데에 있었지만(잉크의 가운데 x 644),
+    짙은 아이콘이 왼쪽에 있고 글자는 오른쪽으로 갈수록 옅어져 왼쪽으로 치우쳐 보였다(잉크의 무게중심 x 593). 아래 실의 가운데(x 654)와도 맞춤."""
+    for name in ('!!br/mark', '!!br/logo/logo_word'):
+        shift(by_name(sl, name), dx=LOGO_DX)
+
+
+# 옮겨 온 덱의 노트와 견주지 않는 장: 6차에 우리가 노트를 바꾼 장과, 8차에 발표자가 대본을 다시 쓴 장
+NOTE_OURS = {'in02', 'in03', 'in04', 'in05', 'in07', 'in08', 'hub2', 'in09', 'scat', 'gath', 'link', 'bridge'}
 INTRO_PATCH = {                                       # 옮겨 온 장마다 6차부터 더 손보는 일
     'in03': [patch_person_click, patch_floats, patch_aura], 'in04': [patch_floats, patch_aura], 'in05': [patch_floats, patch_aura],
-    'in07': [patch_heading7], 'hub2': [patch_hub], 'in09': [patch_answer],
+    'in07': [patch_heading7], 'hub2': [patch_hub], 'in09': [patch_answer], 'gath': [patch_gather], 'bridge': [patch_logo_center],
 }
 
 
@@ -571,7 +645,12 @@ def build(dst):
     appx = draw(appendix_specs())
     prop = draw([N.s_divider('p0', '제안 장표', ['본 발표에 넣을지 정하지 않은 장'],
                              '여기부터는 제안 장표입니다. 본 발표에서는 넘기지 않습니다.')] + specs['prop']) if specs['prop'] else []      # 6차: 없음
-    prev6, prev5, prev4, prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV6, PREV5, PREV4, PREV3, PREV2, PREV))
+    prev7, prev6, prev5, prev4, prev3, prev2, prev1 = (list(Presentation(str(f)).slides) for f in (PREV7, PREV6, PREV5, PREV4, PREV3, PREV2, PREV))
+    old7 = draw([N.s_divider('o7', '이전 판 (7차)', ['11월 13일 7차 통합본에서 8차에 화면이나 대본이 바뀐 장: 인트로 2~5, 7~12, 14쪽, 솔루션 ③(18쪽)',
+                                                    'How it Works 21~25, 29, 31쪽, 기대효과(32쪽), 비교(33쪽), 비즈니스 임팩트(34쪽), 연표(35쪽)',
+                                                    '마무리 ①②(36, 37쪽), 맺는 장(39쪽). 노트에 그때의 대본이 그대로 있습니다'],
+                             '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
+    old7 += [F.copy_slide(prs, prev7[i - 1], note_tpl) for i in PREV7_KEEP]
     old6 = draw([N.s_divider('o6', '이전 판 (6차)', ['11월 13일 6차 통합본에서 7차에 화면이나 대본이 바뀐 장: 인물 셋(3~5쪽), 기대효과(32쪽)',
                                                     '비즈니스 임팩트(33쪽), 연표(34쪽), 마무리 ③(37쪽), Appendix에 두었던 비교 장(39쪽)',
                                                     '노트에 그때의 대본이 그대로 있습니다'],
@@ -598,12 +677,12 @@ def build(dst):
                                                     '노트에 그때의 대본이 그대로 있습니다'],
                              '여기부터는 바꾸기 전의 장입니다. 본 발표에서는 넘기지 않습니다.')])
     old1 += [F.copy_slide(prs, prev1[i - 1], note_tpl) for i in PREV_KEEP] + [F.copy_slide(prs, src[12], note_tpl)]
-    order = [*main, *appx, *prop, *old6, *old5, *old4, *old3, *old2, *old1]
+    order = [*main, *appx, *prop, *old7, *old6, *old5, *old4, *old3, *old2, *old1]
     drop_slides(prs, [s for s in old if s not in (cover, mg)])
     reorder(prs, order)
     samsung_fonts.remap_prs(prs)
     logo_style(own['back'])                             # 맺는 장의 'Weave' 글자를 표지 제목처럼(Samsung Sharp Sans, 보라 그라데이션)
-    build.n_old6, build.n_old5, build.n_old4 = len(old6), len(old5), len(old4)
+    build.n_old7, build.n_old6, build.n_old5, build.n_old4 = len(old7), len(old6), len(old5), len(old4)
     build.n_main, build.n_appx, build.n_prop, build.n_old3, build.n_old2, build.n_old1 = n_main, len(appx), len(prop), len(old3), len(old2), len(old1)
     prs.save(str(dst))
     for key, nclick, nnote, _ in report:
