@@ -884,7 +884,7 @@ FX_ROWS = [     # (숫자, 단위, 고리에 차는 만큼(%), 불편 두 줄, �
     (93.8, '%', 93.8, ['정확한 이름이 떠오르지 않아', '검색하지 못했어요'], ['정확한 이름을 몰라도', '단서로 찾아요'], '²'),
     (82.4, '%', 82.4, ['챙겨야 할 부탁, 약속을', '나중에야 떠올렸어요'], ['챙겨야 할 부탁, 약속을', '묻기 전에 알려 줘요'], '²'),
 ]
-FX_NOTE = ('한 조사에 따르면, 직장인은 여러 앱에 흩어진 정보를 찾는 데 하루 59분을 쓰고 있습니다. '       # 59분: Workgeist Report(미국과 영국의 원격 근무자 설문)
+FX_NOTE = ('한 조사에 따르면, 직장인은 여러 앱에 흩어진 정보를 찾아 활용하는 데 하루 59분을 쓰고 있었습니다. '       # 59분: Workgeist Report(미국과 영국의 원격 근무자 설문). 7차 뒤: '찾는 데' → '찾아 활용하는 데', '쓰고 있습니다' → '쓰고 있었습니다'(사용자 글)
            '(클릭) 앞서 보신 것처럼 저희 설문에서도 93.8%는 정확한 이름이 떠오르지 않아 검색하지 못했으며, '       # 93.8%는 인트로 7쪽에서 본 숫자(같은 설문 6번)
            '(클릭) 82.4%는 부탁이나 약속을 잊었다가, 나중에야 떠올린 경험이 있었습니다. '
            '(클릭) Weave가 있다면, (클릭) 통합 검색, (클릭) 단서로 찾는 기억, (클릭) 먼저 건네는 기억을 통해, 찾는 시간은 줄이고, 놓친 기억은 되살립니다.')
@@ -897,6 +897,7 @@ HW.CUES.update(FX_CUES)
 HW.GAP_EXTRA.update({('fx', 3): -0.15, ('fx', 4): -0.25, ('fx', 5): -0.25})
 HW.LEAD_EXTRA.update({('fx', 4): -0.05, ('fx', 5): -0.05, ('fx', 6): -0.05})
 FX_RO = 82                          # 고리의 바깥 반지름(후보 때는 90)
+FX_RK = 0.085                       # 고리 굵기 ÷ 바깥지름. 7차 뒤: 띠를 살짝 가늘게(인트로 7·8쪽과 같던 0.098 → 0.085, 164px 고리에서 16 → 14px)
 FX_CY, FX_YN, FX_YST, FX_YG = 236, 326, 392, 338      # 고리 가운데, 숫자, 불편 문장, 달라진 문장의 위 끝
 FX_ICY, FX_YB = 520, 584            # Weave 아이콘의 가운데, 아래 제목의 위 끝
 FX_TC, FX_TURN = 1300, 400          # 숫자가 0까지 줄어드는 시간, 입꼬리가 도는 시간(후보 L은 1100, 330)
@@ -917,12 +918,12 @@ def s_fx():
     s = Slide(key, trans=('fade', 500), bar=False, notes=NOTES[key], free=True)
     s.add(key + '/to', [N.title(key + '/to', [('TO-BE', PURPLE)])])
     s.add(key + '/as', [N.title(key + '/as', [('AS-IS', NAVY)])], temp=True)
-    thick = N.RING_K * 2 * FX_RO
+    thick = FX_RK * 2 * FX_RO
     cols, frames = [], {}
     for i, (num, unit, fill, stmt, after, ref) in enumerate(FX_ROWS):
         cx, k = CXS[i], '%s/c%d' % (key, i + 1)
         st = (SHIFT, 0) if i == 0 else None
-        track, navy, _ = ring_set(k, cx, FX_CY, fill, ro=FX_RO)
+        track, navy, _ = ring_set(k, cx, FX_CY, fill, ro=FX_RO, k=FX_RK)
         s.add(k + '/track', track, start=st)
         s.add(k + '/arc0', navy, temp=True)
         s.add(k + '/full', [donut(k + '/full', cx, FX_CY, FX_RO + PAD, thick + 2 * PAD, PURPLE)])     # 짙은 호와 빈 자리를 함께 덮음
