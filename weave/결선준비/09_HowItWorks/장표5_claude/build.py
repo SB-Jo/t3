@@ -70,7 +70,9 @@ PH = {
     'w2': ('photo-meadow.jpg', '2025. 9. 27', (0.66, 0.6)),
     'w3': ('photo-champagne.jpg', '2025. 12. 31', (0.62, 0.45)),
     'glass': ('photo-glass.jpg', '2026. 1. 9', (0.45, 0.45)),
-    'bar': ('photo-bar.jpg', '2025. 11. 22', (0.5, 0.5)),          # 다른 날 마신 화이트 와인(임베딩 장의 둘째 와인 사진)
+    # 다른 날 마신 화이트 와인(임베딩 장의 둘째 와인 사진). 12차(11-13): 병과 라벨이 보이는 사진(photo-bar.jpg)이 집들이 날의 배비치 사진처럼 보여서,
+    # 병 없이 잔 여러 개에 화이트 와인이 담긴 사진으로(자체 제작, assets/photo-white-glasses.jpg)
+    'bar': (str(HERE / 'assets' / 'photo-white-glasses.jpg'), '2025. 11. 22', (0.5, 0.5)),
 }
 WINE4 = ['babich', 'w3', 'w2', 'w1']          # 키워드·끊어진 고리 장의 와인 사진 넷(갤러리처럼 최신순, 첫째가 집들이 날)
 BLUE, BLUE_HL, BLUE_BG = '4F7BFF', '7EA2FF', 'EEF3FF'    # 둘째 하위 질문 색(①은 보라, ②는 파랑)
@@ -80,8 +82,10 @@ ANSWER = '배비치 소비뇽 블랑'
 
 # ------------------------------------------------------------------ 장
 class Slide:
-    def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, cur=None, done=(), bg=True):
-        self.key, self.notes, self.advance = key, notes, advance
+    def __init__(self, key, notes='', trans=('morph', 900), advance=None, bar=True, cur=None, done=(), bg=True, free=False):
+        """free: 클릭해도 앞 묶음의 효과를 끝으로 당기지 않고 그대로 이어 가게 한다(본 차례의 nextAc="none").
+        말이 짧아 효과가 끝나기 전에 다음 클릭을 누르는 장에 쓴다(통합본의 기대효과 장: 기능 이름마다 클릭, 칸마다 숫자가 줄어드는 효과가 겹쳐 흐름)."""
+        self.key, self.notes, self.advance, self.free = key, notes, advance, free
         self.trans = (trans[0], round(trans[1] * SPEED)) if trans else trans
         self.bar, self.cur, self.done, self.bg = bar, cur, set(done), bg
         self.items = []
@@ -302,30 +306,31 @@ NOTES = {
     'hiw': '이는 어떻게 가능했을까요? 두 번째 시나리오를 다시 한번 차근차근 따라가 보겠습니다.',
     'ask': '친구 집들이에서 마신 와인을 다시 사려는데, 정확한 이름이 생각나지 않는 상황입니다.',
     'cloud': '답은 분명 제 기기 안에 있습니다. (클릭) 하지만, 단서는 여러 앱에 흩어져 있죠.',      # 10차: 본문에서 뺀 장(흐린 배경 그림을 만들 때만 그림)
-    'old': '그럼 기존의 두 가지 검색 방식으로 한번 찾아볼까요?',      # 10차: 키워드, 임베딩 둘 다 기존 검색임이 드러나게. 11-13: '지금 쓰는' → '기존의'
-    'kw': ('먼저 키워드 검색은 글자가 같은 기록을 찾습니다. '
-           '(클릭) ‘지은이네’로는 (클릭) 지은이네 집 주소가, (클릭) ‘집들이’로는 (클릭) 다른 사람 집들이가, '
-           '(클릭) ‘와인’으로는 (클릭) 다른 날 결제 내역이 나오죠. '
-           '(클릭) 그럼 그날 찍은 사진은요? (클릭) 텍스트가 아닌 사진은 아예 검색할 수 없습니다.'),      # 11-13: 사진은 글자가 아니라 검색이 안 된다는 뜻이 드러나게
+    'old': '기존의 검색 방식으로 한번 찾아볼까요?',      # 10차: 키워드, 임베딩 둘 다 기존 검색임이 드러나게. 11-13: '지금 쓰는' → '기존의'. 12차: '그럼', '두 가지'를 뺌(발표자 글)
+    'kw': ('먼저 키워드 검색은 글자가 같은 기록을 찾습니다. '      # 12차(11-13): 단어마다 따로 누르던 것을 한 번에(클릭 8 → 4번). 결과 셋 → ✕ 셋 → 사진 → ✕
+           '(클릭) ‘지은이네’, ‘집들이’, ‘와인’ 같은 단어마다 일치하는 검색 결과가 나오지만, '
+           '(클릭) 모두 사용자의 의도와는 관련 없는 정보입니다. '
+           '(클릭) 그럼 그날 찍은 사진은요? (클릭) 사진은 텍스트가 아니기에 검색할 수 없습니다.'),
     'emb': ('다음으로 임베딩 검색은 글자 대신 뜻으로 찾는데요. (클릭) 질문을 고차원 벡터로 바꾸고 '
             '(클릭) 뜻이 비슷할수록 가까이 놓이는 임베딩 공간에서 (클릭) 질문과 가까운 기록을 가져옵니다. '
             '(클릭) 그런데 가져온 건 관련 없는 메모와 (클릭) 다른 날 마신 와인입니다. 정작 단서는 멀리 있죠. '
             '두 방식 모두 단서를 찾지 못했습니다.'),      # 11-13: 맺는 말을 다음 장(step)의 첫머리에서 이리로
-    'step': ('왜 그럴까요? 우리는 정확한 단어보다, 상황의 맥락으로 차근차근 기억을 떠올리기 때문입니다. '      # 11-13: 처음엔 "Let's think"만, 클릭하면 step by step!
-             '(클릭) 그렇다면 검색도 사람처럼 한 단계씩 생각하면 어떨까요? 저희는 단서를 하나씩 짚어 가며 답을 찾아가는 방식을 제안합니다.'),
-    'chain': ('이 질의에서 집들이 날짜에 마셨던 와인 사진을 한 번에 찾을 수는 없습니다. 그 사이를 이어 줄 기록이 하나 필요한데요. '      # 10차: '빠진 고리'를 빼고 화면의 순서(질문 → 물음표 → 사진)대로. 11-13: 첫 문장
+    'step': ('왜일까요? 우리는 정확한 단어보다, 상황의 맥락으로 차근차근 기억을 떠올리기 때문입니다. '      # 11-13: 처음엔 "Let's think"만, 클릭하면 step by step!
+             '그렇다면 검색도 사람처럼 한 단계씩 생각하면 어떨까요? '      # 12차: 클릭을 이 물음 뒤로(제안하는 말과 함께 step by step!이 뜸)
+             '(클릭) 저희는 단서를 하나씩 짚어 가며 답을 찾아가는 방식을 제안합니다.'),
+    'chain': ('앞선 예시에서 와인 사진을 찾으려면, 먼저 집들이가 언제였는지부터 알아야 합니다. 그 날짜를 알려 줄 단서가 하나 필요한데요. '      # 10차: '빠진 고리'를 빼고 화면의 순서(질문 → 물음표 → 사진)대로. 12차: 첫 두 문장(발표자 글)
               '(클릭) 바로 이 카카오톡 대화입니다. ‘박스 정리 다 했어! 이따 올 때 휴지 안 사 와도 돼.’ '
-              '집들이라는 말은 없지만, 우리는 이날이 집들이라는 걸 바로 알죠. 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
+              '집들이라는 말은 없지만, 우리는 이날이 집들이라는 걸 바로 알 수 있죠. 이 중간 단서를 Weave는 어떻게 찾아낼까요?'),
     'idx': ('먼저, 기록이 쌓일 때마다 미리 색인해 둡니다. '
             '(클릭) 문장은 임베딩 모델을 거쳐 뜻을 담은 숫자, 의미 벡터가 되고요. (클릭) 언제, 어느 앱에서, 누가 보냈는지 등은 메타데이터로 저장합니다.'),
     'trig': '단서를 포함한 질의를 입력하고 실타래 버튼을 누르면, Weave는 사용자가 입력한 질의를 가져옵니다.',
     'split': '이 질문을 의미 단위로 나누어 다시 씁니다. (클릭) 집들이가 언제였는지 먼저 묻고, 와인을 마셨던 ‘그날’은 빈칸으로 남겨 두게 되죠.',      # 11-13: 화면의 빈칸 이름 '그날'
     'hop1': ('첫 질문인 ‘지은이네 집들이는 언제였지?’를 일반 임베딩으로 찾으면, 지은이의 카톡은 여전히 멀리 있는데요. '
-             '(클릭) 그래서 저희는 뜻이 비슷한 기록을 넘어, 추론에 필요한 단서도 잘 찾도록 튜닝한 최신 임베딩 모델, Reasoning Embedding을 사용합니다. '
-             '‘박스 정리, 휴지 안 사 와도 돼’에 담긴 뜻이 집들이 초대라는 걸 알아보고, 질문 곁으로 끌어오죠. '
+             '(클릭) 그래서 저희는 뜻이 비슷한 기록을 넘어, 추론에 필요한 단서도 잘 찾도록 튜닝한 임베딩 모델, Reasoning Embedding을 사용합니다. '      # 12차: '최신'을 뺌
+             '‘박스 정리, 휴지 안 사 와도 돼’에 담긴 뜻이 집들이 초대라는 걸 알아보고, 질문과 가까운 곳에 배치합니다. '      # 12차: '질문 곁으로 끌어오죠'에서
              '이 카톡을 받은 3월 15일이 다음 단서가 됩니다.'),
     'hop2': '이 날짜를 두 번째 질문의 ‘그날’에 넣으면 (클릭) 메타데이터로 그날 사진만 필터링할 수 있고 (클릭) 그중 와인 사진에서 이름을 찾아낼 수 있습니다.',      # 11-13: '빈칸' → ‘그날’
-    'deliver': '이렇게 찾은 답은 근거와 함께 다듬어 건넵니다. 그럼, Weave가 우리 일상을 어떻게 바꿀까요?',      # 11-12: 클릭 없이 한 구간
+    'deliver': '이렇게 찾은 답을 다듬어, 근거와 함께 건넵니다. 그럼, Weave가 우리 일상을 어떻게 바꿀까요?',      # 11-12: 클릭 없이 한 구간. 12차: 화면의 글('찾은 답을 다듬어, 근거와 함께 건넵니다')과 같은 차례로
 }
 
 # 말에 맞춰 뜨는 효과: 이름 → (장 키, 구간(클릭 번호), 그 효과가 떠야 할 때 말하는 구절). cue()가 낭독에서 그 구절을 말하는 때를 찾아 준다
@@ -792,7 +797,8 @@ KW_GAL = (375, 490, 530)
 # 11-10 4차: ✕가 뜰 때 옆에 따라 나오는 한마디(카드 셋 + 갤러리).
 # 5차: '다른 날 와인 결제' → '다른 날 결제 내역', 갤러리는 '읽을 수 없는 사진' → '키워드가 없는 사진'(키워드 검색은 같은 글자를 찾는데 사진에는 '와인'도 '집들이'도 적혀 있지 않음)
 # 11-13: 갤러리는 '키워드가 없는 사진' → '사진 검색 불가'(사진은 글자가 아니라서 키워드로는 찾을 수 없음)
-KW_VERDICT = ['관련 없는 주소 정보', '다른 사람 집들이', '다른 날 결제 내역', '사진 검색 불가']      # 11-11 8차: '관련 없는 집 주소' → '관련 없는 주소 정보'
+# 12차(11-13): 첫 카드는 '관련 없는 주소 정보' → '와인과 관련 없는 정보'
+KW_VERDICT = ['와인과 관련 없는 정보', '다른 사람 집들이', '다른 날 결제 내역', '사진 검색 불가']      # 11-11 8차: '관련 없는 집 주소' → '관련 없는 주소 정보'
 
 
 HEAD_NUM = 29                      # 판 제목 앞 번호 동그라미가 차지하는 폭
@@ -878,6 +884,7 @@ def kw_small():
     return Xf(ax=x0, ay=y0, bx=36 + (552 - (x1 - x0) * s) / 2, by=404 - (y1 - y0) * s / 2, s=s)
 
 
+KW_STAG = 130                      # 결과 셋(그리고 ✕ 셋)이 함께 뜰 때 왼쪽부터의 간격(ms, SPEED를 곱하기 전)
 KW_KEYS = ['kw/t1', 'kw/t2', 'kw/t3', 'kw/c1', 'kw/c2', 'kw/c3', 'kw/gal', 'kw/panel', 'kw/q', 'kw/m1', 'kw/m2', 'kw/m3',
            'kw/h1', 'kw/h2', 'kw/h3', 'kw/x1', 'kw/v1', 'kw/x2', 'kw/v2', 'kw/x3', 'kw/v3', 'kw/x4', 'kw/v4']
 
@@ -892,16 +899,20 @@ def s_kw():
         s.add(k, pm[k])
     s.on('kw/panel', 'rise', 100, 500, dy=14)
     s.on('kw/q', 'fade_in', 300, 400)
-    for n in (1, 2, 3):          # 단어 → 실 → 결과 → 같은 단어, 다음 클릭에 ✕와 그 옆 한마디(발표자가 누름)
-        s.click()
-        s.on('kw/h%d' % n, 'wipe_in', 0, 380)
-        s.on('kw/t%d' % n, 'wipe_in', 300, 450, dir='down')
-        s.on('kw/c%d' % n, 'rise', 650, 450, dy=14)
-        s.on('kw/m%d' % n, 'wipe_in', 1000, 300)
-        s.click()
-        s.on('kw/x%d' % n, 'zoom_in', 0, 300, **{'from': 0.8})
-        s.on('kw/v%d' % n, 'wipe_in', 160, 320)
-        s.on(['kw/c%d' % n, 'kw/m%d' % n], 'dim', 0, 350, to=0.45)
+    # 12차(11-13): 단어마다 따로 누르던 것을 한 번에. 클릭 → 단어 셋에서 실이 뻗어 결과 셋이 함께 뜸(왼쪽부터 0.1초 간격) → 클릭 → ✕ 셋과 그 옆 한마디가 함께
+    s.click()
+    for n in (1, 2, 3):          # 단어 → 실 → 결과 → 같은 단어
+        t = (n - 1) * KW_STAG
+        s.on('kw/h%d' % n, 'wipe_in', t, 380)
+        s.on('kw/t%d' % n, 'wipe_in', t + 300, 450, dir='down')
+        s.on('kw/c%d' % n, 'rise', t + 650, 450, dy=14)
+        s.on('kw/m%d' % n, 'wipe_in', t + 1000, 300)
+    s.click()
+    for n in (1, 2, 3):
+        t = (n - 1) * KW_STAG
+        s.on('kw/x%d' % n, 'zoom_in', t, 300, **{'from': 0.8})
+        s.on('kw/v%d' % n, 'wipe_in', t + 160, 320)
+        s.on(['kw/c%d' % n, 'kw/m%d' % n], 'dim', t, 350, to=0.45)
     s.click()                    # 실이 닿지 않는 그날 사진들, 다음 클릭에 ✕
     s.on('kw/gal', 'rise', 0, 450, dy=14)
     s.click()
@@ -1104,7 +1115,7 @@ def chain_talk(x, y, w=356):
 
 def s_chain():
     """11-10 4차: 처음엔 물음표 자리와 흐린 와인 사진 넷 → (클릭) 물음표 자리에 중간 단서(지은 카톡: 근거 두 군데와 날짜 강조)가 들어오고
-    실이 이어져 그날 사진에 테두리와 이름."""
+    실이 이어져 그날 사진에 테두리(12차: 이름 뱃지는 뺌)."""
     s = Slide('chain', trans=('morph', 1000), bar=False,
               notes=NOTES['chain'])
     a_, b_, _ = step_parts(OLD_Y, 30)                      # 앞 장의 큰 제목이 두 토막 그대로 작아져 올라옴(모핑)
@@ -1143,9 +1154,7 @@ def s_chain():
     s.add('ch/hd', [date_band('ch/hd', tp)], xf=kx)
     s.add('ch/tag', clue_tag('ch/tag', tx, ty), xf=kx)
     s.add('ch/pring', [ring_box('ch/pring', spots[wi], pad=4, radius=12, w=3.0)])
-    px_, py_, pw_, ph_ = spots[wi]
-    ans, _ = chip('ch/ans', px_ + pw_ - 44, py_ - 17, ANSWER, 'fill', pt=13, h=34, padx=16)        # 정답 사진의 오른쪽 위 모서리에
-    s.add('ch/ans', ans)
+    # 12차(11-13): 정답 사진 위의 이름 뱃지('배비치 소비뇽 블랑')를 뺌. 이 장에서는 아직 이름을 찾기 전이고, 이름은 Hop 2 장에서 처음 나옴
     s.add('ch/bridge', [caption('ch/bridge', [[('이 중간 단서를 ', INK), ('Weave는 어떻게 찾아낼까요?', PURPLE)]], 640, 600, size=26)])
     s.on('ch/sp', 'rise', 150, 500, dy=14)
     s.on('ch/l1', 'wipe_in', 450, 400)
@@ -1171,8 +1180,7 @@ def s_chain():
     s.on('ch/t2', 'wipe_in', td + 500, 300)
     s.on('ch/dimb', 'fade_out', td + 750, 300)
     s.on('ch/pring', 'zoom_in', td + 815, 400, **{'from': 1.12})
-    s.on('ch/ans', 'zoom_in', td + 1175, 350, **{'from': 0.8})
-    s.on('ch/bridge', 'rise', max(cue('chain.bridge', 12275), td + 1700), 500, dy=14)
+    s.on('ch/bridge', 'rise', max(cue('chain.bridge', 12275), td + 1400), 500, dy=14)
     return s
 
 
@@ -1912,10 +1920,13 @@ def add_slides(prs, layout, note_tpl, specs, auto=False, hold=1700):
             if auto:
                 holds = getattr(sp, 'holds', None) or [(500 if j == 0 else hold) for j in range(len(tl.steps))]
                 slide._element.append(tl.xml(sp_ids, auto=(150, holds)))
-                total = 150 + sum(tl.step_len(j) + holds[j] for j in range(len(tl.steps)))
-                adv = max(adv or 0, total)
+                total, t = 0, 150                   # 머무는 시간이 음수인 묶음(free 장: 효과가 끝나기 전에 다음 묶음이 시작)이 있어도 모든 효과가 끝난 뒤에 넘김
+                for j in range(len(tl.steps)):
+                    total = max(total, t + tl.step_len(j))
+                    t += tl.step_len(j) + holds[j]
+                adv = max(adv or 0, total, t)
             else:
-                slide._element.append(tl.xml(sp_ids, first_auto=True))
+                slide._element.append(tl.xml(sp_ids, first_auto=True, next_ac='none' if getattr(sp, 'free', False) else 'seek'))
         set_transition(slide, sp.trans, adv if (auto or sp.advance) else None)
         if getattr(sp, 'holds', None):          # 발표 속도 미리보기: PowerPoint가 장 넘김 시간을 따로 더하므로 여기서는 더하지 않음
             secs.append((adv or 2500) / 1000)
@@ -2085,7 +2096,8 @@ def _sents(seg):
     return out
 
 
-LEAD_EXTRA = {}                    # {(장 키, 구간): 초} 말없이 화면을 먼저 보여 주는 구간은 그만큼 더 기다렸다 말을 뗌(통합본의 6쪽)
+LEAD_EXTRA = {}                    # {(장 키, 구간): 초} 말없이 화면을 먼저 보여 주는 구간은 그만큼 더 기다렸다 말을 뗌(통합본의 6쪽). 음수면 더 빨리 뗌
+GAP_EXTRA = {}                     # {(장 키, 구간): 초} 그 구간의 말을 마친 뒤의 틈에 더함(음수면 줄임: 통합본 기대효과 장에서 기능 이름을 0.2초 간격으로 늘어놓을 때)
 
 
 def _lead(segs, j, key=None):
@@ -2105,8 +2117,17 @@ def seg_gaps(sp):
     """구간마다 말을 마친 뒤의 틈(초): 그 장의 끝 구간은 GAP_SLIDE, 문장이 끝난 구간은 GAP_SENT, 문장 중간에서 누르는 클릭은 GAP_MID.
     물음으로 끝난 구간은 GAP_Q만큼, (쉼)으로 끝난 구간은 R_BEAT만큼 더 둔다."""
     segs = sp.notes.split('(클릭)')
-    return [(GAP_SLIDE if j == len(segs) - 1 else (GAP_SENT if _ends(seg) else GAP_MID)) +
-            (R_BEAT if seg.rstrip().endswith(REST) else (GAP_Q if seg.rstrip().endswith('?') else 0)) for j, seg in enumerate(segs)]
+    return [max((GAP_SLIDE if j == len(segs) - 1 else (GAP_SENT if _ends(seg) else GAP_MID)) +
+                (R_BEAT if seg.rstrip().endswith(REST) else (GAP_Q if seg.rstrip().endswith('?') else 0)) + GAP_EXTRA.get((sp.key, j), 0), 0)
+            for j, seg in enumerate(segs)]
+
+
+def seg_holds(sp, say):
+    """구간마다 효과가 끝난 뒤 더 머무는 시간(ms): 그 구간의 말(say, 초)이 끝날 때까지.
+    free 장은 효과가 끝나지 않아도 말을 마치면 다음 클릭을 누르므로 음수가 될 수 있다(마지막 구간은 효과가 다 끝날 때까지 머묾)."""
+    last = len(sp.groups) - 1
+    free = getattr(sp, 'free', False)
+    return [h if (free and j < last) else max(h, 0) for j, h in enumerate(round(say[j] * 1000) - _group_len(g) for j, g in enumerate(sp.groups))]
 
 
 def _say_times(sp, rate=SPEECH_RATE):
@@ -2127,8 +2148,9 @@ def rehearse(specs, rate=SPEECH_RATE, says=None):
         say = says[sp.key] if says else _say_times(sp, rate)
         anim = [_group_len(g) / 1000 for g in sp.groups]
         sec = ((sp.trans[1] / 1000) if sp.trans else 0) + 0.15
+        free = getattr(sp, 'free', False)
         for i in range(len(segs)):
-            sec += max(say[i], anim[i] if i < len(anim) else 0)
+            sec += say[i] if (free and i < len(segs) - 1) else max(say[i], anim[i] if i < len(anim) else 0)
         total += sec
         rows.append((sp.key, len(segs) - 1, sum(syllables(g) for g in segs), sec, total))
     return rows
@@ -2276,7 +2298,7 @@ def talk_specs(rate=SPEECH_RATE, says=None):
     for sp in specs:
         segs = sp.notes.split('(클릭)')
         say = says[sp.key] if says else _say_times(sp, rate)
-        sp.holds = [max(round(say[j] * 1000) - _group_len(g), 0) for j, g in enumerate(sp.groups)]
+        sp.holds = seg_holds(sp, say)
         t += (sp.trans[1] / 1000 if sp.trans else 0) + 0.15
         sp.starts = []
         for j, grp in enumerate(sp.groups):

@@ -78,15 +78,25 @@ def groups(slide):
     return out
 
 
+DRIFT_MS = 5000      # 이보다 오래 가는 이동 경로는 제자리에서 천천히 흘러가는 효과로 본다(15쪽의 떠 있는 앱: 7.6초). 보여 줄 내용이 아니라서 장에 머무는 시간에는 넣지 않음
+
+
+def _is_drift(eff):
+    """천천히 흘러가는 효과인가: 이동 경로이고 DRIFT_MS보다 오래 감."""
+    if eff.get('presetClass') != 'path':
+        return False
+    return any((c.get('dur') or '').isdigit() and int(c.get('dur')) >= DRIFT_MS for c in eff.iter(q('p:cTn')) if c is not eff)
+
+
 def group_len(grp):
-    """한 묶음의 효과가 모두 끝나는 때(ms, 묶음이 시작한 때부터). 끝없이 되풀이하는 효과는 세지 않는다."""
+    """한 묶음의 효과가 모두 끝나는 때(ms, 묶음이 시작한 때부터). 끝없이 되풀이하는 효과와 천천히 흘러가는 효과(_is_drift)는 세지 않는다."""
     end = 0
     for sub in grp.findall(q('p:cTn') + '/' + q('p:childTnLst') + '/' + q('p:par')):
         d0 = _delay(sub.find(q('p:cTn')))
         for eff in sub.findall(q('p:cTn') + '/' + q('p:childTnLst') + '/' + q('p:par') + '/' + q('p:cTn')):
             d1 = _delay(eff)
             inner = 0
-            if eff.get('repeatCount') != 'indefinite':
+            if eff.get('repeatCount') != 'indefinite' and not _is_drift(eff):
                 for c in eff.iter(q('p:cTn')):
                     if c is eff or not (c.get('dur') or '').isdigit():
                         continue
@@ -121,6 +131,26 @@ def cap_repeats(slide, ms):
         once *= 2 if eff.get('autoRev') == '1' else 1
         if once:
             eff.set('repeatCount', str(max(int((ms - _delay(eff)) / once * 1000), 1)))
+
+
+def trim_drift(slide, ms):
+    """천천히 흘러가는 효과(_is_drift)가 ms보다 오래 가면 ms에서 끝나게 줄인다(녹화용 사본). 흘러가는 빠르기는 그대로 두려고 경로도 같은 비율로 줄인다.
+    PowerPoint는 영상으로 내보낼 때 저절로 나오는 효과가 다 끝나야 장을 넘기므로, 그대로 두면 말을 마친 뒤에도 그 효과가 끝날 때까지 머문다."""
+    n = 0
+    for eff in slide._element.iter(q('p:cTn')):
+        if not eff.get('presetID') or not _is_drift(eff):
+            continue
+        for mo in eff.iter(q('p:animMotion')):
+            ct = mo.find(q('p:cBhvr')).find(q('p:cTn'))
+            dur = int(ct.get('dur'))
+            left = ms - _delay(eff)
+            if left <= 0 or dur <= left:
+                continue
+            r = left / dur
+            mo.set('path', re.sub(r'-?\d+\.\d+', lambda m: '%.5f' % (float(m.group()) * r), mo.get('path')))
+            ct.set('dur', str(int(left)))
+            n += 1
+    return n
 
 
 def _next_id(slide):

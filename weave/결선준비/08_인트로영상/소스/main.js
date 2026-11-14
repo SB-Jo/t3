@@ -87,7 +87,7 @@ const rectOf = s => (typeof s === 'string' ? $(s) : s).getBoundingClientRect();
 const ctr = s => { const r = rectOf(s); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
 
 const PH = '<span style="color:#9a96a6; font-weight:400">메시지 입력</span>';
-const QA = '지은이네 집들이 때 마셨던 와인', ANS = '배비치 소비뇽 블랑', MSGTX = '여보, 전에 말한 에스티 로더 갈색병<br>면세점에서 사 갈까?';
+const QA = '지은이네 집들이 때 마셨던 와인', ANS = '배비치 소비뇽 블랑', MSGTX = '여보, 전에 말한 에스티로더 갈색병<br>면세점에서 사 갈까?';
 const cont = [];                                       // 매 프레임 tl.seek 뒤에 부르는 함수들
 const seekAll = t => { tl.seek(t, false); for (const f of cont) f(t); };
 const when = (test, fn) => { let last; cont.push(t => { const v = test(t); if (v !== last) { last = v; fn(v); } }); };
@@ -481,7 +481,7 @@ async function build() {
   reveal('#m2', tM2 + 0.06);
   reveal('#m3', tM3);
   cam(g3 - 0.3, R3, 0.9);
-  // 플로팅은 하나씩: 위치(면세점 근처) → 그 오른쪽에 탑승권(귀국 중), 둘이 이어짐 → 아래에 아내 카톡(면세점) → 링크 미리보기(이 갈색병의 이름)
+  // 플로팅은 하나씩: 위치(면세점 근처) → 그 오른쪽에 탑승권(v25: 출장을 떠나는 길, 인천 → 싱가포르), 둘이 이어짐 → 아래에 아내 카톡(면세점) → 링크 미리보기(이 갈색병의 이름)
   gsap.set(['#fw', '#fg', '#fk'], { autoAlpha: 0, scale: 0.94, x: 40 });
   const popF = (k, t) => tl.to(k, { autoAlpha: 1, scale: 1, x: 0, duration: 0.8, ease: 'back.out(1.4)' }, t);
   popF('#fg', g3 + 0.45);
@@ -539,7 +539,7 @@ async function build() {
   // 추천 문장을 시트 폭이 다 들어오는 크기로 한 번에 크게
   cam(pTapW + 0.3, camPose(3.0, { x: B['#sgC'].x, y: (B['#sgC'].y + B['#btnC'].y) / 2 }, { x: 960, y: 500 }), 1.05);
   tl.fromTo('#sgC', { boxShadow: '0 0 0 0 rgba(107,78,255,0)' }, { boxShadow: '0 0 0 2.5px rgba(107,78,255,.8)', duration: 0.4, ease: 'power2.out', immediateRender: false }, pTapW + 1.3);
-  mark('#sgK', pTapW + 1.35, 0.6); mark('#sgK2', pTapW + 2.0, 0.4);                                                         // 기억에서 온 부분: '에스티 로더 갈색병', '면세점'
+  mark('#sgK', pTapW + 1.35, 0.6); mark('#sgK2', pTapW + 2.0, 0.4);                                                         // 기억에서 온 부분: '에스티로더 갈색병', '면세점'
   tl.to('#wC', { y: 760, duration: 0.55, ease: 'power3.in' }, pTapI + 0.25);
   tl.to('#scrimC', { opacity: 0, duration: 0.45 }, pTapI + 0.3);
   textAt($('#kinTx'), pTapI + 0.4, { html: MSGTX });

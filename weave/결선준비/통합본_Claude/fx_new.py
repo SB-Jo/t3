@@ -872,48 +872,59 @@ def s_fxk(key='fxk', count=False):
 # - Weave 아이콘에서 칸마다 실이 뻗는다(후보 J처럼, 달라진 글 바로 아래까지). 기능을 말하는 차례로 한 칸씩 풀린다.
 # - 고리 아래 숫자를 고리 한가운데에 맞춤(왼쪽으로 4px 치우쳐 있었음). 숫자가 줄어드는 속도와 표정이 바뀌는 속도를 조금 늦춤.
 # - 글: '앱을 하나씩 열어 봤어요' → '하나씩 열어 봤어요', '검색으로 찾지 못했어요' → '검색하지 못했어요'. 달라진 글은 더 짧게.
-FX_ROWS = [     # (%, 불편 두 줄, 달라진 두 줄)
-    (83.8, ['어느 앱인지 몰라', '하나씩 열어 봤어요'], ['어느 앱인지 몰라도', '통합 검색으로 찾아요']),
-    (93.8, ['정확한 이름이 떠오르지 않아', '검색하지 못했어요'], ['정확한 이름을 몰라도', '단서로 찾아요']),
-    (82.4, ['챙겨야 할 부탁, 약속을', '나중에야 떠올렸어요'], ['챙겨야 할 부탁, 약속을', '묻기 전에 알려 줘요']),
+# 11-13 7차
+# - 첫 칸의 숫자를 설문의 83.8%에서 '59분'으로(최종제출본의 기대효과에 쓰던 Qatalog와 코넬대의 조사. 글은 그대로). 고리는 한 시간 가운데 59분만큼 차고,
+#   풀릴 때 0분까지 줄어든다. 출처가 둘이 되어 불편 문장 끝에 번호를 달고 각주에 둘 다 적음.
+# - 실 세 가닥을 클릭 셋으로 나눔(발표자가 기능 이름마다 누름). 이름 사이는 0.2초만 쉬므로 앞 칸의 효과가 끝나기 전에 다음 클릭이 온다
+#   → 장을 free로(클릭해도 앞 효과가 끊기지 않고 이어짐).
+# - 실을 조금 굵게(2.6 → 3.8px). 숫자가 0이 되면 곧바로 달라진 글로 바뀌게(0이 0.5초쯤 머물던 것을 없앰).
+FX_SRC = '* ¹ Qatalog & Cornell University Ellis Idea Lab, "Workgeist Report" (2021. 06)   ² ' + N.SURVEY_SRC[2:]
+FX_ROWS = [     # (숫자, 단위, 고리에 차는 만큼(%), 불편 두 줄, 달라진 두 줄, 출처 번호)
+    (59, '분', 59 / 60 * 100, ['어느 앱인지 몰라', '하나씩 열어 봤어요'], ['어느 앱인지 몰라도', '통합 검색으로 찾아요'], '¹'),
+    (93.8, '%', 93.8, ['정확한 이름이 떠오르지 않아', '검색하지 못했어요'], ['정확한 이름을 몰라도', '단서로 찾아요'], '²'),
+    (82.4, '%', 82.4, ['챙겨야 할 부탁, 약속을', '나중에야 떠올렸어요'], ['챙겨야 할 부탁, 약속을', '묻기 전에 알려 줘요'], '²'),
 ]
-FX_NOTE = ('저희 설문에서 83.8%는 어느 앱에 남겼는지 몰라 앱을 하나씩 열어 봤고, '
-           '(클릭) 앞서 보신 것처럼 93.8%는 정확한 이름이 떠오르지 않아 검색하지 못했으며, '       # 93.8%는 인트로 7쪽에서 본 숫자(같은 설문 6번)
-           '(클릭) 82.4%는 부탁이나 약속을 잊었다가, 나중에야 떠올렸습니다. '
-           '(클릭) Weave가 있다면, 통합 검색, 단서로 찾는 기억, 먼저 건네는 기억을 통해, 찾는 시간은 줄이고, 놓친 기억은 되살립니다.')
-FX_CUES = {'fx.n1': ('fx', 0, '83.8%'), 'fx.n2': ('fx', 1, '93.8%'),
-           'fx.f1': ('fx', 3, '통합 검색,'), 'fx.f2': ('fx', 3, '단서로 찾는 기억,'), 'fx.f3': ('fx', 3, '먼저 건네는 기억을'),
-           'fx.title': ('fx', 3, '찾는 시간은')}
+# 11-13 8차: 발표자가 다시 쓴 글. 기능 이름만 늘어놓던 끝 문장이 기능마다 한 마디씩이 되어('어느 앱인지 몰라도 통합 검색으로 바로 찾고, …'),
+#   이름 사이를 0.2초로 좁히던 틈 조정(GAP_EXTRA, LEAD_EXTRA)은 없앰. 첫째, 둘째 고리가 숫자를 말할 때까지 기다리던 것도 없앰(아래 s_fx).
+FX_NOTE = ('조사에 따르면, 직장인은 여러 앱에 흩어진 정보를 찾아 활용하는 데 하루 59분을 쓰고 있었습니다. '       # 59분: Workgeist Report(미국과 영국의 원격 근무자 설문). 7차 뒤: '찾는 데' → '찾아 활용하는 데', '쓰고 있습니다' → '쓰고 있었습니다'(사용자 글)
+           '(클릭) 93.8%는 정확한 이름이 떠오르지 않아 검색하지 못했으며, '       # 93.8%는 인트로 7쪽에서 본 숫자(같은 설문 6번)
+           '(클릭) 82.4%는 부탁이나 약속을 잊었다가, 나중에야 떠올린 경험이 있었습니다. '
+           '(클릭) Weave는 이러한 불편함을 해결합니다. '
+           '(클릭) 어느 앱인지 몰라도 통합 검색으로 바로 찾고, (클릭) 정확한 이름을 몰라도 단서로 찾고, '
+           '(클릭) 챙겨야 할 부탁이나 약속을 필요한 순간에 알려줌으로써, 찾는 시간은 줄이고, 놓친 기억은 되살립니다.')
+FX_CUES = {'fx.title': ('fx', 6, '찾는 시간은')}
 NOTES['fx'] = FX_NOTE
 CUES.update(FX_CUES)
 HW.NOTES['fx'] = FX_NOTE
 HW.CUES.update(FX_CUES)
 FX_RO = 82                          # 고리의 바깥 반지름(후보 때는 90)
+FX_RK = 0.085                       # 고리 굵기 ÷ 바깥지름. 7차 뒤: 띠를 살짝 가늘게(인트로 7·8쪽과 같던 0.098 → 0.085, 164px 고리에서 16 → 14px)
 FX_CY, FX_YN, FX_YST, FX_YG = 236, 326, 392, 338      # 고리 가운데, 숫자, 불편 문장, 달라진 문장의 위 끝
 FX_ICY, FX_YB = 520, 584            # Weave 아이콘의 가운데, 아래 제목의 위 끝
 FX_TC, FX_TURN = 1300, 400          # 숫자가 0까지 줄어드는 시간, 입꼬리가 도는 시간(후보 L은 1100, 330)
+FX_TH = 3.8                         # 실의 굵기(7차: 2.6 → 3.8px. 모션그래픽과 14쪽의 실은 5.6px)
 
 
-def num_mid(key, cx, y, text, color, pt=40, small=20):
+def num_mid(key, cx, y, text, color, pt=40, small=20, unit='%'):
     """고리 아래 숫자: 고리의 가운데 x에 가운데 맞춤."""
-    return T(key, cx - 120, y, 240, round(pt * 1.42), [[(text, dict(size=pt)), ('%', dict(size=small))]], size=pt, color=color, weight='b',
+    return T(key, cx - 120, y, 240, round(pt * 1.42), [[(text, dict(size=pt)), (unit, dict(size=small))]], size=pt, color=color, weight='b',
              align='c', anchor='ctr', spc=-0.5)
 
 
 def s_fx():
-    """기대효과 한 장. 설문 셋이 고리 얼굴로 하나씩 뜨고(위 제목 AS-IS) → (클릭) Weave 아이콘이 뜨며 제목이 TO-BE로 뒤집히고,
-    기능을 말할 때마다 아이콘에서 실이 뻗어 그 칸에 닿는다. 닿은 칸은 숫자가 0까지 줄며 고리가 보라로 닫히고 웃는다.
-    숫자가 사라진 자리에 달라진 두 줄이 올라오고, '찾는 시간은 …'을 말할 때 아래 제목이 뜬다."""
+    """기대효과 한 장. 불편 셋이 고리 얼굴로 하나씩 뜨고(위 제목 AS-IS) → (클릭) Weave 아이콘이 뜨며 제목이 TO-BE로 뒤집히고,
+    (클릭 셋) 기능을 말할 때마다 아이콘에서 실이 뻗어 그 칸에 닿는다. 닿은 칸은 숫자가 0까지 줄며 고리가 보라로 닫히고 웃는다.
+    숫자가 0이 되면 곧바로 달라진 두 줄로 바뀌고, '찾는 시간은 …'을 말할 때 아래 제목이 뜬다."""
     key = 'fx'
-    s = Slide(key, trans=('fade', 500), bar=False, notes=NOTES[key])
+    s = Slide(key, trans=('fade', 500), bar=False, notes=NOTES[key], free=True)
     s.add(key + '/to', [N.title(key + '/to', [('TO-BE', PURPLE)])])
     s.add(key + '/as', [N.title(key + '/as', [('AS-IS', NAVY)])], temp=True)
-    thick = N.RING_K * 2 * FX_RO
+    thick = FX_RK * 2 * FX_RO
     cols, frames = [], {}
-    for i, (pct, stmt, after) in enumerate(FX_ROWS):
+    for i, (num, unit, fill, stmt, after, ref) in enumerate(FX_ROWS):
         cx, k = CXS[i], '%s/c%d' % (key, i + 1)
         st = (SHIFT, 0) if i == 0 else None
-        track, navy, _ = ring_set(k, cx, FX_CY, pct, ro=FX_RO)
+        track, navy, _ = ring_set(k, cx, FX_CY, fill, ro=FX_RO, k=FX_RK)
         s.add(k + '/track', track, start=st)
         s.add(k + '/arc0', navy, temp=True)
         s.add(k + '/full', [donut(k + '/full', cx, FX_CY, FX_RO + PAD, thick + 2 * PAD, PURPLE)])     # 짙은 호와 빈 자리를 함께 덮음
@@ -924,11 +935,14 @@ def s_fx():
         s.add(k + '/m0', [m0], temp=True)
         s.add(k + '/eyes', e1)
         s.add(k + '/m', [m1])
-        s.add(k + '/num0', [num_mid(k + '/num0', cx, FX_YN, '%.1f' % pct, NAVY)], temp=True)
-        s.add(k + '/st0', [caption(k + '/st0', [[(ln, INK)] for ln in stmt], cx, FX_YST, size=ST_PT, lh=ST_LH)], temp=True)
+        s.add(k + '/num0', [num_mid(k + '/num0', cx, FX_YN, '%g' % num, NAVY, unit=unit)], temp=True)
+        # 불편 문장: 둘째 줄 끝에 출처 번호(글은 가운데 맞춤 그대로 두고 번호만 줄 끝 바깥에 붙임)
+        ref_x = cx + tw(stmt[1], ST_PT, 'b') / 2 + 1
+        s.add(k + '/st0', [caption(k + '/st0/t', [[(ln, INK)] for ln in stmt], cx, FX_YST, size=ST_PT, lh=ST_LH),
+                           T(k + '/st0/ref', ref_x, FX_YST + ST_LH, 16, 20, ref, size=13.5, color=SUB)], temp=True)
         s.add(k + '/st', [caption(k + '/st', [[(after[0], INK)], [(after[1], PURPLE)]], cx, FX_YG, size=21, lh=32)])
-        frames[k] = [s.add('%s/n%d' % (k, j), [num_mid('%s/n%d' % (k, j), cx, FX_YN, str(v), NAVY)], temp=True)
-                     for j, v in enumerate(count_down(pct) + [0])]
+        frames[k] = [s.add('%s/n%d' % (k, j), [num_mid('%s/n%d' % (k, j), cx, FX_YN, str(v), NAVY, unit=unit)], temp=True)
+                     for j, v in enumerate(count_down(num) + [0])]
         cols.append((k, cx, st))
     # 아래 가운데의 Weave와 칸마다 뻗는 실(달라진 글 바로 아래까지)
     z, ey = 56, FX_YG + 2 * 32 + 14
@@ -936,35 +950,33 @@ def s_fx():
              [(640, FX_ICY - z / 2 - 3)] * 2 + [(CXS[1], ey)] * 2,
              [(640 + z / 2 + 3, FX_ICY), (820, FX_ICY), (CXS[2], FX_ICY + 6), (CXS[2], ey)]]
     for i, pts in enumerate(paths):
-        s.add('%s/th%d' % (key, i + 1), thread('%s/th%d' % (key, i + 1), pts, w=2.6))
+        s.add('%s/th%d' % (key, i + 1), thread('%s/th%d' % (key, i + 1), pts, w=FX_TH))
     s.add(key + '/halo', [halo(key + '/halo', 640, FX_ICY, 96)])
     s.add(key + '/rg', [R(key + '/rg', 640 - 56, FX_ICY - 56, 112, 112, prst='ellipse', fill=None, line=PURPLE2, line_w=2.6, line_alpha=80)], temp=True)      # 위의 불편 문장에 닿지 않는 크기
     s.add(key + '/icon', weave_mark(key + '/icon', 640, FX_ICY, z))
     s.add(key + '/sub', [N.title(key + '/sub', N.FX_TITLE, y=FX_YB)])
-    s.add(key + '/src', [N.foot(key + '/src', N.SURVEY_SRC)])
-    # 장이 열리면: AS-IS, 첫째 설문이 가운데에 → (클릭) 왼쪽으로 비키고 둘째 → (클릭) 셋째
+    s.add(key + '/src', [N.foot(key + '/src', FX_SRC)])
+    # 장이 열리면: AS-IS, 첫째 불편이 가운데에 → (클릭) 왼쪽으로 비키고 둘째 → (클릭) 셋째
+    # 11-13 8차: 첫째, 둘째 고리도 셋째처럼 뜨자마자 곧바로 차오름(전에는 '59분', '93.8%'를 말할 때까지 기다려서 눌러도 한참 뒤에 움직였음)
     show(s, key + '/as', 'fade_in', 100, 350, temp=True)
-    ring_in(s, cols[0], 150, max(cue(key + '.n1', 1500, ahead=0.35), 600))
+    ring_in(s, cols[0], 150, 410)
     s.click()
-    slide_left(s, [cols[0][0] + x for x in RING_FIRST])
-    ring_in(s, cols[1], 380, max(cue(key + '.n2', 1200, ahead=0.35), 640))      # '앞서 보신 것처럼' 뒤에 숫자를 말할 때 차오름
+    slide_left(s, [cols[0][0] + x for x in RING_FIRST], dur=560)                 # 첫째가 왼쪽으로 비키자마자(0.45초) 둘째가 그 자리에
+    ring_in(s, cols[1], 280, 540)
     s.click()
     ring_in(s, cols[2], 0, 260)
-    s.click()      # 3: Weave가 뜨고 제목이 TO-BE로 → 기능을 말할 때마다 그 칸이 풀림 → 아래 제목
+    s.click()      # 3: Weave가 뜨고 제목이 TO-BE로
     s.on(key + '/icon', 'zoom_in', 0, 340, **{'from': 0.6})
     s.on(key + '/halo', 'fade_in', 100, 500)
     s.on(key + '/rg', 'jump', 160)
     s.on(key + '/rg', 'ring', 160, 900, **{'from': 0.4, 'to': 1.0})
     s.on(key + '/as', 'flip_out', 220, 190)
     s.on(key + '/to', 'flip_in', 410, 260)
-    ts = [cue(key + '.f1', 1500, ahead=0.4), cue(key + '.f2', 2700, ahead=0.4), cue(key + '.f3', 4300, ahead=0.4)]
-    ts[0] = max(ts[0], 760)
     for i, (k, _, _) in enumerate(cols):
-        t = max(ts[i], ts[i - 1] + 500) if i else ts[0]
-        ts[i] = t
-        s.on(k + '/st0', 'fade_out', t, 240)                       # 불편 문장이 먼저 물러나고(실 끝이 그 자리를 지남)
-        s.on('%s/th%d' % (key, i + 1), 'wipe_in', t + 60, 420, dir=('right', 'up', 'left')[i])
-        t2 = t + 400                                               # 실이 닿으면 숫자가 줄며 고리가 닫힘
+        s.click()      # 4~6: 기능 이름을 말할 때마다 실이 그 칸으로 뻗고, 닿으면 숫자가 줄며 고리가 닫힘
+        s.on(k + '/st0', 'fade_out', 0, 240)                       # 불편 문장이 먼저 물러나고(실 끝이 그 자리를 지남)
+        s.on('%s/th%d' % (key, i + 1), 'wipe_in', 60, 420, dir=('right', 'up', 'left')[i])
+        t2 = 400
         fr = frames[k]
         dt = FX_TC / len(fr)
         ring_smile(s, k, t2, dur=FX_TC, turn=FX_TC - FX_TURN - 120, spin=FX_TURN)      # 숫자가 0에 가까워질 때 웃음
@@ -973,9 +985,9 @@ def s_fx():
             s.on(fk, 'jump', t2 + (j + 1) * dt)
             s.on(fk, 'appear', t2 + (j + 1) * dt, 1)
             last = j == len(fr) - 1
-            s.on(fk, 'fade_out', t2 + (j + 2) * dt + (300 if last else 0), 260 if last else 1)      # 0은 잠깐 머물다 사라짐
-        s.on(k + '/st', 'rise', t2 + FX_TC + dt + 560, 460, dy=10)
-    s.on(key + '/sub', 'rise', max(cue(key + '.title', 6000, ahead=0.3), ts[2] + 900), 520, dy=12)       # 아래 제목은 그 말을 할 때
+            s.on(fk, 'fade_out', t2 + (j + 2) * dt + (-10 if last else 0), 130 if last else 1)      # 0은 뜨자마자 물러남
+        s.on(k + '/st', 'rise', t2 + FX_TC + dt + 50, 400, dy=10)                                  # 그 자리에 달라진 두 줄
+    s.on(key + '/sub', 'rise', max(cue(key + '.title', 2600, ahead=0.3), 900), 520, dy=12)       # 아래 제목은 그 말을 할 때(셋째 실의 클릭 뒤)
     return s
 
 

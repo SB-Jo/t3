@@ -103,7 +103,7 @@ def talkify(specs, says, k, plan):
     for sp in specs:
         say = says.get(sp.key) or [END_HOLD] * len(sp.groups)
         assert len(say) == len(sp.groups), (sp.key, len(say), len(sp.groups))
-        sp.holds = [max(round(say[j] * 1000) - HW._group_len(g), 0) for j, g in enumerate(sp.groups)]
+        sp.holds = HW.seg_holds(sp, say)        # free 장(기대효과)은 말을 마치면 효과가 남아 있어도 다음 구간으로(음수)
         marks = []
         for j, grp in enumerate(sp.groups):
             key = 'mk/%s/%d' % (sp.key, j)
@@ -153,6 +153,7 @@ def build_auto(dst, fu, says, part=None):
         if isinstance(item, tuple):
             slides, k = draw(own[item[1]], k)
             order += slides
+            logos += slides         # 맺는 장의 'Weave' 글자(이름이 logo_word로 끝나는 글상자)에 덱과 같은 글꼴과 그라데이션
             continue
         if item == 'mg':
             F.add_mark(mg, MARK_BOX, MARK_RGB[k % 3], 'mk_mg')
@@ -173,6 +174,7 @@ def build_auto(dst, fu, says, part=None):
             F.auto_play(slide, starts)
             hold = sum(holds)
             F.cap_repeats(slide, hold * 1000)                # 떠다니는 조각(끝없이 되풀이)이 장을 붙들지 않게
+            F.trim_drift(slide, hold * 1000)                 # 천천히 흘러가는 앱(15쪽)도 말을 마치면 멈추게(8차: 말이 한 문장으로 줄어 그 효과보다 먼저 끝남)
         else:                       # 표지 영상(18초)이 끝나야 PowerPoint가 장을 넘기므로, 녹화용 사본에서는 머무는 시간만큼만 재생(뒤를 잘라 둠)
             media_ms = F.anim_len(slide)
             for c in slide._element.iter(F.q('p:cmd')):
@@ -399,7 +401,7 @@ def finish(silent, mp4, plan, clips, tail=1.0):
 
 
 # ------------------------------------------------------------------ 시간표
-SECTIONS = [('표지와 인트로', lambda k: k == 'cover' or k.startswith('in') or k in ('hook', 'hub2', 'scat', 'link', 'bridge')),
+SECTIONS = [('표지와 인트로', lambda k: k == 'cover' or k.startswith('in') or k in ('hook', 'hub2', 'scat', 'gath', 'link', 'bridge')),
             ('모션그래픽', lambda k: k == 'mg'),
             ('솔루션과 How it Works', lambda k: k in HW.SLIDE_KEYS),
             ('뒷부분', lambda k: True)]

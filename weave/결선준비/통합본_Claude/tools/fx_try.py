@@ -9,7 +9,7 @@
   python tools/fx_try.py --check      → 영상에 넣은 낭독을 받아쓰기로 글과 견줌
   python tools/fx_try.py --sheet      → 찍어 둔 영상에서 후보마다 세 순간을 뽑아 한 장에(기대효과_후보/한눈에.jpg)
 
-영상 = 31쪽(결과 제공) → 그 장 → 33쪽(비즈니스 임팩트). 낭독은 이 컴퓨터 안에서만 만든다(talk.py와 같은 목소리).
+영상 = 31쪽(결과 제공) → 그 장 → 33쪽(7차부터 기존 기능과의 비교, 6차까지는 비즈니스 임팩트). 낭독은 이 컴퓨터 안에서만 만든다(talk.py와 같은 목소리).
 낭독과 녹화는 out/fx_try/<후보>/에 따로 둔다(본 발표의 낭독 out/tts는 건드리지 않음).
 """
 import argparse
@@ -63,7 +63,7 @@ def use(code):
 def trio(fn):
     d = HW.s_deliver()
     d.trans = ('fade', 320)             # 영상의 첫 장: 앞 장이 없으므로 모핑 대신 가볍게
-    return [d, fn(), N.s_bi()]
+    return [d, fn(), N.s_cmp_main()]
 
 
 def sheet(mp4, dst, fps=4, cols=6, w=480):
@@ -164,7 +164,7 @@ def sheet_of(name, cands):
     font = ImageFont.truetype(str(TK.FONT), 26)
     small = ImageFont.truetype(str(TK.FONT), 19)
     w, h, pad, head, left = 640, 360, 14, 46, 210
-    cols = ['첫 설문이 가운데에', '세 설문이 다 뜬 때', 'Weave로 풀린 뒤']
+    cols = ['첫 불편이 가운데에', '불편 셋이 다 뜬 때', 'Weave로 풀린 뒤']
     im = Image.new('RGB', (left + 3 * (w + pad) + pad, head + len(cands) * (h + pad) + pad), '#FFFFFF')
     d = ImageDraw.Draw(im)
     for j, t in enumerate(cols):
